@@ -1,4 +1,4 @@
-// last edit June-21, 2021 (EOC, mbp)
+// last edit June-22, 2021 (EOC, mbp)
 // see README
 
 
@@ -82,8 +82,8 @@ DCFiducial dcfid;
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 // Main functionality
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-void Erez_CLAS12Reader( int  RunNumber=6420,
-                        int  NeventsMax=10,
+void SIDISc12rSkimmer(  int  RunNumber=6420,
+                        int  NeventsMax=100,
                         int  fdebug=1,
                         bool doApplySelectionCuts=true,
                         int  PrintProgress=5000,

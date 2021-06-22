@@ -1,8 +1,8 @@
- last edit: June-21, 2021 (EOC, mbp)
+ last edit: June-22, 2021 (EOC, mbp)
  
  ------------------------------------------------------------------------------------------------------------------------------------------------
- void Erez_CLAS12Reader (   int RunNumber=6420,
-                            int NeventsMax=10,
+ void SIDISc12rSkimmer (   int RunNumber=6420,
+                            int NeventsMax=100,
                             int fdebug=1,
                             bool doApplySelectionCuts=true,
                             int PrintProgress=5000,
@@ -15,7 +15,12 @@
         D(e,e’pi+)X
         D(e,e’pi+n)X
  
- 
+execute:
+-----------------
+   clas12root SIDIS_at_BAND/SIDISc12rSkimmer.C
+   clas12root "SIDIS_at_BAND/SIDISc12rSkimmer.C+(6420,1e9)"
+
+
  input:
  -----------------
  RunNumber              Run number, e.g. 6420 (see "BAND good-runs file list")
@@ -32,11 +37,6 @@
  
  
  
- execute:
- -----------------
- clas12root Erez_analysis/Cfiles/Erez_CLAS12Reader.C
- clas12root "Erez_analysis/Cfiles/Erez_CLAS12Reader.C+(6420,100)"
- 
  
  comments:
  -----------------
@@ -45,12 +45,6 @@
  Priority 1:
  Add e fiducial cuts on DC
  Add pi+ fiducial cuts on DC
- 
- * How to match the region-particle to the detected-particle?
- We may be incorrectly identifying the pion (or electron)
- from the region-particles data
- with the pion from detected-particles data
- in events with multiple pions (or electrons)
  
 
  Priority 2:
