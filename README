@@ -1,4 +1,6 @@
- last edit: June-22, 2021 (EOC, mbp)
+* hipo skimmer for Semi-Inclusive DIS at CLAS12 with BAND *
+
+last edit: June-22, 2021 (EOC, mbp)
  
  ------------------------------------------------------------------------------------------------------------------------------------------------
  void SIDISc12rSkimmer (   int RunNumber=6420,
