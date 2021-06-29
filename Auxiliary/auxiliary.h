@@ -14,8 +14,8 @@
 // declare methods
 TVector3                GetParticleVertex (clas12::region_part_ptr rp);
 void                     SetLorentzVector (TLorentzVector &p4, clas12::region_part_ptr rp);
-void                         OpenCSVfiles (TString csvfilename, TString header);
-void                        CloseCSVfiles ();
+void                         OpenOutputFiles (TString csvfilename, TString header);
+void                        CloseOutputFiles ();
 void                      StreamToCSVfile (std::vector<Double_t> observables, bool IsSelectedEvent, int fdebug);
 void                      ChangeAxesFrame (TString FrameName="q(z) frame");
 void                        MoveTo_qFrame ();

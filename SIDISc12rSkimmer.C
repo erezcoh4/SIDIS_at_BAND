@@ -26,8 +26,8 @@ using namespace clas12;
 // declare methods
 TVector3                GetParticleVertex (clas12::region_part_ptr rp);
 void                     SetLorentzVector (TLorentzVector &p4, clas12::region_part_ptr rp);
-void                         OpenCSVfiles (TString csvfilename, TString header);
-void                        CloseCSVfiles ();
+void                         OpenOutputFiles (TString csvfilename, TString header);
+void                        CloseOutputFiles ();
 void                      StreamToCSVfile (std::vector<Double_t> observables, bool IsSelectedEvent, int fdebug);
 void                      ChangeAxesFrame (TString FrameName="q(z) frame");
 void                        MoveTo_qFrame ();
@@ -49,19 +49,22 @@ Double_t          Chi2PID_pips_upperBound (Double_t p, Double_t C=0.88);
 
 
 
-
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-// declare globals
+// globals
+// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+
+// Output root file and tree
+TFile * outFile;
+TTree * outTree;
+// Output CSV file
 std::ofstream   CSVfile, SelectedEventsCSVfile;
 // vectors in lab-frame
 TLorentzVector        e;
-TLorentzVector  neutron;
 TLorentzVector   piplus;
 TLorentzVector     Beam;
 TLorentzVector        q;
 // reconstructed vertex position
 TVector3             Ve;
-TVector3             Vn;
 TVector3        Vpiplus;
 
 // kinematics
@@ -76,24 +79,25 @@ int        torusBending = -1; // -1 for In-bending, +1 for Out-bending
 int        DC_layers[3] = {6,18,36};// Region 1 is denoted at DC detector 6, Region 2 is denoted 18, Region 3 - as 36
 
 // vectors in q-frame
-TLorentzVector      neutron_qFrame;
 TLorentzVector       piplus_qFrame;
 Double_t        Ppips_t_q, Ppips_q;
 
 // auxiliary
 DCFiducial dcfid;
 
+
+
+
+
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 // Main functionality
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void SIDISc12rSkimmer(  int  RunNumber=6420,
-                        int  NeventsMax=100,
-                        int  fdebug=1,
-                        bool doApplySelectionCuts=true,
-                        int  PrintProgress=5000,
-                       TString DataPath = "/volatile/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train_20200610/inc/" ){
-    
-    
+                      int  NeventsMax=100,
+                      int  fdebug=1,
+                      bool doApplySelectionCuts=true,
+                      int  PrintProgress=5000,
+                      TString DataPath = "/volatile/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train_20200610/inc/" ){
     
     char RunNumberStr[20];
     sprintf( RunNumberStr, "00%d", RunNumber );
@@ -101,12 +105,14 @@ void SIDISc12rSkimmer(  int  RunNumber=6420,
     // defenitions
     auto db=TDatabasePDG::Instance();
     e       = TLorentzVector(0,0,0,db->GetParticle( 11   )->Mass());
-    neutron = TLorentzVector(0,0,0,db->GetParticle( 2112 )->Mass());
     piplus  = TLorentzVector(0,0,0,db->GetParticle( 211  )->Mass());
     Ve      = TVector3();
-    Vn      = TVector3();
     Vpiplus = TVector3();
     Beam.SetPxPyPzE(0,0,Ebeam,Ebeam);
+    
+    bool      eSelection = false;
+    bool piplusSelection = false;
+    bool EventPassedCuts = false;
     
     int           event = 0;
     int      good_event = 0;
@@ -117,46 +123,103 @@ void SIDISc12rSkimmer(  int  RunNumber=6420,
     double  E_PCAL_e = 0; // electron energy deposit in PCAL [GeV]
     double  E_ECIN_e = 0; // electron energy deposit in ECAL_in [GeV]
     double  E_ECOUT_e= 0; // electron energy deposit in ECAL_out [GeV]
-    double  chi2PID_pips, chi2PID_n;
+    double  chi2PID_pips;
     double  e_PCAL_W,    e_PCAL_V;
     double  pips_PCAL_W, pips_PCAL_V;
-    double  pips_PCAL_x, pips_PCAL_y,pips_PCAL_z;
-    double  e_PCAL_x,    e_PCAL_y,   e_PCAL_z;
+    double  pips_PCAL_x, pips_PCAL_y,       pips_PCAL_z;
+    double  e_PCAL_x,    e_PCAL_y,          e_PCAL_z;
     double  e_PCAL_sector;
-    double  e_DC_sector, e_DC_Chi2N;
+    double  e_DC_sector,        e_DC_Chi2N;
     double  e_DC_x[3],   e_DC_y[3];
-    double  pips_DC_x,   pips_DC_y,  pips_DC_sector;
-    double  pips_Chi2N;
     double  pips_PCAL_sector;
-    double  E_PCAL_pips, E_ECIN_pips, E_ECOUT_pips;
+    double  pips_DC_sector,     pips_Chi2N;
+    double  pips_DC_x[3],pips_DC_y[3];
+    
+    double  E_PCAL_pips, E_ECIN_pips,       E_ECOUT_pips;
     int     DC_layer;
     
     
+    // output tree branches
+    outTree->Branch("E_PCAL_e"          ,&E_PCAL_e              );
+    outTree->Branch("E_ECIN_e"          ,&E_ECIN_e              );
+    outTree->Branch("E_ECOUT_e"         ,&E_ECOUT_e             );
+    outTree->Branch("chi2PID_pips"      ,&chi2PID_pips          );
+    
+    outTree->Branch("e_PCAL_W"          ,&e_PCAL_W              );
+    outTree->Branch("e_PCAL_V"          ,&e_PCAL_V              );
+    outTree->Branch("pips_PCAL_x"       ,&pips_PCAL_x           );
+    outTree->Branch("pips_PCAL_y"       ,&pips_PCAL_y           );
+    outTree->Branch("pips_PCAL_z"       ,&pips_PCAL_z           );
+    outTree->Branch("e_PCAL_x"          ,&e_PCAL_x              );
+    outTree->Branch("e_PCAL_y"          ,&e_PCAL_y              );
+    outTree->Branch("e_PCAL_z"          ,&e_PCAL_z              );
+    
+    outTree->Branch("e_PCAL_sector"     ,&e_PCAL_sector         );
+    
+    outTree->Branch("e_DC_sector"       ,&e_DC_sector           );
+    outTree->Branch("e_DC_Chi2N"        ,&e_DC_Chi2N            );
+    outTree->Branch("e_DC_x"            ,&e_DC_x                );
+    outTree->Branch("e_DC_y"            ,&e_DC_y                );
+    
+    
+    outTree->Branch("pips_PCAL_sector"  ,&pips_PCAL_sector      );
+    outTree->Branch("pips_DC_sector"    ,&pips_DC_sector        );
+    outTree->Branch("pips_Chi2N"        ,&pips_Chi2N            );
+    outTree->Branch("pips_DC_x"         ,&pips_DC_x             );
+    outTree->Branch("pips_DC_y"         ,&pips_DC_y             );
+    
+    outTree->Branch("E_PCAL_pips"       ,&E_PCAL_pips           );
+    outTree->Branch("E_ECIN_pips"       ,&E_ECIN_pips           );
+    
+    outTree->Branch("E_ECIN_pips"       ,&E_ECIN_pips           );
+    outTree->Branch("E_ECOUT_pips"      ,&E_ECOUT_pips          );
+    outTree->Branch("DC_layer"          ,&DC_layer              );
+    
+    
+    outTree->Branch("e"                 ,&e                     );
+    outTree->Branch("piplus"            ,&piplus                );
+    outTree->Branch("Ve"                ,&Ve                    );
+    outTree->Branch("Vpiplus"           ,&Vpiplus               );
+    outTree->Branch("Beam"              ,&Beam                  );
+    outTree->Branch("q"                 ,&q                     );
+    
+    outTree->Branch("Ebeam"             ,&Ebeam                 );
+    outTree->Branch("xB"                ,&xB                    );
+    outTree->Branch("Q2"                ,&Q2                    );
+    outTree->Branch("omega"             ,&omega                 );
+    outTree->Branch("z"                 ,&z                     );
+    outTree->Branch("eSelection"        ,&eSelection            );
+    outTree->Branch("piplusSelection"   ,&piplusSelection       );
+    outTree->Branch("EventPassedCuts"   ,&EventPassedCuts       );
+
+    
+    
+    
+    
     // open CSV file
-    OpenCSVfiles ("/volatile/clas12/users/ecohen/BAND/SIDIS_skimming/skimmed_SIDIS_inc_"
-                  + (TString)RunNumberStr ,
-                 ((TString)("event,")
-                  +(TString)("Ee,Pe,Pe_x,Pe_y,Pe_z,Ptheta_e,Pphi_e,")
-                  +(TString)("Ngammas,Np,Nn,Npips,Npims,")
-                  +(TString)("omega,q,q_x,q_y,q_z,xB,Q2,z,")
-                  +(TString)("Epips,Ppips,Ppips_x,Ppips_y,Ppips_z,")
-                  +(TString)("En,Pn,Pn_x,Pn_y,Pn_z,")
-                  +(TString)("Ppips_t_q,Ppips_q,")
-                  +(TString)("E_PCAL_e,E_ECIN_e,E_ECOUT_e,")
-                  +(TString)("Vx_e,Vy_e,Vz_e,Vx_pips,Vy_pips,Vz_pips,Vx_n,Vy_n,Vz_n,")
-                  +(TString)("chi2PID_pips,chi2PID_n,")
-                  +(TString)("e_PCAL_W,e_PCAL_V,pips_PCAL_W,pips_PCAL_V,")
-                  +(TString)("e_PCAL_x,e_PCAL_y,e_PCAL_z,e_PCAL_sector,")
-                  +(TString)("e_DC_sector,e_DC_Chi2N,")
-                  +(TString)("e_DC_x[region-1],e_DC_y[region-1],")
-                  +(TString)("e_DC_x[region-2],e_DC_y[region-2],")
-                  +(TString)("e_DC_x[region-3],e_DC_y[region-3],")
-                  ));
+    OpenOutputFiles ("/volatile/clas12/users/ecohen/BAND/SIDIS_skimming/skimmed_SIDIS_inc_"
+                     + (TString)RunNumberStr ,
+                     ((TString)("event,")
+                      +(TString)("Ee,Pe,Pe_x,Pe_y,Pe_z,Ptheta_e,Pphi_e,")
+                      +(TString)("Ngammas,Np,Nn,Npips,Npims,")
+                      +(TString)("omega,q,q_x,q_y,q_z,xB,Q2,z,")
+                      +(TString)("Epips,Ppips,Ppips_x,Ppips_y,Ppips_z,")
+                      +(TString)("En,Pn,Pn_x,Pn_y,Pn_z,")
+                      +(TString)("Ppips_t_q,Ppips_q,")
+                      +(TString)("E_PCAL_e,E_ECIN_e,E_ECOUT_e,")
+                      +(TString)("Vx_e,Vy_e,Vz_e,Vx_pips,Vy_pips,Vz_pips,Vx_n,Vy_n,Vz_n,")
+                      +(TString)("chi2PID_pips,chi2PID_n,")
+                      +(TString)("e_PCAL_W,e_PCAL_V,pips_PCAL_W,pips_PCAL_V,")
+                      +(TString)("e_PCAL_x,e_PCAL_y,e_PCAL_z,e_PCAL_sector,")
+                      +(TString)("e_DC_sector,e_DC_Chi2N,")
+                      +(TString)("e_DC_x[region-1],e_DC_y[region-1],")
+                      +(TString)("e_DC_x[region-2],e_DC_y[region-2],")
+                      +(TString)("e_DC_x[region-3],e_DC_y[region-3],")
+                      ));
     
     // Record start time
     auto start = std::chrono::high_resolution_clock::now();
     ///////////////////////////////////// input hipo file
-    // TString inputFile = (TString)DataPath + "sidisdvcs_" + (TString)RunNumberStr + ".hipo";
     TString inputFile = (TString)DataPath + "inc_" + (TString)RunNumberStr + ".hipo";
     for(Int_t i=1;i<gApplication->Argc();i++){
         TString opt=gApplication->Argv(i);
@@ -205,23 +268,26 @@ void SIDISc12rSkimmer(  int  RunNumber=6420,
             E_ECIN_e    = E_ECOUT_e = E_PCAL_e  = -9999;
             chi2PID_pips= chi2PID_n             = -9999;
             e_PCAL_W    = e_PCAL_V              = -9999;
-            pips_PCAL_W = pips_PCAL_V           = -9999;
             e_PCAL_x    = e_PCAL_y  = e_PCAL_z  = -9999;
             e_PCAL_sector                       = -9999;
             e_DC_sector = e_DC_Chi2N            = -9999;
+            pips_DC_sector                      = -9999;
+            pips_PCAL_sector                    = -9999;
+            pips_PCAL_W = pips_PCAL_V           = -9999;
             pips_DC_x   = pips_DC_y             = -9999;
             pips_PCAL_x = pips_PCAL_y           = -9999;
             pips_PCAL_z                         = -9999;
             E_PCAL_pips                         = -9999;
             E_ECIN_pips = E_ECOUT_pips          = -9999;
-            pips_DC_sector                      = -9999;
             DC_layer                            = -9999;
-            pips_PCAL_sector                    = -9999;
             Ve          = Vn        = Vpiplus   = TVector3();
             for (int regionIdx=0; regionIdx<3; regionIdx++) {
                 e_DC_x[regionIdx]   = e_DC_y[regionIdx]     = -9999;
+                pips_DC_x[regionIdx]= pips_DC_y[regionIdx]  = -9999;
             }
-
+            eSelection  = piplusSelection       = false;
+            
+            
             //can get an estimate of the beam current to this event
             c12.getCurrApproxCharge(); //if called c12.scalerReader();
             
@@ -246,79 +312,10 @@ void SIDISc12rSkimmer(  int  RunNumber=6420,
                 << std::endl;
             }
             
-//            for(auto& p : c12.getDetParticles()){
-//                // get any detector information (if exists for this particle)
-//                // there should be a get function for any entry in the bank
-//                auto PID = p->getPid();
-//                if (fdebug>1) std::cout << "region particle " << PID << std::endl;
-//
-//                switch(p->getRegion()) {
-//
-//                    case FD : {
-//
-//                        // PCAL - used for fiducial cuts
-//                        auto     p_PCAL_info = p->cal(PCAL);
-//                        auto          E_PCAL = p_PCAL_info->getEnergy();
-//                        auto   p_PCAL_sector = p_PCAL_info->getSector();
-//                        auto       p_PCAL_Lv = p_PCAL_info->getLv();
-//                        auto       p_PCAL_Lw = p_PCAL_info->getLw();
-//                        auto          E_ECIN = p->cal(ECIN)->getEnergy();
-//                        auto         E_ECOUT = p->cal(ECOUT)->getEnergy();
-//
-//                        // hit position in PCAL
-//                        auto       p_PCAL_x = p_PCAL_info->getX();
-//                        auto       p_PCAL_y = p_PCAL_info->getY();
-//                        auto       p_PCAL_z = p_PCAL_info->getZ();
-//
-//                        // Drift Chamber tracking system
-//                        auto     p_DC_info = p->trk(DC);
-//                        auto   p_DC_sector = p_DC_info->getSector(); // tracking sector
-//                        auto       p_Chi2N = p_DC_info->getChi2N();  // tracking chi^2/NDF
-//
-//
-//
-//                        if (PID == 11){
-//                            e_PCAL_sector = p_PCAL_sector;
-//                            E_PCAL_e  = E_PCAL;
-//                            E_ECIN_e  = E_ECIN;
-//                            E_ECOUT_e = E_ECOUT;
-//                            e_PCAL_W  = p_PCAL_Lw;
-//                            e_PCAL_V  = p_PCAL_Lv;
-//                            e_PCAL_x  = p_PCAL_x;
-//                            e_PCAL_y  = p_PCAL_y;
-//                            e_PCAL_z  = p_PCAL_z;
-//
-//                            e_DC_sector = p_DC_sector;
-//                            e_DC_Chi2N  = p_Chi2N;
-//
-//                        } else if (PID == 211){
-//                            pips_PCAL_W = p_PCAL_Lw;
-//                            pips_PCAL_V = p_PCAL_Lv;
-//                        } else if (PID == 2112){
-//                            n_PCAL_W = p_PCAL_Lw;
-//                            n_PCAL_V = p_PCAL_Lv;
-//                        }
-//                        break;
-//                    }
-//                    case FT : {
-//                        p->ft(FTCAL)->getEnergy();
-//                        p->ft(FTHODO)->getEnergy();
-//                        break;
-//                    }
-//                    case CD: {
-//                        p->sci(CTOF)->getEnergy();
-//                        p->sci(CND)->getEnergy();
-//                        break;
-//                    }
-//                }
-//            }
-        
             
-        
-        
             // filter D(e,e’pi+n)X reaction
             // and compute event kinematics
-            if(  Ne == 1 && Npips >= 1){
+            if(  Ne == 1 && Npips >= 1 ){
                 
                 // set electron 4-momentum
                 SetLorentzVector(e,electrons[0]);
@@ -353,33 +350,11 @@ void SIDISc12rSkimmer(  int  RunNumber=6420,
                     int DC_layer = DC_layers[regionIdx];
                     e_DC_x[regionIdx] = electrons[0]->traj(DC,DC_layer)->getX();
                     e_DC_y[regionIdx] = electrons[0]->traj(DC,DC_layer)->getY();
-
+                    
                 }
                 if (fdebug > 2) std::cout << "extracted electron information and computed kinematics" << std::endl;
                 
-                
-//                // select the fastest neutron as the "recoil"
-//                // Note: We are also interested in events with no-neutrons, so
-//                // initialise the neutron momentum as garbage
-//                neutron.SetXYZM(-99999,-99999,-99999,neutron.M());
-//                TLorentzVector neutron_tmp(0,0,0,db->GetParticle(2112)->Mass());
-//                for (int nIdx=0; nIdx < Nn; nIdx++) {
-//                    SetLorentzVector(neutron_tmp  ,neutrons[nIdx]);
-//                    if (neutron_tmp.E() > neutron.E()) {
-//                        SetLorentzVector(neutron , neutrons[nIdx]);
-//                        // set reconstructed vertex position
-//                        Vn = GetParticleVertex( neutrons[nIdx] );
-//                        // Chi2PID for the neutron
-//                        chi2PID_n = neutrons[nIdx]->getChi2Pid();
-//                    }
-//                }
-//                neutron_qFrame = neutron;
-//                if (fdebug > 2) std::cout << "selected the fastest neutron as the recoil" << std::endl;
-                
-
-                
-                
-                // select the fastest pion as the "leader"
+Z                // select the fastest pion as the "leader"
                 Fastest_pipsIdx = 0;
                 SetLorentzVector(piplus  ,pips[0]);
                 TLorentzVector piplus_tmp(0,0,0,db->GetParticle(211)->Mass());
@@ -390,7 +365,7 @@ void SIDISc12rSkimmer(  int  RunNumber=6420,
                     }
                 }
                 SetLorentzVector(piplus , pips[Fastest_pipsIdx]);
-               // set reconstructed vertex position
+                // set reconstructed vertex position
                 Vpiplus = GetParticleVertex( pips[Fastest_pipsIdx] );
                 // Chi2PID for the pion
                 chi2PID_pips = pips[Fastest_pipsIdx]->par()->getChi2Pid();
@@ -418,7 +393,7 @@ void SIDISc12rSkimmer(  int  RunNumber=6420,
                     DC_layer = DC_layers[regionIdx];
                     pips_DC_x = pips[Fastest_pipsIdx]->traj(DC,DC_layer)->getX();
                     pips_DC_y = pips[Fastest_pipsIdx]->traj(DC,DC_layer)->getY();
-
+                    
                 }
                 // hadron rest frame energy fraction
                 z = piplus.E()/q.E();
@@ -434,28 +409,26 @@ void SIDISc12rSkimmer(  int  RunNumber=6420,
                 Ppips_t_q   = piplus_qFrame.Pt();
                 Ppips_q     = piplus_qFrame.Pz();
                 if (fdebug > 2) Printf("Moved to q-Frame and computed pi+ momentum components");
-
                 
-                 
+                
+                
                 // decide if to write this event to "selected events csv-file"
                 bool IsSelectedEvent = false;
                 if ( doApplySelectionCuts ) {
-                    if (
-                        EventPassedElectronSelectionCriteria(e_PCAL_x, e_PCAL_y, e_PCAL_W, e_PCAL_V,
-                                                             E_PCAL_e,  E_ECIN_e, E_ECOUT_e,
-                                                             e, Ve,
-                                                             e_DC_sector, e_DC_x, e_DC_y,
-                                                             torusBending )
-                        &&
-                        EventPassedPiPlusSelectionCriteria(pips_DC_x, pips_DC_y,
-                                                           chi2PID_pips, piplus.P(),
-                                                           Ve, Vpiplus )
-                        )
-                    IsSelectedEvent = true;
+                    eSelection = EventPassedElectronSelectionCriteria(e_PCAL_x, e_PCAL_y, e_PCAL_W, e_PCAL_V,
+                                                                      E_PCAL_e,  E_ECIN_e, E_ECOUT_e,
+                                                                      e, Ve,
+                                                                      e_DC_sector, e_DC_x, e_DC_y,
+                                                                      torusBending );
+                    piplusSelection = EventPassedPiPlusSelectionCriteria(pips_DC_x, pips_DC_y,
+                                                                         chi2PID_pips, piplus.P(),
+                                                                         Ve, Vpiplus );
+                    EventPassedCuts =( eSelection && piplusSelection );
+                    if ( EventPassedCuts ) IsSelectedEvent = true;
                 }
                 
                 
-                
+                outTree -> Fill();
                 StreamToCSVfile({(Double_t)event,
                     e.E(),              e.P(),          e.Px(),             e.Py(),
                     e.Pz(),             e.Theta(),      e.Phi(),
@@ -499,7 +472,7 @@ void SIDISc12rSkimmer(  int  RunNumber=6420,
     auto finish = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed = finish - start;
     std::cout << "Done. Elapsed time: " << elapsed.count()<< ", processed " << event << " events, " << good_event << " passed filter\n";
-    CloseCSVfiles();
+    CloseOutputFiles();
 }
 
 
@@ -527,18 +500,23 @@ bool EventPassedElectronSelectionCriteria(Double_t e_PCAL_x, Double_t e_PCAL_y,
     // checking DC Fiducials
     // torus magnet bending:   ( 1 = inbeding, 0 = outbending    )
     for (int regionIdx=0; regionIdx<3; regionIdx++) {
+        // DC_e_fid:
+        // sector:  1-6
+        // layer:   1-3
+        // bending: 0(out)/1(in)
+        std::cout << "e_DC_sector: " << e_DC_sector << ", regionIdx: " << regionIdx << std::cout;
         int bending = 1 ? (torusBending==-1) : 0;
         bool DC_fid  = dcfid.DC_e_fid(e_DC_x[regionIdx],
-                                                e_DC_y[regionIdx],
-                                                e_DC_sector+1,
-                                                regionIdx+1,
-                                                bending);
+                                      e_DC_y[regionIdx],
+                                      e_DC_sector+1,
+                                      regionIdx+1,
+                                      bending);
         if (DC_fid == false) {
             return false;
         }
     }
-
-
+    
+    
     // Cut on z-vertex position:
     // based on RGA_Analysis_Overview_and_Procedures_Nov_4_2020-6245173-2020-12-09-v3.pdf
     // p. 71
@@ -587,7 +565,7 @@ bool EventPassedElectronSelectionCriteria(Double_t e_PCAL_x, Double_t e_PCAL_y,
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 bool EventPassedPiPlusSelectionCriteria( Double_t DC_x, Double_t DC_y,
-                                         Double_t chi2PID, Double_t p,
+                                        Double_t chi2PID, Double_t p,
                                         TVector3 Ve,
                                         TVector3 Vpiplus ){
     // decide if pi+ selection cuts
@@ -606,7 +584,7 @@ bool EventPassedPiPlusSelectionCriteria( Double_t DC_x, Double_t DC_y,
        ){
         return false;
     }
-       
+    
     
     if(
        // pi+ Identification Refinement - chi2PID vs. momentum
@@ -679,18 +657,30 @@ void SetLorentzVector (TLorentzVector &p4,clas12::region_part_ptr rp){
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-void OpenCSVfiles (TString csvfilename,TString header){
-    CSVfile.open( csvfilename + ".csv" );
+void OpenOutputFiles (TString outfilename,TString header){
+    
+    // Create output tree
+    outFile = new TFile( outfilename + ".root" ,"RECREATE");
+    outTree = new TTree( "sidis" , "Event information");
+    
+    // Create output csv files
+    CSVfile.open( outfilename + ".csv" );
     CSVfile << header << std::endl;
     
-    SelectedEventsCSVfile.open( csvfilename + "_selected_events.csv" );
+    SelectedEventsCSVfile.open( outfilename + "_selected_events.csv" );
     SelectedEventsCSVfile << header << std::endl;
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-void CloseCSVfiles (){
+void CloseOutputFiles (){
+    // close output CSV
     CSVfile.close();
     SelectedEventsCSVfile.close();
+    
+    // close output ROOT
+    outFile->cd();
+    outTree->Write();
+    outFile->Close();
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
@@ -725,7 +715,7 @@ void MoveTo_qFrame(){
     // q is the z axis
     Double_t q_phi   = q.Phi();
     Double_t q_theta = q.Theta();
-
+    
     q.RotateZ(-q_phi);
     q.RotateY(-q_theta);
     
@@ -735,11 +725,6 @@ void MoveTo_qFrame(){
     piplus_qFrame.RotateY(-q_theta);
     Double_t piplus_phi = piplus_qFrame.Phi();
     piplus_qFrame.RotateZ(-piplus_phi);
-
-    neutron_qFrame.RotateZ(-q_phi);
-    neutron_qFrame.RotateY(-q_theta);
-    Double_t neutron_phi = neutron_qFrame.Phi();
-    neutron_qFrame.RotateZ(-neutron_phi);
-
+    
 }
 

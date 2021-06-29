@@ -150,7 +150,7 @@ void auxiliary::SetLorentzVector (TLorentzVector &p4,clas12::region_part_ptr rp)
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-void auxiliary::OpenCSVfiles (TString csvfilename,TString header){
+void auxiliary::OpenOutputFiles (TString csvfilename,TString header){
     CSVfile.open( csvfilename + ".csv" );
     CSVfile << header << std::endl;
     
@@ -159,7 +159,7 @@ void auxiliary::OpenCSVfiles (TString csvfilename,TString header){
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-void auxiliary::CloseCSVfiles (){
+void auxiliary::CloseOutputFiles (){
     CSVfile.close();
     SelectedEventsCSVfile.close();
 }
