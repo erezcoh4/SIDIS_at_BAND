@@ -91,7 +91,7 @@ void SIDISc12rSkimmer(  int  RunNumber=6420,
                         int  fdebug=1,
                         bool doApplySelectionCuts=true,
                         int  PrintProgress=5000,
-                       TString DataPath = "/volatile/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train_20200610/" ){
+                       TString DataPath = "/volatile/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train_20200610/inc/" ){
     
     
     
