@@ -265,8 +265,8 @@ void SIDISc12rSkimmer(  int  RunNumber=6420,
         // now process the events from the first one...
         while((c12.next()==true) && (event < NeventsMax)){
             
-            runnum = c12->runconfig()->getRun();
-            evnum = c12->runconfig()->getEvent();
+            runnum = c12.runconfig()->getRun();
+            evnum = c12.runconfig()->getEvent();
 
             
             if (fdebug>2) std::cout << "begin analysis of event " << event << std::endl;
