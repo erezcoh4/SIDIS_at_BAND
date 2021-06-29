@@ -41,9 +41,10 @@ bool EventPassedElectronSelectionCriteria (Double_t e_PCAL_x, Double_t e_PCAL_y,
                                            Double_t e_DC_x[3],
                                            Double_t e_DC_y[3],
                                            int torusBending);
-bool   EventPassedPiPlusSelectionCriteria (Double_t DC_x, Double_t DC_y,
+bool   EventPassedPiPlusSelectionCriteria (Double_t pips_DC_x[3], Double_t pips_DC_y[3],
                                            Double_t chi2PID, Double_t p,
-                                           TVector3 Ve, TVector3 Vpiplus );
+                                           TVector3 Ve,
+                                           TVector3 Vpiplus );
 Double_t          Chi2PID_pips_lowerBound (Double_t p, Double_t C=0.88);
 Double_t          Chi2PID_pips_upperBound (Double_t p, Double_t C=0.88);
 
