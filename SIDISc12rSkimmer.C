@@ -530,7 +530,7 @@ bool EventPassedElectronSelectionCriteria(Double_t e_PCAL_x, Double_t e_PCAL_y,
         int bending = 1 ? (torusBending==-1) : 0;
         bool DC_fid  = dcfid.DC_e_fid(e_DC_x[regionIdx],
                                                 e_DC_y[regionIdx],
-                                                e_DC_sector,
+                                                e_DC_sector+1,
                                                 regionIdx+1,
                                                 bending);
         if (DC_fid == false) {
