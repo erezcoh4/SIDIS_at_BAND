@@ -610,7 +610,7 @@ bool EventPassedPiPlusSelectionCriteria( Double_t DC_x, Double_t DC_y,
     
     if(
        // pi+ Identification Refinement - chi2PID vs. momentum
-       && ( Chi2PID_pips_lowerBound( p ) < chi2PID && chi2PID < Chi2PID_pips_upperBound( p ) )
+       ( Chi2PID_pips_lowerBound( p ) < chi2PID && chi2PID < Chi2PID_pips_upperBound( p ) )
        
        // Cut on the z-Vertex Difference Between Electrons and Hadrons.
        &&  ( fabs((Ve-Vpiplus).Z()) < 20.0)
