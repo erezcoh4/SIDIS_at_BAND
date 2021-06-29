@@ -139,6 +139,25 @@ void SIDISc12rSkimmer(  int  RunNumber=6420,
     double  E_PCAL_pips, E_ECIN_pips,       E_ECOUT_pips;
     int     DC_layer;
     
+    // open CSV file
+    OpenOutputFiles ("/volatile/clas12/users/ecohen/BAND/SIDIS_skimming/skimmed_SIDIS_inc_"
+                     + (TString)RunNumberStr ,
+                     ((TString)("event,")
+                      +(TString)("Ee,Pe,Pe_x,Pe_y,Pe_z,Ptheta_e,Pphi_e,")
+                      +(TString)("Ngammas,Np,Nn,Npips,Npims,")
+                      +(TString)("omega,q,q_x,q_y,q_z,xB,Q2,z,")
+                      +(TString)("Epips,Ppips,Ppips_x,Ppips_y,Ppips_z,")
+                      +(TString)("Ppips_t_q,Ppips_q,")
+                      +(TString)("E_PCAL_e,E_ECIN_e,E_ECOUT_e,")
+                      +(TString)("Vx_e,Vy_e,Vz_e,Vx_pips,Vy_pips,Vz_pips,")
+                      +(TString)("chi2PID_pips,")
+                      +(TString)("e_PCAL_W,e_PCAL_V,pips_PCAL_W,pips_PCAL_V,")
+                      +(TString)("e_PCAL_x,e_PCAL_y,e_PCAL_z,e_PCAL_sector,")
+                      +(TString)("e_DC_sector,e_DC_Chi2N,")
+                      +(TString)("e_DC_x[region-1],e_DC_y[region-1],")
+                      +(TString)("e_DC_x[region-2],e_DC_y[region-2],")
+                      +(TString)("e_DC_x[region-3],e_DC_y[region-3],")
+                      ));
     
     // output tree branches
     outTree->Branch("E_PCAL_e"          ,&E_PCAL_e              );
@@ -197,25 +216,7 @@ void SIDISc12rSkimmer(  int  RunNumber=6420,
     
     
     
-    // open CSV file
-    OpenOutputFiles ("/volatile/clas12/users/ecohen/BAND/SIDIS_skimming/skimmed_SIDIS_inc_"
-                     + (TString)RunNumberStr ,
-                     ((TString)("event,")
-                      +(TString)("Ee,Pe,Pe_x,Pe_y,Pe_z,Ptheta_e,Pphi_e,")
-                      +(TString)("Ngammas,Np,Nn,Npips,Npims,")
-                      +(TString)("omega,q,q_x,q_y,q_z,xB,Q2,z,")
-                      +(TString)("Epips,Ppips,Ppips_x,Ppips_y,Ppips_z,")
-                      +(TString)("Ppips_t_q,Ppips_q,")
-                      +(TString)("E_PCAL_e,E_ECIN_e,E_ECOUT_e,")
-                      +(TString)("Vx_e,Vy_e,Vz_e,Vx_pips,Vy_pips,Vz_pips,")
-                      +(TString)("chi2PID_pips,")
-                      +(TString)("e_PCAL_W,e_PCAL_V,pips_PCAL_W,pips_PCAL_V,")
-                      +(TString)("e_PCAL_x,e_PCAL_y,e_PCAL_z,e_PCAL_sector,")
-                      +(TString)("e_DC_sector,e_DC_Chi2N,")
-                      +(TString)("e_DC_x[region-1],e_DC_y[region-1],")
-                      +(TString)("e_DC_x[region-2],e_DC_y[region-2],")
-                      +(TString)("e_DC_x[region-3],e_DC_y[region-3],")
-                      ));
+    
     
     // Record start time
     auto start = std::chrono::high_resolution_clock::now();
