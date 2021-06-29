@@ -1,6 +1,6 @@
 * hipo skimmer for Semi-Inclusive DIS at CLAS12 with BAND *
 
-last edit: June-22, 2021 (EOC, mbp)
+last edit: June-29, 2021 (EOC, mbp)
  
  ------------------------------------------------------------------------------------------------------------------------------------------------
  void SIDISc12rSkimmer (   int RunNumber=6420,
@@ -17,7 +17,7 @@ last edit: June-22, 2021 (EOC, mbp)
         D(e,e’pi+)X
         D(e,e’pi+n)X
  
-execute:
+execute: (from /u/home/cohen/BAND_analysis/clas12root)
 -----------------
    clas12root SIDIS_at_BAND/SIDISc12rSkimmer.C
    clas12root "SIDIS_at_BAND/SIDISc12rSkimmer.C+(6420,1e9)"
@@ -42,6 +42,12 @@ execute:
  
  comments:
  -----------------
+ DVCS train recommended by Florian for SIDIS skimming:
+	"/cache/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train/sidisdvcs/"
+ Tyler: There is a semi-exclusive filter to the DVCS train, so use RGM data trains:
+	"/volatile/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train_20200610/"
+
+
  ToDo list:
  
  Priority 1:
@@ -53,7 +59,7 @@ execute:
  Consider adding pi- to the data-stream (including pi- selection cuts)
  
  
- 
+
  
  variable description:
  ---------------------------------

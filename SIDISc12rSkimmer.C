@@ -36,9 +36,14 @@ bool EventPassedElectronSelectionCriteria (Double_t e_PCAL_x, Double_t e_PCAL_y,
                                            Double_t E_PCAL_e,
                                            Double_t E_ECIN_e, Double_t E_ECOUT_e,
                                            TLorentzVector e,
-                                           TVector3 Ve);
+                                           TVector3 Ve,
+                                           Double_t e_DC_sector,
+                                           Double_t e_DC_x[3],
+                                           Double_t e_DC_y[3],
+                                           int torusBending);
 bool   EventPassedPiPlusSelectionCriteria (Double_t DC_x, Double_t DC_y,
-                                           Double_t chi2PID, Double_t p, TVector3 Ve, TVector3 Vpiplus );
+                                           Double_t chi2PID, Double_t p,
+                                           TVector3 Ve, TVector3 Vpiplus );
 Double_t          Chi2PID_pips_lowerBound (Double_t p, Double_t C=0.88);
 Double_t          Chi2PID_pips_upperBound (Double_t p, Double_t C=0.88);
 
@@ -87,7 +92,9 @@ void SIDISc12rSkimmer(  int  RunNumber=6420,
                         int  fdebug=1,
                         bool doApplySelectionCuts=true,
                         int  PrintProgress=5000,
-                       TString DataPath = "/cache/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train/sidisdvcs/" ){
+                       TString DataPath = "/volatile/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train_20200610/" ){
+    
+    
     
     char RunNumberStr[20];
     sprintf( RunNumberStr, "00%d", RunNumber );
@@ -110,7 +117,7 @@ void SIDISc12rSkimmer(  int  RunNumber=6420,
     double        Mp = db->GetParticle( 2212 )->Mass();
     double  E_PCAL_e = 0; // electron energy deposit in PCAL [GeV]
     double  E_ECIN_e = 0; // electron energy deposit in ECAL_in [GeV]
-    double  E_ECOUT_e = 0; // electron energy deposit in ECAL_out [GeV]
+    double  E_ECOUT_e= 0; // electron energy deposit in ECAL_out [GeV]
     double  chi2PID_pips, chi2PID_n;
     double  e_PCAL_W,    e_PCAL_V;
     double  pips_PCAL_W, pips_PCAL_V;
@@ -118,7 +125,7 @@ void SIDISc12rSkimmer(  int  RunNumber=6420,
     double  e_PCAL_x,    e_PCAL_y,   e_PCAL_z;
     double  e_PCAL_sector;
     double  e_DC_sector, e_DC_Chi2N;
-    double  e_DC_x,      e_DC_y;
+    double  e_DC_x[3],   e_DC_y[3];
     double  pips_DC_x,   pips_DC_y,  pips_DC_sector;
     double  pips_Chi2N;
     double  pips_PCAL_sector;
@@ -127,7 +134,8 @@ void SIDISc12rSkimmer(  int  RunNumber=6420,
     
     
     // open CSV file
-    OpenCSVfiles ("/u/home/cohen/events_" + (TString)RunNumberStr ,
+    OpenCSVfiles ("/volatile/clas12/users/ecohen/BAND/SIDIS_skimming/skimmed_SIDIS_inc_"
+                  + (TString)RunNumberStr ,
                  ((TString)("event,")
                   +(TString)("Ee,Pe,Pe_x,Pe_y,Pe_z,Ptheta_e,Pphi_e,")
                   +(TString)("Ngammas,Np,Nn,Npips,Npims,")
@@ -141,12 +149,16 @@ void SIDISc12rSkimmer(  int  RunNumber=6420,
                   +(TString)("e_PCAL_W,e_PCAL_V,pips_PCAL_W,pips_PCAL_V,")
                   +(TString)("e_PCAL_x,e_PCAL_y,e_PCAL_z,e_PCAL_sector,")
                   +(TString)("e_DC_sector,e_DC_Chi2N,")
+                  +(TString)("e_DC_x[region-1],e_DC_y[region-1],")
+                  +(TString)("e_DC_x[region-2],e_DC_y[region-2],")
+                  +(TString)("e_DC_x[region-3],e_DC_y[region-3],")
                   ));
     
     // Record start time
     auto start = std::chrono::high_resolution_clock::now();
     ///////////////////////////////////// input hipo file
-    TString inputFile = (TString)DataPath + "sidisdvcs_" + (TString)RunNumberStr + ".hipo";
+    // TString inputFile = (TString)DataPath + "sidisdvcs_" + (TString)RunNumberStr + ".hipo";
+    TString inputFile = (TString)DataPath + "inc_" + (TString)RunNumberStr + ".hipo";
     for(Int_t i=1;i<gApplication->Argc();i++){
         TString opt=gApplication->Argv(i);
         if((opt.Contains(".hipo"))){
@@ -199,7 +211,6 @@ void SIDISc12rSkimmer(  int  RunNumber=6420,
             e_PCAL_sector                       = -9999;
             e_DC_sector = e_DC_Chi2N            = -9999;
             pips_DC_x   = pips_DC_y             = -9999;
-            e_DC_x      = e_DC_y                = -9999;
             pips_PCAL_x = pips_PCAL_y           = -9999;
             pips_PCAL_z                         = -9999;
             E_PCAL_pips                         = -9999;
@@ -208,6 +219,9 @@ void SIDISc12rSkimmer(  int  RunNumber=6420,
             DC_layer                            = -9999;
             pips_PCAL_sector                    = -9999;
             Ve          = Vn        = Vpiplus   = TVector3();
+            for (int regionIdx=0; regionIdx<3; regionIdx++) {
+                e_DC_x[regionIdx]   = e_DC_y[regionIdx]     = -9999;
+            }
 
             //can get an estimate of the beam current to this event
             c12.getCurrApproxCharge(); //if called c12.scalerReader();
@@ -338,8 +352,8 @@ void SIDISc12rSkimmer(  int  RunNumber=6420,
                 
                 for (int regionIdx=0; regionIdx<3; regionIdx++) {
                     int DC_layer = DC_layers[regionIdx];
-                    e_DC_x = electrons[0]->traj(DC,DC_layer)->getX();
-                    e_DC_y = electrons[0]->traj(DC,DC_layer)->getY();
+                    e_DC_x[regionIdx] = electrons[0]->traj(DC,DC_layer)->getX();
+                    e_DC_y[regionIdx] = electrons[0]->traj(DC,DC_layer)->getY();
 
                 }
                 if (fdebug > 2) std::cout << "extracted electron information and computed kinematics" << std::endl;
@@ -409,7 +423,9 @@ void SIDISc12rSkimmer(  int  RunNumber=6420,
                 }
                 // hadron rest frame energy fraction
                 z = piplus.E()/q.E();
-                if (fdebug > 2) Printf("selected the fastest pion as the leader, and extracted its information");
+                if (fdebug > 2){
+                    Printf("selected the fastest pion as the leader and extracted information");
+                }
                 
                 // temporarily fill pips 4-vector in q-frame
                 piplus_qFrame = piplus;
@@ -426,10 +442,15 @@ void SIDISc12rSkimmer(  int  RunNumber=6420,
                 bool IsSelectedEvent = false;
                 if ( doApplySelectionCuts ) {
                     if (
-                        EventPassedElectronSelectionCriteria( e_PCAL_x, e_PCAL_y, e_PCAL_W, e_PCAL_V, E_PCAL_e,                                              E_ECIN_e, E_ECOUT_e,
-                                                             e, Ve)
+                        EventPassedElectronSelectionCriteria(e_PCAL_x, e_PCAL_y, e_PCAL_W, e_PCAL_V,
+                                                             E_PCAL_e,  E_ECIN_e, E_ECOUT_e,
+                                                             e, Ve,
+                                                             e_DC_sector, e_DC_x, e_DC_y,
+                                                             torusBending )
                         &&
-                        EventPassedPiPlusSelectionCriteria( pips_DC_x, pips_DC_y, chi2PID_pips, piplus.P(), Ve, Vpiplus )
+                        EventPassedPiPlusSelectionCriteria(pips_DC_x, pips_DC_y,
+                                                           chi2PID_pips, piplus.P(),
+                                                           Ve, Vpiplus )
                         )
                     IsSelectedEvent = true;
                 }
@@ -437,18 +458,24 @@ void SIDISc12rSkimmer(  int  RunNumber=6420,
                 
                 
                 StreamToCSVfile({(Double_t)event,
-                    e.E(),               e.P(),         e.Px(),         e.Py(),             e.Pz(),         e.Theta(),      e.Phi(),
-                    (Double_t)Ngammas,  (Double_t)Np,   (Double_t)Nn,   (Double_t)Npips,    (Double_t)Npims,
-                    q.E(),              q.P(),          q.Px(),         q.Py(),             q.Pz(),         xB,             Q2,         z,
-                    piplus.E(),         piplus.P(),     piplus.Px(),    piplus.Py(),        piplus.Pz(),
-                    neutron.E(),        neutron.P(),    neutron.Px(),   neutron.Py(),       neutron.Pz(),
+                    e.E(),              e.P(),          e.Px(),             e.Py(),
+                    e.Pz(),             e.Theta(),      e.Phi(),
+                    (Double_t)Ngammas,  (Double_t)Np,
+                    (Double_t)Nn,       (Double_t)Npips,    (Double_t)Npims,
+                    q.E(),              q.P(),          q.Px(),             q.Py(),             q.Pz(),         xB,             Q2,         z,
+                    piplus.E(),         piplus.P(),     piplus.Px(),        piplus.Py(),        piplus.Pz(),
+                    neutron.E(),        neutron.P(),    neutron.Px(),       neutron.Py(),       neutron.Pz(),
                     Ppips_t_q,          Ppips_q,
                     E_PCAL_e,           E_ECIN_e,       E_ECOUT_e,
-                    Ve.X(),             Ve.Y(),         Ve.Z(),          Vpiplus.X(),       Vpiplus.Y(),    Vpiplus.Z(),    Vn.X(),     Vn.Y(),     Vn.Z(),
+                    Ve.X(),             Ve.Y(),         Ve.Z(),             Vpiplus.X(),
+                    Vpiplus.Y(),        Vpiplus.Z(),    Vn.X(),             Vn.Y(),             Vn.Z(),
                     chi2PID_pips,       chi2PID_n,
-                    e_PCAL_W,           e_PCAL_V,       pips_PCAL_W,     pips_PCAL_V,
-                    e_PCAL_x,           e_PCAL_y,       e_PCAL_z,        e_PCAL_sector,
+                    e_PCAL_W,           e_PCAL_V,       pips_PCAL_W,        pips_PCAL_V,
+                    e_PCAL_x,           e_PCAL_y,       e_PCAL_z,           e_PCAL_sector,
                     e_DC_sector,        e_DC_Chi2N,
+                    e_DC_x[0],          e_DC_y[0],
+                    e_DC_x[1],          e_DC_y[1],
+                    e_DC_x[2],          e_DC_y[2],
                 }, IsSelectedEvent, fdebug);
                 
                 good_event ++ ;
@@ -456,7 +483,6 @@ void SIDISc12rSkimmer(  int  RunNumber=6420,
                     std::cout
                     << "streamed to CSV file,"
                     << "Ee: "       << e.E()          << " GeV, "
-                    << "En: "       << neutron .E()   << " GeV, "
                     << "E(pi+): "   << piplus  .E()   << " GeV, "
                     << std::endl;
                 }
@@ -486,10 +512,34 @@ bool EventPassedElectronSelectionCriteria(Double_t e_PCAL_x, Double_t e_PCAL_y,
                                           Double_t E_PCAL_e,
                                           Double_t E_ECIN_e, Double_t E_ECOUT_e,
                                           TLorentzVector e,
-                                          TVector3 Ve){
+                                          TVector3 Ve,
+                                          Double_t e_DC_sector,
+                                          Double_t e_DC_x[3],
+                                          Double_t e_DC_y[3],
+                                          int torusBending){
     
     // decide if electron in event passes event selection cuts
-    
+    DCfid = DCFiducial();
+    // DC - fiducial cuts on DC
+    // from bandsoft_tools/skimmers/electrons.cpp,
+    // where eHit.getDC_x1() - x position in first region of the drift chamber
+    // same for y1,x2,y2,...
+    // eHit.getDC_sector() - sector
+    // checking DC Fiducials
+    // torus magnet bending:   ( 1 = inbeding, 0 = outbending    )
+    for (int regionIdx=0; regionIdx<3; regionIdx++) {
+        int bending = 1 ? (torusBending==-1) : 0;
+        bool DC_fid  = DCfid.DC_e_fid(e_DC_x[regionIdx],
+                                                e_DC_y[regionIdx],
+                                                e_DC_sector,
+                                                regionIdx+1,
+                                                bending);
+        if (DC_fid == false) {
+            return false;
+        }
+    }
+
+
     // Cut on z-vertex position:
     // based on RGA_Analysis_Overview_and_Procedures_Nov_4_2020-6245173-2020-12-09-v3.pdf
     // p. 71
@@ -509,21 +559,16 @@ bool EventPassedElectronSelectionCriteria(Double_t e_PCAL_x, Double_t e_PCAL_y,
         Vz_max = 10.0;
         
     } else {
-        
         std::cout << "Un-identified torus bending, return";
         return false;
     }
     
     if(
-       // fiducial cuts
        // fiducial cuts on PCAL
        fabs(e_PCAL_x)>0
        &&  fabs(e_PCAL_y)>0
        &&  e_PCAL_W > 19
        &&  e_PCAL_V > 19
-       
-       // fiducial cuts on DC
-       // ToDo: COMPLETE THIS! (maybe using DC_Fiducial.cpp?)
        
        // Electron Identification Refinement  - PCAL Minimum Energy Deposition Cut
        &&  E_PCAL_e > 0.07
@@ -543,7 +588,9 @@ bool EventPassedElectronSelectionCriteria(Double_t e_PCAL_x, Double_t e_PCAL_y,
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 bool EventPassedPiPlusSelectionCriteria( Double_t DC_x, Double_t DC_y,
-                                         Double_t chi2PID, Double_t p, TVector3 Ve, TVector3 Vpiplus ){
+                                         Double_t chi2PID, Double_t p,
+                                        TVector3 Ve,
+                                        TVector3 Vpiplus ){
     // decide if pi+ selection cuts
     //
     // input:
@@ -553,11 +600,15 @@ bool EventPassedPiPlusSelectionCriteria( Double_t DC_x, Double_t DC_y,
     // p            pi+ momentum    (Ppips.P())
     //
     
+    // DC - fiducial cuts on DC
+    // Complete this!
     if(
-       // fiducial cuts on DC
-       // ToDo: COMPLETE THIS! (maybe using DC_Fiducial.cpp?)
-       (DC_x>0 && DC_y>0 )
+       (DC_x<0 && DC_y<0 ){
+        return false;
+    }
        
+    
+    if(
        // pi+ Identification Refinement - chi2PID vs. momentum
        && ( Chi2PID_pips_lowerBound( p ) < chi2PID && chi2PID < Chi2PID_pips_upperBound( p ) )
        
