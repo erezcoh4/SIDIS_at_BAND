@@ -17,10 +17,10 @@ last edit: June-29, 2021 (EOC, mbp)
         D(e,e’pi+)X
         D(e,e’pi+n)X
  
-execute: (from /u/home/cohen/BAND_analysis/clas12root)
+execute: (from /u/home/cohen/SIDIS_at_BAND, do git pull, then...)
 -----------------
-   clas12root SIDIS_at_BAND/SIDISc12rSkimmer.C
-   clas12root "SIDIS_at_BAND/SIDISc12rSkimmer.C+(6420,1e9)"
+   clas12root SIDISc12rSkimmer.C
+   clas12root "SIDISc12rSkimmer.C+(6420,1e9)"
 
 
  input:

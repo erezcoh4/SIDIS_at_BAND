@@ -83,7 +83,6 @@ Double_t        Ppips_t_q, Ppips_q;
 // auxiliary
 DCFiducial dcfid;
 
-
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 // Main functionality
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
@@ -519,7 +518,7 @@ bool EventPassedElectronSelectionCriteria(Double_t e_PCAL_x, Double_t e_PCAL_y,
                                           int torusBending){
     
     // decide if electron in event passes event selection cuts
-    DCfid = DCFiducial();
+    
     // DC - fiducial cuts on DC
     // from bandsoft_tools/skimmers/electrons.cpp,
     // where eHit.getDC_x1() - x position in first region of the drift chamber
@@ -529,7 +528,7 @@ bool EventPassedElectronSelectionCriteria(Double_t e_PCAL_x, Double_t e_PCAL_y,
     // torus magnet bending:   ( 1 = inbeding, 0 = outbending    )
     for (int regionIdx=0; regionIdx<3; regionIdx++) {
         int bending = 1 ? (torusBending==-1) : 0;
-        bool DC_fid  = DCfid.DC_e_fid(e_DC_x[regionIdx],
+        bool DC_fid  = dcfid.DC_e_fid(e_DC_x[regionIdx],
                                                 e_DC_y[regionIdx],
                                                 e_DC_sector,
                                                 regionIdx+1,
@@ -603,7 +602,8 @@ bool EventPassedPiPlusSelectionCriteria( Double_t DC_x, Double_t DC_y,
     // DC - fiducial cuts on DC
     // Complete this!
     if(
-       (DC_x<0 && DC_y<0 ){
+       (DC_x<0 && DC_y<0 )
+       ){
         return false;
     }
        
