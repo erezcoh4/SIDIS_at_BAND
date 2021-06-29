@@ -389,8 +389,8 @@ void SIDISc12rSkimmer(  int  RunNumber=6420,
                 
                 for (int regionIdx=0; regionIdx<3; regionIdx++) {
                     DC_layer = DC_layers[regionIdx];
-                    pips_DC_x = pips[Fastest_pipsIdx]->traj(DC,DC_layer)->getX();
-                    pips_DC_y = pips[Fastest_pipsIdx]->traj(DC,DC_layer)->getY();
+                    pips_DC_x[regionIdx] = pips[Fastest_pipsIdx]->traj(DC,DC_layer)->getX();
+                    pips_DC_y[regionIdx] = pips[Fastest_pipsIdx]->traj(DC,DC_layer)->getY();
                     
                 }
                 // hadron rest frame energy fraction
@@ -501,7 +501,7 @@ bool EventPassedElectronSelectionCriteria(Double_t e_PCAL_x, Double_t e_PCAL_y,
         // sector:  1-6
         // layer:   1-3
         // bending: 0(out)/1(in)
-        std::cout << "e_DC_sector: " << e_DC_sector << ", regionIdx: " << regionIdx << std::cout;
+        std::cout << "e_DC_sector: " << e_DC_sector << ", regionIdx: " << regionIdx << std::endl;
         int bending = 1 ? (torusBending==-1) : 0;
         bool DC_fid  = dcfid.DC_e_fid(e_DC_x[regionIdx],
                                       e_DC_y[regionIdx],
@@ -561,7 +561,7 @@ bool EventPassedElectronSelectionCriteria(Double_t e_PCAL_x, Double_t e_PCAL_y,
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-bool EventPassedPiPlusSelectionCriteria( Double_t DC_x[3], Double_t DC_y[3],
+bool EventPassedPiPlusSelectionCriteria(Double_t pips_DC_x[3], Double_t pips_DC_y[3],
                                         Double_t chi2PID, Double_t p,
                                         TVector3 Ve,
                                         TVector3 Vpiplus ){
@@ -577,7 +577,7 @@ bool EventPassedPiPlusSelectionCriteria( Double_t DC_x[3], Double_t DC_y[3],
     // DC - fiducial cuts on DC
     // Complete this!
     if(
-       (DC_x<0 && DC_y<0 )
+       (pips_DC_x[0]<0 && pips_DC_x[0]<0 )
        ){
         return false;
     }
