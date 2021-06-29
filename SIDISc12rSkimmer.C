@@ -138,6 +138,7 @@ void SIDISc12rSkimmer(  int  RunNumber=6420,
     
     double  E_PCAL_pips, E_ECIN_pips,       E_ECOUT_pips;
     int     DC_layer;
+    int     runnum,      evnum;
     
     // open CSV file
     OpenOutputFiles ("/volatile/clas12/users/ecohen/BAND/SIDIS_skimming/skimmed_SIDIS_inc_"
@@ -160,6 +161,8 @@ void SIDISc12rSkimmer(  int  RunNumber=6420,
                       ));
     
     // output tree branches
+    outTree->Branch("eventnumber"       ,&evnum                 );
+    outTree->Branch("runnum"            ,&runnum                );
     outTree->Branch("E_PCAL_e"          ,&E_PCAL_e              );
     outTree->Branch("E_ECIN_e"          ,&E_ECIN_e              );
     outTree->Branch("E_ECOUT_e"         ,&E_ECOUT_e             );
@@ -261,6 +264,11 @@ void SIDISc12rSkimmer(  int  RunNumber=6420,
         
         // now process the events from the first one...
         while((c12.next()==true) && (event < NeventsMax)){
+            
+            runnum = c12->runconfig()->getRun();
+            evnum = c12->runconfig()->getEvent();
+
+            
             if (fdebug>2) std::cout << "begin analysis of event " << event << std::endl;
             Nevents++;
             
@@ -418,7 +426,8 @@ void SIDISc12rSkimmer(  int  RunNumber=6420,
                     eSelection = EventPassedElectronSelectionCriteria(e_PCAL_x, e_PCAL_y, e_PCAL_W, e_PCAL_V,
                                                                       E_PCAL_e,  E_ECIN_e, E_ECOUT_e,
                                                                       e, Ve,
-                                                                      e_DC_sector, e_DC_x, e_DC_y,
+                                                                      e_PCAL_sector, // e_PCAL_sector should be consistent with e_DC_sector
+                                                                      e_DC_x, e_DC_y,
                                                                       torusBending );
                     piplusSelection = EventPassedPiPlusSelectionCriteria(pips_DC_x, pips_DC_y,
                                                                          chi2PID_pips, piplus.P(),
