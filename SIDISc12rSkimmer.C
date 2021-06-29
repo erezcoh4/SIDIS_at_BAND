@@ -204,11 +204,10 @@ void SIDISc12rSkimmer(  int  RunNumber=6420,
                       +(TString)("Ngammas,Np,Nn,Npips,Npims,")
                       +(TString)("omega,q,q_x,q_y,q_z,xB,Q2,z,")
                       +(TString)("Epips,Ppips,Ppips_x,Ppips_y,Ppips_z,")
-                      +(TString)("En,Pn,Pn_x,Pn_y,Pn_z,")
                       +(TString)("Ppips_t_q,Ppips_q,")
                       +(TString)("E_PCAL_e,E_ECIN_e,E_ECOUT_e,")
-                      +(TString)("Vx_e,Vy_e,Vz_e,Vx_pips,Vy_pips,Vz_pips,Vx_n,Vy_n,Vz_n,")
-                      +(TString)("chi2PID_pips,chi2PID_n,")
+                      +(TString)("Vx_e,Vy_e,Vz_e,Vx_pips,Vy_pips,Vz_pips,")
+                      +(TString)("chi2PID_pips,")
                       +(TString)("e_PCAL_W,e_PCAL_V,pips_PCAL_W,pips_PCAL_V,")
                       +(TString)("e_PCAL_x,e_PCAL_y,e_PCAL_z,e_PCAL_sector,")
                       +(TString)("e_DC_sector,e_DC_Chi2N,")
@@ -266,7 +265,7 @@ void SIDISc12rSkimmer(  int  RunNumber=6420,
             // initialize
             xB          = Q2        = omega     = -9999;
             E_ECIN_e    = E_ECOUT_e = E_PCAL_e  = -9999;
-            chi2PID_pips= chi2PID_n             = -9999;
+            chi2PID_pips                        = -9999;
             e_PCAL_W    = e_PCAL_V              = -9999;
             e_PCAL_x    = e_PCAL_y  = e_PCAL_z  = -9999;
             e_PCAL_sector                       = -9999;
@@ -274,13 +273,12 @@ void SIDISc12rSkimmer(  int  RunNumber=6420,
             pips_DC_sector                      = -9999;
             pips_PCAL_sector                    = -9999;
             pips_PCAL_W = pips_PCAL_V           = -9999;
-            pips_DC_x   = pips_DC_y             = -9999;
             pips_PCAL_x = pips_PCAL_y           = -9999;
             pips_PCAL_z                         = -9999;
             E_PCAL_pips                         = -9999;
             E_ECIN_pips = E_ECOUT_pips          = -9999;
             DC_layer                            = -9999;
-            Ve          = Vn        = Vpiplus   = TVector3();
+            Ve          = Vpiplus               = TVector3();
             for (int regionIdx=0; regionIdx<3; regionIdx++) {
                 e_DC_x[regionIdx]   = e_DC_y[regionIdx]     = -9999;
                 pips_DC_x[regionIdx]= pips_DC_y[regionIdx]  = -9999;
@@ -354,7 +352,7 @@ void SIDISc12rSkimmer(  int  RunNumber=6420,
                 }
                 if (fdebug > 2) std::cout << "extracted electron information and computed kinematics" << std::endl;
                 
-Z                // select the fastest pion as the "leader"
+                // select the fastest pion as the "leader"
                 Fastest_pipsIdx = 0;
                 SetLorentzVector(piplus  ,pips[0]);
                 TLorentzVector piplus_tmp(0,0,0,db->GetParticle(211)->Mass());
@@ -436,12 +434,11 @@ Z                // select the fastest pion as the "leader"
                     (Double_t)Nn,       (Double_t)Npips,    (Double_t)Npims,
                     q.E(),              q.P(),          q.Px(),             q.Py(),             q.Pz(),         xB,             Q2,         z,
                     piplus.E(),         piplus.P(),     piplus.Px(),        piplus.Py(),        piplus.Pz(),
-                    neutron.E(),        neutron.P(),    neutron.Px(),       neutron.Py(),       neutron.Pz(),
                     Ppips_t_q,          Ppips_q,
                     E_PCAL_e,           E_ECIN_e,       E_ECOUT_e,
-                    Ve.X(),             Ve.Y(),         Ve.Z(),             Vpiplus.X(),
-                    Vpiplus.Y(),        Vpiplus.Z(),    Vn.X(),             Vn.Y(),             Vn.Z(),
-                    chi2PID_pips,       chi2PID_n,
+                    Ve.X(),             Ve.Y(),         Ve.Z(),
+                    Vpiplus.X(),        Vpiplus.Y(),    Vpiplus.Z(),
+                    chi2PID_pips,
                     e_PCAL_W,           e_PCAL_V,       pips_PCAL_W,        pips_PCAL_V,
                     e_PCAL_x,           e_PCAL_y,       e_PCAL_z,           e_PCAL_sector,
                     e_DC_sector,        e_DC_Chi2N,
@@ -564,7 +561,7 @@ bool EventPassedElectronSelectionCriteria(Double_t e_PCAL_x, Double_t e_PCAL_y,
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-bool EventPassedPiPlusSelectionCriteria( Double_t DC_x, Double_t DC_y,
+bool EventPassedPiPlusSelectionCriteria( Double_t DC_x[3], Double_t DC_y[3],
                                         Double_t chi2PID, Double_t p,
                                         TVector3 Ve,
                                         TVector3 Vpiplus ){
