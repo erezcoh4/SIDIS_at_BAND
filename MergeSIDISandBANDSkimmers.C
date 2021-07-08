@@ -2,7 +2,7 @@
 
 
 //#include "/u/home/cohen/BAND_analysis/clas12root/Erez_analysis/Auxiliary/reader.h"
-#include "/u/home/cohen/BAND_analysis/clas12root/Erez_analysis/Auxiliary/bank.h"
+#include "Auxiliary/bank.h"
 
 #include "/u/home/cohen/BAND_analysis/clas12root/Erez_analysis/Auxiliary/BBand.h"
 #include "/u/home/cohen/BAND_analysis/clas12root/Erez_analysis/Auxiliary/BEvent.h"
@@ -137,7 +137,7 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
     int NmergedEvents = 0;
     for (int BANDevent=0; BANDevent < NeventsBAND ; BANDevent++){
         
-        BANDTree -> GetEntry(BANDevent);        
+        BANDTree -> GetEntry(BANDevent);
         
         for (int SIDISevent=0; SIDISevent < NeventsSIDIS ; SIDISevent++){
             
