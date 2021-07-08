@@ -17,6 +17,8 @@ TTree * SIDISTree, * BANDTree;
 TFile * outFile;
 TTree * outTree;
 
+// Output CSV file
+std::ofstream   CSVfile;
 
 
 
@@ -41,7 +43,8 @@ void MergeSIDISandBANDSkimmers(int RunNumber=6420,
     char RunNumberStr[20];
     sprintf( RunNumberStr, "00%d", RunNumber );
     OpenInputFiles   ( (TString)RunNumberStr );
-    OpenOutputFiles  ( (TString)RunNumberStr );
+    OpenOutputFiles  ( (TString)RunNumberStr,
+                      "variables" );
     
     MergeSIDISandBANDevents();
     
@@ -57,6 +60,8 @@ void MergeSIDISandBANDSkimmers(int RunNumber=6420,
 void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
     
     Int_t   BANDrunID, BANDeventID, SIDISrunID, SIDISeventID;
+    Int_t   NeventsBAND  = BANDTree->GetEntries();
+    Int_t   NeventsSIDIS = SIDISTree->GetEntries();
     
     BANDTree  -> SetBranchAddress("eventnumber"  ,&BANDeventID);
     BANDTree  -> SetBranchAddress("runnum"       ,&BANDrunID);
@@ -80,6 +85,7 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
                 << ", "
                 << "SIDIS run " << SIDISrunID
                 << ", event "   << SIDISeventID
+                << std::cout;
             }
             
             if ( (BANDrunID == SIDISrunID) && (BANDeventID == SIDISeventID)){
