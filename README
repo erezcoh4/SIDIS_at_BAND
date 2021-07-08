@@ -29,6 +29,9 @@ MergeSIDISandBANDSkimmers.C
 Merge SIDIS skimming (based on SIDISc12rSkimmer.C) with BAND skimming (based on band-soft tools)
 
 
+execute:
+-----------------
+   root -l MergeSIDISandBANDSkimmers.C
 
 
 

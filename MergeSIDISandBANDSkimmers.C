@@ -27,7 +27,7 @@ void         CloseInputFiles ();
 void        CloseOutputFiles ();
 void MergeSIDISandBANDevents (int NeventsToMerge=100,
                               int fdebug=1,
-                              int PrintProgress=5000
+                              int PrintProgress=5000);
 
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
