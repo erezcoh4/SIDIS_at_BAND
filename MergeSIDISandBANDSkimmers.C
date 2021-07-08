@@ -7,7 +7,7 @@
 // Globals
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 
-TString              DataPath = "/volatile/clas12/users/ecohen/BAND/";
+TString DataPath = "/volatile/clas12/users/ecohen/BAND/";
 
 // Input root files and trees
 TFile * SIDISFile, * BANDFile;
@@ -68,6 +68,13 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
     BANDTree   -> SetBranchAddress("eventnumber"  ,&BANDeventID);
     BANDTree   -> SetBranchAddress("Runno"        ,&BANDrunID);
 
+    if (fdebug>1) {
+        std::cout
+        << "stepping over "
+        << NeventsBAND << " BAND and "
+        << NeventsSIDIS << "SIDIS events"
+        << std::endl;
+    }
     int NmergedEvents = 0;
     for (int BANDevent=0; BANDevent < NeventsBAND ; BANDevent++){
         
@@ -89,9 +96,17 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
             }
             
             if ( (BANDrunID == SIDISrunID) && (BANDeventID == SIDISeventID)){
-                // merge...
+                // Can merge the event...
+                if (fdebug>1){
+                    std::cout
+                    << "merged event"   << BANDeventID      << " from run " << BANDrunID
+                    << " which is the " << NmergedEvents    << " merged event"
+                    << std::endl;
+                }
+                
                 // record event
                 NmergedEvents ++;
+                
                 if (NmergedEvents >= NeventsToMerge){
                     std::cout << "merged " << NmergedEvents << " events, breaking." << std::endl;
                     return;

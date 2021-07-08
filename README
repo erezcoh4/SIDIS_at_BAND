@@ -58,6 +58,7 @@ Read BAND data and write important observables to csv file
 execute:
 -----------------
    clas12root SIDISc12rSkimmer.C
+   clas12root "SIDISc12rSkimmer.C+(6420,1000)"
    clas12root "SIDISc12rSkimmer.C+(6420,1e9)"
 
 
