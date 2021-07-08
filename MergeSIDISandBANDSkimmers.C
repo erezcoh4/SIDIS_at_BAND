@@ -76,7 +76,6 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
     TVector3        Vpiplus;
 
     // kinematics
-    Double_t   Ebeam = 10.2; // GeV ( for Fall-2019 the enrgy was 10.4096 )
     Double_t             xB;
     Double_t             Q2;
     Double_t          omega;
@@ -84,6 +83,8 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
     
     bool      ePastSelectionCuts = false;
     bool piplusPastSelectionCuts = false;
+    
+    int     DC_layer;
     
     double  pips_PCAL_W, pips_PCAL_V, pips_PCAL_x, pips_PCAL_y,       pips_PCAL_z;
     double  chi2PID_pips;
