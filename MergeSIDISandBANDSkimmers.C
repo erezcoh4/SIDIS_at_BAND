@@ -109,12 +109,17 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void OpenInputFiles (TString RunStr){
     
+    std::cout << "Opening " << DataPath + "neutron_skimming/"
+    + "skimmed_SIDIS_inc_"  + RunStr + ".root" << std::endl;
+    
     TString   skimmedBANDFilename = (DataPath + "neutron_skimming/"
                                      + "skimmed_SIDIS_inc_"  + RunStr + ".root");
     BANDFile                      = new TFile( skimmedBANDFilename );
     BANDTree                      = (TTree*)BANDFile->Get("neutrons");
     
     
+    
+    std::cout << "Opening " << DataPath + "SIDIS_skimming/"+ RunStr + ".root" << std::endl;
     
     TString  skimmedSIDISFilename = (DataPath + "SIDIS_skimming/"+ RunStr + ".root");
     SIDISFile                     = new TFile( skimmedBANDFilename );
