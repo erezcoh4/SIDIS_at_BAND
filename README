@@ -1,23 +1,58 @@
 * hipo skimmer for Semi-Inclusive DIS at CLAS12 with BAND *
 
-last edit: June-29, 2021 (EOC, mbp)
+ We are interested in Semi Inclusive DIS (SIDIS) on a deuteron target with pi+ tagging
  
- ------------------------------------------------------------------------------------------------------------------------------------------------
+        D(e,e’pi+)X
+        D(e,e’pi+n)X
+
+last edit: July-5, 2021 (EOC, mbp)
+
+To execute, e.g. go to /u/home/cohen/SIDIS_at_BAND, do git pull, then...
+
+Output files are saved in
+    /volatile/clas12/users/ecohen/BAND/
+
+        /volatile/clas12/users/ecohen/BAND/SIDIS_skimming/
+        /volatile/clas12/users/ecohen/BAND/merged_SIDIS_and_BAND_skimming/
+
+
+
+
+MergeSIDISandBANDSkimmers.C
+
+ ---------------------------------------------
+ void MergeSIDISandBANDSkimmers (   int RunNumber=6420,
+                                    int NeventsToMerge=100,
+                                    int fdebug=1,
+                                    int PrintProgress=5000 )
+  ---------------------------------------------
+Merge SIDIS skimming (based on SIDISc12rSkimmer.C) with BAND skimming (based on band-soft tools)
+
+
+
+
+
+
+
+
+
+
+
+SIDISc12rSkimmer.C
+ 
+ ---------------------------------------------
  void SIDISc12rSkimmer (   int RunNumber=6420,
                             int NeventsMax=100,
                             int fdebug=1,
                             bool doApplySelectionCuts=true,
                             int PrintProgress=5000,
+                            int NpipsMin=1,
                             TString DataPath="/cache/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train/sidisdvcs/")
- ------------------------------------------------------------------------------------------------------------------------------------------------
- Read BAND data and write important observables to csv file
+  ---------------------------------------------
+Read BAND data and write important observables to csv file
  
- We are interested in Semi Inclusive DIS (SIDIS) on a deuteron target with pi+ tagging
  
-        D(e,e’pi+)X
-        D(e,e’pi+n)X
- 
-execute: (from /u/home/cohen/SIDIS_at_BAND, do git pull, then...)
+execute:
 -----------------
    clas12root SIDISc12rSkimmer.C
    clas12root "SIDISc12rSkimmer.C+(6420,1e9)"
@@ -30,13 +65,15 @@ execute: (from /u/home/cohen/SIDIS_at_BAND, do git pull, then...)
  fdebug                 Verbosity
  doApplySelectionCuts   If this flag is set to TRUE, events that pass the event selection cuts are recorded to a seperate csv file
  PrintProgress          Print event N events (default=5000)
+ NpipsMin               Minimal number of pi+ required for defining an event
  DataPath
     examples:
-        "/cache/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train/sidisdvcs/"
-        (inputFile = "sidisdvcs_" + RunNumberStr + ".hipo")
         "/lustre19/expphy/cache/clas12/rg-b/production/recon/fall2019/torus+1/pass1/v1/dst/train/edeutcut/inc/"
         (inputFile = "edeutcut_" + RunNumberStr + ".hipo")
  
+        "/cache/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train/sidisdvcs/"
+        (inputFile = "sidisdvcs_" + RunNumberStr + ".hipo")
+        
  
  
  

@@ -1,5 +1,4 @@
-// last edit June-22, 2021 (EOC, mbp)
-// see README
+// last edit July-5, 2021 (EOC, mbp), see README
 
 
 #include <cstdlib>
@@ -26,8 +25,8 @@ using namespace clas12;
 // declare methods
 TVector3                GetParticleVertex (clas12::region_part_ptr rp);
 void                     SetLorentzVector (TLorentzVector &p4, clas12::region_part_ptr rp);
-void                         OpenOutputFiles (TString csvfilename, TString header);
-void                        CloseOutputFiles ();
+void                      OpenOutputFiles (TString csvfilename, TString header);
+void                     CloseOutputFiles ();
 void                      StreamToCSVfile (std::vector<Double_t> observables, bool IsSelectedEvent, int fdebug);
 void                      ChangeAxesFrame (TString FrameName="q(z) frame");
 void                        MoveTo_qFrame ();
@@ -98,6 +97,7 @@ void SIDISc12rSkimmer(  int  RunNumber=6420,
                       int  fdebug=1,
                       bool doApplySelectionCuts=true,
                       int  PrintProgress=5000,
+                      int NpipsMin=1, // minimal number of pi+
                       TString DataPath = "/volatile/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train_20200610/inc/" ){
     
     char RunNumberStr[20];
@@ -266,7 +266,7 @@ void SIDISc12rSkimmer(  int  RunNumber=6420,
         while((c12.next()==true) && (event < NeventsMax)){
             
             runnum = c12.runconfig()->getRun();
-            evnum = c12.runconfig()->getEvent();
+            evnum  = c12.runconfig()->getEvent();
 
             
             if (fdebug>2) std::cout << "begin analysis of event " << event << std::endl;
@@ -323,7 +323,7 @@ void SIDISc12rSkimmer(  int  RunNumber=6420,
             
             // filter D(e,e’pi+n)X reaction
             // and compute event kinematics
-            if(  Ne == 1 && Npips >= 1 ){
+            if(  Ne == 1 && Npips >= NpipsMin ){
                 
                 // set electron 4-momentum
                 SetLorentzVector(e,electrons[0]);
@@ -429,8 +429,8 @@ void SIDISc12rSkimmer(  int  RunNumber=6420,
                                                                       e_PCAL_sector, // e_PCAL_sector should be consistent with e_DC_sector
                                                                       e_DC_x, e_DC_y,
                                                                       torusBending );
-                    piplusSelection = EventPassedPiPlusSelectionCriteria(pips_DC_x, pips_DC_y,
-                                                                         chi2PID_pips, piplus.P(),
+                    piplusSelection = EventPassedPiPlusSelectionCriteria(pips_DC_x,     pips_DC_y,
+                                                                         chi2PID_pips,  piplus.P(),
                                                                          Ve, Vpiplus );
                     EventPassedCuts =( eSelection && piplusSelection );
                     if ( EventPassedCuts ) IsSelectedEvent = true;
@@ -507,16 +507,21 @@ bool EventPassedElectronSelectionCriteria(Double_t e_PCAL_x, Double_t e_PCAL_y,
     // eHit.getDC_sector() - sector
     // checking DC Fiducials
     // torus magnet bending:   ( 1 = inbeding, 0 = outbending    )
+    
+    // sometimes the readout-sector is 0. This is funny
+    // Justin B. Estee (June-21): I also had this issue. I am throwing away sector 0. The way you check is plot the (x,y) coordinates of the sector and you will not see any thing. Double check me but I think it is 0.
+    if (e_DC_sector == 0) return false;
+    
     for (int regionIdx=0; regionIdx<3; regionIdx++) {
         // DC_e_fid:
         // sector:  1-6
         // layer:   1-3
         // bending: 0(out)/1(in)
-        std::cout << "e_DC_sector: " << e_DC_sector << ", regionIdx: " << regionIdx << std::endl;
+        // std::cout << "e_DC_sector: " << e_DC_sector << ", regionIdx: " << regionIdx << std::endl;
         int bending = 1 ? (torusBending==-1) : 0;
         bool DC_fid  = dcfid.DC_e_fid(e_DC_x[regionIdx],
                                       e_DC_y[regionIdx],
-                                      e_DC_sector+1,
+                                      e_DC_sector,
                                       regionIdx+1,
                                       bending);
         if (DC_fid == false) {
@@ -689,6 +694,8 @@ void CloseOutputFiles (){
     outFile->cd();
     outTree->Write();
     outFile->Close();
+    
+    std::cout << "output files ready: " << outfilename + ".root/csv" << std::cout;
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
