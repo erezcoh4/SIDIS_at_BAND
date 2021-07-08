@@ -85,7 +85,7 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
                 << ", "
                 << "SIDIS run " << SIDISrunID
                 << ", event "   << SIDISeventID
-                << std::cout;
+                << std::endl;
             }
             
             if ( (BANDrunID == SIDISrunID) && (BANDeventID == SIDISeventID)){
@@ -93,7 +93,7 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
                 // record event
                 NmergedEvents ++;
                 if (NmergedEvents >= NeventsToMerge){
-                    std::cout << "merged " << NmergedEvents << " events, breaking." << std::cout;
+                    std::cout << "merged " << NmergedEvents << " events, breaking." << std::endl;
                     return;
                 }
             }
@@ -101,7 +101,7 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
         } // end SIDIS event loop
         
     } // end BAND event loop
-    std::cout << "merged " << NmergedEvents << " SIDIS and BAND events." << std::cout;
+    std::cout << "merged " << NmergedEvents << " SIDIS and BAND events." << std::endl;
 }
 
 
