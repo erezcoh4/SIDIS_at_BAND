@@ -16,7 +16,7 @@
 #include <TCanvas.h>
 #include <TBenchmark.h>
 #include "clas12reader.h"
-#include "/u/home/cohen/BAND_analysis/clas12root/Erez_analysis/Auxiliary/DC_fiducial.cpp"
+#include "/u/home/cohen/SIDIS_at_BAND/Auxiliary/DC_fiducial.cpp"
 using namespace clas12;
 
 

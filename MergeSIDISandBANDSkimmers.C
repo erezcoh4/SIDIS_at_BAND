@@ -1,16 +1,16 @@
-// last edit July-5, 2021 (EOC, mbp), see README
+// last edit July-8, 2021 (EOC, mbp), see README
 
 
 //#include "/u/home/cohen/BAND_analysis/clas12root/Erez_analysis/Auxiliary/reader.h"
-#include "Auxiliary/bank.h"
+#include "/u/home/cohen/SIDIS_at_BAND/Auxiliary/bank.h"
 
-#include "/u/home/cohen/BAND_analysis/clas12root/Erez_analysis/Auxiliary/BBand.h"
-#include "/u/home/cohen/BAND_analysis/clas12root/Erez_analysis/Auxiliary/BEvent.h"
+#include "/u/home/cohen/SIDIS_at_BAND/Auxiliary/BBand.h"
+#include "/u/home/cohen/SIDIS_at_BAND/Auxiliary/BEvent.h"
 
-#include "/u/home/cohen/BAND_analysis/clas12root/Erez_analysis/Auxiliary/RCDB/Connection.h"
+#include "/u/home/cohen/SIDIS_at_BAND/Auxiliary/RCDB/Connection.h"
 
-#include "/u/home/cohen/BAND_analysis/clas12root/Erez_analysis/Auxiliary/constants.h"
-#include "/u/home/cohen/BAND_analysis/clas12root/Erez_analysis/Auxiliary/readhipo_helper.h"
+#include "/u/home/cohen/SIDIS_at_BAND/Auxiliary/constants.h"
+#include "/u/home/cohen/SIDIS_at_BAND/Auxiliary/readhipo_helper.h"
 
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
