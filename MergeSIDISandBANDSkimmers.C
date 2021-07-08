@@ -120,7 +120,7 @@ void OpenInputFiles (TString RunStr){
     
     
     std::cout << "Opening " << DataPath + "SIDIS_skimming/"
-    + "skimmed_sidis_inc_"  + RunStr + ".root" << std::endl;
+    + "skimmed_SIDIS_inc_"  + RunStr + ".root" << std::endl;
     
     TString  skimmedSIDISFilename = (DataPath + "SIDIS_skimming/"
                                      + "skimmed_SIDIS_inc_"  + RunStr + ".root");
