@@ -695,7 +695,7 @@ void CloseOutputFiles (){
     outTree->Write();
     outFile->Close();
     
-    std::cout << "output files ready in root/csv formats" << std::cout;
+    std::cout << "output files ready in root/csv formats" << std::endl;
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
