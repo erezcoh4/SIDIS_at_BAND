@@ -37,7 +37,7 @@ void         OpenOutputFiles (TString RunStr, TString header);
 
 void         CloseInputFiles ();
 void        CloseOutputFiles ();
-void MergeSIDISandBANDevents (int NeventsToMerge=5,
+void MergeSIDISandBANDevents (int NeventsToMerge=10,
                               int fdebug=2,
                               int PrintProgress=5000);
 
@@ -46,7 +46,7 @@ void MergeSIDISandBANDevents (int NeventsToMerge=5,
 // Main functionality
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void MergeSIDISandBANDSkimmers(int RunNumber=6420,
-                               int NeventsToMerge=5,
+                               int NeventsToMerge=10,
                                int fdebug=2,
                                int PrintProgress=5000){
     
@@ -173,7 +173,8 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
                 NmergedEvents ++;
                 
                 if (NmergedEvents >= NeventsToMerge){
-                    std::cout << "merged " << NmergedEvents << " events, breaking." << std::endl;
+                    std::cout << "merged " << NmergedEvents
+                    << " events, which is the maximum required. Breaking." << std::endl;
                     return;
                 }
             }
