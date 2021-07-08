@@ -119,9 +119,11 @@ void OpenInputFiles (TString RunStr){
     
     
     
-    std::cout << "Opening " << DataPath + "SIDIS_skimming/"+ RunStr + ".root" << std::endl;
+    std::cout << "Opening " << DataPath + "SIDIS_skimming/"
+    + "skimmed_sidis_inc_"  + RunStr + ".root" << std::endl;
     
-    TString  skimmedSIDISFilename = (DataPath + "SIDIS_skimming/"+ RunStr + ".root");
+    TString  skimmedSIDISFilename = (DataPath + "SIDIS_skimming/"
+                                     + "skimmed_sidis_inc_"  + RunStr + ".root");
     SIDISFile                     = new TFile( skimmedBANDFilename );
     SIDISTree                     = (TTree*)SIDISFile->Get("sidis");
     
