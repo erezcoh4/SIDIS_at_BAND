@@ -75,6 +75,22 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
     
     SIDISTree  -> SetBranchAddress("eventnumber"  ,&SIDISeventID);
     SIDISTree  -> SetBranchAddress("runnum"       ,&SIDISrunID);
+    
+    // BAND Tree
+    double         Ebeam = 0;
+    double  gated_charge = 0;
+    double      livetime = 0;
+    double     starttime = 0;
+    double       current = 0;
+    int      eventnumber = 0;
+    bool     goodneutron = false;
+    int       nleadindex = -1;
+    double        weight = 0;
+    //     Neutron info:
+    int            nMult = 0;
+    TClonesArray  * nHits = new TClonesArray("bandhit");
+    TClonesArray &saveHit = *nHits;
+    
     BANDTree   -> SetBranchAddress("eventnumber"  ,&BANDeventID);
     BANDTree   -> SetBranchAddress("Runno"        ,&BANDrunID);
     
@@ -83,7 +99,6 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
     BANDTree   -> SetBranchAddress("livetime"     ,&livetime);
     BANDTree   -> SetBranchAddress("starttime"    ,&starttime);
     BANDTree   -> SetBranchAddress("current"      ,&current);
-    BANDTree   -> SetBranchAddress("eventnumber"  ,&eventnumber);
     BANDTree   -> SetBranchAddress("weight"       ,&weight);
     //    Neutron branches:
     BANDTree   -> SetBranchAddress("nMult"        ,&nMult);
@@ -95,7 +110,22 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
     BANDTree   -> SetBranchAddress("genMult"      ,&genMult);
     BANDTree   -> SetBranchAddress("mcParts"      ,&mcParts);
     
+    // Merged Tree - containing all variables...
+    // run and event number (ID) have to be consistent in the merged tree,
+    // so it does not matter from where we take them...
+    MergedTree->Branch("Runno"              ,&SIDISrunID    );
+    MergedTree->Branch("eventnumber"        ,&SIDISeventID  );
     
+    MergedTree->Branch("Ebeam"              ,&Ebeam         );
+    MergedTree->Branch("gated_charge"       ,&gated_charge  );
+    MergedTree->Branch("livetime"           ,&livetime      );
+    MergedTree->Branch("starttime"          ,&starttime     );
+    MergedTree->Branch("current"            ,&current       );
+    MergedTree->Branch("weight"             ,&weight        );
+    MergedTree->Branch("nMult"              ,&nMult         );
+    MergedTree->Branch("nHits"              ,&nHits         );
+    MergedTree->Branch("goodneutron"        ,&goodneutron   );
+    MergedTree->Branch("nleadindex"         ,&nleadindex    );
     
     if (fdebug>1) {
         std::cout
@@ -107,8 +137,7 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
     int NmergedEvents = 0;
     for (int BANDevent=0; BANDevent < NeventsBAND ; BANDevent++){
         
-        BANDTree -> GetEntry(BANDevent);
-        
+        BANDTree -> GetEntry(BANDevent);        
         
         for (int SIDISevent=0; SIDISevent < NeventsSIDIS ; SIDISevent++){
             
