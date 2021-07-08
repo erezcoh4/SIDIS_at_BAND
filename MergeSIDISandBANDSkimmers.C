@@ -27,8 +27,8 @@ void         OpenOutputFiles (TString RunStr, TString header);
 
 void         CloseInputFiles ();
 void        CloseOutputFiles ();
-void MergeSIDISandBANDevents (int NeventsToMerge=100,
-                              int fdebug=1,
+void MergeSIDISandBANDevents (int NeventsToMerge=5,
+                              int fdebug=2,
                               int PrintProgress=5000);
 
 
@@ -36,8 +36,8 @@ void MergeSIDISandBANDevents (int NeventsToMerge=100,
 // Main functionality
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void MergeSIDISandBANDSkimmers(int RunNumber=6420,
-                               int NeventsToMerge=100,
-                               int fdebug=1,
+                               int NeventsToMerge=5,
+                               int fdebug=2,
                                int PrintProgress=5000){
     
     char RunNumberStr[20];
@@ -46,7 +46,7 @@ void MergeSIDISandBANDSkimmers(int RunNumber=6420,
     OpenOutputFiles  ( (TString)RunNumberStr,
                       "variables" );
     
-    MergeSIDISandBANDevents();
+    MergeSIDISandBANDevents( NeventsToMerge, fdebug, PrintProgress );
     
     
     CloseOutputFiles ();
@@ -63,10 +63,10 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
     Int_t   NeventsBAND  = BANDTree->GetEntries();
     Int_t   NeventsSIDIS = SIDISTree->GetEntries();
     
-    BANDTree  -> SetBranchAddress("eventnumber"  ,&BANDeventID);
-    BANDTree  -> SetBranchAddress("runnum"       ,&BANDrunID);
-    SIDISTree -> SetBranchAddress("eventnumber"  ,&SIDISeventID);
-    SIDISTree -> SetBranchAddress("Runno"        ,&SIDISrunID);
+    SIDISTree  -> SetBranchAddress("eventnumber"  ,&SIDISeventID);
+    SIDISTree  -> SetBranchAddress("runnum"       ,&SIDISrunID);
+    BANDTree   -> SetBranchAddress("eventnumber"  ,&BANDeventID);
+    BANDTree   -> SetBranchAddress("Runno"        ,&BANDrunID);
 
     int NmergedEvents = 0;
     for (int BANDevent=0; BANDevent < NeventsBAND ; BANDevent++){
