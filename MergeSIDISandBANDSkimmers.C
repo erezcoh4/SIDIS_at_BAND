@@ -113,7 +113,7 @@ void OpenInputFiles (TString RunStr){
     + "skimmed_SIDIS_inc_"  + RunStr + ".root" << std::endl;
     
     TString   skimmedBANDFilename = (DataPath + "neutron_skimming/"
-                                     + "skimmed_SIDIS_inc_"  + RunStr + ".root");
+                                     + "skimmed_neutrons_inc_"  + RunStr + ".root");
     BANDFile                      = new TFile( skimmedBANDFilename );
     BANDTree                      = (TTree*)BANDFile->Get("neutrons");
     
