@@ -77,19 +77,25 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
     SIDISTree  -> SetBranchAddress("runnum"       ,&SIDISrunID);
     
     // BAND Tree
-    double         Ebeam = 0;
-    double  gated_charge = 0;
-    double      livetime = 0;
-    double     starttime = 0;
-    double       current = 0;
-    int      eventnumber = 0;
-    bool     goodneutron = false;
-    int       nleadindex = -1;
-    double        weight = 0;
+    double           Ebeam = 0;
+    double    gated_charge = 0;
+    double        livetime = 0;
+    double       starttime = 0;
+    double         current = 0;
+    int        eventnumber = 0;
+    bool       goodneutron = false;
+    int         nleadindex = -1;
+    double          weight = 0;
     //     Neutron info:
-    int            nMult = 0;
-    TClonesArray  * nHits = new TClonesArray("bandhit");
-    TClonesArray &saveHit = *nHits;
+    int              nMult = 0;
+    TClonesArray   * nHits = new TClonesArray("bandhit");
+    TClonesArray  &saveHit = *nHits;
+    //    MC info:
+    int            genMult = 0;
+    TClonesArray * mcParts = new TClonesArray("genpart");
+    TClonesArray   &saveMC = *mcParts;
+
+    
     
     BANDTree   -> SetBranchAddress("eventnumber"  ,&BANDeventID);
     BANDTree   -> SetBranchAddress("Runno"        ,&BANDrunID);

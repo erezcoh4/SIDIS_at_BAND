@@ -1,9 +1,8 @@
 # find source and header files, set paths, includes...
-SET(LIBNAME "clashit_tree")
+SET(LIBNAME "genpart_tree")
 FILE(GLOB SRCS *.cpp)
 
-
-FILE(GLOB HEADERS ${CMAKE_SOURCE_DIR}/include/clashit.h)
+FILE(GLOB HEADERS ${CMAKE_SOURCE_DIR}/include/genpart.h)
 set(INCLUDES ${ROOT_INCLUDE_DIR} "${CMAKE_SOURCE_DIR}/include" )
 INCLUDE_DIRECTORIES(${INCLUDES})
 

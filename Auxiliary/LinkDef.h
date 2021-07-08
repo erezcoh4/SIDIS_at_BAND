@@ -4,6 +4,6 @@
 #pragma link off all globals;
 #pragma link off all functions;
 
-#pragma link C++ class clashit+;
+#pragma link C++ class genpart+;
 
 #endif
