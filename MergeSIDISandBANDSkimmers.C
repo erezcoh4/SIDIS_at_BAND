@@ -1,6 +1,16 @@
 // last edit July-5, 2021 (EOC, mbp), see README
 
 
+//#include "/u/home/cohen/BAND_analysis/clas12root/Erez_analysis/Auxiliary/reader.h"
+#include "/u/home/cohen/BAND_analysis/clas12root/Erez_analysis/Auxiliary/bank.h"
+
+#include "/u/home/cohen/BAND_analysis/clas12root/Erez_analysis/Auxiliary/BBand.h"
+#include "/u/home/cohen/BAND_analysis/clas12root/Erez_analysis/Auxiliary/BEvent.h"
+
+#include "/u/home/cohen/BAND_analysis/clas12root/Erez_analysis/Auxiliary/RCDB/Connection.h"
+
+#include "/u/home/cohen/BAND_analysis/clas12root/Erez_analysis/Auxiliary/constants.h"
+#include "/u/home/cohen/BAND_analysis/clas12root/Erez_analysis/Auxiliary/readhipo_helper.h"
 
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
@@ -14,8 +24,8 @@ TFile * SIDISFile, * BANDFile;
 TTree * SIDISTree, * BANDTree;
 
 // Output root file and tree
-TFile * outFile;
-TTree * outTree;
+TFile * MergedFile;
+TTree * MergedTree;
 
 // Output CSV file
 std::ofstream   CSVfile;
@@ -67,7 +77,26 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
     SIDISTree  -> SetBranchAddress("runnum"       ,&SIDISrunID);
     BANDTree   -> SetBranchAddress("eventnumber"  ,&BANDeventID);
     BANDTree   -> SetBranchAddress("Runno"        ,&BANDrunID);
-
+    
+    BANDTree   -> SetBranchAddress("Ebeam"        ,&Ebeam);
+    BANDTree   -> SetBranchAddress("gated_charge" ,&gated_charge);
+    BANDTree   -> SetBranchAddress("livetime"     ,&livetime);
+    BANDTree   -> SetBranchAddress("starttime"    ,&starttime);
+    BANDTree   -> SetBranchAddress("current"      ,&current);
+    BANDTree   -> SetBranchAddress("eventnumber"  ,&eventnumber);
+    BANDTree   -> SetBranchAddress("weight"       ,&weight);
+    //    Neutron branches:
+    BANDTree   -> SetBranchAddress("nMult"        ,&nMult);
+    BANDTree   -> SetBranchAddress("nHits"        ,&nHits);
+    //Branches to store if good Neutron event and leadindex
+    BANDTree   -> SetBranchAddress("goodneutron"  ,&goodneutron);
+    BANDTree   -> SetBranchAddress("nleadindex"   ,&nleadindex);
+    //    MC branches:
+    BANDTree   -> SetBranchAddress("genMult"      ,&genMult);
+    BANDTree   -> SetBranchAddress("mcParts"      ,&mcParts);
+    
+    
+    
     if (fdebug>1) {
         std::cout
         << "stepping over "
@@ -85,7 +114,7 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
             
             SIDISTree -> GetEntry(SIDISevent);
             
-            if (fdebug>1){
+            if (fdebug>2){
                 std::cout
                 << "BAND run "  << BANDrunID
                 << ", event "   << BANDeventID
@@ -99,11 +128,12 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
                 // Can merge the event...
                 if (fdebug>1){
                     std::cout
-                    << "merged event"   << BANDeventID      << " from run " << BANDrunID
-                    << " which is the " << NmergedEvents    << " merged event"
+                    << "merged event "   << BANDeventID     << " from run " << BANDrunID
+                    << " which is the merged event number " << (NmergedEvents+1)
                     << std::endl;
                 }
                 
+                MergedTree -> Fill();
                 // record event
                 NmergedEvents ++;
                 
@@ -156,8 +186,8 @@ void OpenOutputFiles (TString RunStr, TString header){
     
     
     // Create output tree
-    outFile = new TFile( skimmedMergedFilename + ".root" ,"RECREATE");
-    outTree = new TTree( "T" , "Event information from merged SIDIS and BAND skimmers");
+    MergedFile = new TFile( skimmedMergedFilename + ".root" ,"RECREATE");
+    MergedTree = new TTree( "T" , "Event information from merged SIDIS and BAND skimmers");
     
     // Create output csv files
     CSVfile.open( skimmedMergedFilename + ".csv" );
@@ -180,9 +210,9 @@ void CloseOutputFiles (){
     CSVfile.close();
     
     // close output ROOT
-    outFile->cd();
-    outTree->Write();
-    outFile->Close();
+    MergedFile->cd();
+    MergedTree->Write();
+    MergedFile->Close();
     
 }
 
