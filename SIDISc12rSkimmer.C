@@ -40,7 +40,7 @@ bool EventPassedElectronSelectionCriteria (Double_t e_PCAL_x, Double_t e_PCAL_y,
                                            Double_t e_DC_x[3],
                                            Double_t e_DC_y[3],
                                            int torusBending);
-bool   EventPassedPiPlusSelectionCriteria (Double_t pips_DC_x[3], Double_t pips_DC_y[3],
+bool   EventPassedpiplusPastSelectionCutsCriteria (Double_t pips_DC_x[3], Double_t pips_DC_y[3],
                                            Double_t chi2PID, Double_t p,
                                            TVector3 Ve,
                                            TVector3 Vpiplus );
@@ -111,9 +111,9 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
     Vpiplus = TVector3();
     Beam.SetPxPyPzE(0,0,Ebeam,Ebeam);
     
-    bool      eSelection = false;
-    bool piplusSelection = false;
-    bool EventPassedCuts = false;
+    bool      ePastSelectionCuts = false;
+    bool piplusPastSelectionCuts = false;
+    bool         EventPassedCuts = false;
     
     int           event = 0;
     int      good_event = 0;
@@ -211,9 +211,9 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
     outTree->Branch("Q2"                ,&Q2                    );
     outTree->Branch("omega"             ,&omega                 );
     outTree->Branch("z"                 ,&z                     );
-    outTree->Branch("eSelection"        ,&eSelection            );
-    outTree->Branch("piplusSelection"   ,&piplusSelection       );
     outTree->Branch("EventPassedCuts"   ,&EventPassedCuts       );
+    outTree->Branch("ePastSelectionCuts"        ,&ePastSelectionCuts            );
+    outTree->Branch("piplusPastSelectionCuts"   ,&piplusPastSelectionCuts       );
 
     
     
@@ -293,7 +293,7 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
                 e_DC_x[regionIdx]   = e_DC_y[regionIdx]     = -9999;
                 pips_DC_x[regionIdx]= pips_DC_y[regionIdx]  = -9999;
             }
-            eSelection  = piplusSelection       = false;
+            ePastSelectionCuts  = piplusPastSelectionCuts       = false;
             
             
             //can get an estimate of the beam current to this event
@@ -423,16 +423,16 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
                 // decide if to write this event to "selected events csv-file"
                 bool IsSelectedEvent = false;
                 if ( doApplySelectionCuts ) {
-                    eSelection = EventPassedElectronSelectionCriteria(e_PCAL_x, e_PCAL_y, e_PCAL_W, e_PCAL_V,
+                    ePastSelectionCuts = EventPassedElectronSelectionCriteria(e_PCAL_x, e_PCAL_y, e_PCAL_W, e_PCAL_V,
                                                                       E_PCAL_e,  E_ECIN_e, E_ECOUT_e,
                                                                       e, Ve,
                                                                       e_PCAL_sector, // e_PCAL_sector should be consistent with e_DC_sector
                                                                       e_DC_x, e_DC_y,
                                                                       torusBending );
-                    piplusSelection = EventPassedPiPlusSelectionCriteria(pips_DC_x,     pips_DC_y,
+                    piplusPastSelectionCuts = EventPassedpiplusPastSelectionCutsCriteria(pips_DC_x,     pips_DC_y,
                                                                          chi2PID_pips,  piplus.P(),
                                                                          Ve, Vpiplus );
-                    EventPassedCuts =( eSelection && piplusSelection );
+                    EventPassedCuts =( ePastSelectionCuts && piplusPastSelectionCuts );
                     if ( EventPassedCuts ) IsSelectedEvent = true;
                 }
                 
@@ -577,7 +577,7 @@ bool EventPassedElectronSelectionCriteria(Double_t e_PCAL_x, Double_t e_PCAL_y,
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-bool EventPassedPiPlusSelectionCriteria(Double_t pips_DC_x[3], Double_t pips_DC_y[3],
+bool EventPassedpiplusPastSelectionCutsCriteria(Double_t pips_DC_x[3], Double_t pips_DC_y[3],
                                         Double_t chi2PID, Double_t p,
                                         TVector3 Ve,
                                         TVector3 Vpiplus ){
