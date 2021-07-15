@@ -115,14 +115,12 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
     if (fdebug>1) {
         std::cout << "Merging BAND events " << std::endl << "[";
         for (int i=0; i<Nevents2Merge; i++) {
-//        for (auto BANDEventIndex: *BANDEventIndicesToMerge) {
             auto BANDEventIndex = BANDEventIndicesToMerge[i];
             std::cout << BANDEventIndex << ",";
         }
         std::cout << "] " << std::endl;
         std::cout << "With SIDIS events " << std::endl << "[";
         for (int i=0; i<Nevents2Merge; i++) {
-//        for (auto SIDISEventIndex:*SIDISEventIndicesToMerge) {
             auto SIDISEventIndex = SIDISEventIndicesToMerge[i];
             std::cout << SIDISEventIndex << ",";
         }
@@ -337,60 +335,53 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
         << NeventsSIDIS << " SIDIS events"
         << std::endl;
     }
-    int NmergedEvents = 0;
-    for (int BANDevent=0; BANDevent < NeventsBAND ; BANDevent++){
+    //    int NmergedEvents = 0;
+    for (int MergedEvtId=0; MergedEvtId<Nevents2Merge; MergedEvtId++) {
         
-        BANDTree -> GetEntry(BANDevent);
+        //    for (int BANDevent=0; BANDevent < NeventsBAND ; BANDevent++){
         
-        for (int SIDISevent=0; SIDISevent < NeventsSIDIS ; SIDISevent++){
-            
-            SIDISTree -> GetEntry(SIDISevent);
-            
-            if (fdebug>2){
-                std::cout
-                << "BAND run "  << BANDrunID
-                << ", event "   << BANDeventID
-                << ", "
-                << "SIDIS run " << SIDISrunID
-                << ", event "   << SIDISeventID
-                << std::endl;
-            }
-            
-            if ( (BANDrunID == SIDISrunID) && (BANDeventID == SIDISeventID)){
-                // Can merge the event...
-                if (fdebug>0){
-                    std::cout
-                    << "merged event "   << BANDeventID         << " from run " << BANDrunID
-                    << " (in total "     << (NmergedEvents+1)   << " merges)"
-                    << std::endl;
-                }
-                
-                MergedTree -> Fill();
-                StreamToCSVfile ({  (double)BANDrunID,  (double)BANDeventID,
-                    livetime,           current,
-                    xB,                 Q2,
-                    Ebeam,              z,
-                    e->Px(),            e->Py(),
-                    e->Pz(),            e->E(),
-                    q->Px(),            q->Py(),
-                    q->Pz(),            q->E(),
-                    Ve->z(),            Vpiplus->z(),
-                    (double)goodneutron,
-                },fdebug);
-                // record event
-                NmergedEvents ++;
-                
-                if ((NmergedEvents>0) && (NmergedEvents >= NeventsToMerge)){
-                    std::cout << "merged " << NmergedEvents
-                    << " events, which is the maximum required. Breaking." << std::endl;
-                    return;
-                }
-            }
-            
-        } // end SIDIS event loop
+        BANDTree -> GetEntry( BANDEventIndicesToMerge[MergedEvtId] );
         
-    } // end BAND event loop
-    std::cout << "merged " << NmergedEvents << " SIDIS and BAND events." << std::endl;
+        //        for (int SIDISevent=0; SIDISevent < NeventsSIDIS ; SIDISevent++){
+        
+        SIDISTree -> GetEntry( SIDISEventIndicesToMerge[MergedEvtId] );
+        
+        
+        //            if ( (BANDrunID == SIDISrunID) && (BANDeventID == SIDISeventID)){
+        // Can merge the event...
+        if (fdebug>1){
+            std::cout
+            << "merging event " << BANDeventID << " from run " << BANDrunID
+            << std::endl;
+        }
+        
+        MergedTree -> Fill();
+        StreamToCSVfile ({  (double)BANDrunID,  (double)BANDeventID,
+            livetime,           current,
+            xB,                 Q2,
+            Ebeam,              z,
+            e->Px(),            e->Py(),
+            e->Pz(),            e->E(),
+            q->Px(),            q->Py(),
+            q->Pz(),            q->E(),
+            Ve->z(),            Vpiplus->z(),
+            (double)goodneutron,
+        },fdebug);
+        // record event
+        //                NmergedEvents ++;
+        
+        //                if ((NmergedEvents>0) && (NmergedEvents >= NeventsToMerge)){
+        //                    std::cout << "merged " << NmergedEvents
+        //                    << " events, which is the maximum required. Breaking." << std::endl;
+        //                    return;
+        //                }
+    }
+    
+    //        } // end SIDIS event loop
+    
+    //    } // end BAND event loop
+    //} // end merged event loop
+    std::cout << "merged " << Nevents2Merge << " SIDIS and BAND events." << std::endl;
 }
 
 
