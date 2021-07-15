@@ -97,8 +97,8 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
     Int_t   NeventsSIDIS = SIDISTree->GetEntries();
     
     // Create a list of events to merge
-    Int_t  BANDEventIndicesToMerge[NMAXEVENTS],
-    Int_t SIDISEventIndicesToMerge[NMAXEVENTS],
+    Int_t  BANDEventIndicesToMerge[NMAXEVENTS];
+    Int_t SIDISEventIndicesToMerge[NMAXEVENTS];
     
     Int_t Nevents2Merge = CreateListOfEventsToMerge(BANDTree,
                               SIDISTree,
@@ -110,12 +110,14 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
         std::cout << "Merging BAND events " << std::endl << "[";
         for (int i=0; i<Nevents2Merge; i++) {
 //        for (auto BANDEventIndex: *BANDEventIndicesToMerge) {
-            BANDEventIndex = BANDEventIndicesToMerge[i];
+            auto BANDEventIndex = BANDEventIndicesToMerge[i];
             std::cout << BANDEventIndex << ",";
         }
         std::cout << "] " << std::endl;
         std::cout << "With SIDIS events " << std::endl << "[";
-        for (auto SIDISEventIndex:*SIDISEventIndicesToMerge) {
+        for (int i=0; i<Nevents2Merge; i++) {
+//        for (auto SIDISEventIndex:*SIDISEventIndicesToMerge) {
+            auto SIDISEventIndex = SIDISEventIndicesToMerge[i];
             std::cout << SIDISEventIndex << ",";
         }
         std::cout << "] " << std::endl;
