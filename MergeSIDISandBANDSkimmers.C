@@ -48,6 +48,10 @@ void        CloseOutputFiles (TString OutDataPath);
 void MergeSIDISandBANDevents (int NeventsToMerge=10,
                               int fdebug=2,
                               int PrintProgress=5000);
+void CreateListOfEventsToMerge(TTree * BANDTree,
+                               TTree* SIDISTree,
+                               std::vector<int> BANDEventIndicesToMerge,
+                               std::vector<int> SIDISEventIndicesToMerge);
 
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
@@ -90,6 +94,29 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
     Int_t   NeventsBAND  = BANDTree->GetEntries();
     Int_t   NeventsSIDIS = SIDISTree->GetEntries();
     
+    // Create a list of events to merge
+    std::vector<int>  BANDEventIndicesToMerge;
+    std::vector<int> SIDISEventIndicesToMerge;
+    CreateListOfEventsToMerge(&BANDEventIndicesToMerge,
+                              &SIDISEventIndicesToMerge);
+    
+    if (fdebug>1) {
+        std::cout << "Merging BAND events " << std::endl << "[";
+        for (auto BANDEventIndex: BANDEventIndicesToMerge) {
+            std::cout << BANDEventIndex << ",";
+        }
+        std::cout << "] " << std::endl;
+        std::cout << "With SIDIS events " << std::endl << "[";
+        for (auto SIDISEventIndex: SIDISEventIndicesToMerge) {
+            std::cout << SIDISEventIndex << ",";
+        }
+        std::cout << "] " << std::endl;
+    }
+    return;
+    
+    
+    
+    
     // SIDIS Tree
     TLorentzVector        *e=0;
     TLorentzVector   *piplus=0;
@@ -98,7 +125,7 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
     // reconstructed vertex position
     TVector3             *Ve=0;
     TVector3        *Vpiplus=0;
-
+    
     // kinematics
     Double_t             xB;
     Double_t             Q2;
@@ -114,7 +141,7 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
     double  chi2PID_pips;
     double  pips_PCAL_sector, pips_DC_sector, pips_Chi2N;
     double  pips_DC_x[3], pips_DC_y[3];
-
+    
     double  E_PCAL_e, E_ECIN_e, E_ECOUT_e; // electron energy deposit in ECAL_out [GeV]
     double  e_PCAL_W,    e_PCAL_V;
     double  e_PCAL_x,    e_PCAL_y, e_PCAL_z;
@@ -144,14 +171,14 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
     SIDISTree  -> SetBranchAddress("e_PCAL_sector"     ,&e_PCAL_sector         );
     SIDISTree  -> SetBranchAddress("e_DC_sector"       ,&e_DC_sector           );
     SIDISTree  -> SetBranchAddress("e_DC_Chi2N"        ,&e_DC_Chi2N            );
-//    SIDISTree  -> SetBranchAddress("e_DC_x"            ,&e_DC_x                );
-//    SIDISTree  -> SetBranchAddress("e_DC_y"            ,&e_DC_y                );
+    //    SIDISTree  -> SetBranchAddress("e_DC_x"            ,&e_DC_x                );
+    //    SIDISTree  -> SetBranchAddress("e_DC_y"            ,&e_DC_y                );
     
     SIDISTree  -> SetBranchAddress("pips_PCAL_sector"          ,&pips_PCAL_sector      );
     SIDISTree  -> SetBranchAddress("pips_DC_sector"            ,&pips_DC_sector        );
     SIDISTree  -> SetBranchAddress("pips_Chi2N"                ,&pips_Chi2N            );
-//    SIDISTree  -> SetBranchAddress("pips_DC_x"                 ,&pips_DC_x             );
-//    SIDISTree  -> SetBranchAddress("pips_DC_y"                 ,&pips_DC_y             );
+    //    SIDISTree  -> SetBranchAddress("pips_DC_x"                 ,&pips_DC_x             );
+    //    SIDISTree  -> SetBranchAddress("pips_DC_y"                 ,&pips_DC_y             );
     
     SIDISTree  -> SetBranchAddress("E_PCAL_pips"               ,&E_PCAL_pips           );
     SIDISTree  -> SetBranchAddress("E_ECIN_pips"               ,&E_ECIN_pips           );
@@ -159,7 +186,7 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
     SIDISTree  -> SetBranchAddress("E_ECIN_pips"               ,&E_ECIN_pips           );
     SIDISTree  -> SetBranchAddress("E_ECOUT_pips"              ,&E_ECOUT_pips          );
     SIDISTree  -> SetBranchAddress("DC_layer"                  ,&DC_layer              );
-        
+    
     SIDISTree  -> SetBranchAddress("e"                         ,&e                     );
     SIDISTree  -> SetBranchAddress("piplus"                    ,&piplus                );
     SIDISTree  -> SetBranchAddress("Ve"                        ,&Ve                    );
@@ -173,7 +200,7 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
     SIDISTree  -> SetBranchAddress("z"                         ,&z                     );
     SIDISTree  -> SetBranchAddress("ePastSelectionCuts"        ,&ePastSelectionCuts    );
     SIDISTree  -> SetBranchAddress("piplusPastSelectionCuts"   ,&piplusPastSelectionCuts);
-
+    
     
     
     
@@ -197,7 +224,7 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
     int            genMult = 0;
     TClonesArray * mcParts = new TClonesArray("genpart");
     TClonesArray   &saveMC = *mcParts;
-
+    
     
     
     BANDTree   -> SetBranchAddress("eventnumber"  ,&BANDeventID);
@@ -253,14 +280,14 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
     MergedTree->Branch("e_PCAL_sector"      ,&e_PCAL_sector         );
     MergedTree->Branch("e_DC_sector"        ,&e_DC_sector           );
     MergedTree->Branch("e_DC_Chi2N"         ,&e_DC_Chi2N            );
-//    MergedTree->Branch("e_DC_x"             ,&e_DC_x                );
-//    MergedTree->Branch("e_DC_y"             ,&e_DC_y                );
+    //    MergedTree->Branch("e_DC_x"             ,&e_DC_x                );
+    //    MergedTree->Branch("e_DC_y"             ,&e_DC_y                );
     
     MergedTree->Branch("pips_PCAL_sector"   ,&pips_PCAL_sector      );
     MergedTree->Branch("pips_DC_sector"     ,&pips_DC_sector        );
     MergedTree->Branch("pips_Chi2N"         ,&pips_Chi2N            );
-//    MergedTree->Branch("pips_DC_x"          ,&pips_DC_x             );
-//    MergedTree->Branch("pips_DC_y"          ,&pips_DC_y             );
+    //    MergedTree->Branch("pips_DC_x"          ,&pips_DC_x             );
+    //    MergedTree->Branch("pips_DC_y"          ,&pips_DC_y             );
     
     MergedTree->Branch("E_PCAL_pips"        ,&E_PCAL_pips           );
     MergedTree->Branch("E_ECIN_pips"        ,&E_ECIN_pips           );
@@ -268,7 +295,7 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
     MergedTree->Branch("E_ECIN_pips"        ,&E_ECIN_pips           );
     MergedTree->Branch("E_ECOUT_pips"       ,&E_ECOUT_pips          );
     MergedTree->Branch("DC_layer"           ,&DC_layer              );
-        
+    
     MergedTree->Branch("e"                  ,&e                     );
     MergedTree->Branch("piplus"             ,&piplus                );
     MergedTree->Branch("Ve"                 ,&Ve                    );
@@ -282,7 +309,8 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
     MergedTree->Branch("z"                  ,&z                     );
     MergedTree->Branch("ePastSelectionCuts" ,&ePastSelectionCuts    );
     MergedTree->Branch("piplusPastSelectionCuts",&piplusPastSelectionCuts);
-
+    
+    
     
     
     
@@ -323,15 +351,15 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
                 
                 MergedTree -> Fill();
                 StreamToCSVfile ({  (double)BANDrunID,  (double)BANDeventID,
-                                    livetime,           current,
-                                    xB,                 Q2,
-                                    Ebeam,              z,
-                                    e->Px(),            e->Py(),
-                                    e->Pz(),            e->E(),
-                                    q->Px(),            q->Py(),
-                                    q->Pz(),            q->E(),
-                                    Ve->z(),            Vpiplus->z(),
-                                    (double)goodneutron,
+                    livetime,           current,
+                    xB,                 Q2,
+                    Ebeam,              z,
+                    e->Px(),            e->Py(),
+                    e->Pz(),            e->E(),
+                    q->Px(),            q->Py(),
+                    q->Pz(),            q->E(),
+                    Ve->z(),            Vpiplus->z(),
+                    (double)goodneutron,
                 },fdebug);
                 // record event
                 NmergedEvents ++;
@@ -424,9 +452,41 @@ void CloseOutputFiles (TString OutDataPath){
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void StreamToCSVfile (std::vector<Double_t> observables, int fdebug){
     if (fdebug>1) std::cout << "StreamToCSVfile()" << std::endl;
-        
     for (auto v:observables) {
         CSVfile << v << ",";
     }
     CSVfile << std::endl;
+}
+
+
+// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+void CreateListOfEventsToMerge(std::vector<int> BANDEventIndicesToMerge,
+                               std::vector<int> SIDISEventIndicesToMerge){
+    
+    // fast way to decide which event-indices to merge from the two TTrees
+    BANDEventIndicesToMerge.clear();
+    SIDISEventIndicesToMerge.clear();
+    
+    BANDTree   -> SetBranchAddress("eventnumber"  ,&BANDeventID);
+    BANDTree   -> SetBranchAddress("Runno"        ,&BANDrunID);
+    SIDISTree  -> SetBranchAddress("eventnumber"  ,&SIDISeventID);
+    SIDISTree  -> SetBranchAddress("runnum"       ,&SIDISrunID);
+    Int_t   BANDrunID, BANDeventID, SIDISrunID, SIDISeventID;
+    Int_t   NeventsBAND  = BANDTree->GetEntries();
+    Int_t   NeventsSIDIS = SIDISTree->GetEntries();
+    
+    for (int BANDevent=0; BANDevent < NeventsBAND ; BANDevent++){
+        
+        BANDTree -> GetEntry(BANDevent);
+        
+        for (int SIDISevent=0; SIDISevent < NeventsSIDIS ; SIDISevent++){
+            
+            SIDISTree -> GetEntry(SIDISevent);
+                        
+            if ( (BANDrunID == SIDISrunID) && (BANDeventID == SIDISeventID)){
+                BANDEventIndicesToMerge.push_back(BANDevent);
+                BANDEventIndicesToMerge.push_back(SIDISevent);
+            }
+        }
+    }
 }
