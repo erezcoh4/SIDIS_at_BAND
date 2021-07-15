@@ -91,13 +91,13 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
     Int_t   NeventsSIDIS = SIDISTree->GetEntries();
     
     // SIDIS Tree
-    TLorentzVector        e;
-    TLorentzVector   piplus;
-    TLorentzVector     Beam;
-    TLorentzVector        q;
+    TLorentzVector        *e=0;
+    TLorentzVector   *piplus=0;
+    TLorentzVector     *Beam=0;
+    TLorentzVector        *q=0;
     // reconstructed vertex position
-    TVector3             Ve;
-    TVector3        Vpiplus;
+    TVector3             *Ve=0;
+    TVector3        *Vpiplus=0;
 
     // kinematics
     Double_t             xB;
@@ -144,14 +144,14 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
     SIDISTree  -> SetBranchAddress("e_PCAL_sector"     ,&e_PCAL_sector         );
     SIDISTree  -> SetBranchAddress("e_DC_sector"       ,&e_DC_sector           );
     SIDISTree  -> SetBranchAddress("e_DC_Chi2N"        ,&e_DC_Chi2N            );
-    SIDISTree  -> SetBranchAddress("e_DC_x"            ,&e_DC_x                );
-    SIDISTree  -> SetBranchAddress("e_DC_y"            ,&e_DC_y                );
+//    SIDISTree  -> SetBranchAddress("e_DC_x"            ,&e_DC_x                );
+//    SIDISTree  -> SetBranchAddress("e_DC_y"            ,&e_DC_y                );
     
     SIDISTree  -> SetBranchAddress("pips_PCAL_sector"          ,&pips_PCAL_sector      );
     SIDISTree  -> SetBranchAddress("pips_DC_sector"            ,&pips_DC_sector        );
     SIDISTree  -> SetBranchAddress("pips_Chi2N"                ,&pips_Chi2N            );
-    SIDISTree  -> SetBranchAddress("pips_DC_x"                 ,&pips_DC_x             );
-    SIDISTree  -> SetBranchAddress("pips_DC_y"                 ,&pips_DC_y             );
+//    SIDISTree  -> SetBranchAddress("pips_DC_x"                 ,&pips_DC_x             );
+//    SIDISTree  -> SetBranchAddress("pips_DC_y"                 ,&pips_DC_y             );
     
     SIDISTree  -> SetBranchAddress("E_PCAL_pips"               ,&E_PCAL_pips           );
     SIDISTree  -> SetBranchAddress("E_ECIN_pips"               ,&E_ECIN_pips           );
@@ -253,14 +253,14 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
     MergedTree->Branch("e_PCAL_sector"      ,&e_PCAL_sector         );
     MergedTree->Branch("e_DC_sector"        ,&e_DC_sector           );
     MergedTree->Branch("e_DC_Chi2N"         ,&e_DC_Chi2N            );
-    MergedTree->Branch("e_DC_x"             ,&e_DC_x                );
-    MergedTree->Branch("e_DC_y"             ,&e_DC_y                );
+//    MergedTree->Branch("e_DC_x"             ,&e_DC_x                );
+//    MergedTree->Branch("e_DC_y"             ,&e_DC_y                );
     
     MergedTree->Branch("pips_PCAL_sector"   ,&pips_PCAL_sector      );
     MergedTree->Branch("pips_DC_sector"     ,&pips_DC_sector        );
     MergedTree->Branch("pips_Chi2N"         ,&pips_Chi2N            );
-    MergedTree->Branch("pips_DC_x"          ,&pips_DC_x             );
-    MergedTree->Branch("pips_DC_y"          ,&pips_DC_y             );
+//    MergedTree->Branch("pips_DC_x"          ,&pips_DC_x             );
+//    MergedTree->Branch("pips_DC_y"          ,&pips_DC_y             );
     
     MergedTree->Branch("E_PCAL_pips"        ,&E_PCAL_pips           );
     MergedTree->Branch("E_ECIN_pips"        ,&E_ECIN_pips           );
