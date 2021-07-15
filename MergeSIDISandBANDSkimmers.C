@@ -476,7 +476,7 @@ Int_t CreateListOfEventsToMerge(TTree * BANDTree,
                                Int_t SIDISEventIndicesToMerge[NMAXEVENTS],
                                int fdebug){
     // fast way to decide which event-indices to merge from the two TTrees
-    if (fdebug>1) {
+    if (fdebug>2) {
         std::cout << "CreateListOfEventsToMerge()" << std::endl;
     }
     
@@ -506,7 +506,7 @@ Int_t CreateListOfEventsToMerge(TTree * BANDTree,
                         
             if ( (BANDrunID == SIDISrunID) && (BANDeventID == SIDISeventID)){
                 
-                if (fdebug>0){
+                if (fdebug>3){
                     std::cout
                     << "merged event "   << BANDeventID         << " from run " << BANDrunID
                     << " (in total "     << (NmergedEvents+1)   << " merges)"
@@ -523,7 +523,7 @@ Int_t CreateListOfEventsToMerge(TTree * BANDTree,
             // in case the run number is identical in SIDIS and BAND trees,
             // we can cut the loop shorter by breaking if we passed the BAND event ID
             if ( (BANDrunID == SIDISrunID) && (SIDISeventID > BANDeventID)) {
-                if (fdebug>1){ std::cout << "SIDISeventID > BANDeventID, breaking..."<<std::endl ;}
+                if (fdebug>4){ std::cout << "SIDISeventID > BANDeventID, breaking..."<<std::endl ;}
                 break;
             }
         }
