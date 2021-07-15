@@ -1,4 +1,5 @@
-// last edit July-8, 2021 (EOC, mbp), see README
+// last edit July-15, 2021 (EOC, mbp), see README
+// ToDo: Add pion DC fiducial cuts
 
 
 #include <cstdlib>
@@ -40,7 +41,7 @@ bool EventPassedElectronSelectionCriteria (Double_t e_PCAL_x, Double_t e_PCAL_y,
                                            Double_t e_DC_x[3],
                                            Double_t e_DC_y[3],
                                            int torusBending);
-bool   EventPassedpiplusPastSelectionCutsCriteria (Double_t pips_DC_x[3], Double_t pips_DC_y[3],
+bool   EventPassedPiplusPastSelectionCutsCriteria (Double_t pips_DC_x[3], Double_t pips_DC_y[3],
                                            Double_t chi2PID, Double_t p,
                                            TVector3 Ve,
                                            TVector3 Vpiplus );
@@ -429,7 +430,7 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
                                                                       e_PCAL_sector, // e_PCAL_sector should be consistent with e_DC_sector
                                                                       e_DC_x, e_DC_y,
                                                                       torusBending );
-                    piplusPastSelectionCuts = EventPassedpiplusPastSelectionCutsCriteria(pips_DC_x,     pips_DC_y,
+                    piplusPastSelectionCuts = EventPassedPiplusPastSelectionCutsCriteria(pips_DC_x,     pips_DC_y,
                                                                          chi2PID_pips,  piplus.P(),
                                                                          Ve, Vpiplus );
                     EventPassedCuts =( ePastSelectionCuts && piplusPastSelectionCuts );
@@ -577,7 +578,7 @@ bool EventPassedElectronSelectionCriteria(Double_t e_PCAL_x, Double_t e_PCAL_y,
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-bool EventPassedpiplusPastSelectionCutsCriteria(Double_t pips_DC_x[3], Double_t pips_DC_y[3],
+bool EventPassedPiplusPastSelectionCutsCriteria(Double_t pips_DC_x[3], Double_t pips_DC_y[3],
                                         Double_t chi2PID, Double_t p,
                                         TVector3 Ve,
                                         TVector3 Vpiplus ){
@@ -591,9 +592,10 @@ bool EventPassedpiplusPastSelectionCutsCriteria(Double_t pips_DC_x[3], Double_t 
     //
     
     // DC - fiducial cuts on DC
-    // Complete this!
+    // ToDo: Complete this! Need help from Dien with pion fiductial
+    // cuts implementation in DC_fiducials.cpp 
     if(
-       (pips_DC_x[0]<0 && pips_DC_x[0]<0 )
+       (pips_DC_x[0]<-1e9 )
        ){
         return false;
     }

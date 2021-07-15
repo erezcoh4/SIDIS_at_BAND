@@ -1,11 +1,10 @@
-* hipo skimmer for Semi-Inclusive DIS at CLAS12 with BAND *
 
  We are interested in Semi Inclusive DIS (SIDIS) on a deuteron target with pi+ tagging
  
         D(e,e’pi+)X
         D(e,e’pi+n)X
 
-last edit: July-5, 2021 (EOC, mbp)
+last edit: July-15, 2021 (EOC, mbp)
 
 To execute, e.g. go to /u/home/cohen/SIDIS_at_BAND, do git pull, then...
 
@@ -17,8 +16,11 @@ Output files are saved in
 
 
 
-
+---------------------------------------------
 MergeSIDISandBANDSkimmers.C
+---------------------------------------------
+* merger of Semi-Inclusive DIS skimming and BAND-neutron skimming *
+
 
  ---------------------------------------------
  void MergeSIDISandBANDSkimmers (   int RunNumber=6420,
@@ -41,8 +43,11 @@ execute:
 
 
 
+---------------------------------------------
 SIDISc12rSkimmer.C
- 
+---------------------------------------------
+* hipo skimmer for Semi-Inclusive DIS at CLAS12 with BAND *
+
  ---------------------------------------------
  void SIDISc12rSkimmer (   int RunNumber=6420,
                             int NeventsMax=100,

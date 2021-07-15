@@ -136,9 +136,9 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
     SIDISTree  -> SetBranchAddress("E_ECOUT_pips"              ,&E_ECOUT_pips          );
     SIDISTree  -> SetBranchAddress("DC_layer"                  ,&DC_layer              );
         
-    SIDISTree  -> SetBranchAddress("e"                         ,e                     );
-    SIDISTree  -> SetBranchAddress("piplus"                    ,piplus                );
-    SIDISTree  -> SetBranchAddress("Ve"                        ,Ve                    );
+    SIDISTree  -> SetBranchAddress("e"                         ,&e                     );
+    SIDISTree  -> SetBranchAddress("piplus"                    ,&y3piplus                );
+    SIDISTree  -> SetBranchAddress("Ve"                        ,&Ve                    );
     SIDISTree  -> SetBranchAddress("Vpiplus"                   ,&Vpiplus               );
     SIDISTree  -> SetBranchAddress("Beam"                      ,&Beam                  );
     SIDISTree  -> SetBranchAddress("q"                         ,&q                     );
