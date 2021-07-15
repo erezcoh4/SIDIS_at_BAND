@@ -100,7 +100,7 @@ void MergeSIDISandBANDSkimmers(int RunNumber=6420,
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
-    
+    std::cout << "MergeSIDISandBANDevents() " << std::endl;
     Int_t   BANDrunID, BANDeventID, SIDISrunID, SIDISeventID;
     Int_t   NeventsBAND  = BANDTree->GetEntries();
     Int_t   NeventsSIDIS = SIDISTree->GetEntries();
