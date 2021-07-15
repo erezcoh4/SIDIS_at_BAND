@@ -290,7 +290,7 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
         std::cout
         << "stepping over "
         << NeventsBAND << " BAND and "
-        << NeventsSIDIS << "SIDIS events"
+        << NeventsSIDIS << " SIDIS events"
         << std::endl;
     }
     int NmergedEvents = 0;
@@ -314,10 +314,10 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
             
             if ( (BANDrunID == SIDISrunID) && (BANDeventID == SIDISeventID)){
                 // Can merge the event...
-                if (fdebug>1){
+                if (fdebug>0){
                     std::cout
-                    << "merged event "   << BANDeventID     << " from run " << BANDrunID
-                    << " which is the merged event number " << (NmergedEvents+1)
+                    << "merged event "   << BANDeventID         << " from run " << BANDrunID
+                    << " (in total "     << (NmergedEvents+1)   << " merges)"
                     << std::endl;
                 }
                 
