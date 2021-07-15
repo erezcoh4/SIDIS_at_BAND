@@ -85,6 +85,7 @@ void MergeSIDISandBANDSkimmers(int RunNumber=6420,
                        +(TString)"Ve_z,Vpiplus_z,"
                        +(TString)"goodneutron,"));
     
+    std::cout << "go to MergeSIDISandBANDevents() " << std::endl;
     MergeSIDISandBANDevents( NeventsToMerge, fdebug, PrintProgress );
     
     
