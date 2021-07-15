@@ -108,16 +108,16 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
     
     // Create a list of events to merge
     // this takes the most resources, and the largest amount of time.
-    // typically, per 1 merged event, it takes about -14 ms
+    // typically, per 1 merged event, it takes about 14-40 ms
     // and we typically merge 1M events = 1e4 sec
     if (fdebug>1) {
-        
         std::cout << "Create a list of events to merge" << std::endl
         << "stepping over "
         << NeventsBAND << " BAND and "
         << NeventsSIDIS << " SIDIS events"
         << std::endl
-        << "Take some coffee, this takes the largest amount of time.";
+        << "Take some coffee, this takes the largest amount of time."
+        << std::endl;
     }
     Int_t          EventIDsToMerge[NMAXEVENTS];
     Int_t  BANDEventIndicesToMerge[NMAXEVENTS];
@@ -131,7 +131,7 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
                                                     NeventsToMerge,
                                                     fdebug);
     
-    if (fdebug>1) {
+    if (fdebug>2) {
         std::cout << "Merging events (BAND/SIDIS):"  << std::endl;
         for (int i=0; i<Nevents2Merge; i++) {
             auto         eventID = EventIDsToMerge[i];
