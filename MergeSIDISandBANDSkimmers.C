@@ -326,11 +326,11 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
                                     livetime,           current,
                                     xB,                 Q2,
                                     Ebeam,              z,
-                                    e.Px(),             e.Py(),
-                                    e.Pz(),             e.E(),
-                                    q.Px(),             q.Py(),
-                                    q.Pz(),             q.E(),
-                                    Ve.z(),             Vpiplus.z(),
+                                    e->Px(),            e->Py(),
+                                    e->Pz(),            e->E(),
+                                    q->Px(),            q->Py(),
+                                    q->Pz(),            q->E(),
+                                    Ve->z(),            Vpiplus->z(),
                                     (double)goodneutron,
                 },fdebug);
                 // record event
