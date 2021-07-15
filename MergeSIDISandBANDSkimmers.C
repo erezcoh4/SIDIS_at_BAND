@@ -518,12 +518,13 @@ void CreateListOfEventsToMerge(TTree * BANDTree,
                     << std::endl;
                 }
                 
-                BANDEventIndicesToMerge->push_back(BANDevent);
+                BANDEventIndicesToMerge ->push_back(BANDevent);
                 SIDISEventIndicesToMerge->push_back(SIDISevent);
             }
             // in case the run number is identical in SIDIS and BAND trees,
             // we can cut the loop shorter by breaking if we passed the BAND event ID
             if ( (BANDrunID == SIDISrunID) && (SIDISeventID > BANDeventID)) {
+                if (fdebug>1){ std::cout << "SIDISeventID > BANDeventID, breaking..."<<std::endl ;}
                 break;
             }
         }
