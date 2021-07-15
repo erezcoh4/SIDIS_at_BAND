@@ -48,9 +48,7 @@ void        CloseOutputFiles (TString OutDataPath);
 void MergeSIDISandBANDevents (int NeventsToMerge=10,
                               int fdebug=2,
                               int PrintProgress=5000);
-void CreateListOfEventsToMerge(TTree * BANDTree,
-                               TTree* SIDISTree,
-                               std::vector<int> BANDEventIndicesToMerge,
+void CreateListOfEventsToMerge(std::vector<int> BANDEventIndicesToMerge,
                                std::vector<int> SIDISEventIndicesToMerge);
 
 
