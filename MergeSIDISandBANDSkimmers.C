@@ -486,39 +486,39 @@ Int_t CreateListOfEventsToMerge(TTree * BANDTree,
                 
         BANDTree -> GetEntry(BANDevent);
         
-//        // after filling the first evnet we do not have to go all the way back to
-//        // the first event in the SIDIS TTree
-//        if (NmergedEvents>0) {
-//            SIDISeventIndexMin = SIDISEventIndicesToMerge[NmergedEvents];
-//        }
-//        for (int SIDISevent=SIDISeventIndexMin; SIDISevent < NeventsSIDIS ; SIDISevent++){
-//
-//            SIDISTree -> GetEntry(SIDISevent);
-//
-//            if ( (BANDrunID == SIDISrunID) && (BANDeventID == SIDISeventID)){
-//
-//                if (fdebug>3){
-//                    std::cout
-//                    << "merged event "   << BANDeventID         << " from run " << BANDrunID
-//                    << " (in total "     << (NmergedEvents+1)   << " merges)"
-//                    << std::endl;
-//                }
-//                EventIDsToMerge[NmergedEvents] = BANDeventID;
-//                BANDEventIndicesToMerge[NmergedEvents] = BANDevent;
-//                SIDISEventIndicesToMerge[NmergedEvents] = SIDISevent;
-//                NmergedEvents ++ ;
-//                if ((NeventsToMerge>0) && (NmergedEvents >= NeventsToMerge)){
-//                    return NmergedEvents;
-//                }
-//            }
-//
-//            // in case the run number is identical in SIDIS and BAND trees,
-//            // we can cut the loop shorter by breaking if we passed the BAND event ID
-//            if ( SIDISeventID > BANDeventID ) {
-//                if (fdebug>4){ std::cout << "SIDISeventID > BANDeventID, breaking..."<<std::endl ;}
-//                break;
-//            }
-//        }
+        // after filling the first evnet we do not have to go all the way back to
+        // the first event in the SIDIS TTree
+        if (NmergedEvents>0) {
+            SIDISeventIndexMin = SIDISEventIndicesToMerge[NmergedEvents];
+        }
+        for (int SIDISevent=SIDISeventIndexMin; SIDISevent < NeventsSIDIS ; SIDISevent++){
+
+            SIDISTree -> GetEntry(SIDISevent);
+
+            if ( (BANDrunID == SIDISrunID) && (BANDeventID == SIDISeventID)){
+
+                if (fdebug>3){
+                    std::cout
+                    << "merged event "   << BANDeventID         << " from run " << BANDrunID
+                    << " (in total "     << (NmergedEvents+1)   << " merges)"
+                    << std::endl;
+                }
+                EventIDsToMerge[NmergedEvents] = BANDeventID;
+                BANDEventIndicesToMerge[NmergedEvents] = BANDevent;
+                SIDISEventIndicesToMerge[NmergedEvents] = SIDISevent;
+                NmergedEvents ++ ;
+                if ((NeventsToMerge>0) && (NmergedEvents >= NeventsToMerge)){
+                    return NmergedEvents;
+                }
+            }
+
+            // in case the run number is identical in SIDIS and BAND trees,
+            // we can cut the loop shorter by breaking if we passed the BAND event ID
+            if ( SIDISeventID > BANDeventID ) {
+                if (fdebug>4){ std::cout << "SIDISeventID > BANDeventID, breaking..."<<std::endl ;}
+                break;
+            }
+        }
     }
     return NmergedEvents;
 }
