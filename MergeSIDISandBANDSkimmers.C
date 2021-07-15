@@ -517,8 +517,9 @@ void CreateListOfEventsToMerge(TTree * BANDTree,
                     << " (in total "     << (NmergedEvents+1)   << " merges)"
                     << std::endl;
                 }
-                
+                std::cout << "before BANDEventIndicesToMerge ->push_back(BANDevent);"<< std::endl;
                 BANDEventIndicesToMerge ->push_back(BANDevent);
+                std::cout << "after BANDEventIndicesToMerge ->push_back(BANDevent);"<< std::endl;
                 SIDISEventIndicesToMerge->push_back(SIDISevent);
             }
             // in case the run number is identical in SIDIS and BAND trees,
