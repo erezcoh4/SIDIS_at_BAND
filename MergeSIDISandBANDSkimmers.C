@@ -88,7 +88,7 @@ void MergeSIDISandBANDSkimmers(int RunNumber=6420,
     std::cout << "go to MergeSIDISandBANDevents() " << std::endl;
     MergeSIDISandBANDevents( NeventsToMerge, fdebug, PrintProgress );
     std::cout << "done MergeSIDISandBANDevents() " << std::endl;
-
+    
     
     CloseOutputFiles (DataPath + "merged_SIDIS_and_BAND_skimming/");
     CloseInputFiles  ();
@@ -107,7 +107,7 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
     Int_t   BANDrunID, BANDeventID, SIDISrunID, SIDISeventID;
     Int_t   NeventsBAND  = BANDTree->GetEntries();
     Int_t   NeventsSIDIS = SIDISTree->GetEntries();
-        
+    
     // Create a list of events to merge
     // this takes the most resources, and the largest amount of time.
     // typically, per 1 merged event, it takes about 14-40 ms
@@ -124,7 +124,7 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
     Int_t          EventIDsToMerge[NMAXEVENTS];
     Int_t  BANDEventIndicesToMerge[NMAXEVENTS];
     Int_t SIDISEventIndicesToMerge[NMAXEVENTS];
-        
+    
     Int_t Nevents2Merge = CreateListOfEventsToMerge(BANDTree,
                                                     SIDISTree,
                                                     EventIDsToMerge,
@@ -501,8 +501,8 @@ Int_t CreateListOfEventsToMerge(TTree * BANDTree,
     for (int BANDeventIndex=0;
          BANDeventIndex < NeventsBAND ;
          BANDeventIndex++){
-
-
+        
+        
         for (int SIDISeventIndex=SIDISEventIndicesToMerge[NmergedEvents];
              SIDISeventIndex < NeventsSIDIS ;
              SIDISeventIndex++){
@@ -510,7 +510,7 @@ Int_t CreateListOfEventsToMerge(TTree * BANDTree,
             if ( SIDISeventIDs[SIDISeventIndex] > BANDeventIDs[BANDeventIndex] ) {
                 break;
             }
-
+            
             if ( BANDeventIDs[BANDeventIndex] == SIDISeventIDs[SIDISeventIndex] ){
                 
                 EventIDsToMerge[NmergedEvents] = BANDeventID;
@@ -528,45 +528,45 @@ Int_t CreateListOfEventsToMerge(TTree * BANDTree,
     }
     
     
-//    int SIDISeventIndexMin = 0;
-//
-//    for (int BANDevent=0; BANDevent < NeventsBAND ; BANDevent++){
-//
-//        BANDTree -> GetEntry(BANDevent);
-//
-//        // after filling the first evnet we do not have to go all the way back to
-//        // the first event in the SIDIS TTree
-//        SIDISeventIndexMin = SIDISEventIndicesToMerge[NmergedEvents];
-//
-//
-//        for (int SIDISevent=SIDISeventIndexMin; SIDISevent < NeventsSIDIS ; SIDISevent++){
-//
-//            SIDISTree -> GetEntry(SIDISevent);
-//
-//            if ( BANDeventID == SIDISeventID ){
-//
-////                if (fdebug>3){
-////                    std::cout
-////                    << "merged event "   << BANDeventID         << " from run " << BANDrunID
-////                    << " (in total "     << (NmergedEvents+1)   << " merges)"
-////                    << std::endl;
-////                }
-//                EventIDsToMerge[NmergedEvents] = BANDeventID;
-//                BANDEventIndicesToMerge[NmergedEvents] = BANDevent;
-//                SIDISEventIndicesToMerge[NmergedEvents] = SIDISevent;
-//                NmergedEvents ++ ;
-//                if ((NeventsToMerge>0) && (NmergedEvents >= NeventsToMerge)){
-//                    return NmergedEvents;
-//                }
-//            }
-//
-//            // in case the run number is identical in SIDIS and BAND trees,
-//            // we can cut the loop shorter by breaking if we passed the BAND event ID
-//            if ( SIDISeventID > BANDeventID ) {
-//                // if (fdebug>4){ std::cout << "SIDISeventID > BANDeventID, breaking..."<<std::endl ;}
-//                break;
-//            }
-//        }
-//    }
+    //    int SIDISeventIndexMin = 0;
+    //
+    //    for (int BANDevent=0; BANDevent < NeventsBAND ; BANDevent++){
+    //
+    //        BANDTree -> GetEntry(BANDevent);
+    //
+    //        // after filling the first evnet we do not have to go all the way back to
+    //        // the first event in the SIDIS TTree
+    //        SIDISeventIndexMin = SIDISEventIndicesToMerge[NmergedEvents];
+    //
+    //
+    //        for (int SIDISevent=SIDISeventIndexMin; SIDISevent < NeventsSIDIS ; SIDISevent++){
+    //
+    //            SIDISTree -> GetEntry(SIDISevent);
+    //
+    //            if ( BANDeventID == SIDISeventID ){
+    //
+    ////                if (fdebug>3){
+    ////                    std::cout
+    ////                    << "merged event "   << BANDeventID         << " from run " << BANDrunID
+    ////                    << " (in total "     << (NmergedEvents+1)   << " merges)"
+    ////                    << std::endl;
+    ////                }
+    //                EventIDsToMerge[NmergedEvents] = BANDeventID;
+    //                BANDEventIndicesToMerge[NmergedEvents] = BANDevent;
+    //                SIDISEventIndicesToMerge[NmergedEvents] = SIDISevent;
+    //                NmergedEvents ++ ;
+    //                if ((NeventsToMerge>0) && (NmergedEvents >= NeventsToMerge)){
+    //                    return NmergedEvents;
+    //                }
+    //            }
+    //
+    //            // in case the run number is identical in SIDIS and BAND trees,
+    //            // we can cut the loop shorter by breaking if we passed the BAND event ID
+    //            if ( SIDISeventID > BANDeventID ) {
+    //                // if (fdebug>4){ std::cout << "SIDISeventID > BANDeventID, breaking..."<<std::endl ;}
+    //                break;
+    //            }
+    //        }
+    //    }
     return NmergedEvents;
 }
