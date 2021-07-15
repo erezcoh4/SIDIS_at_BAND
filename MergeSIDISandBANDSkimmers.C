@@ -49,7 +49,8 @@ void MergeSIDISandBANDevents (int NeventsToMerge=10,
                               int fdebug=2,
                               int PrintProgress=5000);
 void CreateListOfEventsToMerge(std::vector<int> * BANDEventIndicesToMerge,
-                               std::vector<int> * SIDISEventIndicesToMerge);
+                               std::vector<int> * SIDISEventIndicesToMerge,
+                               int fdebug=0);
 
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
@@ -95,8 +96,10 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
     // Create a list of events to merge
     std::vector<int>  * BANDEventIndicesToMerge;
     std::vector<int> * SIDISEventIndicesToMerge;
+    
     CreateListOfEventsToMerge(BANDEventIndicesToMerge,
-                              SIDISEventIndicesToMerge);
+                              SIDISEventIndicesToMerge,
+                              fdebug);
     
     if (fdebug>1) {
         std::cout << "Merging BAND events " << std::endl << "[";
@@ -459,15 +462,19 @@ void StreamToCSVfile (std::vector<Double_t> observables, int fdebug){
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void CreateListOfEventsToMerge(std::vector<int> * BANDEventIndicesToMerge,
-                               std::vector<int> * SIDISEventIndicesToMerge){
-    
+                               std::vector<int> * SIDISEventIndicesToMerge,
+                               int fdebug){
+    if (fdebug>1) {
+        std::cout << "CreateListOfEventsToMerge()" << std::endl;
+    }
     // fast way to decide which event-indices to merge from the two TTrees
     BANDEventIndicesToMerge->clear();
     SIDISEventIndicesToMerge->clear();
 
     Int_t   BANDrunID, BANDeventID, SIDISrunID, SIDISeventID;
-    Int_t   NeventsBAND  = BANDTree->GetEntries();
-    Int_t   NeventsSIDIS = SIDISTree->GetEntries();
+    Int_t    NeventsBAND  = BANDTree->GetEntries();
+    Int_t    NeventsSIDIS = SIDISTree->GetEntries();
+    Int_t   NmergedEvents = 0
 
     BANDTree   -> SetBranchAddress("eventnumber"  ,&BANDeventID);
     BANDTree   -> SetBranchAddress("Runno"        ,&BANDrunID);
@@ -475,7 +482,9 @@ void CreateListOfEventsToMerge(std::vector<int> * BANDEventIndicesToMerge,
     SIDISTree  -> SetBranchAddress("runnum"       ,&SIDISrunID);
     int SIDISeventIndexMin = 0;
     
-    
+    if (fdebug>1) {
+        std::cout << "stepping over BANDevents" << std::endl;
+    }
     for (int BANDevent=0; BANDevent < NeventsBAND ; BANDevent++){
                 
         BANDTree -> GetEntry(BANDevent);
@@ -490,6 +499,14 @@ void CreateListOfEventsToMerge(std::vector<int> * BANDEventIndicesToMerge,
             SIDISTree -> GetEntry(SIDISevent);
                         
             if ( (BANDrunID == SIDISrunID) && (BANDeventID == SIDISeventID)){
+                
+                if (fdebug>0){
+                    std::cout
+                    << "merged event "   << BANDeventID         << " from run " << BANDrunID
+                    << " (in total "     << (NmergedEvents+1)   << " merges)"
+                    << std::endl;
+                }
+                
                 BANDEventIndicesToMerge->push_back(BANDevent);
                 SIDISEventIndicesToMerge->push_back(SIDISevent);
             }
