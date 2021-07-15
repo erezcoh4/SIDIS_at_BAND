@@ -149,18 +149,19 @@ DCFiducial::DCFiducial() {
         fmax_S_L_out[s][l]->SetParameters(maxparams_out[0][s][l][0],maxparams_out[0][s][l][1]);
     
       }
-    }
+   }
 }
 
 DCFiducial::~DCFiducial() {
-//   for(int s =0; s<6; s++){
-//      for(int l =0; l<3; l++){
-//        delete fmin_S_L_in[s][l];
-//        delete fmax_S_L_in[s][l];
-//        delete fmin_S_L_out[s][l];
-//        delete fmax_S_L_out[s][l];
-//      }
-//   }
+    // original:
+    //   for(int s =0; s<6; s++){
+    //      for(int l =0; l<3; l++){
+    //        delete fmin_S_L_in[s][l];
+    //        delete fmax_S_L_in[s][l];
+    //        delete fmin_S_L_out[s][l];
+    //        delete fmax_S_L_out[s][l];
+    //      }
+    //   }
 }
 
 //Define the function for min, max limits

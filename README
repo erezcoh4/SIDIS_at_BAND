@@ -50,7 +50,7 @@ SIDISc12rSkimmer.C
 
  ---------------------------------------------
  void SIDISc12rSkimmer (   int RunNumber=6420,
-                            int NeventsMax=100,
+                            int NeventsMax=-1, // -1 is "process all events"
                             int fdebug=1,
                             bool doApplySelectionCuts=true,
                             int PrintProgress=5000,
@@ -62,9 +62,10 @@ Read BAND data and write important observables to csv file
  
 execute:
 -----------------
+
+   clas12root -q "SIDISc12rSkimmer.C+(6420,100)"
    clas12root SIDISc12rSkimmer.C
-   clas12root "SIDISc12rSkimmer.C+(6420,1000)"
-   clas12root "SIDISc12rSkimmer.C+(6420,1e9)"
+   
 
 
  input:

@@ -94,7 +94,7 @@ DCFiducial dcfid;
 // Main functionality
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void SIDISc12rSkimmer(int  RunNumber=6420,
-                      int  NeventsMax=100,
+                      int  NeventsMax=-1,
                       int  fdebug=1,
                       bool doApplySelectionCuts=true,
                       int  PrintProgress=5000,
@@ -251,7 +251,7 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
     //get the hipo data
     auto files = fake.GetListOfFiles();
     gBenchmark->Start("timer");
-    
+        
     
     // step over events and extract information....
     for(Int_t i=0;i<files->GetEntries();i++){
@@ -262,9 +262,13 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
         // first count number of events - I don't know how to read it from the HIPO file
         if (fdebug) std::cout << "reading file " << i << std::endl;
         
-        
+        Int_t NeventsMaxToProcess = NeventsMax;
+        if (NeventsMax<0){
+            NeventsMaxToProcess = c12.getReader().getEntries();
+        }
+            
         // now process the events from the first one...
-        while((c12.next()==true) && (event < NeventsMax)){
+        while((c12.next()==true) && (event < NeventsMaxToProcess)){
             
             runnum = c12.runconfig()->getRun();
             evnum  = c12.runconfig()->getEvent();
@@ -593,7 +597,7 @@ bool EventPassedPiplusPastSelectionCutsCriteria(Double_t pips_DC_x[3], Double_t 
     
     // DC - fiducial cuts on DC
     // ToDo: Complete this! Need help from Dien with pion fiductial
-    // cuts implementation in DC_fiducials.cpp 
+    // cuts implementation in DC_fiducials.cpp
     if(
        (pips_DC_x[0]<-1e9 )
        ){
