@@ -482,7 +482,9 @@ void CreateListOfEventsToMerge(TTree * BANDTree,
     Int_t    NeventsBAND  = BANDTree->GetEntries();
     Int_t    NeventsSIDIS = SIDISTree->GetEntries();
     Int_t   NmergedEvents = 0;
-
+    if (fdebug>1) {
+        std::cout << "BANDTree   -> SetBranchAddress(eventnumber  ,&BANDeventID);" << std::endl;
+    }
     BANDTree   -> SetBranchAddress("eventnumber"  ,&BANDeventID);
     BANDTree   -> SetBranchAddress("Runno"        ,&BANDrunID);
     SIDISTree  -> SetBranchAddress("eventnumber"  ,&SIDISeventID);
