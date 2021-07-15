@@ -474,7 +474,7 @@ void CreateListOfEventsToMerge(std::vector<int> * BANDEventIndicesToMerge,
     Int_t   BANDrunID, BANDeventID, SIDISrunID, SIDISeventID;
     Int_t    NeventsBAND  = BANDTree->GetEntries();
     Int_t    NeventsSIDIS = SIDISTree->GetEntries();
-    Int_t   NmergedEvents = 0
+    Int_t   NmergedEvents = 0;
 
     BANDTree   -> SetBranchAddress("eventnumber"  ,&BANDeventID);
     BANDTree   -> SetBranchAddress("Runno"        ,&BANDrunID);
