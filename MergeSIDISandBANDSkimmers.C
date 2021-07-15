@@ -76,7 +76,7 @@ void MergeSIDISandBANDSkimmers(int RunNumber=6420,
     MergeSIDISandBANDevents( NeventsToMerge, fdebug, PrintProgress );
     
     
-    CloseOutputFiles ();
+    CloseOutputFiles (DataPath + "merged_SIDIS_and_BAND_skimming/");
     CloseInputFiles  ();
     
 }
@@ -161,7 +161,7 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
     SIDISTree  -> SetBranchAddress("DC_layer"                  ,&DC_layer              );
         
     SIDISTree  -> SetBranchAddress("e"                         ,&e                     );
-    SIDISTree  -> SetBranchAddress("piplus"                    ,&y3piplus                );
+    SIDISTree  -> SetBranchAddress("piplus"                    ,&piplus                );
     SIDISTree  -> SetBranchAddress("Ve"                        ,&Ve                    );
     SIDISTree  -> SetBranchAddress("Vpiplus"                   ,&Vpiplus               );
     SIDISTree  -> SetBranchAddress("Beam"                      ,&Beam                  );
@@ -404,7 +404,7 @@ void CloseInputFiles (){
 
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-void CloseOutputFiles (){
+void CloseOutputFiles (TString OutDataPath){
     
     // close output CSV
     CSVfile.close();
