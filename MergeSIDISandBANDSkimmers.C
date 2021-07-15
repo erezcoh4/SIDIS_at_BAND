@@ -48,7 +48,9 @@ void        CloseOutputFiles (TString OutDataPath);
 void MergeSIDISandBANDevents (int NeventsToMerge=10,
                               int fdebug=2,
                               int PrintProgress=5000);
-void CreateListOfEventsToMerge(std::vector<int> * BANDEventIndicesToMerge,
+void CreateListOfEventsToMerge(TTree * BANDTree,
+                               TTree * SIDISTree,
+                               std::vector<int> * BANDEventIndicesToMerge,
                                std::vector<int> * SIDISEventIndicesToMerge,
                                int fdebug=0);
 
@@ -97,7 +99,9 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
     std::vector<int>  * BANDEventIndicesToMerge;
     std::vector<int> * SIDISEventIndicesToMerge;
     
-    CreateListOfEventsToMerge(BANDEventIndicesToMerge,
+    CreateListOfEventsToMerge(BANDTree,
+                              SIDISTree,
+                              BANDEventIndicesToMerge,
                               SIDISEventIndicesToMerge,
                               fdebug);
     
@@ -461,7 +465,9 @@ void StreamToCSVfile (std::vector<Double_t> observables, int fdebug){
 
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-void CreateListOfEventsToMerge(std::vector<int> * BANDEventIndicesToMerge,
+void CreateListOfEventsToMerge(TTree * BANDTree,
+                               TTree * SIDISTree,
+                               std::vector<int> * BANDEventIndicesToMerge,
                                std::vector<int> * SIDISEventIndicesToMerge,
                                int fdebug){
     if (fdebug>1) {
