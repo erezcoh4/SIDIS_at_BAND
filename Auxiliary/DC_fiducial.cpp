@@ -153,14 +153,14 @@ DCFiducial::DCFiducial() {
 }
 
 DCFiducial::~DCFiducial() {
-   for(int s =0; s<6; s++){
-      for(int l =0; l<3; l++){
-        delete fmin_S_L_in[s][l];
-        delete fmax_S_L_in[s][l];
-        delete fmin_S_L_out[s][l];
-        delete fmax_S_L_out[s][l];
-      }
-   }
+//   for(int s =0; s<6; s++){
+//      for(int l =0; l<3; l++){
+//        delete fmin_S_L_in[s][l];
+//        delete fmax_S_L_in[s][l];
+//        delete fmin_S_L_out[s][l];
+//        delete fmax_S_L_out[s][l];
+//      }
+//   }
 }
 
 //Define the function for min, max limits
