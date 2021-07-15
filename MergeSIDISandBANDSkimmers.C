@@ -100,12 +100,12 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
     
     if (fdebug>1) {
         std::cout << "Merging BAND events " << std::endl << "[";
-        for (auto & BANDEventIndex: BANDEventIndicesToMerge) {
+        for (auto BANDEventIndex: *BANDEventIndicesToMerge) {
             std::cout << BANDEventIndex << ",";
         }
         std::cout << "] " << std::endl;
         std::cout << "With SIDIS events " << std::endl << "[";
-        for (auto & SIDISEventIndex: SIDISEventIndicesToMerge) {
+        for (auto SIDISEventIndex:*SIDISEventIndicesToMerge) {
             std::cout << SIDISEventIndex << ",";
         }
         std::cout << "] " << std::endl;
@@ -482,8 +482,8 @@ void CreateListOfEventsToMerge(std::vector<int> * BANDEventIndicesToMerge,
         
         // after filling the first evnet we do not have to go all the way back to
         // the first event in the SIDIS TTree
-        if (BANDEventIndicesToMerge.size()>0) {
-            SIDISeventIndexMin = SIDISEventIndicesToMerge.back();
+        if (BANDEventIndicesToMerge->size()>0) {
+            SIDISeventIndexMin = SIDISEventIndicesToMerge->back();
         }
         for (int SIDISevent=SIDISeventIndexMin; SIDISevent < NeventsSIDIS ; SIDISevent++){
             
