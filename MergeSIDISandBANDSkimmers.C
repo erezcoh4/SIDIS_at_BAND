@@ -482,9 +482,7 @@ void CreateListOfEventsToMerge(TTree * BANDTree,
     Int_t    NeventsBAND  = BANDTree->GetEntries();
     Int_t    NeventsSIDIS = SIDISTree->GetEntries();
     Int_t   NmergedEvents = 0;
-    if (fdebug>1) {
-        std::cout << "BANDTree   -> SetBranchAddress(eventnumber  ,&BANDeventID);" << std::endl;
-    }
+    
     BANDTree   -> SetBranchAddress("eventnumber"  ,&BANDeventID);
     BANDTree   -> SetBranchAddress("Runno"        ,&BANDrunID);
     SIDISTree  -> SetBranchAddress("eventnumber"  ,&SIDISeventID);
@@ -498,9 +496,13 @@ void CreateListOfEventsToMerge(TTree * BANDTree,
                 
         BANDTree -> GetEntry(BANDevent);
         
+        if (fdebug>0){
+            std::cout << "BANDTree -> GetEntry(BANDevent)" << std::endl;
+        }
+        
         // after filling the first evnet we do not have to go all the way back to
         // the first event in the SIDIS TTree
-        if (BANDEventIndicesToMerge->size()>0) {
+        if (NmergedEvents>0) {
             SIDISeventIndexMin = SIDISEventIndicesToMerge->back();
         }
         for (int SIDISevent=SIDISeventIndexMin; SIDISevent < NeventsSIDIS ; SIDISevent++){
