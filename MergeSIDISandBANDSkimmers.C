@@ -480,9 +480,6 @@ Int_t CreateListOfEventsToMerge(TTree * BANDTree,
         std::cout << "CreateListOfEventsToMerge()" << std::endl;
     }
     
-//    BANDEventIndicesToMerge->clear();
-//    SIDISEventIndicesToMerge->clear();
-
     Int_t   BANDrunID, BANDeventID, SIDISrunID, SIDISeventID;
     Int_t    NeventsBAND  = BANDTree->GetEntries();
     Int_t    NeventsSIDIS = SIDISTree->GetEntries();
@@ -493,17 +490,10 @@ Int_t CreateListOfEventsToMerge(TTree * BANDTree,
     SIDISTree  -> SetBranchAddress("eventnumber"  ,&SIDISeventID);
     SIDISTree  -> SetBranchAddress("runnum"       ,&SIDISrunID);
     int SIDISeventIndexMin = 0;
-    
-    if (fdebug>1) {
-        std::cout << "stepping over BANDevents" << std::endl;
-    }
+        
     for (int BANDevent=0; BANDevent < NeventsBAND ; BANDevent++){
                 
         BANDTree -> GetEntry(BANDevent);
-        
-        if (fdebug>0){
-            std::cout << "BANDTree -> GetEntry(BANDevent)" << std::endl;
-        }
         
         // after filling the first evnet we do not have to go all the way back to
         // the first event in the SIDIS TTree
@@ -526,8 +516,10 @@ Int_t CreateListOfEventsToMerge(TTree * BANDTree,
                 BANDEventIndicesToMerge[NmergedEvents] = BANDevent;// ->push_back(BANDevent);
                 std::cout << "after BANDEventIndicesToMerge ->push_back(BANDevent);"<< std::endl;
                 SIDISEventIndicesToMerge[NmergedEvents] = SIDISevent; // ->push_back(SIDISevent);
+                
+                NmergedEvents ++ ;
             }
-            NmergedEvents ++ ;
+            
             // in case the run number is identical in SIDIS and BAND trees,
             // we can cut the loop shorter by breaking if we passed the BAND event ID
             if ( (BANDrunID == SIDISrunID) && (SIDISeventID > BANDeventID)) {
