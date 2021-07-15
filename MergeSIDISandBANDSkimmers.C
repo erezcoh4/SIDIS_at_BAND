@@ -21,7 +21,7 @@
 #include "/u/home/cohen/SIDIS_at_BAND/Auxiliary/BEvent.h"
 #include "/u/home/cohen/SIDIS_at_BAND/Auxiliary/constants.h"
 
-#define NMAXEVENTS 100000
+#define NMAXEVENTS 5000000
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 // Globals
@@ -476,6 +476,7 @@ Int_t CreateListOfEventsToMerge(TTree * BANDTree,
     
     // first define two vectors that containt the event IDs in each TTree
     // BAND
+    Int_t  BANDeventIDs[NMAXEVENTS];
     Int_t     BANDeventID, NeventsBAND = BANDTree->GetEntries();
     BANDTree   -> SetBranchAddress("eventnumber"  ,&BANDeventID);
     for (int BANDevent=0; BANDevent < NeventsBAND ; BANDevent++){
@@ -483,6 +484,7 @@ Int_t CreateListOfEventsToMerge(TTree * BANDTree,
         BANDeventIDs[BANDevent] = BANDeventID;
     }
     
+    Int_t  SIDISeventIDs[NMAXEVENTS];
     Int_t     SIDISeventID, NeventsSIDIS = SIDISTree->GetEntries();
     SIDISTree  -> SetBranchAddress("eventnumber"  ,&SIDISeventID);
     for (int SIDISevent=0; SIDISevent < NeventsSIDIS ; SIDISevent++){
