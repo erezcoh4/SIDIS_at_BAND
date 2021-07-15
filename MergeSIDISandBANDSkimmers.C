@@ -103,7 +103,7 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
     if (fdebug>1) {
         std::cout << "Create a list of events to merge" << std::endl;
     }
-    Int_t          EventIDsToMerge[NMAXEVENTS],
+    Int_t          EventIDsToMerge[NMAXEVENTS];
     Int_t  BANDEventIndicesToMerge[NMAXEVENTS];
     Int_t SIDISEventIndicesToMerge[NMAXEVENTS];
     
