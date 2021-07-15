@@ -93,7 +93,7 @@ void MergeSIDISandBANDSkimmers(int RunNumber=6420,
     
     std::cout << "execution time: "
     << double(clock() - tStart) / (double)CLOCKS_PER_SEC
-    << std::endl;
+    << " sec "<< std::endl;
 }
 
 
@@ -136,6 +136,9 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
             std::cout << eventID << "(" << BANDEventIndex << "/" << SIDISEventIndex << "),";
         }
         std::cout << std::endl;
+        std::cout << "Duration time for creating the list: "
+        << double(clock() - tStart) / (double)CLOCKS_PER_SEC
+        << " sec "<< std::endl;
     }
     
     
