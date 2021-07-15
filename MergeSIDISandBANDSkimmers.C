@@ -512,11 +512,8 @@ Int_t CreateListOfEventsToMerge(TTree * BANDTree,
                     << " (in total "     << (NmergedEvents+1)   << " merges)"
                     << std::endl;
                 }
-                std::cout << "before BANDEventIndicesToMerge ->push_back(BANDevent);"<< std::endl;
                 BANDEventIndicesToMerge[NmergedEvents] = BANDevent;// ->push_back(BANDevent);
-                std::cout << "after BANDEventIndicesToMerge ->push_back(BANDevent);"<< std::endl;
                 SIDISEventIndicesToMerge[NmergedEvents] = SIDISevent; // ->push_back(SIDISevent);
-                
                 NmergedEvents ++ ;
             }
             
