@@ -104,8 +104,7 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
     Int_t   BANDrunID, BANDeventID, SIDISrunID, SIDISeventID;
     Int_t   NeventsBAND  = BANDTree->GetEntries();
     Int_t   NeventsSIDIS = SIDISTree->GetEntries();
-    
-    
+        
     // Create a list of events to merge
     // this takes the most resources, and the largest amount of time.
     // typically, per 1 merged event, it takes about 14-40 ms
