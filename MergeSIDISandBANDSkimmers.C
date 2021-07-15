@@ -116,7 +116,8 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
         << "stepping over "
         << NeventsBAND << " BAND and "
         << NeventsSIDIS << " SIDIS events"
-        << std::endl;
+        << std::endl
+        << "Take some coffee, this takes the largest amount of time.";
     }
     Int_t          EventIDsToMerge[NMAXEVENTS];
     Int_t  BANDEventIndicesToMerge[NMAXEVENTS];
@@ -133,8 +134,8 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
     if (fdebug>1) {
         std::cout << "Merging events (BAND/SIDIS):"  << std::endl;
         for (int i=0; i<Nevents2Merge; i++) {
-            auto eventID = EventIDsToMerge[i];
-            auto BANDEventIndex = BANDEventIndicesToMerge[i];
+            auto         eventID = EventIDsToMerge[i];
+            auto  BANDEventIndex = BANDEventIndicesToMerge[i];
             auto SIDISEventIndex = SIDISEventIndicesToMerge[i];
             std::cout << eventID << "(" << BANDEventIndex << "/" << SIDISEventIndex << "),";
         }
