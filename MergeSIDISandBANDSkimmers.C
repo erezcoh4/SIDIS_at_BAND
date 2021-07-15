@@ -470,12 +470,13 @@ void CreateListOfEventsToMerge(TTree * BANDTree,
                                std::vector<int> * BANDEventIndicesToMerge,
                                std::vector<int> * SIDISEventIndicesToMerge,
                                int fdebug){
+    // fast way to decide which event-indices to merge from the two TTrees
     if (fdebug>1) {
         std::cout << "CreateListOfEventsToMerge()" << std::endl;
     }
-    // fast way to decide which event-indices to merge from the two TTrees
-    BANDEventIndicesToMerge->clear();
-    SIDISEventIndicesToMerge->clear();
+    
+//    BANDEventIndicesToMerge->clear();
+//    SIDISEventIndicesToMerge->clear();
 
     Int_t   BANDrunID, BANDeventID, SIDISrunID, SIDISeventID;
     Int_t    NeventsBAND  = BANDTree->GetEntries();
