@@ -512,8 +512,8 @@ Int_t CreateListOfEventsToMerge(TTree * BANDTree,
             if ( BANDeventIDs[BANDeventIndex] == SIDISeventIDs[SIDISeventIndex] ){
                 
                 EventIDsToMerge[NmergedEvents] = BANDeventID;
-                BANDEventIndicesToMerge[NmergedEvents] = BANDevent;
-                SIDISEventIndicesToMerge[NmergedEvents] = SIDISevent;
+                BANDEventIndicesToMerge[NmergedEvents] = BANDeventIndex;
+                SIDISEventIndicesToMerge[NmergedEvents] = SIDISeventIndex;
                 NmergedEvents ++ ;
                 
                 if ((NeventsToMerge>0) && (NmergedEvents >= NeventsToMerge)){
