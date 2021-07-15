@@ -474,18 +474,30 @@ void CreateListOfEventsToMerge(std::vector<int> BANDEventIndicesToMerge,
     Int_t   BANDrunID, BANDeventID, SIDISrunID, SIDISeventID;
     Int_t   NeventsBAND  = BANDTree->GetEntries();
     Int_t   NeventsSIDIS = SIDISTree->GetEntries();
+    int SIDISeventIndexMin = 0;
+    
     
     for (int BANDevent=0; BANDevent < NeventsBAND ; BANDevent++){
-        
+                
         BANDTree -> GetEntry(BANDevent);
         
-        for (int SIDISevent=0; SIDISevent < NeventsSIDIS ; SIDISevent++){
+        // after filling the first evnet we do not have to go all the way back to
+        // the first event in the SIDIS TTree
+        if (BANDEventIndicesToMerge.size()>0) {
+            SIDISeventIndexMin = SIDISEventIndicesToMerge.back();
+        }
+        for (int SIDISevent=SIDISeventIndexMin; SIDISevent < NeventsSIDIS ; SIDISevent++){
             
             SIDISTree -> GetEntry(SIDISevent);
                         
             if ( (BANDrunID == SIDISrunID) && (BANDeventID == SIDISeventID)){
                 BANDEventIndicesToMerge.push_back(BANDevent);
-                BANDEventIndicesToMerge.push_back(SIDISevent);
+                SIDISEventIndicesToMerge.push_back(SIDISevent);
+            }
+            // in case the run number is identical in SIDIS and BAND trees,
+            // we can cut the loop shorter by breaking if we passed the BAND event ID
+            if ( (BANDrunID == SIDISrunID) && (SIDISeventID > BANDeventID)) {
+                break;
             }
         }
     }
