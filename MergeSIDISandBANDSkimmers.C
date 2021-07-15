@@ -352,7 +352,7 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
             (double)goodneutron,
         },fdebug);
         
-        if (fdebug>1){
+        if (fdebug>2){
             std::cout
             << "merging event " << BANDeventID << " from run " << BANDrunID
             << std::endl;
@@ -436,7 +436,7 @@ void CloseOutputFiles (TString OutDataPath){
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void StreamToCSVfile (std::vector<Double_t> observables, int fdebug){
-    if (fdebug>1) std::cout << "StreamToCSVfile()" << std::endl;
+    if (fdebug>2) std::cout << "StreamToCSVfile()" << std::endl;
     for (auto v:observables) {
         CSVfile << v << ",";
     }
