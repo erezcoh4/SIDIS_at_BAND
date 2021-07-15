@@ -524,9 +524,9 @@ Int_t CreateListOfEventsToMerge(TTree * BANDTree,
             }
             
         }
-        
     }
-    
+    return NmergedEvents;
+
     
     //    int SIDISeventIndexMin = 0;
     //
@@ -568,5 +568,4 @@ Int_t CreateListOfEventsToMerge(TTree * BANDTree,
     //            }
     //        }
     //    }
-    return NmergedEvents;
 }
