@@ -14,6 +14,7 @@
 #include <TChain.h>
 #include <TCanvas.h>
 #include <TBenchmark.h>
+#include<time.h>
 
 #include "/u/home/cohen/SIDIS_at_BAND/Auxiliary/bank.h"
 #include "/u/home/cohen/SIDIS_at_BAND/Auxiliary/BBand.h"
@@ -38,6 +39,9 @@ TTree * MergedTree;
 
 // Output CSV file
 std::ofstream   CSVfile;
+
+// time
+clock_t tStart = clock();
 
 
 
@@ -87,6 +91,9 @@ void MergeSIDISandBANDSkimmers(int RunNumber=6420,
     CloseOutputFiles (DataPath + "merged_SIDIS_and_BAND_skimming/");
     CloseInputFiles  ();
     
+    std::cout << "execution time: "
+    << double(clock() - tStart) / (double)CLOCKS_PER_SEC
+    << std::endl;
 }
 
 
