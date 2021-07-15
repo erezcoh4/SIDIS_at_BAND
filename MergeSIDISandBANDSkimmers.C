@@ -139,8 +139,7 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
         std::cout << "Duration for creating the list: "
         << double(clock() - tStart) / (double)CLOCKS_PER_SEC
         << " sec "<< std::endl;
-    }
-    return;
+    }    
     
     
     
