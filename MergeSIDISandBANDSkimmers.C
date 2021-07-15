@@ -464,14 +464,15 @@ void CreateListOfEventsToMerge(std::vector<int> BANDEventIndicesToMerge,
     // fast way to decide which event-indices to merge from the two TTrees
     BANDEventIndicesToMerge.clear();
     SIDISEventIndicesToMerge.clear();
-    
+
+    Int_t   BANDrunID, BANDeventID, SIDISrunID, SIDISeventID;
+    Int_t   NeventsBAND  = BANDTree->GetEntries();
+    Int_t   NeventsSIDIS = SIDISTree->GetEntries();
+
     BANDTree   -> SetBranchAddress("eventnumber"  ,&BANDeventID);
     BANDTree   -> SetBranchAddress("Runno"        ,&BANDrunID);
     SIDISTree  -> SetBranchAddress("eventnumber"  ,&SIDISeventID);
     SIDISTree  -> SetBranchAddress("runnum"       ,&SIDISrunID);
-    Int_t   BANDrunID, BANDeventID, SIDISrunID, SIDISeventID;
-    Int_t   NeventsBAND  = BANDTree->GetEntries();
-    Int_t   NeventsSIDIS = SIDISTree->GetEntries();
     int SIDISeventIndexMin = 0;
     
     
