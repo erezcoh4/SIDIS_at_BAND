@@ -27,7 +27,7 @@ using namespace clas12;
 TVector3                GetParticleVertex (clas12::region_part_ptr rp);
 void                     SetLorentzVector (TLorentzVector &p4, clas12::region_part_ptr rp);
 void                      OpenOutputFiles (TString csvfilename, TString header);
-void                     CloseOutputFiles ();
+void                     CloseOutputFiles (TString OutDataPath);
 void                      StreamToCSVfile (std::vector<Double_t> observables, bool IsSelectedEvent, int fdebug);
 void                      ChangeAxesFrame (TString FrameName="q(z) frame");
 void                        MoveTo_qFrame ();
@@ -438,11 +438,14 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
                                                                          chi2PID_pips,  piplus.P(),
                                                                          Ve, Vpiplus );
                     EventPassedCuts =( ePastSelectionCuts && piplusPastSelectionCuts );
-                    if ( EventPassedCuts ) IsSelectedEvent = true;
+                    if ( EventPassedCuts ) {
+                        IsSelectedEvent = true;
+                        outTree -> Fill();
+                    }
                 }
                 
                 
-                outTree -> Fill();
+                
                 StreamToCSVfile({(Double_t)event,
                     e.E(),              e.P(),          e.Px(),             e.Py(),
                     e.Pz(),             e.Theta(),      e.Phi(),
@@ -485,7 +488,7 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
     auto finish = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed = finish - start;
     std::cout << "Done. Elapsed time: " << elapsed.count()<< ", processed " << event << " events, " << good_event << " passed filter\n";
-    CloseOutputFiles();
+    CloseOutputFiles("/volatile/clas12/users/ecohen/BAND/SIDIS_skimming/");
 }
 
 
@@ -691,7 +694,7 @@ void OpenOutputFiles (TString outfilename,TString header){
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-void CloseOutputFiles (){
+void CloseOutputFiles (TString OutDataPath){
     // close output CSV
     CSVfile.close();
     SelectedEventsCSVfile.close();
@@ -701,7 +704,8 @@ void CloseOutputFiles (){
     outTree->Write();
     outFile->Close();
     
-    std::cout << "output files ready in root/csv formats" << std::endl;
+    std::cout << "output files ready in root/csv formats in " << std::endl
+    << OutDataPath << std::endl;
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
