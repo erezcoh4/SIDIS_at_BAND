@@ -1,5 +1,20 @@
 // last edit July-8, 2021 (EOC, mbp), see README
 
+#include <cstdlib>
+#include <iostream>
+#include <chrono>
+#include <TFile.h>
+#include <TTree.h>
+#include <TApplication.h>
+#include <TROOT.h>
+#include <TDatabasePDG.h>
+#include <TLorentzVector.h>
+#include <TVector3.h>
+#include <TH1.h>
+#include <TChain.h>
+#include <TCanvas.h>
+#include <TBenchmark.h>
+
 #include "/u/home/cohen/SIDIS_at_BAND/Auxiliary/bank.h"
 #include "/u/home/cohen/SIDIS_at_BAND/Auxiliary/BBand.h"
 #include "/u/home/cohen/SIDIS_at_BAND/Auxiliary/BEvent.h"
@@ -29,7 +44,7 @@ void          OpenInputFiles (TString RunStr);
 void         OpenOutputFiles (TString RunStr, TString header);
 void         StreamToCSVfile (std::vector<Double_t> observables, int fdebug=0);
 void         CloseInputFiles ();
-void        CloseOutputFiles ();
+void        CloseOutputFiles (TString OutDataPath);
 void MergeSIDISandBANDevents (int NeventsToMerge=10,
                               int fdebug=2,
                               int PrintProgress=5000);
@@ -47,16 +62,16 @@ void MergeSIDISandBANDSkimmers(int RunNumber=6420,
     sprintf( RunNumberStr, "00%d", RunNumber );
     OpenInputFiles   ( (TString)RunNumberStr );
     OpenOutputFiles  ( (TString)RunNumberStr,
-                      ("runID,eventID,"     +
-                      "livetime,current,"   +
-                      "xB,Q2,"              +
-                      "Ebeam,z,"            +
-                      "e_Px,e_Py,"          +
-                      "e_Pz,e_E,"           +
-                      "q_Px,q_Py,"          +
-                      "q_Pz,q_E,"           +
-                      "Ve_z,Vpiplus_z,"     +
-                      "goodneutron,"));
+                      ("runID,eventID,"
+                       +(TString)"livetime,current,"
+                       +(TString)"xB,Q2,"
+                       +(TString)"Ebeam,z,"
+                       +(TString)"e_Px,e_Py,"
+                       +(TString)"e_Pz,e_E,"
+                       +(TString)"q_Px,q_Py,"
+                       +(TString)"q_Pz,q_E,"
+                       +(TString)"Ve_z,Vpiplus_z,"
+                       +(TString)"goodneutron,"));
     
     MergeSIDISandBANDevents( NeventsToMerge, fdebug, PrintProgress );
     
@@ -307,16 +322,16 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
                 }
                 
                 MergedTree -> Fill();
-                StreamToCSVfile ({  BANDrunID,      BANDeventID,
-                                    livetime,       current,
-                                    xB,             Q2,
-                                    Ebeam,          z,
-                                    e.Px(),         e.Py(),
-                                    e.Pz(),         e.E(),
-                                    q.Px(),         q.Py(),
-                                    q.Pz(),         q.E(),
-                                    Ve.z(),         Vpiplus.z(),
-                                    goodneutron,
+                StreamToCSVfile ({  (double)BANDrunID,  (double)BANDeventID,
+                                    livetime,           current,
+                                    xB,                 Q2,
+                                    Ebeam,              z,
+                                    e.Px(),             e.Py(),
+                                    e.Pz(),             e.E(),
+                                    q.Px(),             q.Py(),
+                                    q.Pz(),             q.E(),
+                                    Ve.z(),             Vpiplus.z(),
+                                    (double)goodneutron,
                 },fdebug);
                 // record event
                 NmergedEvents ++;
@@ -394,11 +409,15 @@ void CloseOutputFiles (){
     // close output CSV
     CSVfile.close();
     
+    int Nevents = MergedTree->GetEntries();
+    
     // close output ROOT
     MergedFile->cd();
     MergedTree->Write();
     MergedFile->Close();
     
+    std::cout << "output file ready in " << std::endl << OutDataPath << std::endl
+    << "merged " << Nevents << " SIDIS and BAND (neutron) events" << std::endl;
 }
 
 
