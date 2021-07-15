@@ -101,7 +101,12 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
     
     // Create a list of events to merge
     if (fdebug>1) {
-        std::cout << "Create a list of events to merge" << std::endl;
+        
+        std::cout << "Create a list of events to merge" << std::endl
+        << "stepping over "
+        << NeventsBAND << " BAND and "
+        << NeventsSIDIS << " SIDIS events"
+        << std::endl;
     }
     Int_t          EventIDsToMerge[NMAXEVENTS];
     Int_t  BANDEventIndicesToMerge[NMAXEVENTS];
@@ -327,13 +332,7 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
     
     
     
-    if (fdebug>1) {
-        std::cout
-        << "stepping over "
-        << NeventsBAND << " BAND and "
-        << NeventsSIDIS << " SIDIS events"
-        << std::endl;
-    }
+    
     //    int NmergedEvents = 0;
     for (int MergedEvtId=0; MergedEvtId<Nevents2Merge; MergedEvtId++) {
         
@@ -359,7 +358,9 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
         }
     } // end merged event loop
     
-    std::cout << "merged " << Nevents2Merge << " SIDIS and BAND events." << std::endl;
+    if (fdebug>2){
+        std::cout << "merged " << Nevents2Merge << " SIDIS and BAND events." << std::endl;
+    }
 }
 
 
