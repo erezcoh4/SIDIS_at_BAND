@@ -27,7 +27,7 @@ std::ofstream   CSVfile;
 
 void          OpenInputFiles (TString RunStr);
 void         OpenOutputFiles (TString RunStr, TString header);
-
+void         StreamToCSVfile (std::vector<Double_t> observables, int fdebug=0);
 void         CloseInputFiles ();
 void        CloseOutputFiles ();
 void MergeSIDISandBANDevents (int NeventsToMerge=10,
@@ -39,7 +39,7 @@ void MergeSIDISandBANDevents (int NeventsToMerge=10,
 // Main functionality
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void MergeSIDISandBANDSkimmers(int RunNumber=6420,
-                               int NeventsToMerge=10,
+                               int NeventsToMerge=-1,
                                int fdebug=2,
                                int PrintProgress=5000){
     
@@ -47,7 +47,16 @@ void MergeSIDISandBANDSkimmers(int RunNumber=6420,
     sprintf( RunNumberStr, "00%d", RunNumber );
     OpenInputFiles   ( (TString)RunNumberStr );
     OpenOutputFiles  ( (TString)RunNumberStr,
-                      "variables" );
+                      ("runID,eventID,"     +
+                      "livetime,current,"   +
+                      "xB,Q2,"              +
+                      "Ebeam,z,"            +
+                      "e_Px,e_Py,"          +
+                      "e_Pz,e_E,"           +
+                      "q_Px,q_Py,"          +
+                      "q_Pz,q_E,"           +
+                      "Ve_z,Vpiplus_z,"     +
+                      "goodneutron,"));
     
     MergeSIDISandBANDevents( NeventsToMerge, fdebug, PrintProgress );
     
@@ -298,10 +307,21 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
                 }
                 
                 MergedTree -> Fill();
+                StreamToCSVfile ({  BANDrunID,      BANDeventID,
+                                    livetime,       current,
+                                    xB,             Q2,
+                                    Ebeam,          z,
+                                    e.Px(),         e.Py(),
+                                    e.Pz(),         e.E(),
+                                    q.Px(),         q.Py(),
+                                    q.Pz(),         q.E(),
+                                    Ve.z(),         Vpiplus.z(),
+                                    goodneutron,
+                },fdebug);
                 // record event
                 NmergedEvents ++;
                 
-                if (NmergedEvents >= NeventsToMerge){
+                if ((NmergedEvents>0) && (NmergedEvents >= NeventsToMerge)){
                     std::cout << "merged " << NmergedEvents
                     << " events, which is the maximum required. Breaking." << std::endl;
                     return;
@@ -342,7 +362,7 @@ void OpenInputFiles (TString RunStr){
 
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-void OpenOutputFiles (TString RunStr, TString header){
+void OpenOutputFiles (TString RunStr, TString csvheader){
     
     
     TString skimmedMergedFilename = (DataPath + "merged_SIDIS_and_BAND_skimming/"
@@ -356,7 +376,7 @@ void OpenOutputFiles (TString RunStr, TString header){
     
     // Create output csv files
     CSVfile.open( skimmedMergedFilename + ".csv" );
-    CSVfile << header << std::endl;
+    CSVfile << csvheader << std::endl;
     
 }
 
@@ -381,3 +401,13 @@ void CloseOutputFiles (){
     
 }
 
+
+// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+void StreamToCSVfile (std::vector<Double_t> observables, int fdebug){
+    if (fdebug>1) std::cout << "StreamToCSVfile()" << std::endl;
+        
+    for (auto v:observables) {
+        CSVfile << v << ",";
+    }
+    CSVfile << std::endl;
+}

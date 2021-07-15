@@ -24,7 +24,7 @@ MergeSIDISandBANDSkimmers.C
 
  ---------------------------------------------
  void MergeSIDISandBANDSkimmers (   int RunNumber=6420,
-                                    int NeventsToMerge=100,
+                                    int NeventsToMerge=-1, // all possible events
                                     int fdebug=1,
                                     int PrintProgress=5000 )
   ---------------------------------------------
@@ -33,7 +33,9 @@ Merge SIDIS skimming (based on SIDISc12rSkimmer.C) with BAND skimming (based on 
 
 execute:
 -----------------
-   root -l MergeSIDISandBANDSkimmers.C
+
+    root -l MergeSIDISandBANDSkimmers.C
+    root -l -q "MergeSIDISandBANDSkimmers.C+(6420,-1)"
 
 
 

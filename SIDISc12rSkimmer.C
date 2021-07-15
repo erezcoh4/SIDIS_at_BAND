@@ -699,13 +699,16 @@ void CloseOutputFiles (TString OutDataPath){
     CSVfile.close();
     SelectedEventsCSVfile.close();
     
+    int Nentires = outTree -> GetEntries();
+    
     // close output ROOT
     outFile->cd();
     outTree->Write();
     outFile->Close();
     
     std::cout << "output files ready in root/csv formats in " << std::endl
-    << OutDataPath << std::endl;
+    << OutDataPath << std::endl
+    << "wrote " << Nentires << " to output root file";
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
