@@ -53,6 +53,7 @@ void           CloseOutputFiles (TString OutDataPath);
 void    MergeSIDISandBANDevents (int NeventsToMerge=10,
                                  int fdebug=2,
                                  int PrintProgress=5000);
+void    Hello (int NeventsToMerge=10, int fdebug=2, int PrintProgress=5000);
 Int_t CreateListOfEventsToMerge (TTree * BANDTree,
                                  TTree * SIDISTree,
                                  Int_t          EventIDsToMerge[NMAXEVENTS],
@@ -85,6 +86,8 @@ void MergeSIDISandBANDSkimmers(int RunNumber=6420,
                        +(TString)"Ve_z,Vpiplus_z,"
                        +(TString)"goodneutron,"));
     
+    std::cout << "go to Hello() " << std::endl;
+    Hello( NeventsToMerge, fdebug, PrintProgress );
     std::cout << "go to MergeSIDISandBANDevents() " << std::endl;
     MergeSIDISandBANDevents( NeventsToMerge, fdebug, PrintProgress );
     std::cout << "done MergeSIDISandBANDevents() " << std::endl;
@@ -99,6 +102,11 @@ void MergeSIDISandBANDSkimmers(int RunNumber=6420,
 }
 
 
+
+// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+void    Hello (int NeventsToMerge=10, int fdebug=2, int PrintProgress=5000){
+    std::cout << "hello..." << std::endl;
+}
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
