@@ -135,9 +135,9 @@ void    Hello (int NeventsToMerge=10, int fdebug=2, int PrintProgress=5000){
     std::cout << "You're all I've ever wanted, and your arms are open wide..." << std::endl;
     Int_t Nevents2Merge = CreateListOfEventsToMerge(BANDTree,
                                                     SIDISTree,
-                                                    EventIDsToMerge,
-                                                    BANDEventIndicesToMerge,
-                                                    SIDISEventIndicesToMerge,
+//                                                    EventIDsToMerge,
+//                                                    BANDEventIndicesToMerge,
+//                                                    SIDISEventIndicesToMerge,
                                                     NeventsToMerge,
                                                     fdebug);
     std::cout << "Cause you know just what to say, and you know just what to do..." << std::endl;
