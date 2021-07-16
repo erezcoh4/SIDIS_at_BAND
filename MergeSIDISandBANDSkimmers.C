@@ -143,106 +143,107 @@ void    Hello (int NeventsToMerge=10, int fdebug=2, int PrintProgress=5000){
                                                     NeventsToMerge,
                                                     fdebug);
     std::cout << "Cause you know just what to say, and you know just what to do..." << std::endl;
-//    if (fdebug>2) {
-//        std::cout << "Merging events (BAND/SIDIS):"  << std::endl;
-//        for (int i=0; i<Nevents2Merge; i++) {
-//            auto         eventID = EventIDsToMerge[i];
-//            auto  BANDEventIndex = BANDEventIndicesToMerge[i];
-//            auto SIDISEventIndex = SIDISEventIndicesToMerge[i];
-//            std::cout << eventID << "(" << BANDEventIndex << "/" << SIDISEventIndex << "),";
-//        }
-//        std::cout << std::endl;
-//        std::cout << "Duration for creating the list: "
-//        << double(clock() - tStart) / (double)CLOCKS_PER_SEC
-//        << " sec "<< std::endl;
-//    }
-//
-//
-//
-//
-//    // SIDIS Tree
-//    TLorentzVector        *e=0;
-//    TLorentzVector   *piplus=0;
-//    TLorentzVector     *Beam=0;
-//    TLorentzVector        *q=0;
-//    // reconstructed vertex position
-//    TVector3             *Ve=0;
-//    TVector3        *Vpiplus=0;
-//
-//    // kinematics
-//    Double_t             xB;
-//    Double_t             Q2;
-//    Double_t          omega;
-//    Double_t              z; // energy fraction rest frame
-//
-//    bool      ePastSelectionCuts = false;
-//    bool piplusPastSelectionCuts = false;
-//
-//    int     DC_layer;
-//
-//    double  pips_PCAL_W, pips_PCAL_V, pips_PCAL_x, pips_PCAL_y,       pips_PCAL_z;
-//    double  chi2PID_pips;
-//    double  pips_PCAL_sector, pips_DC_sector, pips_Chi2N;
-//    double  pips_DC_x[3], pips_DC_y[3];
-//
-//    double  E_PCAL_e, E_ECIN_e, E_ECOUT_e; // electron energy deposit in ECAL_out [GeV]
-//    double  e_PCAL_W,    e_PCAL_V;
-//    double  e_PCAL_x,    e_PCAL_y, e_PCAL_z;
-//    double  e_PCAL_sector;
-//    double  e_DC_sector,        e_DC_Chi2N;
-//    double  e_DC_x[3],   e_DC_y[3];
-//
-//    double  E_PCAL_pips, E_ECIN_pips,       E_ECOUT_pips;
-//    SIDISTree  -> SetBranchAddress("eventnumber"  ,&SIDISeventID);
-//    SIDISTree  -> SetBranchAddress("runnum"       ,&SIDISrunID);
-//
-//    // output tree branches
-//    SIDISTree  -> SetBranchAddress("E_PCAL_e"          ,&E_PCAL_e              );
-//    SIDISTree  -> SetBranchAddress("E_ECIN_e"          ,&E_ECIN_e              );
-//    SIDISTree  -> SetBranchAddress("E_ECOUT_e"         ,&E_ECOUT_e             );
-//    SIDISTree  -> SetBranchAddress("chi2PID_pips"      ,&chi2PID_pips          );
-//
-//    SIDISTree  -> SetBranchAddress("e_PCAL_W"          ,&e_PCAL_W              );
-//    SIDISTree  -> SetBranchAddress("e_PCAL_V"          ,&e_PCAL_V              );
-//    SIDISTree  -> SetBranchAddress("pips_PCAL_x"       ,&pips_PCAL_x           );
-//    SIDISTree  -> SetBranchAddress("pips_PCAL_y"       ,&pips_PCAL_y           );
-//    SIDISTree  -> SetBranchAddress("pips_PCAL_z"       ,&pips_PCAL_z           );
-//    SIDISTree  -> SetBranchAddress("e_PCAL_x"          ,&e_PCAL_x              );
-//    SIDISTree  -> SetBranchAddress("e_PCAL_y"          ,&e_PCAL_y              );
-//    SIDISTree  -> SetBranchAddress("e_PCAL_z"          ,&e_PCAL_z              );
-//
-//    SIDISTree  -> SetBranchAddress("e_PCAL_sector"     ,&e_PCAL_sector         );
-//    SIDISTree  -> SetBranchAddress("e_DC_sector"       ,&e_DC_sector           );
-//    SIDISTree  -> SetBranchAddress("e_DC_Chi2N"        ,&e_DC_Chi2N            );
-//    //    SIDISTree  -> SetBranchAddress("e_DC_x"            ,&e_DC_x                );
-//    //    SIDISTree  -> SetBranchAddress("e_DC_y"            ,&e_DC_y                );
-//
-//    SIDISTree  -> SetBranchAddress("pips_PCAL_sector"          ,&pips_PCAL_sector      );
-//    SIDISTree  -> SetBranchAddress("pips_DC_sector"            ,&pips_DC_sector        );
-//    SIDISTree  -> SetBranchAddress("pips_Chi2N"                ,&pips_Chi2N            );
-//    //    SIDISTree  -> SetBranchAddress("pips_DC_x"                 ,&pips_DC_x             );
-//    //    SIDISTree  -> SetBranchAddress("pips_DC_y"                 ,&pips_DC_y             );
-//
-//    SIDISTree  -> SetBranchAddress("E_PCAL_pips"               ,&E_PCAL_pips           );
-//    SIDISTree  -> SetBranchAddress("E_ECIN_pips"               ,&E_ECIN_pips           );
-//
-//    SIDISTree  -> SetBranchAddress("E_ECIN_pips"               ,&E_ECIN_pips           );
-//    SIDISTree  -> SetBranchAddress("E_ECOUT_pips"              ,&E_ECOUT_pips          );
-//    SIDISTree  -> SetBranchAddress("DC_layer"                  ,&DC_layer              );
-//
-//    SIDISTree  -> SetBranchAddress("e"                         ,&e                     );
-//    SIDISTree  -> SetBranchAddress("piplus"                    ,&piplus                );
-//    SIDISTree  -> SetBranchAddress("Ve"                        ,&Ve                    );
-//    SIDISTree  -> SetBranchAddress("Vpiplus"                   ,&Vpiplus               );
-//    SIDISTree  -> SetBranchAddress("Beam"                      ,&Beam                  );
-//    SIDISTree  -> SetBranchAddress("q"                         ,&q                     );
-//
-//    SIDISTree  -> SetBranchAddress("xB"                        ,&xB                    );
-//    SIDISTree  -> SetBranchAddress("Q2"                        ,&Q2                    );
-//    SIDISTree  -> SetBranchAddress("omega"                     ,&omega                 );
-//    SIDISTree  -> SetBranchAddress("z"                         ,&z                     );
-//    SIDISTree  -> SetBranchAddress("ePastSelectionCuts"        ,&ePastSelectionCuts    );
-//    SIDISTree  -> SetBranchAddress("piplusPastSelectionCuts"   ,&piplusPastSelectionCuts);
+    if (fdebug>2) {
+        std::cout << "Merging events (BAND/SIDIS):"  << std::endl;
+        for (int i=0; i<Nevents2Merge; i++) {
+            auto         eventID = EventIDsToMerge[i];
+            auto  BANDEventIndex = BANDEventIndicesToMerge[i];
+            auto SIDISEventIndex = SIDISEventIndicesToMerge[i];
+            std::cout << eventID << "(" << BANDEventIndex << "/" << SIDISEventIndex << "),";
+        }
+        std::cout << std::endl;
+        std::cout << "Duration for creating the list: "
+        << double(clock() - tStart) / (double)CLOCKS_PER_SEC
+        << " sec "<< std::endl;
+    }
+
+
+
+
+    // SIDIS Tree
+    TLorentzVector        *e=0;
+    TLorentzVector   *piplus=0;
+    TLorentzVector     *Beam=0;
+    TLorentzVector        *q=0;
+    // reconstructed vertex position
+    TVector3             *Ve=0;
+    TVector3        *Vpiplus=0;
+
+    // kinematics
+    Double_t             xB;
+    Double_t             Q2;
+    Double_t          omega;
+    Double_t              z; // energy fraction rest frame
+
+    bool      ePastSelectionCuts = false;
+    bool piplusPastSelectionCuts = false;
+
+    int     DC_layer;
+
+    double  pips_PCAL_W, pips_PCAL_V, pips_PCAL_x, pips_PCAL_y,       pips_PCAL_z;
+    double  chi2PID_pips;
+    double  pips_PCAL_sector, pips_DC_sector, pips_Chi2N;
+    double  pips_DC_x[3], pips_DC_y[3];
+
+    double  E_PCAL_e, E_ECIN_e, E_ECOUT_e; // electron energy deposit in ECAL_out [GeV]
+    double  e_PCAL_W,    e_PCAL_V;
+    double  e_PCAL_x,    e_PCAL_y, e_PCAL_z;
+    double  e_PCAL_sector;
+    double  e_DC_sector,        e_DC_Chi2N;
+    double  e_DC_x[3],   e_DC_y[3];
+
+    double  E_PCAL_pips, E_ECIN_pips,       E_ECOUT_pips;
+    SIDISTree  -> SetBranchAddress("eventnumber"  ,&SIDISeventID);
+    SIDISTree  -> SetBranchAddress("runnum"       ,&SIDISrunID);
+
+    // output tree branches
+    SIDISTree  -> SetBranchAddress("E_PCAL_e"          ,&E_PCAL_e              );
+    SIDISTree  -> SetBranchAddress("E_ECIN_e"          ,&E_ECIN_e              );
+    SIDISTree  -> SetBranchAddress("E_ECOUT_e"         ,&E_ECOUT_e             );
+    SIDISTree  -> SetBranchAddress("chi2PID_pips"      ,&chi2PID_pips          );
+
+    SIDISTree  -> SetBranchAddress("e_PCAL_W"          ,&e_PCAL_W              );
+    SIDISTree  -> SetBranchAddress("e_PCAL_V"          ,&e_PCAL_V              );
+    SIDISTree  -> SetBranchAddress("pips_PCAL_x"       ,&pips_PCAL_x           );
+    SIDISTree  -> SetBranchAddress("pips_PCAL_y"       ,&pips_PCAL_y           );
+    SIDISTree  -> SetBranchAddress("pips_PCAL_z"       ,&pips_PCAL_z           );
+    SIDISTree  -> SetBranchAddress("e_PCAL_x"          ,&e_PCAL_x              );
+    SIDISTree  -> SetBranchAddress("e_PCAL_y"          ,&e_PCAL_y              );
+    SIDISTree  -> SetBranchAddress("e_PCAL_z"          ,&e_PCAL_z              );
+
+    SIDISTree  -> SetBranchAddress("e_PCAL_sector"     ,&e_PCAL_sector         );
+    SIDISTree  -> SetBranchAddress("e_DC_sector"       ,&e_DC_sector           );
+    SIDISTree  -> SetBranchAddress("e_DC_Chi2N"        ,&e_DC_Chi2N            );
+    //    SIDISTree  -> SetBranchAddress("e_DC_x"            ,&e_DC_x                );
+    //    SIDISTree  -> SetBranchAddress("e_DC_y"            ,&e_DC_y                );
+
+    SIDISTree  -> SetBranchAddress("pips_PCAL_sector"          ,&pips_PCAL_sector      );
+    SIDISTree  -> SetBranchAddress("pips_DC_sector"            ,&pips_DC_sector        );
+    SIDISTree  -> SetBranchAddress("pips_Chi2N"                ,&pips_Chi2N            );
+    //    SIDISTree  -> SetBranchAddress("pips_DC_x"                 ,&pips_DC_x             );
+    //    SIDISTree  -> SetBranchAddress("pips_DC_y"                 ,&pips_DC_y             );
+
+    SIDISTree  -> SetBranchAddress("E_PCAL_pips"               ,&E_PCAL_pips           );
+    SIDISTree  -> SetBranchAddress("E_ECIN_pips"               ,&E_ECIN_pips           );
+
+    SIDISTree  -> SetBranchAddress("E_ECIN_pips"               ,&E_ECIN_pips           );
+    SIDISTree  -> SetBranchAddress("E_ECOUT_pips"              ,&E_ECOUT_pips          );
+    SIDISTree  -> SetBranchAddress("DC_layer"                  ,&DC_layer              );
+
+    SIDISTree  -> SetBranchAddress("e"                         ,&e                     );
+    SIDISTree  -> SetBranchAddress("piplus"                    ,&piplus                );
+    SIDISTree  -> SetBranchAddress("Ve"                        ,&Ve                    );
+    SIDISTree  -> SetBranchAddress("Vpiplus"                   ,&Vpiplus               );
+    SIDISTree  -> SetBranchAddress("Beam"                      ,&Beam                  );
+    SIDISTree  -> SetBranchAddress("q"                         ,&q                     );
+
+    SIDISTree  -> SetBranchAddress("xB"                        ,&xB                    );
+    SIDISTree  -> SetBranchAddress("Q2"                        ,&Q2                    );
+    SIDISTree  -> SetBranchAddress("omega"                     ,&omega                 );
+    SIDISTree  -> SetBranchAddress("z"                         ,&z                     );
+    SIDISTree  -> SetBranchAddress("ePastSelectionCuts"        ,&ePastSelectionCuts    );
+    SIDISTree  -> SetBranchAddress("piplusPastSelectionCuts"   ,&piplusPastSelectionCuts);
+    std::cout << "And I want to tell you so much, I love you" << std::endl;
 //
 //
 //
