@@ -71,7 +71,7 @@ Int_t CreateListOfEventsToMerge (TTree * BANDTree,
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void MergeSIDISandBANDSkimmers(int RunNumber=6420,
                                int NeventsToMerge=-1,
-                               int fdebug=2,
+                               int fdebug=1,
                                int PrintProgress=5000){
     
     char RunNumberStr[20];
