@@ -127,7 +127,7 @@ void    Hello (int NeventsToMerge=10, int fdebug=2, int PrintProgress=5000){
         << "Take some coffee, this takes the largest amount of time."
         << std::endl;
     }
-//    Int_t          EventIDsToMerge[NMAXEVENTS];
+    Int_t          EventIDsToMerge[NMAXEVENTS];
 //    Int_t  BANDEventIndicesToMerge[NMAXEVENTS];
 //    Int_t SIDISEventIndicesToMerge[NMAXEVENTS];
     std::cout << "You're all I've ever wanted, and your arms are open wide..." << std::endl;
