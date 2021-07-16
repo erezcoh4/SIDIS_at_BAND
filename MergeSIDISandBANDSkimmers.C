@@ -114,23 +114,23 @@ void    Hello (int NeventsToMerge=10, int fdebug=2, int PrintProgress=5000){
     std::cout << "I can see it in your eyes..." << std::endl;
     Int_t   NeventsSIDIS = SIDISTree->GetEntries();
     std::cout << "I can see it in your smile..." << std::endl;
-//    // Create a list of events to merge
-//    // this takes the most resources, and the largest amount of time.
-//    // typically, per 1 merged event, it takes about 14-40 ms
-//    // and we typically merge 1M events = 1e4 sec
-//    if (fdebug>1) {
-//        std::cout << "Create a list of events to merge" << std::endl
-//        << "stepping over "
-//        << NeventsBAND << " BAND and "
-//        << NeventsSIDIS << " SIDIS events"
-//        << std::endl
-//        << "Take some coffee, this takes the largest amount of time."
-//        << std::endl;
-//    }
-//    Int_t          EventIDsToMerge[NMAXEVENTS];
-//    Int_t  BANDEventIndicesToMerge[NMAXEVENTS];
-//    Int_t SIDISEventIndicesToMerge[NMAXEVENTS];
-//    std::cout << "hello-3..." << std::endl;
+    // Create a list of events to merge
+    // this takes the most resources, and the largest amount of time.
+    // typically, per 1 merged event, it takes about 14-40 ms
+    // and we typically merge 1M events = 1e4 sec
+    if (fdebug>1) {
+        std::cout << "Create a list of events to merge" << std::endl
+        << "stepping over "
+        << NeventsBAND << " BAND and "
+        << NeventsSIDIS << " SIDIS events"
+        << std::endl
+        << "Take some coffee, this takes the largest amount of time."
+        << std::endl;
+    }
+    Int_t          EventIDsToMerge[NMAXEVENTS];
+    Int_t  BANDEventIndicesToMerge[NMAXEVENTS];
+    Int_t SIDISEventIndicesToMerge[NMAXEVENTS];
+    std::cout << "You're all I've ever wanted, and your arms are open wide..." << std::endl;
 //    Int_t Nevents2Merge = CreateListOfEventsToMerge(BANDTree,
 //                                                    SIDISTree,
 //                                                    EventIDsToMerge,
