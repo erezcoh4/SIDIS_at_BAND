@@ -43,6 +43,11 @@ std::ofstream   CSVfile;
 // time
 clock_t tStart = clock();
 
+// globals
+Int_t          EventIDsToMerge[NMAXEVENTS];
+Int_t  BANDEventIndicesToMerge[NMAXEVENTS];
+Int_t SIDISEventIndicesToMerge[NMAXEVENTS];
+
 
 
 void             OpenInputFiles (TString RunStr);
@@ -56,9 +61,9 @@ void    MergeSIDISandBANDevents (int NeventsToMerge=10,
 void    Hello (int NeventsToMerge=10, int fdebug=2, int PrintProgress=5000);
 Int_t CreateListOfEventsToMerge (TTree * BANDTree,
                                  TTree * SIDISTree,
-                                 Int_t          EventIDsToMerge[NMAXEVENTS],
-                                 Int_t  BANDEventIndicesToMerge[NMAXEVENTS],
-                                 Int_t SIDISEventIndicesToMerge[NMAXEVENTS],
+//                                 Int_t          EventIDsToMerge[NMAXEVENTS],
+//                                 Int_t  BANDEventIndicesToMerge[NMAXEVENTS],
+//                                 Int_t SIDISEventIndicesToMerge[NMAXEVENTS],
                                  int NeventsToMerge=-1,
                                  int fdebug=0);
 
@@ -127,9 +132,6 @@ void    Hello (int NeventsToMerge=10, int fdebug=2, int PrintProgress=5000){
         << "Take some coffee, this takes the largest amount of time."
         << std::endl;
     }
-    Int_t          EventIDsToMerge[NMAXEVENTS];
-//    Int_t  BANDEventIndicesToMerge[NMAXEVENTS];
-//    Int_t SIDISEventIndicesToMerge[NMAXEVENTS];
     std::cout << "You're all I've ever wanted, and your arms are open wide..." << std::endl;
 //    Int_t Nevents2Merge = CreateListOfEventsToMerge(BANDTree,
 //                                                    SIDISTree,
@@ -411,9 +413,9 @@ void MergeSIDISandBANDevents(int NeventsToMerge, int fdebug, int PrintProgress){
     
     Int_t Nevents2Merge = CreateListOfEventsToMerge(BANDTree,
                                                     SIDISTree,
-                                                    EventIDsToMerge,
-                                                    BANDEventIndicesToMerge,
-                                                    SIDISEventIndicesToMerge,
+//                                                    EventIDsToMerge,
+//                                                    BANDEventIndicesToMerge,
+//                                                    SIDISEventIndicesToMerge,
                                                     NeventsToMerge,
                                                     fdebug);
     
@@ -747,9 +749,9 @@ void StreamToCSVfile (std::vector<Double_t> observables, int fdebug){
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 Int_t CreateListOfEventsToMerge(TTree * BANDTree,
                                 TTree * SIDISTree,
-                                Int_t          EventIDsToMerge[NMAXEVENTS],
-                                Int_t  BANDEventIndicesToMerge[NMAXEVENTS],
-                                Int_t SIDISEventIndicesToMerge[NMAXEVENTS],
+//                                Int_t          EventIDsToMerge[NMAXEVENTS],
+//                                Int_t  BANDEventIndicesToMerge[NMAXEVENTS],
+//                                Int_t SIDISEventIndicesToMerge[NMAXEVENTS],
                                 int NeventsToMerge,
                                 int fdebug){
     
