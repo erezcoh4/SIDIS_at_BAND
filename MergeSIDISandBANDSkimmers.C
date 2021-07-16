@@ -107,9 +107,11 @@ void MergeSIDISandBANDSkimmers(int RunNumber=6420,
 void    Hello (int NeventsToMerge=10, int fdebug=2, int PrintProgress=5000){
     std::cout << "hello..." << std::endl;
     Int_t   BANDrunID, BANDeventID, SIDISrunID, SIDISeventID;
+    std::cout << "hello-1..." << std::endl;
     Int_t   NeventsBAND  = BANDTree->GetEntries();
+    std::cout << "hello-1.5..." << std::endl;
     Int_t   NeventsSIDIS = SIDISTree->GetEntries();
-    
+    std::cout << "hello-2..." << std::endl;
     // Create a list of events to merge
     // this takes the most resources, and the largest amount of time.
     // typically, per 1 merged event, it takes about 14-40 ms
@@ -126,7 +128,7 @@ void    Hello (int NeventsToMerge=10, int fdebug=2, int PrintProgress=5000){
     Int_t          EventIDsToMerge[NMAXEVENTS];
     Int_t  BANDEventIndicesToMerge[NMAXEVENTS];
     Int_t SIDISEventIndicesToMerge[NMAXEVENTS];
-    
+    std::cout << "hello-3..." << std::endl;
     Int_t Nevents2Merge = CreateListOfEventsToMerge(BANDTree,
                                                     SIDISTree,
                                                     EventIDsToMerge,
@@ -134,7 +136,7 @@ void    Hello (int NeventsToMerge=10, int fdebug=2, int PrintProgress=5000){
                                                     SIDISEventIndicesToMerge,
                                                     NeventsToMerge,
                                                     fdebug);
-    
+    std::cout << "hello-4..." << std::endl;
     if (fdebug>2) {
         std::cout << "Merging events (BAND/SIDIS):"  << std::endl;
         for (int i=0; i<Nevents2Merge; i++) {
