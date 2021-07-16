@@ -112,11 +112,9 @@ void MergeSIDISandBANDSkimmers(int RunNumber=6420,
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void    Hello (int NeventsToMerge=10, int fdebug=2, int PrintProgress=5000){
-    std::cout << "hello..." << std::endl;
-    int x;
-    std::cout << "hello x..." << std::endl;
+    std::cout << "Hello..." << std::endl;
     Int_t   BANDrunID, BANDeventID, SIDISrunID, SIDISeventID;
-    std::cout << "is it me you're looking for?..." << std::endl;
+    std::cout << "Is it me you're looking for?..." << std::endl;
     Int_t   NeventsBAND  = BANDTree->GetEntries();
     std::cout << "I can see it in your eyes..." << std::endl;
     Int_t   NeventsSIDIS = SIDISTree->GetEntries();
@@ -244,149 +242,149 @@ void    Hello (int NeventsToMerge=10, int fdebug=2, int PrintProgress=5000){
     SIDISTree  -> SetBranchAddress("ePastSelectionCuts"        ,&ePastSelectionCuts    );
     SIDISTree  -> SetBranchAddress("piplusPastSelectionCuts"   ,&piplusPastSelectionCuts);
     std::cout << "And I want to tell you so much, I love you" << std::endl;
-//
-//
-//
-//
-//
-//
-//    // BAND Tree
-//    double           Ebeam = 0;
-//    double    gated_charge = 0;
-//    double        livetime = 0;
-//    double       starttime = 0;
-//    double         current = 0;
-//    int        eventnumber = 0;
-//    bool       goodneutron = false;
-//    int         nleadindex = -1;
-//    double          weight = 0;
-//    //     Neutron info:
-//    int              nMult = 0;
-//    TClonesArray   * nHits = new TClonesArray("bandhit");
-//    TClonesArray  &saveHit = *nHits;
-//    //    MC info:
-//    int            genMult = 0;
-//    TClonesArray * mcParts = new TClonesArray("genpart");
-//    TClonesArray   &saveMC = *mcParts;
-//
-//
-//
-//    BANDTree   -> SetBranchAddress("eventnumber"  ,&BANDeventID);
-//    BANDTree   -> SetBranchAddress("Runno"        ,&BANDrunID);
-//
-//    BANDTree   -> SetBranchAddress("Ebeam"        ,&Ebeam);
-//    BANDTree   -> SetBranchAddress("gated_charge" ,&gated_charge);
-//    BANDTree   -> SetBranchAddress("livetime"     ,&livetime);
-//    BANDTree   -> SetBranchAddress("starttime"    ,&starttime);
-//    BANDTree   -> SetBranchAddress("current"      ,&current);
-//    BANDTree   -> SetBranchAddress("weight"       ,&weight);
-//    //    Neutron branches:
-//    BANDTree   -> SetBranchAddress("nMult"        ,&nMult);
-//    BANDTree   -> SetBranchAddress("nHits"        ,&nHits);
-//    //Branches to store if good Neutron event and leadindex
-//    BANDTree   -> SetBranchAddress("goodneutron"  ,&goodneutron);
-//    BANDTree   -> SetBranchAddress("nleadindex"   ,&nleadindex);
-//    //    MC branches:
-//    BANDTree   -> SetBranchAddress("genMult"      ,&genMult);
-//    BANDTree   -> SetBranchAddress("mcParts"      ,&mcParts);
-//
-//    // Merged Tree - containing all variables...
-//    // run and event number (ID) have to be consistent in the merged tree,
-//    // so it does not matter from where we take them...
-//    MergedTree->Branch("Runno"              ,&SIDISrunID    );
-//    MergedTree->Branch("eventnumber"        ,&SIDISeventID  );
-//    // BAND branches
-//    MergedTree->Branch("Ebeam"              ,&Ebeam         );
-//    MergedTree->Branch("gated_charge"       ,&gated_charge  );
-//    MergedTree->Branch("livetime"           ,&livetime      );
-//    MergedTree->Branch("starttime"          ,&starttime     );
-//    MergedTree->Branch("current"            ,&current       );
-//    MergedTree->Branch("weight"             ,&weight        );
-//    MergedTree->Branch("nMult"              ,&nMult         );
-//    MergedTree->Branch("nHits"              ,&nHits         );
-//    MergedTree->Branch("goodneutron"        ,&goodneutron   );
-//    MergedTree->Branch("nleadindex"         ,&nleadindex    );
-//    // SIDIS branches
-//    MergedTree->Branch("E_PCAL_e"           ,&E_PCAL_e              );
-//    MergedTree->Branch("E_ECIN_e"           ,&E_ECIN_e              );
-//    MergedTree->Branch("E_ECOUT_e"          ,&E_ECOUT_e             );
-//    MergedTree->Branch("chi2PID_pips"       ,&chi2PID_pips          );
-//
-//    MergedTree->Branch("e_PCAL_W"           ,&e_PCAL_W              );
-//    MergedTree->Branch("e_PCAL_V"           ,&e_PCAL_V              );
-//    MergedTree->Branch("pips_PCAL_x"        ,&pips_PCAL_x           );
-//    MergedTree->Branch("pips_PCAL_y"        ,&pips_PCAL_y           );
-//    MergedTree->Branch("pips_PCAL_z"        ,&pips_PCAL_z           );
-//    MergedTree->Branch("e_PCAL_x"           ,&e_PCAL_x              );
-//    MergedTree->Branch("e_PCAL_y"           ,&e_PCAL_y              );
-//    MergedTree->Branch("e_PCAL_z"           ,&e_PCAL_z              );
-//
-//    MergedTree->Branch("e_PCAL_sector"      ,&e_PCAL_sector         );
-//    MergedTree->Branch("e_DC_sector"        ,&e_DC_sector           );
-//    MergedTree->Branch("e_DC_Chi2N"         ,&e_DC_Chi2N            );
-//    //    MergedTree->Branch("e_DC_x"             ,&e_DC_x                );
-//    //    MergedTree->Branch("e_DC_y"             ,&e_DC_y                );
-//
-//    MergedTree->Branch("pips_PCAL_sector"   ,&pips_PCAL_sector      );
-//    MergedTree->Branch("pips_DC_sector"     ,&pips_DC_sector        );
-//    MergedTree->Branch("pips_Chi2N"         ,&pips_Chi2N            );
-//    //    MergedTree->Branch("pips_DC_x"          ,&pips_DC_x             );
-//    //    MergedTree->Branch("pips_DC_y"          ,&pips_DC_y             );
-//
-//    MergedTree->Branch("E_PCAL_pips"        ,&E_PCAL_pips           );
-//    MergedTree->Branch("E_ECIN_pips"        ,&E_ECIN_pips           );
-//
-//    MergedTree->Branch("E_ECIN_pips"        ,&E_ECIN_pips           );
-//    MergedTree->Branch("E_ECOUT_pips"       ,&E_ECOUT_pips          );
-//    MergedTree->Branch("DC_layer"           ,&DC_layer              );
-//
-//    MergedTree->Branch("e"                  ,&e                     );
-//    MergedTree->Branch("piplus"             ,&piplus                );
-//    MergedTree->Branch("Ve"                 ,&Ve                    );
-//    MergedTree->Branch("Vpiplus"            ,&Vpiplus               );
-//    MergedTree->Branch("Beam"               ,&Beam                  );
-//    MergedTree->Branch("q"                  ,&q                     );
-//
-//    MergedTree->Branch("xB"                 ,&xB                    );
-//    MergedTree->Branch("Q2"                 ,&Q2                    );
-//    MergedTree->Branch("omega"              ,&omega                 );
-//    MergedTree->Branch("z"                  ,&z                     );
-//    MergedTree->Branch("ePastSelectionCuts" ,&ePastSelectionCuts    );
-//    MergedTree->Branch("piplusPastSelectionCuts",&piplusPastSelectionCuts);
-//
-//
-//
-//
-//
-//
-//    //    int NmergedEvents = 0;
-//    for (int MergedEvtId=0; MergedEvtId<Nevents2Merge; MergedEvtId++) {
-//
-//        BANDTree -> GetEntry( BANDEventIndicesToMerge[MergedEvtId] );
-//        SIDISTree -> GetEntry( SIDISEventIndicesToMerge[MergedEvtId] );
-//        MergedTree -> Fill();
-//        StreamToCSVfile ({  (double)BANDrunID,  (double)BANDeventID,
-//            livetime,           current,
-//            xB,                 Q2,
-//            Ebeam,              z,
-//            e->Px(),            e->Py(),
-//            e->Pz(),            e->E(),
-//            q->Px(),            q->Py(),
-//            q->Pz(),            q->E(),
-//            Ve->z(),            Vpiplus->z(),
-//            (double)goodneutron,
-//        },fdebug);
-//
-//        if (fdebug>2){
-//            std::cout
-//            << "merging event " << BANDeventID << " from run " << BANDrunID
-//            << std::endl;
-//        }
-//    } // end merged event loop
-//
-//    if (fdebug>2){
-//        std::cout << "merged " << Nevents2Merge << " SIDIS and BAND events." << std::endl;
-//    }
+
+
+
+
+
+
+    // BAND Tree
+    double           Ebeam = 0;
+    double    gated_charge = 0;
+    double        livetime = 0;
+    double       starttime = 0;
+    double         current = 0;
+    int        eventnumber = 0;
+    bool       goodneutron = false;
+    int         nleadindex = -1;
+    double          weight = 0;
+    //     Neutron info:
+    int              nMult = 0;
+    TClonesArray   * nHits = new TClonesArray("bandhit");
+    TClonesArray  &saveHit = *nHits;
+    //    MC info:
+    int            genMult = 0;
+    TClonesArray * mcParts = new TClonesArray("genpart");
+    TClonesArray   &saveMC = *mcParts;
+
+
+
+    BANDTree   -> SetBranchAddress("eventnumber"  ,&BANDeventID);
+    BANDTree   -> SetBranchAddress("Runno"        ,&BANDrunID);
+
+    BANDTree   -> SetBranchAddress("Ebeam"        ,&Ebeam);
+    BANDTree   -> SetBranchAddress("gated_charge" ,&gated_charge);
+    BANDTree   -> SetBranchAddress("livetime"     ,&livetime);
+    BANDTree   -> SetBranchAddress("starttime"    ,&starttime);
+    BANDTree   -> SetBranchAddress("current"      ,&current);
+    BANDTree   -> SetBranchAddress("weight"       ,&weight);
+    //    Neutron branches:
+    BANDTree   -> SetBranchAddress("nMult"        ,&nMult);
+    BANDTree   -> SetBranchAddress("nHits"        ,&nHits);
+    //Branches to store if good Neutron event and leadindex
+    BANDTree   -> SetBranchAddress("goodneutron"  ,&goodneutron);
+    BANDTree   -> SetBranchAddress("nleadindex"   ,&nleadindex);
+    //    MC branches:
+    BANDTree   -> SetBranchAddress("genMult"      ,&genMult);
+    BANDTree   -> SetBranchAddress("mcParts"      ,&mcParts);
+
+    // Merged Tree - containing all variables...
+    // run and event number (ID) have to be consistent in the merged tree,
+    // so it does not matter from where we take them...
+    MergedTree->Branch("Runno"              ,&SIDISrunID    );
+    MergedTree->Branch("eventnumber"        ,&SIDISeventID  );
+    // BAND branches
+    MergedTree->Branch("Ebeam"              ,&Ebeam         );
+    MergedTree->Branch("gated_charge"       ,&gated_charge  );
+    MergedTree->Branch("livetime"           ,&livetime      );
+    MergedTree->Branch("starttime"          ,&starttime     );
+    MergedTree->Branch("current"            ,&current       );
+    MergedTree->Branch("weight"             ,&weight        );
+    MergedTree->Branch("nMult"              ,&nMult         );
+    MergedTree->Branch("nHits"              ,&nHits         );
+    MergedTree->Branch("goodneutron"        ,&goodneutron   );
+    MergedTree->Branch("nleadindex"         ,&nleadindex    );
+    // SIDIS branches
+    MergedTree->Branch("E_PCAL_e"           ,&E_PCAL_e              );
+    MergedTree->Branch("E_ECIN_e"           ,&E_ECIN_e              );
+    MergedTree->Branch("E_ECOUT_e"          ,&E_ECOUT_e             );
+    MergedTree->Branch("chi2PID_pips"       ,&chi2PID_pips          );
+
+    MergedTree->Branch("e_PCAL_W"           ,&e_PCAL_W              );
+    MergedTree->Branch("e_PCAL_V"           ,&e_PCAL_V              );
+    MergedTree->Branch("pips_PCAL_x"        ,&pips_PCAL_x           );
+    MergedTree->Branch("pips_PCAL_y"        ,&pips_PCAL_y           );
+    MergedTree->Branch("pips_PCAL_z"        ,&pips_PCAL_z           );
+    MergedTree->Branch("e_PCAL_x"           ,&e_PCAL_x              );
+    MergedTree->Branch("e_PCAL_y"           ,&e_PCAL_y              );
+    MergedTree->Branch("e_PCAL_z"           ,&e_PCAL_z              );
+
+    MergedTree->Branch("e_PCAL_sector"      ,&e_PCAL_sector         );
+    MergedTree->Branch("e_DC_sector"        ,&e_DC_sector           );
+    MergedTree->Branch("e_DC_Chi2N"         ,&e_DC_Chi2N            );
+    //    MergedTree->Branch("e_DC_x"             ,&e_DC_x                );
+    //    MergedTree->Branch("e_DC_y"             ,&e_DC_y                );
+
+    MergedTree->Branch("pips_PCAL_sector"   ,&pips_PCAL_sector      );
+    MergedTree->Branch("pips_DC_sector"     ,&pips_DC_sector        );
+    MergedTree->Branch("pips_Chi2N"         ,&pips_Chi2N            );
+    //    MergedTree->Branch("pips_DC_x"          ,&pips_DC_x             );
+    //    MergedTree->Branch("pips_DC_y"          ,&pips_DC_y             );
+
+    MergedTree->Branch("E_PCAL_pips"        ,&E_PCAL_pips           );
+    MergedTree->Branch("E_ECIN_pips"        ,&E_ECIN_pips           );
+
+    MergedTree->Branch("E_ECIN_pips"        ,&E_ECIN_pips           );
+    MergedTree->Branch("E_ECOUT_pips"       ,&E_ECOUT_pips          );
+    MergedTree->Branch("DC_layer"           ,&DC_layer              );
+
+    MergedTree->Branch("e"                  ,&e                     );
+    MergedTree->Branch("piplus"             ,&piplus                );
+    MergedTree->Branch("Ve"                 ,&Ve                    );
+    MergedTree->Branch("Vpiplus"            ,&Vpiplus               );
+    MergedTree->Branch("Beam"               ,&Beam                  );
+    MergedTree->Branch("q"                  ,&q                     );
+
+    MergedTree->Branch("xB"                 ,&xB                    );
+    MergedTree->Branch("Q2"                 ,&Q2                    );
+    MergedTree->Branch("omega"              ,&omega                 );
+    MergedTree->Branch("z"                  ,&z                     );
+    MergedTree->Branch("ePastSelectionCuts" ,&ePastSelectionCuts    );
+    MergedTree->Branch("piplusPastSelectionCuts",&piplusPastSelectionCuts);
+    std::cout << "I long to see the sunlight in your hair" << std::endl;
+
+
+
+
+
+    //    int NmergedEvents = 0;
+    for (int MergedEvtId=0; MergedEvtId<Nevents2Merge; MergedEvtId++) {
+
+        BANDTree -> GetEntry( BANDEventIndicesToMerge[MergedEvtId] );
+        SIDISTree -> GetEntry( SIDISEventIndicesToMerge[MergedEvtId] );
+        MergedTree -> Fill();
+        StreamToCSVfile ({  (double)BANDrunID,  (double)BANDeventID,
+            livetime,           current,
+            xB,                 Q2,
+            Ebeam,              z,
+            e->Px(),            e->Py(),
+            e->Pz(),            e->E(),
+            q->Px(),            q->Py(),
+            q->Pz(),            q->E(),
+            Ve->z(),            Vpiplus->z(),
+            (double)goodneutron,
+        },fdebug);
+
+        if (fdebug>2){
+            std::cout
+            << "merging event " << BANDeventID << " from run " << BANDrunID
+            << std::endl;
+        }
+    } // end merged event loop
+
+    if (fdebug>2){
+        std::cout << "merged " << Nevents2Merge << " SIDIS and BAND events." << std::endl;
+    }
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
