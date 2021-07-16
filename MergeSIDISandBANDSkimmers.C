@@ -109,11 +109,11 @@ void    Hello (int NeventsToMerge=10, int fdebug=2, int PrintProgress=5000){
     int x;
     std::cout << "hello x..." << std::endl;
     Int_t   BANDrunID, BANDeventID, SIDISrunID, SIDISeventID;
-    std::cout << "hello-1..." << std::endl;
-//    Int_t   NeventsBAND  = BANDTree->GetEntries();
-//    std::cout << "hello-1.5..." << std::endl;
-//    Int_t   NeventsSIDIS = SIDISTree->GetEntries();
-//    std::cout << "hello-2..." << std::endl;
+    std::cout << "is it me you're looking for?..." << std::endl;
+    Int_t   NeventsBAND  = BANDTree->GetEntries();
+    std::cout << "I can see it in your eyes..." << std::endl;
+    Int_t   NeventsSIDIS = SIDISTree->GetEntries();
+    std::cout << "I can see it in your smile..." << std::endl;
 //    // Create a list of events to merge
 //    // this takes the most resources, and the largest amount of time.
 //    // typically, per 1 merged event, it takes about 14-40 ms
