@@ -117,14 +117,20 @@ void    MergeSIDISandBANDevents (int NeventsToMerge=10, int fdebug=2, int PrintP
         << NeventsBAND << " BAND and "
         << NeventsSIDIS << " SIDIS events"
         << std::endl
-        << "Take some coffee, this takes the largest amount of time."
+        << "Take some coffee, this takes some 20-40 ms per event to merge."
         << std::endl;
     }
     Int_t Nevents2Merge = CreateListOfEventsToMerge(BANDTree,
                                                     SIDISTree,
                                                     NeventsToMerge,
                                                     fdebug);
-    if (fdebug>2) {
+    if (fdebug>0) {
+        std::cout << std::endl;
+        std::cout << "Done creating merge list of " << Nevents2Merge << " events, after "
+        << double(clock() - tStart) / (double)CLOCKS_PER_SEC
+        << " sec "<< std::endl;
+
+        if (fdebug>2) {
         std::cout << "Merging events (BAND/SIDIS):"  << std::endl;
         for (int i=0; i<Nevents2Merge; i++) {
             auto         eventID = EventIDsToMerge[i];
@@ -132,10 +138,7 @@ void    MergeSIDISandBANDevents (int NeventsToMerge=10, int fdebug=2, int PrintP
             auto SIDISEventIndex = SIDISEventIndicesToMerge[i];
             std::cout << eventID << "(" << BANDEventIndex << "/" << SIDISEventIndex << "),";
         }
-        std::cout << std::endl;
-        std::cout << "Duration for creating the list: "
-        << double(clock() - tStart) / (double)CLOCKS_PER_SEC
-        << " sec "<< std::endl;
+        }
     }
 
 
