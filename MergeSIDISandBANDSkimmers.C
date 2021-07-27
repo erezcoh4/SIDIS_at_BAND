@@ -50,6 +50,33 @@ Int_t SIDISEventIndicesToMerge[NMAXEVENTS];
 Int_t             BANDeventIDs[NMAXEVENTS];
 Int_t            SIDISeventIDs[NMAXEVENTS];
 
+// kinematics and observables
+Double_t Mp      = 0.938272; // GeV/c2
+Double_t Mn      = 0.939565; // GeV/c2
+Double_t Md      = 1.875;    // GeV/c2
+Double_t Mp2     = Mp * Mp;
+
+// SIDIS Tree
+TLorentzVector        *e=0;
+TLorentzVector   *piplus=0;
+TLorentzVector     *Beam=0;
+TLorentzVector        *q=0;
+// reconstructed vertex position
+TVector3             *Ve=0;
+TVector3        *Vpiplus=0;
+
+// kinematics
+Double_t             xB;
+Double_t             Q2;
+Double_t          omega;
+Double_t              z; // energy fraction rest frame
+Double_t              W; // energy of the hadronic system
+Double_t        alpha_s; // light cone fraction of momentum of the recoil neutron
+
+// moving proton
+Double_t         WPrime;
+Double_t         xPrime;
+
 
 
 void             OpenInputFiles (TString RunStr);
@@ -64,6 +91,9 @@ Int_t CreateListOfEventsToMerge (TTree * BANDTree,
                                  TTree * SIDISTree,
                                  int NeventsToMerge=-1,
                                  int fdebug=0);
+
+
+
 
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
@@ -82,6 +112,8 @@ void MergeSIDISandBANDSkimmers(int RunNumber=6420,
                        +(TString)"livetime,current,"
                        +(TString)"xB,Q2,"
                        +(TString)"Ebeam,z,"
+                       +(TString)"W,alpha_s,"
+                       +(TString)"WPrime,xPrime,",
                        +(TString)"e_Px,e_Py,"
                        +(TString)"e_Pz,e_E,"
                        +(TString)"q_Px,q_Py,"
@@ -144,20 +176,7 @@ void    MergeSIDISandBANDevents (int NeventsToMerge=10, int fdebug=2, int PrintP
 
 
 
-    // SIDIS Tree
-    TLorentzVector        *e=0;
-    TLorentzVector   *piplus=0;
-    TLorentzVector     *Beam=0;
-    TLorentzVector        *q=0;
-    // reconstructed vertex position
-    TVector3             *Ve=0;
-    TVector3        *Vpiplus=0;
-
-    // kinematics
-    Double_t             xB;
-    Double_t             Q2;
-    Double_t          omega;
-    Double_t              z; // energy fraction rest frame
+    
 
     bool      ePastSelectionCuts = false;
     bool piplusPastSelectionCuts = false;
@@ -171,14 +190,14 @@ void    MergeSIDISandBANDevents (int NeventsToMerge=10, int fdebug=2, int PrintP
 
     double  E_PCAL_e, E_ECIN_e, E_ECOUT_e; // electron energy deposit in ECAL_out [GeV]
     double  e_PCAL_W,    e_PCAL_V;
-    double  e_PCAL_x,    e_PCAL_y, e_PCAL_z;
+    double  e_PCAL_x,    e_PCAL_y,  e_PCAL_z;
     double  e_PCAL_sector;
-    double  e_DC_sector,        e_DC_Chi2N;
+    double  e_DC_sector,            e_DC_Chi2N;
     double  e_DC_x[3],   e_DC_y[3];
 
     double  E_PCAL_pips, E_ECIN_pips,       E_ECOUT_pips;
-    SIDISTree  -> SetBranchAddress("eventnumber"  ,&SIDISeventID);
-    SIDISTree  -> SetBranchAddress("runnum"       ,&SIDISrunID);
+    SIDISTree  -> SetBranchAddress("eventnumber"        ,&SIDISeventID                  );
+    SIDISTree  -> SetBranchAddress("runnum"             ,&SIDISrunID                    );
 
     // output tree branches
     SIDISTree  -> SetBranchAddress("E_PCAL_e"          ,&E_PCAL_e              );
@@ -195,36 +214,43 @@ void    MergeSIDISandBANDevents (int NeventsToMerge=10, int fdebug=2, int PrintP
     SIDISTree  -> SetBranchAddress("e_PCAL_y"          ,&e_PCAL_y              );
     SIDISTree  -> SetBranchAddress("e_PCAL_z"          ,&e_PCAL_z              );
 
-    SIDISTree  -> SetBranchAddress("e_PCAL_sector"     ,&e_PCAL_sector         );
-    SIDISTree  -> SetBranchAddress("e_DC_sector"       ,&e_DC_sector           );
-    SIDISTree  -> SetBranchAddress("e_DC_Chi2N"        ,&e_DC_Chi2N            );
+    SIDISTree  -> SetBranchAddress("e_PCAL_sector"     ,&e_PCAL_sector                  );
+    SIDISTree  -> SetBranchAddress("e_DC_sector"       ,&e_DC_sector                    );
+    SIDISTree  -> SetBranchAddress("e_DC_Chi2N"        ,&e_DC_Chi2N                     );
     //    SIDISTree  -> SetBranchAddress("e_DC_x"            ,&e_DC_x                );
     //    SIDISTree  -> SetBranchAddress("e_DC_y"            ,&e_DC_y                );
 
-    SIDISTree  -> SetBranchAddress("pips_PCAL_sector"          ,&pips_PCAL_sector      );
-    SIDISTree  -> SetBranchAddress("pips_DC_sector"            ,&pips_DC_sector        );
-    SIDISTree  -> SetBranchAddress("pips_Chi2N"                ,&pips_Chi2N            );
+    SIDISTree  -> SetBranchAddress("pips_PCAL_sector"          ,&pips_PCAL_sector       );
+    SIDISTree  -> SetBranchAddress("pips_DC_sector"            ,&pips_DC_sector         );
+    SIDISTree  -> SetBranchAddress("pips_Chi2N"                ,&pips_Chi2N             );
     //    SIDISTree  -> SetBranchAddress("pips_DC_x"                 ,&pips_DC_x             );
     //    SIDISTree  -> SetBranchAddress("pips_DC_y"                 ,&pips_DC_y             );
 
-    SIDISTree  -> SetBranchAddress("E_PCAL_pips"               ,&E_PCAL_pips           );
-    SIDISTree  -> SetBranchAddress("E_ECIN_pips"               ,&E_ECIN_pips           );
+    SIDISTree  -> SetBranchAddress("E_PCAL_pips"               ,&E_PCAL_pips            );
+    SIDISTree  -> SetBranchAddress("E_ECIN_pips"               ,&E_ECIN_pips            );
 
-    SIDISTree  -> SetBranchAddress("E_ECIN_pips"               ,&E_ECIN_pips           );
-    SIDISTree  -> SetBranchAddress("E_ECOUT_pips"              ,&E_ECOUT_pips          );
-    SIDISTree  -> SetBranchAddress("DC_layer"                  ,&DC_layer              );
+    SIDISTree  -> SetBranchAddress("E_ECIN_pips"               ,&E_ECIN_pips            );
+    SIDISTree  -> SetBranchAddress("E_ECOUT_pips"              ,&E_ECOUT_pips           );
+    SIDISTree  -> SetBranchAddress("DC_layer"                  ,&DC_layer               );
 
-    SIDISTree  -> SetBranchAddress("e"                         ,&e                     );
-    SIDISTree  -> SetBranchAddress("piplus"                    ,&piplus                );
-    SIDISTree  -> SetBranchAddress("Ve"                        ,&Ve                    );
-    SIDISTree  -> SetBranchAddress("Vpiplus"                   ,&Vpiplus               );
-    SIDISTree  -> SetBranchAddress("Beam"                      ,&Beam                  );
-    SIDISTree  -> SetBranchAddress("q"                         ,&q                     );
+    SIDISTree  -> SetBranchAddress("e"                         ,&e                      );
+    SIDISTree  -> SetBranchAddress("piplus"                    ,&piplus                 );
+    SIDISTree  -> SetBranchAddress("Ve"                        ,&Ve                     );
+    SIDISTree  -> SetBranchAddress("Vpiplus"                   ,&Vpiplus                );
+    SIDISTree  -> SetBranchAddress("Beam"                      ,&Beam                   );
+    SIDISTree  -> SetBranchAddress("q"                         ,&q                      );
 
-    SIDISTree  -> SetBranchAddress("xB"                        ,&xB                    );
-    SIDISTree  -> SetBranchAddress("Q2"                        ,&Q2                    );
-    SIDISTree  -> SetBranchAddress("omega"                     ,&omega                 );
-    SIDISTree  -> SetBranchAddress("z"                         ,&z                     );
+    SIDISTree  -> SetBranchAddress("xB"                        ,&xB                     );
+    SIDISTree  -> SetBranchAddress("Q2"                        ,&Q2                     );
+    SIDISTree  -> SetBranchAddress("omega"                     ,&omega                  );
+    SIDISTree  -> SetBranchAddress("z"                         ,&z                      );
+    SIDISTree  -> SetBranchAddress("xPrime"                    ,&xPrime                 );
+    SIDISTree  -> SetBranchAddress("W"                         ,&W                      );
+    SIDISTree  -> SetBranchAddress("WPrime"                    ,&WPrime                 );
+    SIDISTree  -> SetBranchAddress("alpha_s"                   ,&alpha_s                );
+    
+    
+    
     SIDISTree  -> SetBranchAddress("ePastSelectionCuts"        ,&ePastSelectionCuts    );
     SIDISTree  -> SetBranchAddress("piplusPastSelectionCuts"   ,&piplusPastSelectionCuts);
 
@@ -338,7 +364,21 @@ void    MergeSIDISandBANDevents (int NeventsToMerge=10, int fdebug=2, int PrintP
     MergedTree->Branch("piplusPastSelectionCuts",&piplusPastSelectionCuts);
 
 
-
+    // compute kinematics
+    Q2      = -q.Mag2();
+    omega   = q.E();
+    Es      = Pn.E();
+    Ps      = Pn.P();
+    w2      = omega * omega;
+    theta_sq= Pn.Angle();
+    xB      = Q2 / (2. * Mp * omega);
+    xPrime  = Q2 / (2. * ((Md - Es) * omega + Pn.Vect()*q.Vect() ));
+    W       = sqrt(Mp2 - Q2 + 2. * omega * Mp);
+    WPrime  = sqrt(Mp2 - Q2 + 2. * omega * (Md - Es) + 2. * Ps * sqrt(Q2 + w2) * cos( theta_sq ));
+    
+    
+    alpha_s = ComputeLightConeFraction( Pn_qFrame );
+     
 
 
     //    int NmergedEvents = 0;
@@ -351,6 +391,8 @@ void    MergeSIDISandBANDevents (int NeventsToMerge=10, int fdebug=2, int PrintP
             livetime,           current,
             xB,                 Q2,
             Ebeam,              z,
+            W,                  alpha_s,
+            WPrime,             xPrime,
             e->Px(),            e->Py(),
             e->Pz(),            e->E(),
             q->Px(),            q->Py(),
@@ -564,4 +606,14 @@ Int_t CreateListOfEventsToMerge(TTree * BANDTree,
     //            }
     //        }
     //    }
+}
+
+
+
+// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+Double_t ComputeLightConeFraction( TLorentzVector p ){
+    // compute light-cone momentum fraction
+    Double_t m = p.Mag();
+    Double_t alpha = (p.E() - p.Z())/m;
+    return alpha;
 }

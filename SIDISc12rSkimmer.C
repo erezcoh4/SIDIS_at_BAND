@@ -542,14 +542,14 @@ bool EventPassedElectronSelectionCriteria(Double_t e_PCAL_x, Double_t e_PCAL_y,
     // based on RGA_Analysis_Overview_and_Procedures_Nov_4_2020-6245173-2020-12-09-v3.pdf
     // p. 71
     Double_t Vz_min,Vz_max;
-    if (torusBending==-1){
+    if (torusBending==1){
         
         // in-bending torus field -13.0 cm < Vz < +12.0 cm
         // Spring 19 and Spring 2020 in-bending.
         Vz_min = -13.0;
         Vz_max = 12.0;
         
-    } else if (torusBending==-1){
+    } else if (torusBending==0){
         
         // Out-bending torus field -18.0 cm < Vz < +10.0 cm
         // Fall 2019 (without low-energy-run) was out-bending.
