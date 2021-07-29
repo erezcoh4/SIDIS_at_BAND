@@ -77,6 +77,9 @@ public:
             std::getline(ss, token, ',');
             cut.first = token;
             std::cout << "Token 1: " <<  token << std::endl;
+            if (strcmp('',token.c_str())==0) {
+                break;
+            }
             std::getline(ss, token, ',');
             std::cout << "Token 2: " <<  token << std::endl;
             cut.second = (double)(std::stof( token ));
@@ -84,6 +87,7 @@ public:
             //            ss >> cut.first >> cut.second;
             
             std::cout << "cut: "<< " first:"<< cut.first << "," << ", second: "<< cut.second << std::endl;
+            
             // Extract each value
             
             //            while(ss >> val){
