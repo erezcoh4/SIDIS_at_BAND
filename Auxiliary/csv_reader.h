@@ -44,8 +44,6 @@ public:
         
         // Helper vars
         std::string line, colname;
-        double val;
-        char tmp;
         std::string token;
         
         // Read the column names
@@ -66,8 +64,7 @@ public:
         //        }
         
         // Read data, line by line
-        while(std::getline(myFile, line))
-        {
+        while(std::getline(myFile, line)) {
             // Create a stringstream of the current line
             std::stringstream ss(line);
             std::cout << ss.str() << std::endl;
