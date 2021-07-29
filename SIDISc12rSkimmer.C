@@ -778,7 +778,7 @@ void printCutValues(){
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 double FindCutValue( std::string cutName ){
     for (auto cut: cutValues) {
-        if (strcmp(cut.first,cutName.c_str())==0){
+        if (strcmp(cut.first.c_str(),cutName.c_str())==0){
             return cut.second;
         }
     }
