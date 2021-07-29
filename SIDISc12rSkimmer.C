@@ -49,7 +49,7 @@ bool   EventPassedPiplusPastSelectionCutsCriteria (Double_t pips_DC_x[3], Double
                                            TVector3 Vpiplus );
 Double_t          Chi2PID_pips_lowerBound (Double_t p, Double_t C=0.88);
 Double_t          Chi2PID_pips_upperBound (Double_t p, Double_t C=0.88);
-
+double                       FindCutValue ( std::string cutName );
 
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
@@ -550,17 +550,8 @@ bool EventPassedElectronSelectionCriteria(Double_t e_PCAL_x, Double_t e_PCAL_y,
     if (torusBending==-1){ // in-bending torus field
         // Spring 19 and Spring 2020 in-bending.
         // -13.0 cm < Vz < +12.0 cm
-        
-        for (auto cut: cutValues) {
-            if (strcmp(cut.first,"Vz_e_min_inbending")==0){
-                Vz_min = cut.second;
-            }
-        }
-        for (auto cut: cutValues) {
-            if (strcmp(cut.first,"Vz_e_max_inbending")==0){
-                Vz_max = cut.second;
-            }
-        }
+        Vz_min = FindCutValue("Vz_e_min_inbending");
+        Vz_max = FindCutValue("Vz_e_max_inbending");        
 
         std::cout << "Vz min,max: " << Vz_min << ","<< Vz_min << std::endl;
 //        Vz_max = 12.0;
@@ -776,7 +767,6 @@ void MoveTo_qFrame(){
     
 }
 
-
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void printCutValues(){
     std::cout << "Using cut values:" << std::endl;
@@ -785,3 +775,11 @@ void printCutValues(){
     }
 }
 
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+double FindCutValue( std::string cutName ){
+    for (auto cut: cutValues) {
+        if (strcmp(cut.first,cutName.c_str())==0){
+            return cut.second;
+        }
+    }
+}
