@@ -51,8 +51,8 @@ public:
         // Read the column names
         //        if(myFile.good())
         //        {
-        //            // Extract the first line in the file
-        //            std::getline(myFile, line);
+        // read header line
+        std::getline(myFile, line);
         //
         //            // Create a stringstream from line
         //            std::stringstream ss(line);
@@ -79,32 +79,32 @@ public:
             std::pair<std::string, double> cut;
             std::getline(ss, token, ',');
             cut.first = token;
-//            std::cout << "Token 1: " <<  token << std::endl;
+            //            std::cout << "Token 1: " <<  token << std::endl;
             std::getline(ss, token, ',');
             std::cout << "Token 2: " <<  token << std::endl;
             cut.second = (double)(std::stof( token ));
             
-//            ss >> cut.first >> cut.second;
+            //            ss >> cut.first >> cut.second;
             
             std::cout << "cut: "<< " first:"<< cut.first << "," << ", second: "<< cut.second << std::endl;
             // Extract each value
             
-//            while(ss >> val){
-//                std::cout << val << std::endl;
-//
-//                // Add the current integer to the 'colIdx' column's values vector
-//                cut.first = val;
-//
-//                // If the next token is a comma, ignore it and move on
-//                if(ss.peek() == ',') ss.ignore();
-//
-//                // Add the current integer to the 'colIdx' column's values vector
-//                cut.second = val;
-//
-//                //
-//                //                // Increment the column index
-//                //                colIdx++;
-//            }
+            //            while(ss >> val){
+            //                std::cout << val << std::endl;
+            //
+            //                // Add the current integer to the 'colIdx' column's values vector
+            //                cut.first = val;
+            //
+            //                // If the next token is a comma, ignore it and move on
+            //                if(ss.peek() == ',') ss.ignore();
+            //
+            //                // Add the current integer to the 'colIdx' column's values vector
+            //                cut.second = val;
+            //
+            //                //
+            //                //                // Increment the column index
+            //                //                colIdx++;
+            //            }
             result.push_back(cut);
         }
         
