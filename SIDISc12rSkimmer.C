@@ -33,6 +33,7 @@ void                      StreamToCSVfile (std::vector<Double_t> observables, bo
 void                      ChangeAxesFrame (TString FrameName="q(z) frame");
 void                        MoveTo_qFrame ();
 void                       printCutValues ();
+void                        loadCutValues (TString cutValuesFilename = "cutValues.csv");
 bool EventPassedElectronSelectionCriteria (Double_t e_PCAL_x, Double_t e_PCAL_y,
                                            Double_t e_PCAL_W,Double_t e_PCAL_V,
                                            Double_t E_PCAL_e,
@@ -57,6 +58,13 @@ double                       FindCutValue ( std::string cutName );
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 // cut values
 std::vector<std::pair<std::string, double>> cutValues;
+double cutValue_Vz_min,     cutValue_Vz_max;
+double cutValue_e_PCAL_W,   cutValue_e_PCAL_V;
+double cutValue_E_PCAL_e;
+double cutValue_SamplingFraction_min;
+
+
+
 
 // Output root file and tree
 TFile * outFile;
@@ -111,10 +119,7 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
         std::cout << "(SIDIS) skimming run " << RunNumberStr << std::endl;
     }
     
-    // read cut values csv file
-    csv_reader csvr;
-    cutValues = csvr.read_csv("cutValues.csv");
-    if (fdebug>0) { printCutValues(); }
+    loadCutValues("cutValues.csv",fdebug);
     
     
 
@@ -234,7 +239,6 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
     
     // Record start time
     auto start = std::chrono::high_resolution_clock::now();
-    ///////////////////////////////////// input hipo file
     TString inputFile = (TString)DataPath + "inc_" + (TString)RunNumberStr + ".hipo";
     for(Int_t i=1;i<gApplication->Argc();i++){
         TString opt=gApplication->Argv(i);
@@ -254,7 +258,6 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
     else {
         std::cout << "using Out-Bending torus data" << std::endl;
     }
-    /////////////////////////////////////
     
     TChain fake("hipo");
     fake.Add(inputFile.Data());
@@ -548,45 +551,24 @@ bool EventPassedElectronSelectionCriteria(Double_t e_PCAL_x, Double_t e_PCAL_y,
     }
     
     
-    // Cut on z-vertex position:
-    // based on RGA_Analysis_Overview_and_Procedures_Nov_4_2020-6245173-2020-12-09-v3.pdf
-    // p. 71
-    Double_t Vz_min,Vz_max;
-    if (torusBending==-1){ // in-bending torus field
-        // Spring 19 and Spring 2020 in-bending.
-        Vz_min = FindCutValue("Vz_e_min_inbending");
-        Vz_max = FindCutValue("Vz_e_max_inbending");
-    } else if (torusBending==1){ // Out-bending torus field
-        // Fall 2019 (without low-energy-run) was out-bending.
-        Vz_min = FindCutValue("Vz_e_min_outbending");
-        Vz_max = FindCutValue("Vz_e_max_outbending");
-        
-    } else {
-        std::cout
-        << "Un-identified torus bending "
-        << torusBending
-        << ", return" << std::endl;
-        return false;
-    }
-    
     if(
        // fiducial cuts on PCAL
        fabs(e_PCAL_x)>0
        &&  fabs(e_PCAL_y)>0
-       &&  e_PCAL_W > FindCutValue("e_PCAL_W_min")
-       &&  e_PCAL_V > FindCutValue("e_PCAL_V_min")
+       &&  e_PCAL_W > cutValue_e_PCAL_W
+       &&  e_PCAL_V > cutValue_e_PCAL_V
        
        // Electron Identification Refinement  - PCAL Minimum Energy Deposition Cut
-       &&  E_PCAL_e > FindCutValue("E_PCAL_e_min")
+       &&  E_PCAL_e > cutValue_E_PCAL_e
        
        // Sampling fraction cut
-       && ((E_PCAL_e + E_ECIN_e + E_ECOUT_e)/e.P()) > FindCutValue("SamplingFraction_min")
+       && ((E_PCAL_e + E_ECIN_e + E_ECOUT_e)/e.P()) > cutValue_SamplingFraction_min
        && (E_ECIN_e/e.P() > 0.2 - E_PCAL_e/e.P()) // RGA AN puts "<" here mistakenly
        
        // Cut on z-vertex position: in-bending torus field -13.0 cm < Vz < +12.0 cm
        // Spring 19 and Spring 2020 in-bending.
        // Fall 2019 (without low-energy-run) was out-bending.
-       &&  ((Vz_min < Ve.Z()) && (Ve.Z() < Vz_max))
+       &&  ((cutValue_Vz_min < Ve.Z()) && (Ve.Z() < cutValue_Vz_max))
        ) return true;
     
     return false;
@@ -594,9 +576,9 @@ bool EventPassedElectronSelectionCriteria(Double_t e_PCAL_x, Double_t e_PCAL_y,
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 bool EventPassedPiplusPastSelectionCutsCriteria(Double_t pips_DC_x[3], Double_t pips_DC_y[3],
-                                        Double_t chi2PID, Double_t p,
-                                        TVector3 Ve,
-                                        TVector3 Vpiplus ){
+                                                Double_t chi2PID, Double_t p,
+                                                TVector3 Ve,
+                                                TVector3 Vpiplus ){
     // decide if pi+ selection cuts
     //
     // input:
@@ -621,7 +603,7 @@ bool EventPassedPiplusPastSelectionCutsCriteria(Double_t pips_DC_x[3], Double_t 
        ( Chi2PID_pips_lowerBound( p ) < chi2PID && chi2PID < Chi2PID_pips_upperBound( p ) )
        
        // Cut on the z-Vertex Difference Between Electrons and Hadrons.
-       &&  ( fabs((Ve-Vpiplus).Z()) < FindCutValue("(Ve-Vpiplus)_z_max"))
+       &&  ( fabs((Ve-Vpiplus).Z()) < cutValue_Ve_Vpiplus_dz_max )
        ) return true;
     
     return false;
@@ -764,6 +746,47 @@ void MoveTo_qFrame(){
     piplus_qFrame.RotateZ(-piplus_phi);
     
 }
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+void loadCutValues(TString cutValuesFilename, int fdebug){
+    
+    // read cut values csv file
+    csv_reader csvr;
+    cutValues = csvr.read_csv("cutValues.csv");
+    if (fdebug>0) { printCutValues(); }
+    
+    
+    
+    // assign specific cut values - to speed things up
+    // by avoiding recalling FindCutValue() on every event
+    
+    // Cut on z-vertex position:
+    // based on RGA_Analysis_Overview_and_Procedures_Nov_4_2020-6245173-2020-12-09-v3.pdf
+    // p. 71
+    if (torusBending==-1){ // in-bending torus field
+        // Spring 19 and Spring 2020 in-bending.
+        cutValue_Vz_min = FindCutValue("Vz_e_min_inbending");
+        cutValue_Vz_max = FindCutValue("Vz_e_max_inbending");
+    } else if (torusBending==1){ // Out-bending torus field
+        // Fall 2019 (without low-energy-run) was out-bending.
+        cutValue_Vz_min = FindCutValue("Vz_e_min_outbending");
+        cutValue_Vz_max = FindCutValue("Vz_e_max_outbending");
+        
+    } else {
+        std::cout
+        << "Un-identified torus bending "
+        << torusBending
+        << ", return" << std::endl;
+        return false;
+    }
+        
+    cutValue_e_PCAL_W               = FindCutValue("e_PCAL_W_min");
+    cutValue_e_PCAL_V               = FindCutValue("e_PCAL_V_min");
+    cutValue_E_PCAL_e               = FindCutValue("E_PCAL_e_min");
+    cutValue_SamplingFraction_min   = FindCutValue("SamplingFraction_min");
+    cutValue_Ve_Vpiplus_dz_max      = FindCutValue("(Ve-Vpiplus)_z_max");
+}
+
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void printCutValues(){
