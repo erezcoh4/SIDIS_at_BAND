@@ -44,7 +44,8 @@ public:
         
         // Helper vars
         std::string line, colname;
-        int val;
+        double val;
+        char tmp;
         
         // Read the column names
         //        if(myFile.good())
@@ -68,30 +69,33 @@ public:
         {
             // Create a stringstream of the current line
             std::stringstream ss(line);
+            std::cout << ss << std::endl;
             
             //            // Keep track of the current column index
             //            int colIdx = 0;
             //
             
             std::pair<std::string, double> cut;
-            
+            ss >> cut.first >> tmp >> cut.second;
+            std::cout << cut.first << tmp << cut.second << std::endl;
             // Extract each value
             
-            while(ss >> val){
-                
-                // Add the current integer to the 'colIdx' column's values vector
-                cut.first = val;
-                
-                // If the next token is a comma, ignore it and move on
-                if(ss.peek() == ',') ss.ignore();
-                
-                // Add the current integer to the 'colIdx' column's values vector
-                cut.second = val;
-                
-                //
-                //                // Increment the column index
-                //                colIdx++;
-            }
+//            while(ss >> val){
+//                std::cout << val << std::endl;
+//
+//                // Add the current integer to the 'colIdx' column's values vector
+//                cut.first = val;
+//
+//                // If the next token is a comma, ignore it and move on
+//                if(ss.peek() == ',') ss.ignore();
+//
+//                // Add the current integer to the 'colIdx' column's values vector
+//                cut.second = val;
+//
+//                //
+//                //                // Increment the column index
+//                //                colIdx++;
+//            }
             result.push_back(cut);
         }
         
