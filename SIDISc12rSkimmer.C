@@ -18,7 +18,7 @@
 #include <TBenchmark.h>
 #include "clas12reader.h"
 #include "/u/home/cohen/SIDIS_at_BAND/Auxiliary/DC_fiducial.cpp"
-#include "/u/home/cohen/SIDIS_at_BAND/Auxiliary/csv_reader.cpp"
+#include "/u/home/cohen/SIDIS_at_BAND/Auxiliary/csv_reader.h"
 using namespace clas12;
 
 
