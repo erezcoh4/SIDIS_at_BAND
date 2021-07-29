@@ -77,8 +77,8 @@ public:
             //
             
             std::pair<std::string, double> cut;
-            
-            std::cout << "Token: " << std::getline(ss, token, ',').str() << std::endl;
+            std::getline(ss, token, ',')
+            std::cout << "Token: " <<  token << std::endl;
             
             ss >> cut.first >> cut.second;
             
