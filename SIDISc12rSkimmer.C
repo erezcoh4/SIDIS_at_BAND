@@ -107,11 +107,15 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
     
     char RunNumberStr[20];
     sprintf( RunNumberStr, "00%d", RunNumber );
+    if (fdebug>1) {
+        std::cout << "processing " << RunNumberStr << std::endl;
+    }
     
     // read cut values csv file
     csv_reader csvr;
     cutValues = csvr.read_csv("cutValues.csv");
-    printCutValues();
+    if (fdebug>0) { printCutValues(); }
+    
 
     
     // defenitions
