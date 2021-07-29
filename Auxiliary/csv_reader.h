@@ -46,6 +46,7 @@ public:
         std::string line, colname;
         double val;
         char tmp;
+        std::string token;
         
         // Read the column names
         //        if(myFile.good())
@@ -76,6 +77,9 @@ public:
             //
             
             std::pair<std::string, double> cut;
+            
+            std::cout << std::getline(ss, token, ',') << std::endl;
+            
             ss >> cut.first >> cut.second;
             
             std::cout << "cut: "<< " first:"<< cut.first << "," << ", second: "<< cut.second << std::endl;
