@@ -25,8 +25,8 @@ class csv_reader {
     //    }
     
 public:
-    csv_reader();
-    ~csv_reader();
+    csv_reader(){};
+    ~csv_reader(){};
     
     
     std::vector<std::pair<std::string, double>> read_csv(std::string filename){

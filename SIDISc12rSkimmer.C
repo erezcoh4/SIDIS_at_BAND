@@ -108,7 +108,7 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
     char RunNumberStr[20];
     sprintf( RunNumberStr, "00%d", RunNumber );
     if (fdebug>1) {
-        std::cout << "processing " << RunNumberStr << std::endl;
+        std::cout << "(SIDIS) skimming run " << RunNumberStr << std::endl;
     }
     
     // read cut values csv file
