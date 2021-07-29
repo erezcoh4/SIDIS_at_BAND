@@ -33,7 +33,8 @@ void                      StreamToCSVfile (std::vector<Double_t> observables, bo
 void                      ChangeAxesFrame (TString FrameName="q(z) frame");
 void                        MoveTo_qFrame ();
 void                       printCutValues ();
-void                        loadCutValues (TString cutValuesFilename = "cutValues.csv");
+void                        loadCutValues (TString cutValuesFilename = "cutValues.csv", int fdebug=0);
+double                       FindCutValue ( std::string cutName );
 bool EventPassedElectronSelectionCriteria (Double_t e_PCAL_x, Double_t e_PCAL_y,
                                            Double_t e_PCAL_W,Double_t e_PCAL_V,
                                            Double_t E_PCAL_e,
@@ -50,7 +51,6 @@ bool   EventPassedPiplusPastSelectionCutsCriteria (Double_t pips_DC_x[3], Double
                                            TVector3 Vpiplus );
 Double_t          Chi2PID_pips_lowerBound (Double_t p, Double_t C=0.88);
 Double_t          Chi2PID_pips_upperBound (Double_t p, Double_t C=0.88);
-double                       FindCutValue ( std::string cutName );
 
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
@@ -62,7 +62,7 @@ double cutValue_Vz_min,     cutValue_Vz_max;
 double cutValue_e_PCAL_W,   cutValue_e_PCAL_V;
 double cutValue_E_PCAL_e;
 double cutValue_SamplingFraction_min;
-
+double cutValue_Ve_Vpiplus_dz_max;
 
 
 
@@ -777,7 +777,7 @@ void loadCutValues(TString cutValuesFilename, int fdebug){
         << "Un-identified torus bending "
         << torusBending
         << ", return" << std::endl;
-        return false;
+        return;
     }
         
     cutValue_e_PCAL_W               = FindCutValue("e_PCAL_W_min");
