@@ -10,6 +10,11 @@
 
 class csv_reader {
     
+    csv_reader();
+    ~csv_reader();
+    
+    
+    
     // based on [https://www.gormanalysis.com/blog/reading-and-writing-csv-files-with-cpp/]
     
     // example usage:
