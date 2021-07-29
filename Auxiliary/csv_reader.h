@@ -79,7 +79,7 @@ public:
             std::pair<std::string, double> cut;
             std::getline(ss, token, ',');
             cut.first = token;
-            //            std::cout << "Token 1: " <<  token << std::endl;
+            std::cout << "Token 1: " <<  token << std::endl;
             std::getline(ss, token, ',');
             std::cout << "Token 2: " <<  token << std::endl;
             cut.second = (double)(std::stof( token ));
