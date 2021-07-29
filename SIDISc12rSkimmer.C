@@ -1,4 +1,4 @@
-// last edit July-15, 2021 (EOC, mbp), see README
+// last edit July-29, 2021 (EOC, mbp), see README
 // ToDo: Add pion DC fiducial cuts
 
 
@@ -18,6 +18,7 @@
 #include <TBenchmark.h>
 #include "clas12reader.h"
 #include "/u/home/cohen/SIDIS_at_BAND/Auxiliary/DC_fiducial.cpp"
+#include "/u/home/cohen/SIDIS_at_BAND/Auxiliary/csv_reader.cpp"
 using namespace clas12;
 
 
@@ -31,6 +32,7 @@ void                     CloseOutputFiles (TString OutDataPath);
 void                      StreamToCSVfile (std::vector<Double_t> observables, bool IsSelectedEvent, int fdebug);
 void                      ChangeAxesFrame (TString FrameName="q(z) frame");
 void                        MoveTo_qFrame ();
+void                       printCutValues ();
 bool EventPassedElectronSelectionCriteria (Double_t e_PCAL_x, Double_t e_PCAL_y,
                                            Double_t e_PCAL_W,Double_t e_PCAL_V,
                                            Double_t E_PCAL_e,
@@ -53,6 +55,8 @@ Double_t          Chi2PID_pips_upperBound (Double_t p, Double_t C=0.88);
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 // globals
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+// cut values
+std::vector<std::pair<std::string, std::vector<double>>> cutValues;
 
 // Output root file and tree
 TFile * outFile;
@@ -103,6 +107,12 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
     
     char RunNumberStr[20];
     sprintf( RunNumberStr, "00%d", RunNumber );
+    
+    // read cut values csv file
+    csv_reader csvr();
+    cutValues = csvr.read_csv("cutValues.csv");
+    printCutValues();
+
     
     // defenitions
     auto db=TDatabasePDG::Instance();
@@ -215,11 +225,6 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
     outTree->Branch("EventPassedCuts"   ,&EventPassedCuts       );
     outTree->Branch("ePastSelectionCuts"        ,&ePastSelectionCuts            );
     outTree->Branch("piplusPastSelectionCuts"   ,&piplusPastSelectionCuts       );
-
-    
-    
-    
-    
     
     
     // Record start time
@@ -514,7 +519,7 @@ bool EventPassedElectronSelectionCriteria(Double_t e_PCAL_x, Double_t e_PCAL_y,
     // same for y1,x2,y2,...
     // eHit.getDC_sector() - sector
     // checking DC Fiducials
-    // torus magnet bending:   ( 1 = inbeding, 0 = outbending    )
+    // torusBending         torus magnet bending:   ( 1 = inbeding, -1 = outbending    )
     
     // sometimes the readout-sector is 0. This is funny
     // Justin B. Estee (June-21): I also had this issue. I am throwing away sector 0. The way you check is plot the (x,y) coordinates of the sector and you will not see any thing. Double check me but I think it is 0.
@@ -526,7 +531,7 @@ bool EventPassedElectronSelectionCriteria(Double_t e_PCAL_x, Double_t e_PCAL_y,
         // layer:   1-3
         // bending: 0(out)/1(in)
         // std::cout << "e_DC_sector: " << e_DC_sector << ", regionIdx: " << regionIdx << std::endl;
-        int bending = 1 ? (torusBending==-1) : 0;
+        int bending  = 1 ? (torusBending==-1) : 0;
         bool DC_fid  = dcfid.DC_e_fid(e_DC_x[regionIdx],
                                       e_DC_y[regionIdx],
                                       e_DC_sector,
@@ -542,22 +547,36 @@ bool EventPassedElectronSelectionCriteria(Double_t e_PCAL_x, Double_t e_PCAL_y,
     // based on RGA_Analysis_Overview_and_Procedures_Nov_4_2020-6245173-2020-12-09-v3.pdf
     // p. 71
     Double_t Vz_min,Vz_max;
-    if (torusBending==1){
-        
-        // in-bending torus field -13.0 cm < Vz < +12.0 cm
+    if (torusBending==-1){ // in-bending torus field
         // Spring 19 and Spring 2020 in-bending.
-        Vz_min = -13.0;
-        Vz_max = 12.0;
+        // -13.0 cm < Vz < +12.0 cm
         
-    } else if (torusBending==0){
+        for (auto cut: CutValues) {
+            if (strcmp(cut.first,"Vz_e_min_inbending")==0){
+                Vz_min = cut.second;
+            }
+        }
+        for (auto cut: CutValues) {
+            if (strcmp(cut.first,"Vz_e_max_inbending")==0){
+                Vz_max = cut.second;
+            }
+        }
+
+        std::cout << "Vz min,max: " << Vz_min << ","<< Vz_min << std::endl;
+//        Vz_max = 12.0;
         
-        // Out-bending torus field -18.0 cm < Vz < +10.0 cm
+    } else if (torusBending==1){ // Out-bending torus field
         // Fall 2019 (without low-energy-run) was out-bending.
+        // -18.0 cm < Vz < +10.0 cm
+        
         Vz_min = -18.0;
         Vz_max = 10.0;
         
     } else {
-        std::cout << "Un-identified torus bending, return";
+        std::cout
+        << "Un-identified torus bending "
+        << torusBending
+        << ", return" << std::endl;
         return false;
     }
     
@@ -708,7 +727,8 @@ void CloseOutputFiles (TString OutDataPath){
     
     std::cout << "output files ready in root/csv formats in " << std::endl
     << OutDataPath << std::endl
-    << "wrote " << Nentires << " to output root file";
+    << "wrote " << Nentires << " to output root file"
+    << std::endl;
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
@@ -754,5 +774,14 @@ void MoveTo_qFrame(){
     Double_t piplus_phi = piplus_qFrame.Phi();
     piplus_qFrame.RotateZ(-piplus_phi);
     
+}
+
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+void printCutValues(){
+    std::cout << "Using cut values:"
+    for (auto cut: CutValues) {
+        std::cout << cut.first << ": " << cut.second << std::endl;
+    }
 }
 
