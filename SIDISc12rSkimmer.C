@@ -110,12 +110,12 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
     if (fdebug>1) {
         std::cout << "(SIDIS) skimming run " << RunNumberStr << std::endl;
     }
-    return;
     
     // read cut values csv file
     csv_reader csvr;
     cutValues = csvr.read_csv("cutValues.csv");
     if (fdebug>0) { printCutValues(); }
+    return;
     
 
     
