@@ -81,7 +81,7 @@ public:
             cut.first = token;
 //            std::cout << "Token 1: " <<  token << std::endl;
             std::getline(ss, token, ',');
-            cut.second = std::stod( token );
+            cut.second = (double)(std::stof( token ));
 //            std::cout << "Token 2: " <<  token << std::endl;
 //            ss >> cut.first >> cut.second;
             
