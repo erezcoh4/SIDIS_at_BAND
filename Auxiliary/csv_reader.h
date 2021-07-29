@@ -72,22 +72,27 @@ public:
             //            // Keep track of the current column index
             //            int colIdx = 0;
             //
+            
+            std::pair<std::string, double> cut;
+            
             // Extract each value
+            
             while(ss >> val){
                 
                 // Add the current integer to the 'colIdx' column's values vector
-                result.first = val;
+                cut.first = val;
                 
                 // If the next token is a comma, ignore it and move on
                 if(ss.peek() == ',') ss.ignore();
                 
                 // Add the current integer to the 'colIdx' column's values vector
-                result.second = val;
+                cut.second = val;
                 
                 //
                 //                // Increment the column index
                 //                colIdx++;
             }
+            result.push_back(cut);
         }
         
         // Close file
