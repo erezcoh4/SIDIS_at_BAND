@@ -76,9 +76,9 @@ public:
             //
             
             std::pair<std::string, double> cut;
-            ss >> cut.first >> tmp >> cut.second;
+            ss >> cut.first >> cut.second;
             
-            std::cout << "cut: "<< " first:"<< cut.first << tmp << ", second: "<< cut.second << std::endl;
+            std::cout << "cut: "<< " first:"<< cut.first << "," << ", second: "<< cut.second << std::endl;
             // Extract each value
             
 //            while(ss >> val){
