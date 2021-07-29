@@ -77,7 +77,7 @@ public:
             std::getline(ss, token, ',');
             cut.first = token;
             std::cout << "Token 1: " <<  token << std::endl;
-            if (strcmp('',token.c_str())==0) {
+            if (strcmp("",token.c_str())==0) {
                 break;
             }
             std::getline(ss, token, ',');
