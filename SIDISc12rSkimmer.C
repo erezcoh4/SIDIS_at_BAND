@@ -56,7 +56,7 @@ double                       FindCutValue ( std::string cutName );
 // globals
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 // cut values
-std::vector<std::pair<std::string, std::vector<double>>> cutValues;
+std::vector<std::pair<std::string, double>> cutValues;
 
 // Output root file and tree
 TFile * outFile;
@@ -551,7 +551,7 @@ bool EventPassedElectronSelectionCriteria(Double_t e_PCAL_x, Double_t e_PCAL_y,
         // Spring 19 and Spring 2020 in-bending.
         // -13.0 cm < Vz < +12.0 cm
         Vz_min = FindCutValue("Vz_e_min_inbending");
-        Vz_max = FindCutValue("Vz_e_max_inbending");        
+        Vz_max = FindCutValue("Vz_e_max_inbending");
 
         std::cout << "Vz min,max: " << Vz_min << ","<< Vz_min << std::endl;
 //        Vz_max = 12.0;
