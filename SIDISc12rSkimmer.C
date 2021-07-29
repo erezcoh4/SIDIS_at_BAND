@@ -557,7 +557,7 @@ bool EventPassedElectronSelectionCriteria(Double_t e_PCAL_x, Double_t e_PCAL_y,
         // -13.0 cm < Vz < +12.0 cm
         Vz_min = FindCutValue("Vz_e_min_inbending");
         Vz_max = FindCutValue("Vz_e_max_inbending");
-        std::cout << "Vz min,max: " << Vz_min << ","<< Vz_min << std::endl;
+        std::cout << "Vz min,max: " << Vz_min << ","<< Vz_max << std::endl;
         
     } else if (torusBending==1){ // Out-bending torus field
         // Fall 2019 (without low-energy-run) was out-bending.
