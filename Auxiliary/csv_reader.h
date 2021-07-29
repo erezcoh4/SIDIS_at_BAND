@@ -69,7 +69,7 @@ public:
         {
             // Create a stringstream of the current line
             std::stringstream ss(line);
-            std::cout << ss << std::endl;
+            std::cout << ss.str() << std::endl;
             
             //            // Keep track of the current column index
             //            int colIdx = 0;
