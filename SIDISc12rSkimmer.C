@@ -109,7 +109,7 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
     sprintf( RunNumberStr, "00%d", RunNumber );
     
     // read cut values csv file
-    csv_reader csvr();
+    csv_reader csvr;
     cutValues = csvr.read_csv("cutValues.csv");
     printCutValues();
 
@@ -551,12 +551,12 @@ bool EventPassedElectronSelectionCriteria(Double_t e_PCAL_x, Double_t e_PCAL_y,
         // Spring 19 and Spring 2020 in-bending.
         // -13.0 cm < Vz < +12.0 cm
         
-        for (auto cut: CutValues) {
+        for (auto cut: cutValues) {
             if (strcmp(cut.first,"Vz_e_min_inbending")==0){
                 Vz_min = cut.second;
             }
         }
-        for (auto cut: CutValues) {
+        for (auto cut: cutValues) {
             if (strcmp(cut.first,"Vz_e_max_inbending")==0){
                 Vz_max = cut.second;
             }
@@ -779,8 +779,8 @@ void MoveTo_qFrame(){
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void printCutValues(){
-    std::cout << "Using cut values:"
-    for (auto cut: CutValues) {
+    std::cout << "Using cut values:" << std::endl;
+    for (auto cut: cutValues) {
         std::cout << cut.first << ": " << cut.second << std::endl;
     }
 }

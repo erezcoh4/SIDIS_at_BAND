@@ -10,9 +10,7 @@
 
 class csv_reader {
     
-    csv_reader();
-    ~csv_reader();
-    
+     
     
     
     // based on [https://www.gormanalysis.com/blog/reading-and-writing-csv-files-with-cpp/]
@@ -27,6 +25,9 @@ class csv_reader {
     //    }
 
 public:
+    csv_reader();
+    ~csv_reader();
+   
     
     std::vector<std::pair<std::string, std::vector<double>>> read_csv(std::string filename){
         // Reads a CSV file into a vector of <string, vector<int>> pairs where
