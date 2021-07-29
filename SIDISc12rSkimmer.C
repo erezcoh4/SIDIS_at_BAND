@@ -554,17 +554,12 @@ bool EventPassedElectronSelectionCriteria(Double_t e_PCAL_x, Double_t e_PCAL_y,
     Double_t Vz_min,Vz_max;
     if (torusBending==-1){ // in-bending torus field
         // Spring 19 and Spring 2020 in-bending.
-        // -13.0 cm < Vz < +12.0 cm
         Vz_min = FindCutValue("Vz_e_min_inbending");
         Vz_max = FindCutValue("Vz_e_max_inbending");
-        std::cout << "Vz min,max: " << Vz_min << ","<< Vz_max << std::endl;
-        
     } else if (torusBending==1){ // Out-bending torus field
         // Fall 2019 (without low-energy-run) was out-bending.
-        // -18.0 cm < Vz < +10.0 cm
-        
-        Vz_min = -18.0;
-        Vz_max = 10.0;
+        Vz_min = FindCutValue("Vz_e_min_outbending");
+        Vz_max = FindCutValue("Vz_e_max_outbending");
         
     } else {
         std::cout
@@ -578,14 +573,14 @@ bool EventPassedElectronSelectionCriteria(Double_t e_PCAL_x, Double_t e_PCAL_y,
        // fiducial cuts on PCAL
        fabs(e_PCAL_x)>0
        &&  fabs(e_PCAL_y)>0
-       &&  e_PCAL_W > 19
-       &&  e_PCAL_V > 19
+       &&  e_PCAL_W > FindCutValue("e_PCAL_W_min")
+       &&  e_PCAL_V > FindCutValue("e_PCAL_V_min")
        
        // Electron Identification Refinement  - PCAL Minimum Energy Deposition Cut
-       &&  E_PCAL_e > 0.07
+       &&  E_PCAL_e > FindCutValue("E_PCAL_e_min")
        
        // Sampling fraction cut
-       && ((E_PCAL_e + E_ECIN_e + E_ECOUT_e)/e.P()) > 0.17
+       && ((E_PCAL_e + E_ECIN_e + E_ECOUT_e)/e.P()) > FindCutValue("SamplingFraction_min")
        && (E_ECIN_e/e.P() > 0.2 - E_PCAL_e/e.P()) // RGA AN puts "<" here mistakenly
        
        // Cut on z-vertex position: in-bending torus field -13.0 cm < Vz < +12.0 cm
@@ -626,7 +621,7 @@ bool EventPassedPiplusPastSelectionCutsCriteria(Double_t pips_DC_x[3], Double_t 
        ( Chi2PID_pips_lowerBound( p ) < chi2PID && chi2PID < Chi2PID_pips_upperBound( p ) )
        
        // Cut on the z-Vertex Difference Between Electrons and Hadrons.
-       &&  ( fabs((Ve-Vpiplus).Z()) < 20.0)
+       &&  ( fabs((Ve-Vpiplus).Z()) < FindCutValue("(Ve-Vpiplus)_z_max"))
        ) return true;
     
     return false;
