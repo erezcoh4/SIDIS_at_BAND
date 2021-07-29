@@ -81,8 +81,9 @@ public:
             cut.first = token;
 //            std::cout << "Token 1: " <<  token << std::endl;
             std::getline(ss, token, ',');
+            std::cout << "Token 2: " <<  token << std::endl;
             cut.second = (double)(std::stof( token ));
-//            std::cout << "Token 2: " <<  token << std::endl;
+            
 //            ss >> cut.first >> cut.second;
             
             std::cout << "cut: "<< " first:"<< cut.first << "," << ", second: "<< cut.second << std::endl;
