@@ -80,9 +80,7 @@ int    DC_layers[3] = {6,18,36};// Region 1 is denoted at DC detector 6, Region 
 int                    DC_layer;
 int                      runnum;
 int                       evnum;
-int                       event;
 int                  good_event;
-int                     Nevents;
 int               beam_helicity; // helicity of the electron +1 along the beam and -1 opposite to it
 int                      status;
 //    int Fastest_pipsIdx = 0;
@@ -313,9 +311,8 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
         if (NeventsMax<0){
             NeventsMaxToProcess = c12.getReader().getEntries();
         }
-        event       = 0;
-        good_event  = 0;
-        Nevents     = 0;
+        int event   = 0;
+        int good_event  = 0;
 
             
         // now process the events from the first one...
@@ -327,7 +324,6 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
             
             
             if (fdebug>2) std::cout << "begin analysis of event " << event << std::endl;
-            Nevents++;
             
             // initialize
             xB          = Q2        = omega     = -9999;
