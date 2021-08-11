@@ -939,12 +939,14 @@ void CloseOutputFiles (TString OutDataPath){
     outFile_e_piminus->Close();
     
     std::cout << "output files ready in root/csv formats in " << std::endl
-    << OutDataPath << std::endl
+    << std::endl
     << "wrote "  << Nentires_e_piplus  << " to (e,e'pi+) root file, "
     << std::endl << outFile_e_piplus -> GetName()
+    << std::endl << outfilename + "_e_piplus_selected_events.csv"
     << std::endl
     << "and "    << Nentires_e_piminus << " to (e,e'pi-) root file. "
     << std::endl << outFile_e_piminus -> GetName()
+    << std::endl << outfilename + "_e_piminus_selected_events.csv"
     << std::endl;
 }
 
