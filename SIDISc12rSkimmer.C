@@ -953,11 +953,6 @@ void StreamToCSVfile (std::vector<Double_t> observables, bool IsSelectedEvent, i
     }
     // decide which file to write...
     if (LeadingPionCharge=="piplus") {
-        StreamVariablesToCSVfile (CSVfile_e_piplus,
-                                  SelectedEventsCSVfile_e_piplus,
-                                  observables,
-                                  IsSelectedEvent);
-        
         for (auto v:observables) CSVfile_e_piplus << v << ",";
         CSVfile_e_piplus << std::endl;
         
