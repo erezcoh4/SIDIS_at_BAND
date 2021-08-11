@@ -37,6 +37,7 @@ void                      ChangeAxesFrame (TString FrameName="q(z) frame");
 void                        MoveTo_qFrame ();
 void                       printCutValues ();
 void                        loadCutValues (TString cutValuesFilename = "cutValues.csv", int fdebug=0);
+void                      SetOutputTTrees ();
 double                       FindCutValue ( std::string cutName );
 bool EventPassedElectronSelectionCriteria (Double_t e_PCAL_x, Double_t e_PCAL_y,
                                            Double_t e_PCAL_W,Double_t e_PCAL_V,
@@ -164,6 +165,8 @@ TLorentzVector             Beam;
 TLorentzVector                e;
 TLorentzVector                q;
 TLorentzVector               pi; // leading pion
+TLorentzVector           piplus; // leading positive pion
+TLorentzVector          piminus; // leading negative pion
 TLorentzVector    piplus_leader; // leading positive pion
 TLorentzVector   piminus_leader; // leading negative pion
 TString       LeadingPionCharge; // "piplus" / "piminus"
@@ -217,7 +220,7 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
 
     
     // defenitions
-    auto db=TDatabasePDG::Instance();
+    auto db = TDatabasePDG::Instance();
     Mp      = db->GetParticle( 2212 )->Mass();
     Mp2     = Mp * Mp;
     e       = TLorentzVector(0,0,0,db->GetParticle( 11   )->Mass());
@@ -253,52 +256,7 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
                       ));
     
     // output tree branches
-    outTree->Branch("eventnumber"       ,&evnum                 );
-    outTree->Branch("runnum"            ,&runnum                );
-    outTree->Branch("e_E_PCAL"          ,&e_E_PCAL              );
-    outTree->Branch("e_E_ECIN"          ,&e_E_ECIN              );
-    outTree->Branch("e_E_ECOUT"         ,&e_E_ECOUT             );
-    outTree->Branch("pips_chi2PID"      ,&pips_chi2PID          );
-    outTree->Branch("e_PCAL_W"          ,&e_PCAL_W              );
-    outTree->Branch("e_PCAL_V"          ,&e_PCAL_V              );
-    outTree->Branch("pips_PCAL_x"       ,&pips_PCAL_x           );
-    outTree->Branch("pips_PCAL_y"       ,&pips_PCAL_y           );
-    outTree->Branch("pips_PCAL_z"       ,&pips_PCAL_z           );
-    outTree->Branch("e_PCAL_x"          ,&e_PCAL_x              );
-    outTree->Branch("e_PCAL_y"          ,&e_PCAL_y              );
-    outTree->Branch("e_PCAL_z"          ,&e_PCAL_z              );
-    outTree->Branch("e_PCAL_sector"     ,&e_PCAL_sector         );
-    outTree->Branch("e_DC_sector"       ,&e_DC_sector           );
-    outTree->Branch("e_DC_Chi2N"        ,&e_DC_Chi2N            );
-    outTree->Branch("e_DC_x"            ,&e_DC_x                );
-    outTree->Branch("e_DC_y"            ,&e_DC_y                );
-    outTree->Branch("pips_PCAL_sector"  ,&pips_PCAL_sector      );
-    outTree->Branch("pips_DC_sector"    ,&pips_DC_sector        );
-    outTree->Branch("pips_Chi2N"        ,&pips_Chi2N            );
-    outTree->Branch("pips_DC_x"         ,&pips_DC_x             );
-    outTree->Branch("pips_DC_y"         ,&pips_DC_y             );
-    outTree->Branch("pips_E_PCAL"       ,&pips_E_PCAL           );
-    outTree->Branch("pips_E_ECIN"       ,&pips_E_ECIN           );
-    outTree->Branch("pips_E_ECIN"       ,&pips_E_ECIN           );
-    outTree->Branch("pips_E_ECOUT"      ,&pips_E_ECOUT          );
-    outTree->Branch("DC_layer"          ,&DC_layer              );
-    outTree->Branch("e"                 ,&e                     );
-    outTree->Branch("piplus"            ,&piplus                );
-    outTree->Branch("Ve"                ,&Ve                    );
-    outTree->Branch("Vpiplus"           ,&Vpiplus               );
-    outTree->Branch("Beam"              ,&Beam                  );
-    outTree->Branch("beam_helicity"     ,&beam_helicity         );
-    outTree->Branch("q"                 ,&q                     );
-    outTree->Branch("Ebeam"             ,&Ebeam                 );
-    outTree->Branch("xB"                ,&xB                    );
-    outTree->Branch("Q2"                ,&Q2                    );
-    outTree->Branch("omega"             ,&omega                 );
-    outTree->Branch("z"                 ,&z                     );
-    outTree->Branch("W"                 ,&W                     );
-    
-    outTree->Branch("EventPassedCuts"   ,&EventPassedCuts       );
-    outTree->Branch("ePastSelectionCuts",&ePastSelectionCuts    );
-    outTree->Branch("piPastSelectionCuts",&piPastSelectionCuts  );
+    SetOutputTTrees();
     
     // ------------------------------------------------------------
     // open input file(s)
@@ -623,6 +581,7 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
                         pi_DC_y[regionIdx] = pims_DC_y[regionIdx];
                     }
                 }
+                
                 // leading hadron rest frame energy fraction
                 z = pi.E()/q.E();
                 // done
@@ -1122,4 +1081,105 @@ int GetBeamHelicity( clas12reader c12, int runnum ){
         beam_helicity = -1 * beam_helicity;
     }
     return beam_helicity;
+}
+
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+void SetOutputTTrees(){
+    // pi+
+    outTree_e_piplus->Branch("eventnumber"          ,&evnum                 );
+    outTree_e_piplus->Branch("runnum"               ,&runnum                );
+    outTree_e_piplus->Branch("e_E_PCAL"             ,&e_E_PCAL              );
+    outTree_e_piplus->Branch("e_E_ECIN"             ,&e_E_ECIN              );
+    outTree_e_piplus->Branch("e_E_ECOUT"            ,&e_E_ECOUT             );
+    outTree_e_piplus->Branch("pi_chi2PID"           ,&pi_chi2PID            );
+    outTree_e_piplus->Branch("e_PCAL_W"             ,&e_PCAL_W              );
+    outTree_e_piplus->Branch("e_PCAL_V"             ,&e_PCAL_V              );
+    outTree_e_piplus->Branch("pi_PCAL_x"            ,&pi_PCAL_x             );
+    outTree_e_piplus->Branch("pi_PCAL_y"            ,&pi_PCAL_y             );
+    outTree_e_piplus->Branch("pi_PCAL_z"            ,&pi_PCAL_z             );
+    outTree_e_piplus->Branch("e_PCAL_x"             ,&e_PCAL_x              );
+    outTree_e_piplus->Branch("e_PCAL_y"             ,&e_PCAL_y              );
+    outTree_e_piplus->Branch("e_PCAL_z"             ,&e_PCAL_z              );
+    outTree_e_piplus->Branch("e_PCAL_sector"        ,&e_PCAL_sector         );
+    outTree_e_piplus->Branch("e_DC_sector"          ,&e_DC_sector           );
+    outTree_e_piplus->Branch("e_DC_Chi2N"           ,&e_DC_Chi2N            );
+    outTree_e_piplus->Branch("e_DC_x"               ,&e_DC_x                );
+    outTree_e_piplus->Branch("e_DC_y"               ,&e_DC_y                );
+    outTree_e_piplus->Branch("pi_PCAL_sector"       ,&pi_PCAL_sector        );
+    outTree_e_piplus->Branch("pi_DC_sector"         ,&pi_DC_sector          );
+    outTree_e_piplus->Branch("pi_Chi2N"             ,&pi_Chi2N              );
+    outTree_e_piplus->Branch("pi_DC_x"              ,&pi_DC_x               );
+    outTree_e_piplus->Branch("pi_DC_y"              ,&pi_DC_y               );
+    outTree_e_piplus->Branch("pi_E_PCAL"            ,&pi_E_PCAL             );
+    outTree_e_piplus->Branch("pi_E_ECIN"            ,&pi_E_ECIN             );
+    outTree_e_piplus->Branch("pi_E_ECIN"            ,&pi_E_ECIN             );
+    outTree_e_piplus->Branch("pi_E_ECOUT"           ,&pi_E_ECOUT            );
+    outTree_e_piplus->Branch("DC_layer"             ,&DC_layer              );
+    outTree_e_piplus->Branch("e"                    ,&e                     );
+    outTree_e_piplus->Branch("pi"                   ,&pi                    );
+    outTree_e_piplus->Branch("Ve"                   ,&Ve                    );
+    outTree_e_piplus->Branch("Vpi"                  ,&Vpi                   );
+    outTree_e_piplus->Branch("Beam"                 ,&Beam                  );
+    outTree_e_piplus->Branch("beam_helicity"        ,&beam_helicity         );
+    outTree_e_piplus->Branch("q"                    ,&q                     );
+    outTree_e_piplus->Branch("Ebeam"                ,&Ebeam                 );
+    outTree_e_piplus->Branch("xB"                   ,&xB                    );
+    outTree_e_piplus->Branch("Q2"                   ,&Q2                    );
+    outTree_e_piplus->Branch("omega"                ,&omega                 );
+    outTree_e_piplus->Branch("z"                    ,&z                     );
+    outTree_e_piplus->Branch("W"                    ,&W                     );
+
+    outTree_e_piplus->Branch("EventPassedCuts"      ,&EventPassedCuts       );
+    outTree_e_piplus->Branch("ePastSelectionCuts"   ,&ePastSelectionCuts    );
+    outTree_e_piplus->Branch("piPastSelectionCuts"  ,&piPastSelectionCuts   );
+    
+    
+    // pi-
+    outTree_e_piminus->Branch("eventnumber"         ,&evnum                 );
+    outTree_e_piminus->Branch("runnum"              ,&runnum                );
+    outTree_e_piminus->Branch("e_E_PCAL"            ,&e_E_PCAL              );
+    outTree_e_piminus->Branch("e_E_ECIN"            ,&e_E_ECIN              );
+    outTree_e_piminus->Branch("e_E_ECOUT"           ,&e_E_ECOUT             );
+    outTree_e_piminus->Branch("pi_chi2PID"          ,&pi_chi2PID            );
+    outTree_e_piminus->Branch("e_PCAL_W"            ,&e_PCAL_W              );
+    outTree_e_piminus->Branch("e_PCAL_V"            ,&e_PCAL_V              );
+    outTree_e_piminus->Branch("pi_PCAL_x"           ,&pi_PCAL_x             );
+    outTree_e_piminus->Branch("pi_PCAL_y"           ,&pi_PCAL_y             );
+    outTree_e_piminus->Branch("pi_PCAL_z"           ,&pi_PCAL_z             );
+    outTree_e_piminus->Branch("e_PCAL_x"            ,&e_PCAL_x              );
+    outTree_e_piminus->Branch("e_PCAL_y"            ,&e_PCAL_y              );
+    outTree_e_piminus->Branch("e_PCAL_z"            ,&e_PCAL_z              );
+    outTree_e_piminus->Branch("e_PCAL_sector"       ,&e_PCAL_sector         );
+    outTree_e_piminus->Branch("e_DC_sector"         ,&e_DC_sector           );
+    outTree_e_piminus->Branch("e_DC_Chi2N"          ,&e_DC_Chi2N            );
+    outTree_e_piminus->Branch("e_DC_x"              ,&e_DC_x                );
+    outTree_e_piminus->Branch("e_DC_y"              ,&e_DC_y                );
+    outTree_e_piminus->Branch("pi_PCAL_sector"      ,&pi_PCAL_sector        );
+    outTree_e_piminus->Branch("pi_DC_sector"        ,&pi_DC_sector          );
+    outTree_e_piminus->Branch("pi_Chi2N"            ,&pi_Chi2N              );
+    outTree_e_piminus->Branch("pi_DC_x"             ,&pi_DC_x               );
+    outTree_e_piminus->Branch("pi_DC_y"             ,&pi_DC_y               );
+    outTree_e_piminus->Branch("pi_E_PCAL"           ,&pi_E_PCAL             );
+    outTree_e_piminus->Branch("pi_E_ECIN"           ,&pi_E_ECIN             );
+    outTree_e_piminus->Branch("pi_E_ECIN"           ,&pi_E_ECIN             );
+    outTree_e_piminus->Branch("pi_E_ECOUT"          ,&pi_E_ECOUT            );
+    outTree_e_piminus->Branch("DC_layer"            ,&DC_layer              );
+    outTree_e_piminus->Branch("e"                   ,&e                     );
+    outTree_e_piminus->Branch("pi"                  ,&pi                    );
+    outTree_e_piminus->Branch("Ve"                  ,&Ve                    );
+    outTree_e_piminus->Branch("Vpi"                 ,&Vpi                   );
+    outTree_e_piminus->Branch("Beam"                ,&Beam                  );
+    outTree_e_piminus->Branch("beam_helicity"       ,&beam_helicity         );
+    outTree_e_piminus->Branch("q"                   ,&q                     );
+    outTree_e_piminus->Branch("Ebeam"               ,&Ebeam                 );
+    outTree_e_piminus->Branch("xB"                  ,&xB                    );
+    outTree_e_piminus->Branch("Q2"                  ,&Q2                    );
+    outTree_e_piminus->Branch("omega"               ,&omega                 );
+    outTree_e_piminus->Branch("z"                   ,&z                     );
+    outTree_e_piminus->Branch("W"                   ,&W                     );
+
+    outTree_e_piminus->Branch("EventPassedCuts"     ,&EventPassedCuts       );
+    outTree_e_piminus->Branch("ePastSelectionCuts"  ,&ePastSelectionCuts    );
+    outTree_e_piminus->Branch("piPastSelectionCuts" ,&piPastSelectionCuts   );
 }
