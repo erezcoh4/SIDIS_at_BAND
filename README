@@ -1,12 +1,21 @@
 
- We are interested in Semi Inclusive DIS (SIDIS) on a deuteron target with pi+ tagging
+    last edit: Aug-11, 2021 (EOC, mbp)
+    
+    Skimming for Semi Inclusive DIS (SIDIS) on a deuteron target with pi+ tagging
  
         D(e,e’pi+)X
         D(e,e’pi+n)X
         D(e,e’pi-)X
         D(e,e’pi-n)X
+        
+        
+    execute:
+    ---------------------
+    clas12root -q "SIDISc12rSkimmer.C+(6420,100)"
+    root -l -q "MergeSIDISandBANDSkimmers.C(6420,100)"
+    
+        
 
-last edit: Aug-6, 2021 (EOC, mbp)
 
 To execute, e.g. go to /u/home/cohen/SIDIS_at_BAND, do git pull, then...
 
