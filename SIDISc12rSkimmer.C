@@ -623,7 +623,7 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
                     if ( EventPassedCuts ) {
                         status          = 0;
                         IsSelectedEvent = true;
-                        
+                        if (fdebug>2)  std::cout << "Leading pion is " << LeadingPionCharge << std::endl;
                         if (LeadingPionCharge=="piplus") {
                             outTree_e_piplus -> Fill();
                         } else {
