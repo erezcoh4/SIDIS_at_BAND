@@ -53,7 +53,8 @@ bool EventPassedElectronSelectionCriteria (Double_t e_PCAL_x, Double_t e_PCAL_y,
                                            int torusBending);
 bool EventPassedPionSelectionCutsCriteria (Double_t DC_x[3], Double_t DC_y[3],
                                            Double_t chi2PID, Double_t p,
-                                           TVector3 Ve,      TVector3 Vpi );
+                                           TVector3 Ve,      TVector3 Vpi,
+                                           int fdebug);
 Double_t          Chi2PID_pion_lowerBound (Double_t p, Double_t C=0.88); // C(pi+)=0.88, C(pi-)=0.93
 Double_t          Chi2PID_pion_upperBound (Double_t p, Double_t C=0.88); // C(pi+)=0.88, C(pi-)=0.93
 int                       GetBeamHelicity (event_ptr p_event, int runnum, int fdebug);
@@ -631,7 +632,8 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
                     
                     piPastSelectionCuts = EventPassedPionSelectionCutsCriteria(pi_DC_x,     pi_DC_y,
                                                                                pi_chi2PID,  pi.P(),
-                                                                               Ve,          Vpi);
+                                                                               Ve,          Vpi,
+                                                                               fdebug);
                     
                     EventPassedCuts = ( ePastSelectionCuts && piPastSelectionCuts );
                     
@@ -851,7 +853,7 @@ bool EventPassedPionSelectionCutsCriteria(Double_t DC_x[3], Double_t DC_y[3],
     else if (LeadingPionCharge=="piminus")  C = 0.93;
     
     if (fdebug>3) {
-        std::cout << "EventPassedPionSelectionCutsCriteria(): " << std::endl
+        std::cout << "in EventPassedPionSelectionCutsCriteria()"<< std::endl
         << "leading pion charge: "  << LeadingPionCharge        << ","
         << "DC_x[0]: "              << DC_x[0]                  << ","
         << "chi2PID:"               << chi2PID                  << ","
