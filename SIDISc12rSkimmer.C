@@ -35,10 +35,6 @@ void                     CloseOutputFiles (TString OutDataPath);
 void                      StreamToCSVfile (std::vector<Double_t> observables,
                                            bool IsSelectedEvent,
                                            int fdebug);
-void             StreamVariablesToCSVfile (std::ofstream CSVfile,
-                                           std::ofstream SelectedEventsCSVfile,
-                                           std::vector<Double_t> observables,
-                                           bool IsSelectedEvent);
 void                      ChangeAxesFrame (TString FrameName="q(z) frame");
 void                        MoveTo_qFrame ();
 void                       printCutValues ();
@@ -961,30 +957,27 @@ void StreamToCSVfile (std::vector<Double_t> observables, bool IsSelectedEvent, i
                                   SelectedEventsCSVfile_e_piplus,
                                   observables,
                                   IsSelectedEvent);
+        
+        for (auto v:observables) CSVfile_e_piplus << v << ",";
+        CSVfile_e_piplus << std::endl;
+        
+        if (IsSelectedEvent) {
+            for (auto v:observables) SelectedEventsCSVfile_e_piplus << v << ",";
+            SelectedEventsCSVfile_e_piplus << std::endl;
+        }
+        
     } else {
-        StreamVariablesToCSVfile (CSVfile_e_piminus,
-                                  SelectedEventsCSVfile_e_piminus,
-                                  observables,
-                                  IsSelectedEvent);
+        for (auto v:observables) CSVfile_e_piminus << v << ",";
+        CSVfile_e_piminus << std::endl;
+        
+        if (IsSelectedEvent) {
+            for (auto v:observables) SelectedEventsCSVfile_e_piminus << v << ",";
+            SelectedEventsCSVfile_e_piminus << std::endl;
+        }
     }
 }
 
-void StreamVariablesToCSVfile (std::ofstream CSVfile,
-                               std::ofstream SelectedEventsCSVfile,
-                               std::vector<Double_t> observables, bool IsSelectedEvent){
-    // write to file
-    for (auto v:observables) {
-        CSVfile << v << ",";
-    }
-    CSVfile << std::endl;
-    
-    if (IsSelectedEvent) {
-        for (auto v:observables) {
-            SelectedEventsCSVfile << v << ",";
-        }
-        SelectedEventsCSVfile << std::endl;
-    }
-}
+
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void ChangeAxesFrame(TString FrameName){
