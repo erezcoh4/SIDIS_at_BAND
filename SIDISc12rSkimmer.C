@@ -429,7 +429,7 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
                 int     leading_e_index = 0;
                 SetLorentzVector(e,electrons[0]);
                 TLorentzVector e_tmp(0,0,0,db->GetParticle(11)->Mass());
-                for (int eIdx=0; eIdx < Ne; e++) {
+                for (int eIdx=0; eIdx < Ne; eIdx++) {
                     SetLorentzVector(e_tmp  ,e[eIdx]);
                     double Ee = e_tmp.E();
                     if (Ee > leading_e_E) {
