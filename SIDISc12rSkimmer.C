@@ -965,7 +965,7 @@ void OpenOutputFiles (TString outfilename,TString header){
     
     SelectedEventsCSVfile_e_piplus.open( outfilename + "_e_piplus_selected_events.csv" );
     SelectedEventsCSVfile_e_piplus << header << std::endl;
-    SelectedEventsCSVfile_e_piminus.open( outfilename + "_e_pimius_selected_events.csv" );
+    SelectedEventsCSVfile_e_piminus.open( outfilename + "_e_piminus_selected_events.csv" );
     SelectedEventsCSVfile_e_piminus << header << std::endl;
 
 }
