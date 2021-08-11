@@ -31,7 +31,7 @@ using namespace clas12;
 TVector3                GetParticleVertex (clas12::region_part_ptr rp);
 void                     SetLorentzVector (TLorentzVector &p4, clas12::region_part_ptr rp);
 void                      OpenOutputFiles (TString csvfilename, TString header);
-void                     CloseOutputFiles (TString OutDataPath);
+void                     CloseOutputFiles (TString OutDataPath, TString outfilename);
 void                      StreamToCSVfile (std::vector<Double_t> observables,
                                            bool IsSelectedEvent,
                                            int fdebug);
@@ -235,8 +235,9 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
     
     
     // open CSV file
-    OpenOutputFiles ("/volatile/clas12/users/ecohen/BAND/SIDIS_skimming/skimmed_SIDIS_inc_"
-                     + (TString)RunNumberStr ,
+    TString outfilepath = "/volatile/clas12/users/ecohen/BAND/SIDIS_skimming/";
+    TString outfilename = "skimmed_SIDIS_inc_" + (TString)RunNumberStr;
+    OpenOutputFiles ( outfilepath + outfilename,
                      ( (TString)("status,runnum,evnum,")
                       +(TString)("Ebeam,beam_helicity,")
                       +(TString)("Ee,Pe,Pe_x,Pe_y,Pe_z,Pe_theta,Pe_phi,")
@@ -720,7 +721,7 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
     std::chrono::duration<double> elapsed = finish - start;
     
     std::cout << "Done. Elapsed time: " << elapsed.count() << std::endl;
-    CloseOutputFiles("/volatile/clas12/users/ecohen/BAND/SIDIS_skimming/");
+    CloseOutputFiles( outfilepath, outfilename );
 }
 
 
@@ -906,7 +907,7 @@ void OpenOutputFiles (TString outfilename,TString header){
     outTree_e_piminus = new TTree( "(e,e'pi-) events" , "Event information");
     
     // Create output csv files
-    CSVfile_e_piplus.open( outfilename + "_e_piplus.csv" );
+    CSVfile_e_piplus.open( outfilename  + "_e_piplus.csv" );
     CSVfile_e_piplus << header << std::endl;
     CSVfile_e_piminus.open( outfilename + "_e_piminus.csv" );
     CSVfile_e_piminus << header << std::endl;
@@ -919,7 +920,7 @@ void OpenOutputFiles (TString outfilename,TString header){
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-void CloseOutputFiles (TString OutDataPath){
+void CloseOutputFiles (TString OutDataPath, TString outfilename){
     // close output CSV
     CSVfile_e_piplus                .close();
     SelectedEventsCSVfile_e_piplus  .close();
@@ -942,11 +943,11 @@ void CloseOutputFiles (TString OutDataPath){
     << std::endl
     << "wrote "  << Nentires_e_piplus  << " to (e,e'pi+) root file, "
     << std::endl << outFile_e_piplus -> GetName()
-    << std::endl << outfilename + "_e_piplus_selected_events.csv"
+    << std::endl << OutDataPath + outfilename + "_e_piplus_selected_events.csv"
     << std::endl
     << "and "    << Nentires_e_piminus << " to (e,e'pi-) root file. "
     << std::endl << outFile_e_piminus -> GetName()
-    << std::endl << outfilename + "_e_piminus_selected_events.csv"
+    << std::endl << OutDataPath + outfilename + "_e_piminus_selected_events.csv"
     << std::endl;
 }
 
