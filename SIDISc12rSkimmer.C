@@ -323,7 +323,21 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
             runnum = c12.runconfig()->getRun();
             evnum  = c12.runconfig()->getEvent();
             if (fdebug>3) std::cout << "get beam helicity " << std::endl;
-            beam_helicity = GetBeamHelicity(c12, runnum, fdebug );
+//            beam_helicity = GetBeamHelicity(c12, runnum, fdebug );
+            beam_helicity = c12.event()->getHelicity();
+            
+            if (fdebug>3) std::cout << "check spin flip" << std::endl;
+            // we are working here on RGB data
+            bool helFlip = true;
+            if      (runnum>=11093 && runnum<=11283)    helFlip = false; // falls, 10.4 GeV period only
+            else if (runnum>=11323 && runnum<=11571)    helFlip = false; // winter
+            
+            if (helFlip) {
+                beam_helicity = -1 * beam_helicity;
+            }
+            if (fdebug>3) std::cout << "done GetBeamHelicity() " << std::endl;
+            
+            
             
             
             if (fdebug>2) std::cout << "begin analysis of event " << event << std::endl;
@@ -1061,7 +1075,8 @@ double FindCutValue( std::string cutName ){
 int GetBeamHelicity( clas12reader c12, int runnum, int fdebug ){
     // get beam helicity (+1 along the beam and -1 opposite to it)
     // [Christopher Dilks <dilks@jlab.org>, email from Aug-5, 2021]
-    // for more items [https://github.com/JeffersonLab/clas12root/blob/master/AccesssingBankDataInCpp.txt]
+    // for more items
+    // [https://github.com/JeffersonLab/clas12root/blob/master/AccesssingBankDataInCpp.txt]
     
     //// helFlip: if true, REC::Event.helicity has opposite sign from reality
     //def helFlip
