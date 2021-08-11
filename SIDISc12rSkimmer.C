@@ -965,7 +965,7 @@ void CloseOutputFiles (TString OutDataPath, TString outfilename){
     outFile_e_piminus->Close();
     
     std::cout
-    << "Done processesing "  <<  Nevents_processed          << "events,"
+    << "Done processesing "  <<  Nevents_processed          << " events,"
     << std::endl
     << std::setprecision(3)
     << (float)Nevents_passed_e_cuts/Nevents_processed       << " events passed e cuts,"
