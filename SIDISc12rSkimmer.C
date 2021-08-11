@@ -36,7 +36,7 @@ void                      StreamToCSVfile (std::vector<Double_t> observables,
                                            bool IsSelectedEvent,
                                            int fdebug);
 void             StreamVariablesToCSVfile (std::ofstream CSVfile,
-                                           std::ofstreamSelectedEventsCSVfile,
+                                           std::ofstream SelectedEventsCSVfile,
                                            std::vector<Double_t> observables,
                                            bool IsSelectedEvent);
 void                      ChangeAxesFrame (TString FrameName="q(z) frame");
@@ -591,7 +591,7 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
                 z = pi.E()/q.E();
                 // done
                 if (fdebug > 2){
-                    Printf("selected the leading pion %s",LeadingPionCharge.c_str());
+                    std::cout << "selected the leading pion " << LeadingPionCharge << std::endl;
                 }
                 
                 //                // temporarily fill pips 4-vector in q-frame
@@ -644,7 +644,7 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
                     (Double_t)runnum,
                     (Double_t)event,
                     Ebeam,
-                    beam_helicity,
+                    (Double_t)beam_helicity,
                     e.E(),
                     e.P(),
                     e.Px(),
@@ -723,7 +723,8 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
     
     auto finish = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed = finish - start;
-    std::cout << "Done. Elapsed time: " << elapsed.count()<< ", processed " << event << " events, " << good_event << " passed filter\n";
+    
+    std::cout << "Done. Elapsed time: " << elapsed.count() << std::endl;
     CloseOutputFiles("/volatile/clas12/users/ecohen/BAND/SIDIS_skimming/");
 }
 
@@ -798,7 +799,7 @@ bool EventPassedElectronSelectionCriteria(Double_t e_PCAL_x, Double_t e_PCAL_y,
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-bool EventPassedPionSelectionCutsCriteria(Double_t DC_x[3], Double_t DC_x[3],
+bool EventPassedPionSelectionCutsCriteria(Double_t DC_x[3], Double_t DC_y[3],
                                           Double_t chi2PID, Double_t p,
                                           TVector3 Ve,
                                           TVector3 Vpi){
@@ -925,8 +926,10 @@ void OpenOutputFiles (TString outfilename,TString header){
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void CloseOutputFiles (TString OutDataPath){
     // close output CSV
-    CSVfile.close();
-    SelectedEventsCSVfile.close();
+    CSVfile_e_piplus                .close();
+    SelectedEventsCSVfile_e_piplus  .close();
+    CSVfile_e_piminus               .close();
+    SelectedEventsCSVfile_e_piminus .close();
     
     int Nentires_e_piplus  = outTree_e_piplus  -> GetEntries();
     int Nentires_e_piminus = outTree_e_piminus -> GetEntries();
@@ -967,7 +970,7 @@ void StreamToCSVfile (std::vector<Double_t> observables, bool IsSelectedEvent, i
 }
 
 void StreamVariablesToCSVfile (std::ofstream CSVfile,
-                               std::ofstreamSelectedEventsCSVfile,
+                               std::ofstream SelectedEventsCSVfile,
                                std::vector<Double_t> observables, bool IsSelectedEvent){
     // write to file
     for (auto v:observables) {
