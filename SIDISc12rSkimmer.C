@@ -32,7 +32,13 @@ TVector3                GetParticleVertex (clas12::region_part_ptr rp);
 void                     SetLorentzVector (TLorentzVector &p4, clas12::region_part_ptr rp);
 void                      OpenOutputFiles (TString csvfilename, TString header);
 void                     CloseOutputFiles (TString OutDataPath);
-void                      StreamToCSVfile (std::vector<Double_t> observables, bool IsSelectedEvent, int fdebug);
+void                      StreamToCSVfile (std::vector<Double_t> observables,
+                                           bool IsSelectedEvent,
+                                           int fdebug);
+void             StreamVariablesToCSVfile (std::ofstream CSVfile,
+                                           std::ofstreamSelectedEventsCSVfile,
+                                           std::vector<Double_t> observables,
+                                           bool IsSelectedEvent);
 void                      ChangeAxesFrame (TString FrameName="q(z) frame");
 void                        MoveTo_qFrame ();
 void                       printCutValues ();
@@ -585,7 +591,7 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
                 z = pi.E()/q.E();
                 // done
                 if (fdebug > 2){
-                    Printf("selected the leading pion %s",LeadingPionCharge);
+                    Printf("selected the leading pion %s",LeadingPionCharge.c_str());
                 }
                 
                 //                // temporarily fill pips 4-vector in q-frame
@@ -946,16 +952,23 @@ void StreamToCSVfile (std::vector<Double_t> observables, bool IsSelectedEvent, i
     if (fdebug>1) {
         std::cout << "streaming to CSVfile" << std::endl;
     }
-    
     // decide which file to write...
-    std::ofstream CSVfile, SelectedEventsCSVfile;
     if (LeadingPionCharge=="piplus") {
-        CSVfile = CSVfile_e_piplus;
-        SelectedEventsCSVfile = SelectedEventsCSVfile_e_piplus;
+        StreamVariablesToCSVfile (CSVfile_e_piplus,
+                                  SelectedEventsCSVfile_e_piplus,
+                                  observables,
+                                  IsSelectedEvent);
     } else {
-        CSVfile = CSVfile_e_piminus;
-        SelectedEventsCSVfile = SelectedEventsCSVfile_e_piminus;
+        StreamVariablesToCSVfile (CSVfile_e_piminus,
+                                  SelectedEventsCSVfile_e_piminus,
+                                  observables,
+                                  IsSelectedEvent);
     }
+}
+
+void StreamVariablesToCSVfile (std::ofstream CSVfile,
+                               std::ofstreamSelectedEventsCSVfile,
+                               std::vector<Double_t> observables, bool IsSelectedEvent){
     // write to file
     for (auto v:observables) {
         CSVfile << v << ",";
@@ -979,20 +992,20 @@ void ChangeAxesFrame(TString FrameName){
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void MoveTo_qFrame(){
-    // move to a reference frame where
-    // q is the z axis
-    Double_t q_phi   = q.Phi();
-    Double_t q_theta = q.Theta();
-    
-    q.RotateZ(-q_phi);
-    q.RotateY(-q_theta);
-    
-    // rotate additional vectors to the same axes-frame
-    // and they reside on the x-z plane: v=(v_x,0,v_q)
-    piplus_qFrame.RotateZ(-q_phi);
-    piplus_qFrame.RotateY(-q_theta);
-    Double_t piplus_phi = piplus_qFrame.Phi();
-    piplus_qFrame.RotateZ(-piplus_phi);
+//    // move to a reference frame where
+//    // q is the z axis
+//    Double_t q_phi   = q.Phi();
+//    Double_t q_theta = q.Theta();
+//
+//    q.RotateZ(-q_phi);
+//    q.RotateY(-q_theta);
+//
+//    // rotate additional vectors to the same axes-frame
+//    // and they reside on the x-z plane: v=(v_x,0,v_q)
+//    piplus_qFrame.RotateZ(-q_phi);
+//    piplus_qFrame.RotateY(-q_theta);
+//    Double_t piplus_phi = piplus_qFrame.Phi();
+//    piplus_qFrame.RotateZ(-piplus_phi);
     
 }
 
