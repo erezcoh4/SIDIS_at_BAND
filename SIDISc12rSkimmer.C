@@ -295,13 +295,17 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
     // step over events and extract information....
     for(Int_t i=0;i<files->GetEntries();i++){
         
+        if (fdebug>3) std::cout << "creating the event reader" << std::endl;
+        
         //create the event reader
         clas12reader c12(files->At(i)->GetTitle(),{0});
         
         //rcdb info
+        if (fdebug>3) std::cout << "reading RCDB info" << std::endl;
         auto& rcdbData = c12.rcdb()->current();//struct with all relevent rcdb values
         
         // get beam energy
+        if (fdebug>3) std::cout << "getting beam energy" << std::endl;
         Ebeam = rcdbData.beam_energy ;
         Beam.SetPxPyPzE(0,0,Ebeam,Ebeam);
         
