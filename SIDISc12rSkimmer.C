@@ -725,17 +725,11 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
                 // ------------------------------------------------------------------------------------------------
 
                 good_event ++ ;
-                if (fdebug>2) {
-                    std::cout
-                    << "streamed to CSV file,"
-                    << "Ee: "       << e.E()        << " GeV, "
-                    << "E(pi): "    << pi.E()       << " GeV, "
-                    << std::endl;
-                }
             }
             
             if (fdebug>1) {
-                std::cout << "done processing event " << event << std::endl << "------------------------------" << std::endl ;
+                std::cout << "done processing event " << event
+                << std::endl << "------------------------------------------------------------" << std::endl ;
             }
             event++;
             Nevents_processed++;
@@ -875,7 +869,7 @@ bool EventPassedPionSelectionCutsCriteria(Double_t DC_x[3], Double_t DC_y[3],
 
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-Double_t Chi2PID_pion_upperBound( Double_t p, Double_t C){
+Double_t Chi2PID_pion_lowerBound( Double_t p, Double_t C){
     // compute lower bound for chi2PID for a pi+
     // based on RGA_Analysis_Overview_and_Procedures_Nov_4_2020-6245173-2020-12-09-v3.pdf
     // p. 75
@@ -891,7 +885,7 @@ Double_t Chi2PID_pion_upperBound( Double_t p, Double_t C){
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-Double_t Chi2PID_pion_lowerBound( Double_t p, Double_t C){
+Double_t Chi2PID_pion_upperBound( Double_t p, Double_t C){
     // compute upper bound for chi2PID for a pi+
     // based on RGA_Analysis_Overview_and_Procedures_Nov_4_2020-6245173-2020-12-09-v3.pdf
     // p. 75
