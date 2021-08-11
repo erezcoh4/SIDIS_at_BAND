@@ -310,9 +310,8 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
         if (fdebug) std::cout << "reading file " << i << std::endl;
         
         Int_t NeventsMaxToProcess = NeventsMax;
-        if (NeventsMax<0){
-            NeventsMaxToProcess = c12.getReader().getEntries();
-        }
+        if (NeventsMax<0) NeventsMaxToProcess = c12.getReader().getEntries();
+        
         int       event = 0;
         int  good_event = 0;
 
@@ -322,17 +321,7 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
             
             runnum = c12.runconfig()->getRun();
             evnum  = c12.runconfig()->getEvent();
-            if (fdebug>3) std::cout << "get beam helicity " << std::endl;
             GetBeamHelicity( c12.event() , runnum, fdebug );
-//            beam_helicity = c12.event()->getHelicity();
-//            // check spin flip
-//            // we are working here on RGB data
-//            bool helFlip = true;
-//            if      (runnum>=11093 && runnum<=11283)    helFlip = false; // falls, 10.4 GeV period only
-//            else if (runnum>=11323 && runnum<=11571)    helFlip = false; // winter
-//            if (helFlip) beam_helicity = -1 * beam_helicity;
-            
-            
             
             
             if (fdebug>2) std::cout << "begin analysis of event " << event << std::endl;
@@ -951,8 +940,11 @@ void CloseOutputFiles (TString OutDataPath){
     
     std::cout << "output files ready in root/csv formats in " << std::endl
     << OutDataPath << std::endl
-    << "wrote " << Nentires_e_piplus  << " to (e,e'pi+) root file, "
-    << "and "   << Nentires_e_piminus << " to (e,e'pi-) root file. "
+    << "wrote "  << Nentires_e_piplus  << " to (e,e'pi+) root file, "
+    << std::endl << outFile_e_piplus -> GetName()
+    << std::endl
+    << "and "    << Nentires_e_piminus << " to (e,e'pi-) root file. "
+    << std::endl << outFile_e_piminus -> GetName()
     << std::endl;
 }
 
