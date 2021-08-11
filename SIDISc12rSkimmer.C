@@ -296,9 +296,9 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
     // step over events and extract information....
     for(Int_t i=0;i<files->GetEntries();i++){
         
-        if (fdebug>3) std::cout << "creating the event reader" << std::endl;
         
         //create the event reader
+        if (fdebug>3) std::cout << "creating the event reader" << std::endl;
         clas12reader c12(files->At(i)->GetTitle(),{0});
         
 
@@ -313,8 +313,8 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
         if (NeventsMax<0){
             NeventsMaxToProcess = c12.getReader().getEntries();
         }
-        int event   = 0;
-        int good_event  = 0;
+        int       event = 0;
+        int  good_event = 0;
 
             
         // now process the events from the first one...
@@ -322,6 +322,7 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
             
             runnum = c12.runconfig()->getRun();
             evnum  = c12.runconfig()->getEvent();
+            if (fdebug>3) std::cout << "get beam helicity " << std::endl;
             beam_helicity = GetBeamHelicity(c12, runnum);
             
             
