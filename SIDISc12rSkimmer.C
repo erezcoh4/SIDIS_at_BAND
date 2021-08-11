@@ -417,17 +417,31 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
             
             // filter events, extract information, and compute event kinematics:
             // we keep only d(e,e’pi+)X and d(e,e’pi-)X events
-            if(  Ne == 1
+            if(  Ne > 0
                &&
                (Npips > 0 || Npims > 0) ){
                    
                 // ------------------------------------------------------------------------------------------------
                 // extract electron information
                 // ------------------------------------------------------------------------------------------------
-                // set electron 4-momentum
+                // find leading electron as the one with highest energy
+                double  leading_e_E;
+                int     leading_e_index = 0;
                 SetLorentzVector(e,electrons[0]);
-                // set electron vertex
-                Ve      = GetParticleVertex( electrons[0] );
+                TLorentzVector e_tmp(0,0,0,db->GetParticle(11)->Mass());
+                for (int eIdx=0; eIdx < Ne; e++) {
+                    SetLorentzVector(e_tmp  ,e[eIdx]);
+                    double Ee = e_tmp.E();
+                    if (Ee > leading_e_E) {
+                        leading_e_index = eIdx;
+                        leading_e_E     = Ee;
+                    }
+                }
+                // set leading electron 4-momentum
+                SetLorentzVector(e , electrons[leading_e_index]);
+                // set leading electron vertex
+                Ve = GetParticleVertex( electrons[leading_e_index] );
+                
                 // compute event kinematics
                 q       = Beam - e;
                 Q2      = -q.Mag2();
@@ -438,13 +452,13 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
                 
                 
                 // detector information on electron
-                auto e_PCAL_info= electrons[0]->cal(PCAL);
+                auto e_PCAL_info= electrons[leading_e_index]->cal(PCAL);
                 e_E_PCAL        = e_PCAL_info->getEnergy();
                 e_PCAL_sector   = e_PCAL_info->getSector();
                 e_PCAL_V        = e_PCAL_info->getLv();
                 e_PCAL_W        = e_PCAL_info->getLw();
-                e_E_ECIN        = electrons[0]->cal(ECIN)->getEnergy();
-                e_E_ECOUT       = electrons[0]->cal(ECOUT)->getEnergy();
+                e_E_ECIN        = electrons[leading_e_index]->cal(ECIN)->getEnergy();
+                e_E_ECOUT       = electrons[leading_e_index]->cal(ECOUT)->getEnergy();
                 
                 // hit position in PCAL
                 e_PCAL_x        = e_PCAL_info->getX();
@@ -452,14 +466,14 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
                 e_PCAL_z        = e_PCAL_info->getZ();
                 
                 // Drift Chamber tracking system
-                auto e_DC_info  = electrons[0]->trk(DC);
+                auto e_DC_info  = electrons[leading_e_index]->trk(DC);
                 e_DC_sector     = e_DC_info->getSector(); // tracking sector
                 e_DC_Chi2N      = e_DC_info->getChi2N();  // tracking chi^2/NDF
                 
                 for (int regionIdx=0; regionIdx<3; regionIdx++) {
                     int DC_layer = DC_layers[regionIdx];
-                    e_DC_x[regionIdx] = electrons[0]->traj(DC,DC_layer)->getX();
-                    e_DC_y[regionIdx] = electrons[0]->traj(DC,DC_layer)->getY();
+                    e_DC_x[regionIdx] = electrons[leading_e_index]->traj(DC,DC_layer)->getX();
+                    e_DC_y[regionIdx] = electrons[leading_e_index]->traj(DC,DC_layer)->getY();
                     
                 }
                 if (fdebug > 2) std::cout << "extracted electron information and computed kinematics" << std::endl;
