@@ -86,6 +86,13 @@ int                       evnum;
 int                  good_event;
 int               beam_helicity; // helicity of the electron +1 along the beam and -1 opposite to it
 int                      status;
+int           Nevents_processed;
+int       Nevents_passed_e_cuts;
+int    Nevents_passed_pips_cuts;
+int  Nevents_passed_e_pips_cuts;
+int    Nevents_passed_pims_cuts;
+int  Nevents_passed_e_pims_cuts;
+
 //    int Fastest_pipsIdx = 0;
 // define the leading jet as the one with greatest z
 double            z_max_pi;
@@ -315,6 +322,13 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
         
         int       event = 0;
         int  good_event = 0;
+        Nevents_processed           = 0;
+        Nevents_passed_e_cuts       = 0;
+        Nevents_passed_pips_cuts    = 0;
+        Nevents_passed_pims_cuts    = 0;
+        Nevents_passed_e_pips_cuts  = 0;
+        Nevents_passed_e_pims_cuts  = 0;
+        
 
             
         // now process the events from the first one...
@@ -586,9 +600,8 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
                 // leading hadron rest frame energy fraction
                 z = pi.E()/q.E();
                 // done
-                if (fdebug > 2){
-                    std::cout << "selected the leading pion " << LeadingPionCharge << std::endl;
-                }
+                if (fdebug > 2) std::cout << "selected the leading pion " << LeadingPionCharge << std::endl;
+                
                 
                 //                // temporarily fill pips 4-vector in q-frame
                 //                piplus_qFrame = piplus;
@@ -621,14 +634,25 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
                                                                                Ve,          Vpi);
                     
                     EventPassedCuts = ( ePastSelectionCuts && piPastSelectionCuts );
+                    
+                    // increment event counters
+                    if (ePastSelectionCuts)                 Nevents_passed_e_cuts    ++ ;
+                    
+                    if (piPastSelectionCuts) {
+                        if (LeadingPionCharge=="piplus")    Nevents_passed_pips_cuts ++ ;
+                        else                                Nevents_passed_pims_cuts ++ ;
+                    }
+                    
                     if ( EventPassedCuts ) {
                         status          = 0;
                         IsSelectedEvent = true;
                         if (fdebug>2)  std::cout << "Leading pion is " << LeadingPionCharge << std::endl;
                         if (LeadingPionCharge=="piplus") {
                             outTree_e_piplus -> Fill();
+                            Nevents_passed_e_pips_cuts ++ ;
                         } else {
                             outTree_e_piminus -> Fill();
+                            Nevents_passed_e_pims_cuts ++ ;
                         }
                     }
                 }
@@ -712,6 +736,7 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
                 std::cout << "done processing event " << event << std::endl << "------------------------------" << std::endl ;
             }
             event++;
+            Nevents_processed++;
             if (fdebug && event%PrintProgress==0) std::cout << std::setprecision(1) << " event " << event << std::endl;
         } // end event loop
     } // end file loop
@@ -938,6 +963,23 @@ void CloseOutputFiles (TString OutDataPath, TString outfilename){
     outFile_e_piminus->cd();
     outTree_e_piminus->Write();
     outFile_e_piminus->Close();
+    
+    std::cout
+    << "Done processesing "  <<  Nevents_processed          << "events,"
+    << std::endl
+    << std::setprecision(3)
+    << (float)Nevents_passed_e_cuts/Nevents_processed       << " events passed e cuts,"
+    << std::endl
+    << (float)Nevents_passed_pips_cuts/Nevents_processed    << " events passed pi+ cuts,"
+    << std::endl
+    << (float)Nevents_passed_e_pips_cuts/Nevents_processed  << " events passed pi+ and e cuts,"
+    << std::endl
+    << (float)Nevents_passed_pims_cuts/Nevents_processed    << " events passed pi- cuts,"
+    << std::endl
+    << (float)Nevents_passed_e_pims_cuts/Nevents_processed  << " events passed e and pi- cuts,"
+    << std::endl;
+    
+    
     
     std::cout << "output files ready in root/csv formats in " << std::endl
     << std::endl
