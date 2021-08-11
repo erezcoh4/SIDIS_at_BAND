@@ -727,6 +727,13 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
                 good_event ++ ;
             }
             
+            else {
+                if (fdebug>1) {
+                    std::cout << "Skipped computations in this event as there are not enough particles: "
+                    << "Ne = " << Ne << ",Npips = " << Npips << ",Npims = " << Npims << std::endl ;
+                }
+            }
+            
             if (fdebug>1) {
                 std::cout << "done processing event " << event
                 << std::endl << "------------------------------------------------------------" << std::endl ;
