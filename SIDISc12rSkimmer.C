@@ -49,10 +49,9 @@ bool EventPassedElectronSelectionCriteria (Double_t e_PCAL_x, Double_t e_PCAL_y,
                                            Double_t e_DC_x[3],
                                            Double_t e_DC_y[3],
                                            int torusBending);
-bool EventPassedPionSelectionCutsCriteria (Double_t pips_DC_x[3], Double_t pips_DC_y[3],
+bool EventPassedPionSelectionCutsCriteria (Double_t DC_x[3], Double_t DC_y[3],
                                            Double_t chi2PID, Double_t p,
-                                           TVector3 Ve,
-                                           TVector3 Vpi );
+                                           TVector3 Ve,      TVector3 Vpi );
 Double_t          Chi2PID_pion_lowerBound (Double_t p, Double_t C=0.88); // C(pi+)=0.88, C(pi-)=0.93
 Double_t          Chi2PID_pion_upperBound (Double_t p, Double_t C=0.88); // C(pi+)=0.88, C(pi-)=0.93
 int                       GetBeamHelicity (clas12reader c12, int runnum );
@@ -81,9 +80,9 @@ int    DC_layers[3] = {6,18,36};// Region 1 is denoted at DC detector 6, Region 
 int                    DC_layer;
 int                      runnum;
 int                       evnum;
-int                   event = 0;
-int              good_event = 0;
-int                 Nevents = 0;
+int                       event;
+int                  good_event;
+int                     Nevents;
 int               beam_helicity; // helicity of the electron +1 along the beam and -1 opposite to it
 int                      status;
 //    int Fastest_pipsIdx = 0;
@@ -314,6 +313,10 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
         if (NeventsMax<0){
             NeventsMaxToProcess = c12.getReader().getEntries();
         }
+        event       = 0;
+        good_event  = 0;
+        Nevents     = 0;
+
             
         // now process the events from the first one...
         while((c12.next()==true) && (event < NeventsMaxToProcess)){
@@ -465,7 +468,7 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
                     TLorentzVector piplus_tmp(0,0,0,db->GetParticle(211)->Mass());
                     for (int pipsIdx=0; pipsIdx < Npips; pipsIdx++) {
                         SetLorentzVector(piplus_tmp  ,pips[pipsIdx]);
-                        z = pips[pipsIdx].E()/q.E();
+                        z = piplus_tmp.E()/q.E();
                         if (z > z_max_piplus) {
                             z_max_piplus_index = pipsIdx;
                             z_max_piplus       = z;
@@ -502,7 +505,7 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
                     TLorentzVector piminus_tmp(0,0,0,db->GetParticle(211)->Mass());
                     for (int pimsIdx=0; pimsIdx < Npims; pimsIdx++) {
                         SetLorentzVector(piminus_tmp  ,pims[pimsIdx]);
-                        z = pims[pimsIdx].E()/q.E();
+                        z = piminus_tmp.E()/q.E();
                         if (z > z_max_piminus) {
                             z_max_piminus_index = pimsIdx;
                             z_max_piminus       = z;
@@ -793,7 +796,7 @@ bool EventPassedElectronSelectionCriteria(Double_t e_PCAL_x, Double_t e_PCAL_y,
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-bool EventPassedPionSelectionCutsCriteria(Double_t pi_DC_x[3], Double_t pi_DC_x[3],
+bool EventPassedPionSelectionCutsCriteria(Double_t DC_x[3], Double_t DC_x[3],
                                           Double_t chi2PID, Double_t p,
                                           TVector3 Ve,
                                           TVector3 Vpi){
@@ -813,7 +816,7 @@ bool EventPassedPionSelectionCutsCriteria(Double_t pi_DC_x[3], Double_t pi_DC_x[
     // cuts implementation in DC_fiducials.cpp
     //
     if(
-       (pi_DC_x[0]<-1e9 )
+       (DC_x[0]<-1e9 )
        ){
         return false;
     }
@@ -912,8 +915,8 @@ void OpenOutputFiles (TString outfilename,TString header){
     
     SelectedEventsCSVfile_e_piplus.open( outfilename + "_e_piplus_selected_events.csv" );
     SelectedEventsCSVfile_e_piplus << header << std::endl;
-    SelectedEventsCSVfile_e_pimius.open( outfilename + "_e_pimius_selected_events.csv" );
-    SelectedEventsCSVfile_e_pimius << header << std::endl;
+    SelectedEventsCSVfile_e_piminus.open( outfilename + "_e_pimius_selected_events.csv" );
+    SelectedEventsCSVfile_e_piminus << header << std::endl;
 
 }
 
