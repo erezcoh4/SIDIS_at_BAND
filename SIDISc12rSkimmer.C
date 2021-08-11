@@ -823,7 +823,8 @@ bool EventPassedElectronSelectionCriteria(Double_t e_PCAL_x, Double_t e_PCAL_y,
 bool EventPassedPionSelectionCutsCriteria(Double_t DC_x[3], Double_t DC_y[3],
                                           Double_t chi2PID, Double_t p,
                                           TVector3 Ve,
-                                          TVector3 Vpi){
+                                          TVector3 Vpi,
+                                          int fdebug){
     
     // decide if pion (pi+ or pi-) passed event selection cuts
     //
@@ -846,11 +847,19 @@ bool EventPassedPionSelectionCutsCriteria(Double_t DC_x[3], Double_t DC_y[3],
     }
     
     double C;
-    if (LeadingPionCharge=="piplus")
-        C = 0.88;
-    else if (LeadingPionCharge=="piminus")
-        C = 0.93;
+    if (LeadingPionCharge=="piplus")        C = 0.88;
+    else if (LeadingPionCharge=="piminus")  C = 0.93;
     
+    if (fdebug>3) {
+        std::cout << "EventPassedPionSelectionCutsCriteria(): " << std::endl
+        << "leading pion charge: "  << LeadingPionCharge        << ","
+        << "DC_x[0]: "              << DC_x[0]                  << ","
+        << "chi2PID:"               << chi2PID                  << ","
+        << "Chi2PID_pion_lowerBound( p="<<p<<", C="<<C<<" ): "  << Chi2PID_pion_lowerBound( p, C ) << ","
+        << "Chi2PID_pion_upperBound( p="<<p<<", C="<<C<<" ): "  << Chi2PID_pion_upperBound( p, C ) << ","
+        << "fabs((Ve-Vpi).Z()): "   << fabs((Ve-Vpi).Z())       << ","
+        << std::endl;
+    }
     if(
        // pi+ Identification Refinement - chi2PID vs. momentum
        ( Chi2PID_pion_lowerBound( p, C ) < chi2PID && chi2PID < Chi2PID_pion_upperBound( p , C ) )
@@ -972,11 +981,11 @@ void CloseOutputFiles (TString OutDataPath, TString outfilename){
     << std::endl
     << (float)Nevents_passed_pips_cuts/Nevents_processed    << " events passed pi+ cuts,"
     << std::endl
-    << (float)Nevents_passed_e_pips_cuts/Nevents_processed  << " events passed pi+ and e cuts,"
+    << (float)Nevents_passed_e_pips_cuts/Nevents_processed  << " events passed (e,e'pi+) cuts,"
     << std::endl
     << (float)Nevents_passed_pims_cuts/Nevents_processed    << " events passed pi- cuts,"
     << std::endl
-    << (float)Nevents_passed_e_pims_cuts/Nevents_processed  << " events passed e and pi- cuts,"
+    << (float)Nevents_passed_e_pims_cuts/Nevents_processed  << " events passed (e,e'pi-) cuts,"
     << std::endl;
     
     
