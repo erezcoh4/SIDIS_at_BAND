@@ -184,26 +184,26 @@ void    MergeSIDISandBANDevents (int NeventsToMerge=10, int fdebug=2, int PrintP
     int     DC_layer;
 
     double  pips_PCAL_W, pips_PCAL_V, pips_PCAL_x, pips_PCAL_y,       pips_PCAL_z;
-    double  chi2PID_pips;
+    double  pips_chi2PID;
     double  pips_PCAL_sector, pips_DC_sector, pips_Chi2N;
     double  pips_DC_x[3], pips_DC_y[3];
 
-    double  E_PCAL_e, E_ECIN_e, E_ECOUT_e; // electron energy deposit in ECAL_out [GeV]
+    double  e_E_PCAL, e_E_ECIN, e_E_ECOUT; // electron energy deposit in ECAL_out [GeV]
     double  e_PCAL_W,    e_PCAL_V;
     double  e_PCAL_x,    e_PCAL_y,  e_PCAL_z;
     double  e_PCAL_sector;
     double  e_DC_sector,            e_DC_Chi2N;
     double  e_DC_x[3],   e_DC_y[3];
 
-    double  E_PCAL_pips, E_ECIN_pips,       E_ECOUT_pips;
+    double  pips_E_PCAL, pips_E_ECIN,       pips_E_ECOUT;
     SIDISTree  -> SetBranchAddress("eventnumber"        ,&SIDISeventID                  );
     SIDISTree  -> SetBranchAddress("runnum"             ,&SIDISrunID                    );
 
     // output tree branches
-    SIDISTree  -> SetBranchAddress("E_PCAL_e"          ,&E_PCAL_e              );
-    SIDISTree  -> SetBranchAddress("E_ECIN_e"          ,&E_ECIN_e              );
-    SIDISTree  -> SetBranchAddress("E_ECOUT_e"         ,&E_ECOUT_e             );
-    SIDISTree  -> SetBranchAddress("chi2PID_pips"      ,&chi2PID_pips          );
+    SIDISTree  -> SetBranchAddress("e_E_PCAL"          ,&e_E_PCAL              );
+    SIDISTree  -> SetBranchAddress("e_E_ECIN"          ,&e_E_ECIN              );
+    SIDISTree  -> SetBranchAddress("e_E_ECOUT"         ,&e_E_ECOUT             );
+    SIDISTree  -> SetBranchAddress("pips_chi2PID"      ,&pips_chi2PID          );
 
     SIDISTree  -> SetBranchAddress("e_PCAL_W"          ,&e_PCAL_W              );
     SIDISTree  -> SetBranchAddress("e_PCAL_V"          ,&e_PCAL_V              );
@@ -226,11 +226,11 @@ void    MergeSIDISandBANDevents (int NeventsToMerge=10, int fdebug=2, int PrintP
     //    SIDISTree  -> SetBranchAddress("pips_DC_x"                 ,&pips_DC_x             );
     //    SIDISTree  -> SetBranchAddress("pips_DC_y"                 ,&pips_DC_y             );
 
-    SIDISTree  -> SetBranchAddress("E_PCAL_pips"               ,&E_PCAL_pips            );
-    SIDISTree  -> SetBranchAddress("E_ECIN_pips"               ,&E_ECIN_pips            );
+    SIDISTree  -> SetBranchAddress("pips_E_PCAL"               ,&pips_E_PCAL            );
+    SIDISTree  -> SetBranchAddress("pips_E_ECIN"               ,&pips_E_ECIN            );
 
-    SIDISTree  -> SetBranchAddress("E_ECIN_pips"               ,&E_ECIN_pips            );
-    SIDISTree  -> SetBranchAddress("E_ECOUT_pips"              ,&E_ECOUT_pips           );
+    SIDISTree  -> SetBranchAddress("pips_E_ECIN"               ,&pips_E_ECIN            );
+    SIDISTree  -> SetBranchAddress("pips_E_ECOUT"              ,&pips_E_ECOUT           );
     SIDISTree  -> SetBranchAddress("DC_layer"                  ,&DC_layer               );
 
     SIDISTree  -> SetBranchAddress("e"                         ,&e                      );
@@ -316,10 +316,10 @@ void    MergeSIDISandBANDevents (int NeventsToMerge=10, int fdebug=2, int PrintP
     MergedTree->Branch("goodneutron"        ,&goodneutron   );
     MergedTree->Branch("nleadindex"         ,&nleadindex    );
     // SIDIS branches
-    MergedTree->Branch("E_PCAL_e"           ,&E_PCAL_e              );
-    MergedTree->Branch("E_ECIN_e"           ,&E_ECIN_e              );
-    MergedTree->Branch("E_ECOUT_e"          ,&E_ECOUT_e             );
-    MergedTree->Branch("chi2PID_pips"       ,&chi2PID_pips          );
+    MergedTree->Branch("e_E_PCAL"           ,&e_E_PCAL              );
+    MergedTree->Branch("e_E_ECIN"           ,&e_E_ECIN              );
+    MergedTree->Branch("e_E_ECOUT"          ,&e_E_ECOUT             );
+    MergedTree->Branch("pips_chi2PID"       ,&pips_chi2PID          );
 
     MergedTree->Branch("e_PCAL_W"           ,&e_PCAL_W              );
     MergedTree->Branch("e_PCAL_V"           ,&e_PCAL_V              );
@@ -342,11 +342,11 @@ void    MergeSIDISandBANDevents (int NeventsToMerge=10, int fdebug=2, int PrintP
     //    MergedTree->Branch("pips_DC_x"          ,&pips_DC_x             );
     //    MergedTree->Branch("pips_DC_y"          ,&pips_DC_y             );
 
-    MergedTree->Branch("E_PCAL_pips"        ,&E_PCAL_pips           );
-    MergedTree->Branch("E_ECIN_pips"        ,&E_ECIN_pips           );
+    MergedTree->Branch("pips_E_PCAL"        ,&pips_E_PCAL           );
+    MergedTree->Branch("pips_E_ECIN"        ,&pips_E_ECIN           );
 
-    MergedTree->Branch("E_ECIN_pips"        ,&E_ECIN_pips           );
-    MergedTree->Branch("E_ECOUT_pips"       ,&E_ECOUT_pips          );
+    MergedTree->Branch("pips_E_ECIN"        ,&pips_E_ECIN           );
+    MergedTree->Branch("pips_E_ECOUT"       ,&pips_E_ECOUT          );
     MergedTree->Branch("DC_layer"           ,&DC_layer              );
 
     MergedTree->Branch("e"                  ,&e                     );

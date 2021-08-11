@@ -3,8 +3,10 @@
  
         D(e,e’pi+)X
         D(e,e’pi+n)X
+        D(e,e’pi-)X
+        D(e,e’pi-n)X
 
-last edit: July-16, 2021 (EOC, mbp)
+last edit: Aug-6, 2021 (EOC, mbp)
 
 To execute, e.g. go to /u/home/cohen/SIDIS_at_BAND, do git pull, then...
 
@@ -141,9 +143,9 @@ execute:
  Pn_z               neutron z-momentum                          [GeV/c]
  Ppips_t_q          pi+ momentum transverse to q direction      [GeV/c]
  Ppips_q            pi+ momentum parallel to q direction        [GeV/c]
- E_PCAL_e           electron energy deposit in PCAL             [GeV]
- E_ECIN_e           electron energy deposit in ECAL(in)         [GeV]
- E_ECOUT_e          electron energy deposit in ECAL(out)        [GeV]
+ e_E_PCAL           electron energy deposit in PCAL             [GeV]
+ e_E_ECIN           electron energy deposit in ECAL(in)         [GeV]
+ e_E_ECOUT          electron energy deposit in ECAL(out)        [GeV]
  Vx_e               electron vertex position in x-direction     [cm]
  Vy_e               electron vertex position in y-direction     [cm]
  Vz_e               electron vertex position in z-direction     [cm]
@@ -153,7 +155,7 @@ execute:
  Vx_n               neutron vertex position in x-direction      [cm]
  Vy_n               neutron vertex position in y-direction      [cm]
  Vz_n               neutron vertex position in z-direction      [cm]
- chi2PID_pips       chi2 of PID for pi+
+ pips_chi2PID       chi2 of PID for pi+
  chi2PID_n          chi2 of PID for n
  e_PCAL_W           W of the electron in PCAL
  e_PCAL_V           V of the electron in PCAL
