@@ -891,7 +891,9 @@ bool EventPassedPionSelectionCutsCriteria(Double_t DC_sector,
     // comments
     // ---------------
     // DC - fiducial cuts on DC
-    
+    if (fdebug>3) {
+        std::cout << "EventPassedPionSelectionCutsCriteria()" << std::endl;
+    }
     if (DC_sector == 0) return false;
     
     for (int regionIdx=0; regionIdx<3; regionIdx++) {
@@ -933,8 +935,13 @@ bool EventPassedPionSelectionCutsCriteria(Double_t DC_sector,
        
        // Cut on the z-Vertex Difference Between Electrons and Hadrons.
        &&  ( fabs((Ve-Vpi).Z()) < cutValue_Ve_Vpi_dz_max )
-       ) return true;
-    
+       ) {
+        if (fdebug>3) {
+            std::cout << "done EventPassedPionSelectionCutsCriteria(), return false" << std::endl;
+            
+            return true;
+        }
+    }
     return false;
 }
 
