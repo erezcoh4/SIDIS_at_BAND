@@ -349,9 +349,9 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
             evnum  = c12.runconfig()->getEvent();
             GetBeamHelicity( c12.event() , runnum, fdebug );
             
-            if (abs(evnum - 50845) < 10) fdebug = 10;
-            else fdebug = 0;
-            
+//            if (abs(evnum - 50845) < 10) fdebug = 10;
+//            else fdebug = 0;
+//            
             if (fdebug>2) std::cout << "begin analysis of event " << event << std::endl;
             
             // initialize
