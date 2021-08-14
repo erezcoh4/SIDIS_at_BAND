@@ -20,7 +20,10 @@
 #include <TCanvas.h>
 #include <TBenchmark.h>
 #include "clas12reader.h"
-#include "/u/home/cohen/SIDIS_at_BAND/Auxiliary/DC_fiducial.cpp"
+// previous version (deprecated, delete by Aug-20,2021)
+// #include "/u/home/cohen/SIDIS_at_BAND/Auxiliary/DC_fiducial.cpp"
+// new version Aug-11,2021
+#include "/u/home/cohen/SIDIS_at_BAND/Auxiliary/DCfid_SIDIS.cpp"
 #include "/u/home/cohen/SIDIS_at_BAND/Auxiliary/csv_reader.h"
 using namespace clas12;
 
@@ -50,8 +53,10 @@ bool EventPassedElectronSelectionCriteria (Double_t e_PCAL_x, Double_t e_PCAL_y,
                                            Double_t e_DC_sector,
                                            Double_t e_DC_x[3],
                                            Double_t e_DC_y[3],
+                                           Double_t e_DC_z[3],
                                            int torusBending);
-bool EventPassedPionSelectionCutsCriteria (Double_t DC_x[3], Double_t DC_y[3],
+bool EventPassedPionSelectionCutsCriteria (Double_t DC_sector,
+                                           Double_t DC_x[3], Double_t DC_y[3], Double_t DC_z[3],
                                            Double_t chi2PID, Double_t p,
                                            TVector3 Ve,      TVector3 Vpi,
                                            int fdebug);
@@ -114,6 +119,7 @@ double         e_DC_sector;
 double          e_DC_Chi2N;
 double           e_DC_x[3];
 double           e_DC_y[3];
+double           e_DC_z[3];
 // leading pion (pi+ or pi-)
 double          pi_chi2PID;
 double           pi_PCAL_W;
@@ -126,6 +132,7 @@ double        pi_DC_sector;
 double            pi_Chi2N;
 double          pi_DC_x[3];
 double          pi_DC_y[3];
+double          pi_DC_z[3];
 double           pi_E_PCAL;
 double           pi_E_ECIN;
 double          pi_E_ECOUT;
@@ -141,6 +148,7 @@ double      pips_DC_sector;
 double          pips_Chi2N;
 double        pips_DC_x[3];
 double        pips_DC_y[3];
+double        pips_DC_z[3];
 double         pips_E_PCAL;
 double         pips_E_ECIN;
 double        pips_E_ECOUT;
@@ -156,6 +164,7 @@ double      pims_DC_sector;
 double          pims_Chi2N;
 double        pims_DC_x[3];
 double        pims_DC_y[3];
+double        pims_DC_z[3];
 double         pims_E_PCAL;
 double         pims_E_ECIN;
 double        pims_E_ECOUT;
@@ -199,7 +208,8 @@ Double_t                      W; // hadronic c.m. energy
 //TLorentzVector       piplus_qFrame;
 //Double_t        Ppips_t_q, Ppips_q;
 // auxiliary
-DCFiducial dcfid;
+// DCFiducial dcfid;
+DCfid_SIDIS dcfid;
 
 
 
@@ -259,9 +269,9 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
                       +(TString)("e_PCAL_W,e_PCAL_V,pips_PCAL_W,pips_PCAL_V,")
                       +(TString)("e_PCAL_x,e_PCAL_y,e_PCAL_z,e_PCAL_sector,")
                       +(TString)("e_DC_sector,e_DC_Chi2N,")
-                      +(TString)("e_DC_x[region-1],e_DC_y[region-1],")
-                      +(TString)("e_DC_x[region-2],e_DC_y[region-2],")
-                      +(TString)("e_DC_x[region-3],e_DC_y[region-3],")
+                      +(TString)("e_DC_x[region-1],e_DC_y[region-1],e_DC_z[region-1],")
+                      +(TString)("e_DC_x[region-2],e_DC_y[region-2],e_DC_z[region-2],")
+                      +(TString)("e_DC_x[region-3],e_DC_y[region-3],e_DC_z[region-3],")
                       ));
     
     // output tree branches
@@ -381,9 +391,13 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
             
             for (int regionIdx=0; regionIdx<3; regionIdx++) {
                 e_DC_x[regionIdx]   = e_DC_y[regionIdx]     = -9999;
+                e_DC_z[regionIdx]                           = -9999;
                 pips_DC_x[regionIdx]= pips_DC_y[regionIdx]  = -9999;
+                pips_DC_z[regionIdx]                        = -9999;
                 pims_DC_x[regionIdx]= pims_DC_y[regionIdx]  = -9999;
+                pims_DC_z[regionIdx]                        = -9999;
                 pi_DC_x[regionIdx]  = pi_DC_y[regionIdx]    = -9999;
+                pi_DC_z[regionIdx]                          = -9999;
             }
             ePastSelectionCuts  = piPastSelectionCuts       = false;
             LeadingPionCharge                   = "piplus"; // arbitrary initialisation
@@ -474,7 +488,8 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
                     int DC_layer = DC_layers[regionIdx];
                     e_DC_x[regionIdx] = electrons[leading_e_index]->traj(DC,DC_layer)->getX();
                     e_DC_y[regionIdx] = electrons[leading_e_index]->traj(DC,DC_layer)->getY();
-                    
+                    e_DC_z[regionIdx] = electrons[leading_e_index]->traj(DC,DC_layer)->getZ();
+
                 }
                 if (fdebug > 2) std::cout << "extracted electron information and computed kinematics" << std::endl;
                 // ------------------------------------------------------------------------------------------------
@@ -522,6 +537,7 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
                         DC_layer = DC_layers[regionIdx];
                         pips_DC_x[regionIdx] = pips[z_max_piplus_index]->traj(DC,DC_layer)->getX();
                         pips_DC_y[regionIdx] = pips[z_max_piplus_index]->traj(DC,DC_layer)->getY();
+                        pips_DC_z[regionIdx] = pips[z_max_piplus_index]->traj(DC,DC_layer)->getZ();
                     }
                 }
                 
@@ -559,6 +575,7 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
                         DC_layer = DC_layers[regionIdx];
                         pims_DC_x[regionIdx] = pims[z_max_piminus_index]->traj(DC,DC_layer)->getX();
                         pims_DC_y[regionIdx] = pims[z_max_piminus_index]->traj(DC,DC_layer)->getY();
+                        pims_DC_z[regionIdx] = pims[z_max_piminus_index]->traj(DC,DC_layer)->getZ();
                     }
                 }
                 
@@ -586,6 +603,7 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
                     for (int regionIdx=0; regionIdx<3; regionIdx++) {
                         pi_DC_x[regionIdx] = pips_DC_x[regionIdx];
                         pi_DC_y[regionIdx] = pips_DC_y[regionIdx];
+                        pi_DC_z[regionIdx] = pips_DC_z[regionIdx];
                     }
                 } else {
                     
@@ -609,6 +627,7 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
                     for (int regionIdx=0; regionIdx<3; regionIdx++) {
                         pi_DC_x[regionIdx] = pims_DC_x[regionIdx];
                         pi_DC_y[regionIdx] = pims_DC_y[regionIdx];
+                        pi_DC_z[regionIdx] = pims_DC_z[regionIdx];
                     }
                 }
                 
@@ -641,10 +660,13 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
                                                                               e_E_ECOUT,
                                                                               e, Ve,
                                                                               e_PCAL_sector, // e_PCAL_sector should be consistent with e_DC_sector
-                                                                              e_DC_x, e_DC_y,
+                                                                              e_DC_x, e_DC_y, e_DC_z,
                                                                               torusBending );
                     
-                    piPastSelectionCuts = EventPassedPionSelectionCutsCriteria(pi_DC_x,     pi_DC_y,
+                    piPastSelectionCuts = EventPassedPionSelectionCutsCriteria(pi_DC_sector,
+                                                                               pi_DC_x,
+                                                                               pi_DC_y,
+                                                                               pi_DC_z,
                                                                                pi_chi2PID,  pi.P(),
                                                                                Ve,          Vpi,
                                                                                fdebug);
@@ -731,10 +753,13 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
                     e_DC_Chi2N,
                     e_DC_x[0],
                     e_DC_y[0],
+                    e_DC_z[0],
                     e_DC_x[1],
                     e_DC_y[1],
+                    e_DC_z[1],
                     e_DC_x[2],
                     e_DC_y[2],
+                    e_DC_z[2],
                 }, IsSelectedEvent, fdebug);
                 // ------------------------------------------------------------------------------------------------
 
@@ -771,7 +796,7 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 bool EventPassedElectronSelectionCriteria(Double_t e_PCAL_x, Double_t e_PCAL_y,
-                                          Double_t e_PCAL_W,Double_t e_PCAL_V,
+                                          Double_t e_PCAL_W, Double_t e_PCAL_V,
                                           Double_t e_E_PCAL,
                                           Double_t e_E_ECIN, Double_t e_E_ECOUT,
                                           TLorentzVector e,
@@ -779,6 +804,7 @@ bool EventPassedElectronSelectionCriteria(Double_t e_PCAL_x, Double_t e_PCAL_y,
                                           Double_t e_DC_sector,
                                           Double_t e_DC_x[3],
                                           Double_t e_DC_y[3],
+                                          Double_t e_DC_z[3],
                                           int torusBending){
     
     // decide if electron in event passes event selection cuts
@@ -802,11 +828,21 @@ bool EventPassedElectronSelectionCriteria(Double_t e_PCAL_x, Double_t e_PCAL_y,
         // bending: 0(out)/1(in)
         // std::cout << "e_DC_sector: " << e_DC_sector << ", regionIdx: " << regionIdx << std::endl;
         int bending  = 1 ? (torusBending==-1) : 0;
-        bool DC_fid  = dcfid.DC_e_fid(e_DC_x[regionIdx],
-                                      e_DC_y[regionIdx],
-                                      e_DC_sector,
-                                      regionIdx+1,
-                                      bending);
+        // previous version (deprecated, delete by Aug-20,2021)
+        //        bool DC_fid  = dcfid.DC_e_fid(e_DC_x[regionIdx],
+        //                                      e_DC_y[regionIdx],
+        //                                      e_DC_sector,
+        //                                      regionIdx+1,
+        //                                      bending);
+        // new version Aug-11,2021
+        
+        bool DC_fid  = dcfid.DC_fid_th_ph_sidis(11,                 // particle PID,
+                                                e_DC_x[regionIdx],  // x
+                                                e_DC_y[regionIdx],  // y
+                                                e_DC_z[regionIdx],  // z
+                                                e_DC_sector,        // sector
+                                                regionIdx+1,        // layer
+                                                bending);           // torus bending
         if (DC_fid == false) {
             return false;
         }
@@ -837,7 +873,8 @@ bool EventPassedElectronSelectionCriteria(Double_t e_PCAL_x, Double_t e_PCAL_y,
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-bool EventPassedPionSelectionCutsCriteria(Double_t DC_x[3], Double_t DC_y[3],
+bool EventPassedPionSelectionCutsCriteria(Double_t DC_sector,
+                                          Double_t DC_x[3], Double_t DC_y[3], Double_t DC_z[3],
                                           Double_t chi2PID, Double_t p,
                                           TVector3 Ve,
                                           TVector3 Vpi,
@@ -854,13 +891,26 @@ bool EventPassedPionSelectionCutsCriteria(Double_t DC_x[3], Double_t DC_y[3],
     // comments
     // ---------------
     // DC - fiducial cuts on DC
-    // ToDo: Complete DC - fiducial cuts on DC! Need help from Dien with pion fiductial
-    // cuts implementation in DC_fiducials.cpp
-    //
-    if(
-       (DC_x[0]<-1e9 )
-       ){
-        return false;
+    
+    if (DC_sector == 0) return false;
+    
+    for (int regionIdx=0; regionIdx<3; regionIdx++) {
+        // DC_e_fid:
+        // sector:  1-6
+        // layer:   1-3
+        // bending: 0(out)/1(in)
+        int bending  = 1 ? (torusBending==-1) : 0;
+        // new version Aug-11,2021
+        bool DC_fid  = dcfid.DC_fid_th_ph_sidis(211,                // particle PID
+                                                DC_x[regionIdx],    // x
+                                                DC_y[regionIdx],    // y
+                                                DC_z[regionIdx],    // z
+                                                DC_sector,          // sector
+                                                regionIdx+1,        // layer
+                                                bending);           // torus bending
+        if (DC_fid == false) {
+            return false;
+        }
     }
     
     double C;
@@ -1189,11 +1239,13 @@ void SetOutputTTrees(){
     outTree_e_piplus->Branch("e_DC_Chi2N"           ,&e_DC_Chi2N            );
     outTree_e_piplus->Branch("e_DC_x"               ,&e_DC_x                );
     outTree_e_piplus->Branch("e_DC_y"               ,&e_DC_y                );
+    outTree_e_piplus->Branch("e_DC_z"               ,&e_DC_z                );
     outTree_e_piplus->Branch("pi_PCAL_sector"       ,&pi_PCAL_sector        );
     outTree_e_piplus->Branch("pi_DC_sector"         ,&pi_DC_sector          );
     outTree_e_piplus->Branch("pi_Chi2N"             ,&pi_Chi2N              );
     outTree_e_piplus->Branch("pi_DC_x"              ,&pi_DC_x               );
     outTree_e_piplus->Branch("pi_DC_y"              ,&pi_DC_y               );
+    outTree_e_piplus->Branch("pi_DC_z"              ,&pi_DC_z               );
     outTree_e_piplus->Branch("pi_E_PCAL"            ,&pi_E_PCAL             );
     outTree_e_piplus->Branch("pi_E_ECIN"            ,&pi_E_ECIN             );
     outTree_e_piplus->Branch("pi_E_ECIN"            ,&pi_E_ECIN             );
@@ -1238,11 +1290,13 @@ void SetOutputTTrees(){
     outTree_e_piminus->Branch("e_DC_Chi2N"          ,&e_DC_Chi2N            );
     outTree_e_piminus->Branch("e_DC_x"              ,&e_DC_x                );
     outTree_e_piminus->Branch("e_DC_y"              ,&e_DC_y                );
+    outTree_e_piminus->Branch("e_DC_z"              ,&e_DC_z                );
     outTree_e_piminus->Branch("pi_PCAL_sector"      ,&pi_PCAL_sector        );
     outTree_e_piminus->Branch("pi_DC_sector"        ,&pi_DC_sector          );
     outTree_e_piminus->Branch("pi_Chi2N"            ,&pi_Chi2N              );
     outTree_e_piminus->Branch("pi_DC_x"             ,&pi_DC_x               );
     outTree_e_piminus->Branch("pi_DC_y"             ,&pi_DC_y               );
+    outTree_e_piminus->Branch("pi_DC_z"             ,&pi_DC_z               );
     outTree_e_piminus->Branch("pi_E_PCAL"           ,&pi_E_PCAL             );
     outTree_e_piminus->Branch("pi_E_ECIN"           ,&pi_E_ECIN             );
     outTree_e_piminus->Branch("pi_E_ECIN"           ,&pi_E_ECIN             );

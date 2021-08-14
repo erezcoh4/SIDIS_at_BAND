@@ -1,3 +1,5 @@
+
+
 # Skimming for Semi Inclusive DIS (SIDIS) on a deuteron target with $pi^+$ and $pi^-$ tagging
 
     last edit: Aug-11, 2021 (EOC, mbp)
@@ -15,12 +17,20 @@
     clas12root -q "SIDISc12rSkimmer.C+(6420,100)"
     root -l -q "MergeSIDISandBANDSkimmers.C(6420,100)"
     
-        
+    
+    ## ToDo list:
+    ---------------------    
+    (1) add fiducial cuts for pions in the DC
+    (2) Compare electron-only with BAND analysis results or RGA results (e.g. single-spin assymetries)
+    (3) Verify that event matching between SIDIS and BAND skimming  is done correctly
+    (4) Add neuton fiducial cuts
+    (5) Verify we use the same values for the fiducial cuts as the general BAND group
+    
 
 
-(To execute, e.g. go to /u/home/cohen/SIDIS_at_BAND, do git pull, then...)
+    ## output
 
-Output files are saved in
+    Output files are saved in
     /volatile/clas12/users/ecohen/BAND/
 
         /volatile/clas12/users/ecohen/BAND/SIDIS_skimming/
@@ -31,6 +41,9 @@ Output files are saved in
     ## MergeSIDISandBANDSkimmers.C
     ---------------------------------------------
     * merger of Semi-Inclusive DIS skimming and BAND-neutron skimming *
+
+
+
 
 
  ---------------------------------------------
