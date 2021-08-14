@@ -349,6 +349,8 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
             evnum  = c12.runconfig()->getEvent();
             GetBeamHelicity( c12.event() , runnum, fdebug );
             
+            if (abs(evnum - 50845) < 10) fdebug = 10;
+            else fdebug = 0;
             
             if (fdebug>2) std::cout << "begin analysis of event " << event << std::endl;
             
@@ -903,6 +905,17 @@ bool EventPassedPionSelectionCutsCriteria(Double_t DC_sector,
         // bending: 0(out)/1(in)
         int bending  = 1 ? (torusBending==-1) : 0;
         // new version Aug-11,2021
+        if (fdebug>3) {
+            std::cout << "dcfid.DC_fid_th_ph_sidis()"
+            << DC_x[regionIdx] <<     ","
+            << DC_y[regionIdx] <<     ","
+            << DC_z[regionIdx] <<     ","
+            << DC_sector       <<     ","
+            << regionIdx+1     <<     ","
+            << bending         <<     ","
+            << std::endl;
+            
+        }
         bool DC_fid  = dcfid.DC_fid_th_ph_sidis(211,                // particle PID
                                                 DC_x[regionIdx],    // x
                                                 DC_y[regionIdx],    // y
@@ -1101,7 +1114,6 @@ void StreamToCSVfile (std::vector<Double_t> observables, bool IsSelectedEvent, i
         }
     }
 }
-
 
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
