@@ -220,7 +220,15 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
     TString outfilepath = "/volatile/clas12/users/ecohen/BAND/SIDIS_skimming/";
     TString outfilename = "skimmed_SIDIS_inc_" + RunNumberStr;
     OpenResultFiles( outfilepath, outfilename );
-    TObjArray * files = OpenInputHipoFiles( DataPath + "inc_" + RunNumberStr + ".hipo", fdebug );
+    
+    TString inputFile = DataPath + "inc_" + RunNumberStr + ".hipo";
+    TChain fake("hipo");
+    fake.Add(inputFile.Data());
+    //get the hipo data
+    auto files = fake.GetListOfFiles();
+//    if (fdebug) std::cout << files->GetEntries() << " files to analyze.. "  << std::endl;
+    
+//    TObjArray * files = OpenInputHipoFiles( DataPath + "inc_" + RunNumberStr + ".hipo", fdebug );
     if (fdebug) std::cout << files->GetEntries() << " files to analyze.. "  << std::endl;
     
     // step over events and extract information....
@@ -1014,7 +1022,7 @@ TObjArray * OpenInputHipoFiles( TString inputFile, int fdebug ){
     if (fdebug) std::cout << files->GetEntries() << " files to analyze.. "  << std::endl;
     
     // gBenchmark->Start("timer");
-    return *files;
+    return files;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
