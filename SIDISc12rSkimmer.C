@@ -75,7 +75,7 @@ void               ExtractPipsInformation (int pipsIdx, int fdebug );
 void               ExtractPimsInformation (int pimsIdx, int fdebug );
 void                    ComputeKinematics ();
 void                   WriteEventToOutput ();
-void                        FinishProgram ();
+void                        FinishProgram (TString outfilepath, TString outfilename);
 void                   GetParticlesByType (int fdebug );
 void              Stream_e_pi_line_to_CSV (TString pionCharge, int piIdx );
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
@@ -199,7 +199,7 @@ Double_t     Ebeam, xB, Q2, omega, W, W2;
 //Double_t        Ppips_t_q, Ppips_q;
 // auxiliary
 DCfid_SIDIS dcfid;
-std::vector<region_part_ptr>  electrons, neutrons, protons, pipules, piminuses, gammas;
+std::vector<region_part_ptr>  electrons, neutrons, protons, pipulses, piminuses, gammas;
 
 
 
@@ -271,7 +271,7 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
     } // end file loop
     
     
-    FinishProgram();
+    FinishProgram( outfilepath, outfilename);
 }
 
 
@@ -1088,7 +1088,7 @@ void ExtractPionsInformation(int fdebug){
     }
     
     // done
-    if (fdebug > 2) std::cout << "selected the leading pion " << LeadingPionCharge << std::endl;
+    if (fdebug > 2) std::cout << "done extracting pion information" << std::endl;
 }
 
 
@@ -1120,7 +1120,7 @@ void WriteEventToOutput(){
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-void FinishProgram(){
+void FinishProgram(TString outfilepath, TString outfilename){
     auto finish = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed = finish - start;
     
@@ -1165,9 +1165,9 @@ void ExtractPipsInformation( int pipsIdx, int fdebug ){
     pips_Chi2N[pipsIdx]         = pips_DC_info->getChi2N();  // tracking chi^2/NDF
     for (int regionIdx=0; regionIdx<3; regionIdx++) {
         DC_layer = DC_layers[regionIdx];
-        pips_DC_x[pipsIdx][regionIdx] = pips[pipsIdx]->traj(DC,DC_layer)->getX();
-        pips_DC_y[pipsIdx][regionIdx] = pips[pipsIdx]->traj(DC,DC_layer)->getY();
-        pips_DC_z[pipsIdx][regionIdx] = pips[pipsIdx]->traj(DC,DC_layer)->getZ();
+        pips_DC_x[pipsIdx][regionIdx] = pipluses[pipsIdx]->traj(DC,DC_layer)->getX();
+        pips_DC_y[pipsIdx][regionIdx] = pipluses[pipsIdx]->traj(DC,DC_layer)->getY();
+        pips_DC_z[pipsIdx][regionIdx] = pipluses[pipsIdx]->traj(DC,DC_layer)->getZ();
     }
     // ------------------------------------------------------------------------------------------------
     // now, check if pion passed event selection requirements
@@ -1179,7 +1179,7 @@ void ExtractPipsInformation( int pipsIdx, int fdebug ){
                                                                      pips_DC_z[pipsIdx],
                                                                      pips_chi2PID[pipsIdx],  piplus[pipsIdx].P(),
                                                                      Ve,
-                                                                     Vpiplus,
+                                                                     Vpiplus[pipsIdx],
                                                                      fdebug);
     if (pipsPastSelectionCuts[pipsIdx]) {
         pimsPastCutsInEvent = true;
@@ -1212,9 +1212,9 @@ void ExtractPimsInformation( int pimsIdx ){
     pims_Chi2N[pimsIdx]         = pims_DC_info->getChi2N();  // tracking chi^2/NDF
     for (int regionIdx=0; regionIdx<3; regionIdx++) {
         DC_layer = DC_layers[regionIdx];
-        pims_DC_x[pimsIdx][regionIdx] = pims[pimsIdx]->traj(DC,DC_layer)->getX();
-        pims_DC_y[pimsIdx][regionIdx] = pims[pimsIdx]->traj(DC,DC_layer)->getY();
-        pims_DC_z[pimsIdx][regionIdx] = pims[pimsIdx]->traj(DC,DC_layer)->getZ();
+        pims_DC_x[pimsIdx][regionIdx] = piminuses[pimsIdx]->traj(DC,DC_layer)->getX();
+        pims_DC_y[pimsIdx][regionIdx] = piminuses[pimsIdx]->traj(DC,DC_layer)->getY();
+        pims_DC_z[pimsIdx][regionIdx] = piminuses[pimsIdx]->traj(DC,DC_layer)->getZ();
     }
     // ------------------------------------------------------------------------------------------------
     // now, check if pion passed event selection requirements
@@ -1226,7 +1226,7 @@ void ExtractPimsInformation( int pimsIdx ){
                                                                      pims_DC_z[pimsIdx],
                                                                      pims_chi2PID[pimsIdx],  pimlus[pimsIdx].P(),
                                                                      Ve,
-                                                                     Vpiminus,
+                                                                     Vpiminus[pimsIdx],
                                                                      fdebug);
     if (pimsPastSelectionCuts[pimsIdx]) {
         pimsPastCutsInEvent = true;
