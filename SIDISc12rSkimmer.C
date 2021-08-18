@@ -421,7 +421,7 @@ bool PionPassedSelectionCutsCriteria(TString pionCharge, // "pi+" or "pi-"
                                                 DC_sector,          // sector
                                                 regionIdx+1,        // layer
                                                 bending);           // torus bending
-        // ToDo: add this condition after verified by Alex!        
+        // ToDo: add this condition after verified by Alex!
 //        if (DC_fid == false) {
 //            return false;
 //        }
@@ -444,11 +444,8 @@ bool PionPassedSelectionCutsCriteria(TString pionCharge, // "pi+" or "pi-"
        // Cut on the z-Vertex Difference Between Electrons and Hadrons.
        &&  ( fabs((Ve-Vpi).Z()) < cutValue_Ve_Vpi_dz_max )
        ) {
-        if (fdebug>3) {
-            std::cout << "done PionPassedSelectionCutsCriteria(), return false" << std::endl;
-            
-            return true;
-        }
+        if (fdebug>3) { std::cout << "succesfully passed PionPassedSelectionCutsCriteria(), return true" << std::endl; }
+        return true;
     }
     return false;
 }
