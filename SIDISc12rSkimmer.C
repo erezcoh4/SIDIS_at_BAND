@@ -404,7 +404,7 @@ bool PionPassedSelectionCutsCriteria(TString pionCharge, // "pi+" or "pi-"
         int bending  = 1 ? (torusBending==-1) : 0;
         // new version Aug-11,2021
         if (fdebug>3) {
-            std::cout << "dcfid.DC_fid_th_ph_sidis()"
+            std::cout << "dcfid.DC_fid_th_ph_sidis(): "
             << DC_x[regionIdx] <<     ","
             << DC_y[regionIdx] <<     ","
             << DC_z[regionIdx] <<     ","
@@ -421,9 +421,10 @@ bool PionPassedSelectionCutsCriteria(TString pionCharge, // "pi+" or "pi-"
                                                 DC_sector,          // sector
                                                 regionIdx+1,        // layer
                                                 bending);           // torus bending
-        if (DC_fid == false) {
-            return false;
-        }
+        // ToDo: add this condition after verified by Alex!        
+//        if (DC_fid == false) {
+//            return false;
+//        }
     }
     
     if (fdebug>3) {
