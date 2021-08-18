@@ -221,7 +221,7 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
     TString outfilename = "skimmed_SIDIS_inc_" + RunNumberStr;
     OpenResultFiles( outfilepath, outfilename );
     auto files = OpenInputHipoFiles( DataPath + "inc_" + RunNumberStr + ".hipo", fdebug );
-        
+    if (fdebug) std::cout << files->GetEntries() << " files to analyze.. "  << std::endl;
     // step over events and extract information....
     for(Int_t i=0;i<files->GetEntries();i++){
             
