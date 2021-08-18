@@ -28,6 +28,8 @@ using namespace clas12;
 
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+// start clock
+auto start = std::chrono::high_resolution_clock::now();
 // declare methods
 TVector3                GetParticleVertex (clas12::region_part_ptr rp);
 void                     SetLorentzVector (TLorentzVector &p4, clas12::region_part_ptr rp);
@@ -63,11 +65,11 @@ Double_t          Chi2PID_pion_upperBound (Double_t p, Double_t C=0.88); // C(pi
 int                       GetBeamHelicity (event_ptr p_event, int runnum, int fdebug);
 double                      GetBeamEnergy (int fdebug);
 TString                   GetRunNumberSTR (int RunNumber, int fdebug);
-void                InitializeFileReading ();
+void                InitializeFileReading (int NeventsMax,int c12Nentries, int fdebug);
 void                  InitializeVariables ();
 void                      OpenResultFiles ( TString outfilepath, TString outfilename );
-TObjArray *            OpenInputHipoFiles ( TString inputFile );
-void           ExtractElectronInformation ();
+TObjArray *            OpenInputHipoFiles ( TString inputFile, int fdebug );
+void           ExtractElectronInformation (int fdebug);
 void              ExtractPionsInformation (int fdebug);
 void               ExtractPipsInformation (int pipsIdx, int fdebug );
 void               ExtractPimsInformation (int pimsIdx, int fdebug );
@@ -210,16 +212,13 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
                       int  PrintProgress=5000,
                       int NpipsMin=1, // minimal number of pi+
                       TString DataPath = "/volatile/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train_20200610/inc/" ){
-    
-    auto start = std::chrono::high_resolution_clock::now();
-    
     TString RunNumberStr = GetRunNumberSTR(RunNumber,fdebug);
     // read cut values
     loadCutValues("cutValues.csv",fdebug);
     
     // open result files
     OpenResultFiles( "/volatile/clas12/users/ecohen/BAND/SIDIS_skimming/", "skimmed_SIDIS_inc_" + RunNumberStr);
-    auto files = OpenInputHipoFiles( DataPath + "inc_" + RunNumberStr + ".hipo" );
+    auto files = OpenInputHipoFiles( DataPath + "inc_" + RunNumberStr + ".hipo", fdebug );
         
     // step over events and extract information....
     for(Int_t i=0;i<files->GetEntries();i++){
@@ -227,7 +226,7 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
         //create the event reader
         if (fdebug) std::cout << "reading file " << i << std::endl;
         clas12reader c12(files->At(i)->GetTitle(),{0});
-        InitializeFileReading();
+        InitializeFileReading( NeventsMax, c12.getReader().getEntries(), fdebug );
         
         int event = 0;
 
@@ -249,7 +248,7 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
                &&
                ((0 < Npips && Npips < NMAXPIONS) || (0 < Npims && Npims < NMAXPIONS)) ){
                    
-                ExtractElectronInformation  ();
+                ExtractElectronInformation  (fdebug);
                 ComputeKinematics           ();
                 ExtractPionsInformation     (fdebug);
                 WriteEventToOutput          ();
@@ -267,9 +266,11 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
             event++;
             if (fdebug && event%PrintProgress==0) std::cout << std::setprecision(1) << " event " << event << std::endl;
         } // end event loop
+        
+        Nevents_processed = event;
     } // end file loop
     
-    Nevents_processed = event;
+    
     FinishProgram();
 }
 
@@ -313,7 +314,6 @@ bool ElectronPassedSelectionCriteria(Double_t e_PCAL_x, Double_t e_PCAL_y,
         bool DC_fid  = dcfid.DC_fid_xy_sidis(11,                 // particle PID,
                                              e_DC_x[regionIdx],  // x
                                              e_DC_y[regionIdx],  // y
-                                             e_DC_z[regionIdx],  // z
                                              e_DC_sector,        // sector
                                              regionIdx+1,        // layer
                                              bending);           // torus bending
@@ -891,11 +891,11 @@ double GetBeamEnergy (int fdebug){
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-void InitializeFileReading(){
+void InitializeFileReading(int NeventsMax, int c12Nentries, int fdebug){
     Ebeam = GetBeamEnergy( fdebug );
     Beam.SetPxPyPzE(0,0,Ebeam,Ebeam);
     Int_t NeventsMaxToProcess = NeventsMax;
-    if (NeventsMax<0) NeventsMaxToProcess = c12.getReader().getEntries();
+    if (NeventsMax<0) NeventsMaxToProcess = c12Nentries;
     Nevents_processed           = 0;
     Nevents_passed_e_cuts       = 0;
     Nevents_passed_pips_cuts    = 0;
@@ -910,7 +910,6 @@ void InitializeVariables(){
     
     xB          = Q2        = omega     = -9999;
     e_E_ECIN    = e_E_ECOUT = e_E_PCAL  = -9999;
-    pips_chi2PID                        = -9999;
     e_PCAL_W    = e_PCAL_V              = -9999;
     e_PCAL_x    = e_PCAL_y  = e_PCAL_z  = -9999;
     e_PCAL_sector                       = -9999;
@@ -924,6 +923,7 @@ void InitializeVariables(){
     ePastCutsInEvent                    = false;
     
     for (int piIdx=0; piIdx<NMAXPIONS; piIdx++) {
+        pips_chi2PID[piIdx]                         = -9999;
         pips_DC_sector[piIdx]                       = -9999;
         pips_PCAL_sector[piIdx]                     = -9999;
         pips_PCAL_W[piIdx] = pips_PCAL_V[piIdx]     = -9999;
@@ -932,6 +932,7 @@ void InitializeVariables(){
         pips_E_PCAL[piIdx]                          = -9999;
         pips_E_ECIN[piIdx] = pips_E_ECOUT[piIdx]    = -9999;
         
+        pims_chi2PID[piIdx]                         = -9999;
         pims_DC_sector[piIdx]                       = -9999;
         pims_PCAL_sector[piIdx]                     = -9999;
         pims_PCAL_W[piIdx] = pims_PCAL_V[piIdx]     = -9999;
@@ -980,7 +981,7 @@ void OpenResultFiles( TString outfilepath, TString outfilename ){
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-TObjArray * OpenInputHipoFiles( TString inputFile ){
+TObjArray * OpenInputHipoFiles( TString inputFile, int fdebug ){
     
     // ------------------------------------------------------------
     // open input file(s)
@@ -1011,7 +1012,7 @@ TObjArray * OpenInputHipoFiles( TString inputFile ){
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-void ExtractElectronInformation(){
+void ExtractElectronInformation(int fdebug){
     // ------------------------------------------------------------------------------------------------
     // extract electron information
     // ------------------------------------------------------------------------------------------------
@@ -1101,7 +1102,7 @@ void WriteEventToOutput(){
         IsSelectedEvent = true;
         outTree_e_piplus -> Fill();
         Nevents_passed_e_pips_cuts ++ ;
-        for (pipsIdx=0; pipsIdx<Npips; pipsIdx++) {
+        for (int pipsIdx=0; pipsIdx<Npips; pipsIdx++) {
             Stream_e_pi_line_to_CSV( "pi+", pipsIdx );
         }
     }
@@ -1110,7 +1111,7 @@ void WriteEventToOutput(){
         IsSelectedEvent = true;
         outTree_e_piminus -> Fill();
         Nevents_passed_e_pims_cuts ++ ;
-        for (pimsIdx=0; pimsIdx<Npims; pimsIdx++) {
+        for (int pimsIdx=0; pimsIdx<Npims; pimsIdx++) {
             Stream_e_pi_line_to_CSV( "pi-", pimsIdx );
         }
     }
