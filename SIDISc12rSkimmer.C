@@ -68,7 +68,6 @@ TString                   GetRunNumberSTR (int RunNumber, int fdebug);
 void                InitializeFileReading (int NeventsMax,int c12Nentries, int fdebug);
 void                  InitializeVariables ();
 void                      OpenResultFiles ( TString outfilepath, TString outfilename );
-TObjArray *            OpenInputHipoFiles ( TString inputFile, int fdebug );
 void           ExtractElectronInformation (int fdebug);
 void              ExtractPionsInformation (int fdebug);
 void               ExtractPipsInformation (int pipsIdx, int fdebug );
@@ -226,10 +225,6 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
     fake.Add(inputFile.Data());
     //get the hipo data
     auto files = fake.GetListOfFiles();
-//    if (fdebug) std::cout << files->GetEntries() << " files to analyze.. "  << std::endl;
-    
-//    TObjArray * files = OpenInputHipoFiles( DataPath + "inc_" + RunNumberStr + ".hipo", fdebug );
-    if (fdebug) std::cout << files->GetEntries() << " files to analyze.. "  << std::endl;
     
     // step over events and extract information....
     for(Int_t i=0;i<files->GetEntries();i++){
@@ -281,11 +276,10 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
                 std::cout << "done processing event " << event
                 << std::endl << "------------------------------------------------------------" << std::endl ;
             }
-            event++;
+            event++; Nevents_processed++;
             if (fdebug && event%PrintProgress==0) std::cout << std::setprecision(1) << " event " << event << std::endl;
         } // end event loop
         
-        Nevents_processed = event;
     } // end file loop
     
     
@@ -998,32 +992,6 @@ void OpenResultFiles( TString outfilepath, TString outfilename ){
     SetOutputTTrees();
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-TObjArray * OpenInputHipoFiles( TString inputFile, int fdebug ){
-    
-    // open input file(s)
-    
-    if(inputFile==TString())  {
-        std::cout << " *** please provide a file name..." << std::endl;
-        exit(0);
-    }
-    if (fdebug) std::cout << "Analysing hipo file " << inputFile << std::endl;
-    // decide if torus is in-bending or out-bending
-    if (torusBending==-1){
-        std::cout << "using In-Bending torus data" << std::endl;
-    }
-    else {
-        std::cout << "using Out-Bending torus data" << std::endl;
-    }
-    TChain fake("hipo");
-    fake.Add(inputFile.Data());
-    //get the hipo data
-    auto files = fake.GetListOfFiles();
-    if (fdebug) std::cout << files->GetEntries() << " files to analyze.. "  << std::endl;
-    
-    // gBenchmark->Start("timer");
-    return files;
-}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void ExtractElectronInformation(int fdebug){
@@ -1197,6 +1165,7 @@ void ExtractPipsInformation( int pipsIdx, int fdebug ){
                                                                      fdebug);
     if (pipsPastSelectionCuts[pipsIdx]) {
         pimsPastCutsInEvent = true;
+        Nevents_passed_pips_cuts ++;
     }
 }
 
@@ -1244,6 +1213,7 @@ void ExtractPimsInformation( int pimsIdx, int fdebug ){
                                                                      fdebug);
     if (pimsPastSelectionCuts[pimsIdx]) {
         pimsPastCutsInEvent = true;
+        Nevents_passed_pims_cuts ++;
     }
 }
 
