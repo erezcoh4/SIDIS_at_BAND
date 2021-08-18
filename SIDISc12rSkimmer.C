@@ -199,7 +199,7 @@ Double_t     Ebeam, xB, Q2, omega, W, W2;
 //Double_t        Ppips_t_q, Ppips_q;
 // auxiliary
 DCfid_SIDIS dcfid;
-std::vector<region_part_ptr>  electrons, neutrons, protons, pipulses, piminuses, gammas;
+std::vector<region_part_ptr>  electrons, neutrons, protons, pipluses, piminuses, gammas;
 
 
 
@@ -217,7 +217,9 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
     loadCutValues("cutValues.csv",fdebug);
     
     // open result files
-    OpenResultFiles( "/volatile/clas12/users/ecohen/BAND/SIDIS_skimming/", "skimmed_SIDIS_inc_" + RunNumberStr);
+    TString outfilepath = "/volatile/clas12/users/ecohen/BAND/SIDIS_skimming/";
+    TString outfilename = "skimmed_SIDIS_inc_" + RunNumberStr
+    OpenResultFiles( outfilepath, outfilename );
     auto files = OpenInputHipoFiles( DataPath + "inc_" + RunNumberStr + ".hipo", fdebug );
         
     // step over events and extract information....
@@ -239,6 +241,13 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
             
             GetBeamHelicity    ( c12.event() , runnum, fdebug );
             InitializeVariables();
+            // Get Particles By Type
+            electrons   = c12.getByID( 11   );
+            neutrons    = c12.getByID( 2112 );
+            protons     = c12.getByID( 2212 );
+            pipules     = c12.getByID( 211  );
+            piminuses   = c12.getByID(-211  );
+            gammas      = c12.getByID( 22   ); 
             GetParticlesByType ( fdebug );
             
             
@@ -1187,10 +1196,10 @@ void ExtractPipsInformation( int pipsIdx, int fdebug ){
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-void ExtractPimsInformation( int pimsIdx ){
+void ExtractPimsInformation( int pimsIdx, int fdebug ){
     // extract negative pion information
     SetLorentzVector(piminus[pimsIdx]  ,piminuses[pimsIdx]);
-    Zpims[pipsIdx]              = piminus[pipsIdx].E() / omega;
+    Zpims[pimsIdx]              = piminus[pimsIdx].E() / omega;
     Vpiminus[pimsIdx]           = GetParticleVertex( piminuses[pimsIdx] );
     pims_chi2PID[pimsIdx]       = piminuses[pimsIdx]->par()->getChi2Pid();
     
@@ -1224,7 +1233,7 @@ void ExtractPimsInformation( int pimsIdx ){
                                                                      pims_DC_x[pimsIdx],
                                                                      pims_DC_y[pimsIdx],
                                                                      pims_DC_z[pimsIdx],
-                                                                     pims_chi2PID[pimsIdx],  pimlus[pimsIdx].P(),
+                                                                     pims_chi2PID[pimsIdx],  piminus[pimsIdx].P(),
                                                                      Ve,
                                                                      Vpiminus[pimsIdx],
                                                                      fdebug);
@@ -1236,12 +1245,12 @@ void ExtractPimsInformation( int pimsIdx ){
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void GetParticlesByType (int fdebug){
     // get particles by type
-    electrons   = c12.getByID( 11   ); Ne      = electrons.size();
-    neutrons    = c12.getByID( 2112 ); Nn      = neutrons.size();
-    protons     = c12.getByID( 2212 ); Np      = protons.size();
-    pipules     = c12.getByID( 211  ); Npips   = pipules.size();
-    piminuses   = c12.getByID(-211  ); Npims   = piminuses.size();
-    gammas      = c12.getByID( 22   ); Ngammas = gammas.size();
+    Ne      = electrons.size();
+    Nn      = neutrons.size();
+    Np      = protons.size();
+    Npips   = pipules.size();
+    Npims   = piminuses.size();
+    Ngammas = gammas.size();
     if (fdebug>2){
         std::cout
         << "number of particles in event "  << event        << " : " << c12.getNParticles() << ", "
