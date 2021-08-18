@@ -1169,7 +1169,7 @@ void ExtractPipsInformation( int pipsIdx, int fdebug ){
                                                                      Vpiplus[pipsIdx],
                                                                      fdebug);
     if (pipsPastSelectionCuts[pipsIdx]) {
-        pimsPastCutsInEvent = true;
+        pipsPastCutsInEvent = true;
         Nevents_passed_pips_cuts ++;
     }
 }
