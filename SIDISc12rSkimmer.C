@@ -76,7 +76,7 @@ void               ExtractPimsInformation (int pimsIdx, int fdebug );
 void                    ComputeKinematics ();
 void                   WriteEventToOutput ();
 void                        FinishProgram (TString outfilepath, TString outfilename);
-void                   GetParticlesByType (int fdebug );
+void                   GetParticlesByType (int event, int fdebug );
 void              Stream_e_pi_line_to_CSV (TString pionCharge, int piIdx );
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 
@@ -218,7 +218,7 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
     
     // open result files
     TString outfilepath = "/volatile/clas12/users/ecohen/BAND/SIDIS_skimming/";
-    TString outfilename = "skimmed_SIDIS_inc_" + RunNumberStr
+    TString outfilename = "skimmed_SIDIS_inc_" + RunNumberStr;
     OpenResultFiles( outfilepath, outfilename );
     auto files = OpenInputHipoFiles( DataPath + "inc_" + RunNumberStr + ".hipo", fdebug );
         
@@ -245,10 +245,10 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
             electrons   = c12.getByID( 11   );
             neutrons    = c12.getByID( 2112 );
             protons     = c12.getByID( 2212 );
-            pipules     = c12.getByID( 211  );
+            pipluses    = c12.getByID( 211  );
             piminuses   = c12.getByID(-211  );
-            gammas      = c12.getByID( 22   ); 
-            GetParticlesByType ( fdebug );
+            gammas      = c12.getByID( 22   );
+            GetParticlesByType ( event, fdebug );
             
             
             // filter events, extract information, and compute event kinematics:
@@ -1243,7 +1243,7 @@ void ExtractPimsInformation( int pimsIdx, int fdebug ){
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-void GetParticlesByType (int fdebug){
+void GetParticlesByType (int event, int fdebug){
     // get particles by type
     Ne      = electrons.size();
     Nn      = neutrons.size();
@@ -1253,7 +1253,7 @@ void GetParticlesByType (int fdebug){
     Ngammas = gammas.size();
     if (fdebug>2){
         std::cout
-        << "number of particles in event "  << event        << " : " << c12.getNParticles() << ", "
+        << "particles in event "            << event        << " : "
         << "N(electrons): "                 << Ne           <<  ","
         << "N(protons): "                   << Np           <<  ","
         << "N(neutrons): "                  << Nn           <<  ","
@@ -1298,12 +1298,13 @@ void Stream_e_pi_line_to_CSV( TString pionCharge, int piIdx ){
     //    Some, like azimuthal angles of pion (phi_pi) and proton (phi_p) in the CM frame may also be confusing.
     //    In addition to the first 16 columns (mandatory) you can add as many columns as you are comfortable to fill, and consider relevant for your process.
     
-    variables = {   status, runnum,     evnum,      beam_helicity,
-                    e.P(),  e.Theta(),  e.Phi(),    Ve.Z(),
-                    pi.P(), pi.Theta(), pi.Phi(),   Vpi.Z(),
-                    Q2,     W,          xB,          Zpi,
+    std::vector<double> variables =
+    {   (double)status, (double)runnum,     (double)evnum,      (double)beam_helicity,
+        e.P(),          e.Theta(),          e.Phi(),            Ve.Z(),
+        pi.P(),         pi.Theta(),         pi.Phi(),           Vpi.Z(),
+        Q2,             W,                  xB,                 Zpi,
     };
-    StreamToCSVfile( , IsSelectedEvent, fdebug );
+    StreamToCSVfile( variables , IsSelectedEvent, fdebug );
 }
 
 
