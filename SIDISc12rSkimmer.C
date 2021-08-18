@@ -222,6 +222,7 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
     OpenResultFiles( outfilepath, outfilename );
     TObjArray * files = OpenInputHipoFiles( DataPath + "inc_" + RunNumberStr + ".hipo", fdebug );
     if (fdebug) std::cout << files->GetEntries() << " files to analyze.. "  << std::endl;
+    
     // step over events and extract information....
     for(Int_t i=0;i<files->GetEntries();i++){
             
@@ -1013,7 +1014,7 @@ TObjArray * OpenInputHipoFiles( TString inputFile, int fdebug ){
     if (fdebug) std::cout << files->GetEntries() << " files to analyze.. "  << std::endl;
     
     // gBenchmark->Start("timer");
-    return files;
+    return & files;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
