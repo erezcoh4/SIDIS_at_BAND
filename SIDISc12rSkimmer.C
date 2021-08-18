@@ -917,7 +917,7 @@ void InitializeFileReading(int NeventsMax, int c12Nentries, int fdebug){
     Nevents_passed_pims_cuts    = 0;
     Nevents_passed_e_pips_cuts  = 0;
     Nevents_passed_e_pims_cuts  = 0;
-    if (fdebug>1) {
+    if (fdebug>-1) {
         std::cout << "NeventsMaxToProcess =  " << NeventsMaxToProcess << "" << std::endl;
     }
 }
