@@ -381,7 +381,7 @@ bool PionPassedSelectionCutsCriteria(TString pionCharge, // "pi+" or "pi-"
     if (fdebug>3) {
         std::cout << "PionPassedSelectionCutsCriteria()" << std::endl;
     }
-    if (DC_sector == 0) return false;
+    if (DC_sector == 0) { std::cout << "DC_sector=0 (funny...)" << std::endl; return false;}
     
     int PDGcode;
     double    C;
@@ -445,6 +445,7 @@ bool PionPassedSelectionCutsCriteria(TString pionCharge, // "pi+" or "pi-"
        &&  ( fabs((Ve-Vpi).Z()) < cutValue_Ve_Vpi_dz_max )
        ) {
         if (fdebug>3) { std::cout << "succesfully passed PionPassedSelectionCutsCriteria(), return true" << std::endl; }
+        
         return true;
     }
     return false;
