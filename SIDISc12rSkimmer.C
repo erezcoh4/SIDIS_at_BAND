@@ -381,7 +381,7 @@ bool PionPassedSelectionCutsCriteria(TString pionCharge, // "pi+" or "pi-"
     if (fdebug>3) {
         std::cout << "PionPassedSelectionCutsCriteria()" << std::endl;
     }
-    if (DC_sector == 0) { std::cout << "DC_sector=0 (funny...)" << std::endl; return false;}
+    if (DC_sector == 0) { if (fdebug>2){std::cout << "DC_sector=0 (funny...)" << std::endl;} return false;}
     
     int PDGcode;
     double    C;
