@@ -74,7 +74,7 @@ void              ExtractPionsInformation (int fdebug);
 void               ExtractPipsInformation (int pipsIdx, int fdebug );
 void               ExtractPimsInformation (int pimsIdx, int fdebug );
 void                    ComputeKinematics ();
-void                   WriteEventToOutput ();
+void                   WriteEventToOutput (int fdebug);
 void                        FinishProgram (TString outfilepath, TString outfilename);
 void                   GetParticlesByType (int event, int fdebug );
 void              Stream_e_pi_line_to_CSV (TString pionCharge, int piIdx, bool IsSelectedEvent, int fdebug );
@@ -260,7 +260,7 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
                 ExtractElectronInformation  (fdebug);
                 ComputeKinematics           ();
                 ExtractPionsInformation     (fdebug);
-                WriteEventToOutput          ();
+                WriteEventToOutput          (fdebug);
                 
             } else {
                 if (fdebug>1) {
@@ -1102,7 +1102,7 @@ void ExtractPionsInformation(int fdebug){
 
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-void WriteEventToOutput(){
+void WriteEventToOutput(int fdebug){
     
     // (Maybe) write this event to "selected events csv-file"
     bool IsSelectedEvent = false;
@@ -1245,12 +1245,12 @@ void ExtractPimsInformation( int pimsIdx, int fdebug ){
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void GetParticlesByType (int event, int fdebug){
     // get particles by type
-    Ne      = electrons.size();
-    Nn      = neutrons.size();
-    Np      = protons.size();
-    Npips   = pipules.size();
-    Npims   = piminuses.size();
-    Ngammas = gammas.size();
+    Ne      = electrons .size();
+    Nn      = neutrons  .size();
+    Np      = protons   .size();
+    Npips   = pipluses  .size();
+    Npims   = piminuses .size();
+    Ngammas = gammas    .size();
     if (fdebug>2){
         std::cout
         << "particles in event "            << event        << " : "
@@ -1304,7 +1304,7 @@ void Stream_e_pi_line_to_CSV( TString pionCharge, int piIdx, bool IsSelectedEven
         pi.P(),         pi.Theta(),         pi.Phi(),           Vpi.Z(),
         Q2,             W,                  xB,                 Zpi,
     };
-    StreamToCSVfile( variables , IsSelectedEvent, fdebug );
+    StreamToCSVfile( pionCharge, variables , IsSelectedEvent, fdebug );
 }
 
 
