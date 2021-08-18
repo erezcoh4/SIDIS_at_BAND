@@ -2,7 +2,11 @@
 
 # Skimming for Semi Inclusive DIS (SIDIS) on a deuteron target with $pi^+$ and $pi^-$ tagging
 
-    last edit: Aug-11, 2021 (EOC, mbp)
+    last edit: Aug-18, 2021 (EOC, mbp)
+    ToDo:
+    (1) add multiple pions per event
+    (2) Check beam helicity
+    (3) Add pion DC fiducial cuts
     
     ## We are interested in events:
  
@@ -78,9 +82,7 @@ Merge SIDIS skimming (based on SIDISc12rSkimmer.C) with BAND skimming (based on 
  void SIDISc12rSkimmer (   int RunNumber=6420,
                             int NeventsMax=-1, // -1 is "process all events"
                             int fdebug=1,
-                            bool doApplySelectionCuts=true,
                             int PrintProgress=5000,
-                            int NpipsMin=1,
                             TString DataPath="/cache/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train/sidisdvcs/")
   ---------------------------------------------
 Read BAND data and write important observables to csv file
