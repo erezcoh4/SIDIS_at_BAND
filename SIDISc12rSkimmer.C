@@ -220,7 +220,7 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
     TString outfilepath = "/volatile/clas12/users/ecohen/BAND/SIDIS_skimming/";
     TString outfilename = "skimmed_SIDIS_inc_" + RunNumberStr;
     OpenResultFiles( outfilepath, outfilename );
-    auto files = OpenInputHipoFiles( DataPath + "inc_" + RunNumberStr + ".hipo", fdebug );
+    TObjArray * files = OpenInputHipoFiles( DataPath + "inc_" + RunNumberStr + ".hipo", fdebug );
     if (fdebug) std::cout << files->GetEntries() << " files to analyze.. "  << std::endl;
     // step over events and extract information....
     for(Int_t i=0;i<files->GetEntries();i++){
@@ -992,15 +992,8 @@ void OpenResultFiles( TString outfilepath, TString outfilename ){
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 TObjArray * OpenInputHipoFiles( TString inputFile, int fdebug ){
     
-    // ------------------------------------------------------------
     // open input file(s)
-    // ------------------------------------------------------------
-//    for(Int_t i=1;i<gApplication->Argc();i++){
-//        TString opt=gApplication->Argv(i);
-//        if((opt.Contains(".hipo"))){
-//            inputFile=opt(5,opt.Sizeof());
-//        }
-//    }
+    
     if(inputFile==TString())  {
         std::cout << " *** please provide a file name..." << std::endl;
         exit(0);
