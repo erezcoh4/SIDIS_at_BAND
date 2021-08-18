@@ -1017,6 +1017,8 @@ TObjArray * OpenInputHipoFiles( TString inputFile, int fdebug ){
     fake.Add(inputFile.Data());
     //get the hipo data
     auto files = fake.GetListOfFiles();
+    if (fdebug) std::cout << files->GetEntries() << " files to analyze.. "  << std::endl;
+    
     gBenchmark->Start("timer");
     return files;
 }
