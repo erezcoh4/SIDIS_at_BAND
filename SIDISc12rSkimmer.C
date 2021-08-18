@@ -905,7 +905,7 @@ double GetBeamEnergy (int fdebug){
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void InitializeFileReading(int NeventsMax, int c12Nentries, int fdebug){
     if (fdebug>1) {
-        std::cout << "InitializeFileReading( " << NeventsMax << " << " << c12Nentries << " " << fdebug << ")" << std::endl;
+        std::cout << "InitializeFileReading( " << NeventsMax << " , " << c12Nentries << " , " << fdebug << ")" << std::endl;
     }
     Ebeam = GetBeamEnergy( fdebug );
     Beam.SetPxPyPzE(0,0,Ebeam,Ebeam);
@@ -917,6 +917,9 @@ void InitializeFileReading(int NeventsMax, int c12Nentries, int fdebug){
     Nevents_passed_pims_cuts    = 0;
     Nevents_passed_e_pips_cuts  = 0;
     Nevents_passed_e_pims_cuts  = 0;
+    if (fdebug>1) {
+        std::cout << "NeventsMaxToProcess =  " << NeventsMaxToProcess << "" << std::endl;
+    }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
