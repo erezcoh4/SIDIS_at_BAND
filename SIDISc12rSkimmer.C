@@ -716,7 +716,7 @@ void SetOutputTTrees(){
     outTree_e_piplus->Branch("e_E_PCAL"             ,&e_E_PCAL              );
     outTree_e_piplus->Branch("e_E_ECIN"             ,&e_E_ECIN              );
     outTree_e_piplus->Branch("e_E_ECOUT"            ,&e_E_ECOUT             );
-    outTree_e_piplus->Branch("pi_chi2PID"           ,&pips_chi2PID          );
+    outTree_e_piplus->Branch("pi_chi2PID"           ,pips_chi2PID          );
     outTree_e_piplus->Branch("e_PCAL_W"             ,&e_PCAL_W              );
     outTree_e_piplus->Branch("e_PCAL_V"             ,&e_PCAL_V              );
     outTree_e_piplus->Branch("pi_PCAL_x"            ,&pips_PCAL_x           );
@@ -906,7 +906,7 @@ double GetBeamEnergy (int fdebug){
 void InitializeFileReading(int NeventsMax, int c12Nentries, int fdebug){
     Ebeam = GetBeamEnergy( fdebug );
     Beam.SetPxPyPzE(0,0,Ebeam,Ebeam);
-    Int_t NeventsMaxToProcess = NeventsMax;
+    NeventsMaxToProcess = NeventsMax;
     if (NeventsMax<0) NeventsMaxToProcess = c12Nentries;
     Nevents_processed           = 0;
     Nevents_passed_e_cuts       = 0;
