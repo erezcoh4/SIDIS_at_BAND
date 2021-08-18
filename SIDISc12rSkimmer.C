@@ -1014,7 +1014,7 @@ TObjArray * OpenInputHipoFiles( TString inputFile, int fdebug ){
     if (fdebug) std::cout << files->GetEntries() << " files to analyze.. "  << std::endl;
     
     // gBenchmark->Start("timer");
-    return & files;
+    return *files;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
