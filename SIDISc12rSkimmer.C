@@ -734,9 +734,9 @@ void SetOutputTTrees(){
     outTree_e_piplus->Branch("pi_PCAL_sector"       ,pips_PCAL_sector      );
     outTree_e_piplus->Branch("pi_DC_sector"         ,pips_DC_sector        );
     outTree_e_piplus->Branch("pi_Chi2N"             ,pips_Chi2N            );
-    outTree_e_piplus->Branch("pi_DC_x"              ,&pips_DC_x             );
-    outTree_e_piplus->Branch("pi_DC_y"              ,&pips_DC_y             );
-    outTree_e_piplus->Branch("pi_DC_z"              ,&pips_DC_z             );
+    outTree_e_piplus->Branch("pi_DC_x"              ,&pips_DC_x            , "pi_DC_x[20][3]/F"  );
+    outTree_e_piplus->Branch("pi_DC_y"              ,&pips_DC_y            , "pi_DC_y[20][3]/F"  );
+    outTree_e_piplus->Branch("pi_DC_z"              ,&pips_DC_z            , "pi_DC_z[20][3]/F"  );
     outTree_e_piplus->Branch("pi_E_PCAL"            ,pips_E_PCAL           );
     outTree_e_piplus->Branch("pi_E_ECIN"            ,pips_E_ECIN           );
     outTree_e_piplus->Branch("pi_E_ECIN"            ,pips_E_ECIN           );
@@ -786,8 +786,8 @@ void SetOutputTTrees(){
     outTree_e_piminus->Branch("pi_DC_sector"        ,pims_DC_sector        );
     outTree_e_piminus->Branch("pi_Chi2N"            ,pims_Chi2N            );
     outTree_e_piminus->Branch("pi_DC_x"             ,&pims_DC_x            , "pi_DC_x[20][3]/F" );
-    outTree_e_piminus->Branch("pi_DC_y"             ,&pims_DC_y             );
-    outTree_e_piminus->Branch("pi_DC_z"             ,&pims_DC_z             );
+    outTree_e_piminus->Branch("pi_DC_y"             ,&pims_DC_y            , "pi_DC_y[20][3]/F"  );
+    outTree_e_piminus->Branch("pi_DC_z"             ,&pims_DC_z            , "pi_DC_z[20][3]/F"  );
     outTree_e_piminus->Branch("pi_E_PCAL"           ,pims_E_PCAL           );
     outTree_e_piminus->Branch("pi_E_ECIN"           ,pims_E_ECIN           );
     outTree_e_piminus->Branch("pi_E_ECIN"           ,pims_E_ECIN           );
@@ -904,6 +904,9 @@ double GetBeamEnergy (int fdebug){
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void InitializeFileReading(int NeventsMax, int c12Nentries, int fdebug){
+    if (fdebug>1) {
+        std::cout << "InitializeFileReading( " << NeventsMax << " << " << c12Nentries << " " << fdebug << ")" << std::endl;
+    }
     Ebeam = GetBeamEnergy( fdebug );
     Beam.SetPxPyPzE(0,0,Ebeam,Ebeam);
     NeventsMaxToProcess = NeventsMax;
