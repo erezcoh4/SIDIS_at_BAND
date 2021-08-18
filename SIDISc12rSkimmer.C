@@ -805,7 +805,7 @@ void SetOutputTTrees(){
     outTree_e_piminus->Branch("Q2"                  ,&Q2                    );
     outTree_e_piminus->Branch("omega"               ,&omega                 );
     outTree_e_piminus->Branch("W"                   ,&W                     );
-    outTree_e_piplus->Branch("Z"                    ,&Zpims                 );
+    outTree_e_piplus->Branch("Z"                    ,Zpims                 );
 
     outTree_e_piminus->Branch("EventPassedCuts"     ,&EventPassedCuts       );
     outTree_e_piminus->Branch("ePastCutsInEvent"     ,&ePastCutsInEvent      );
@@ -904,7 +904,7 @@ double GetBeamEnergy (int fdebug){
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void InitializeFileReading(int NeventsMax, int c12Nentries, int fdebug){
-    if (fdebug>1) {
+    if (fdebug>-1) {
         std::cout << "InitializeFileReading( " << NeventsMax << " , " << c12Nentries << " , " << fdebug << ")" << std::endl;
     }
     Ebeam = GetBeamEnergy( fdebug );
