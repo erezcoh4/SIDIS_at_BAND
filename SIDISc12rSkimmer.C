@@ -995,12 +995,12 @@ TObjArray * OpenInputHipoFiles( TString inputFile, int fdebug ){
     // ------------------------------------------------------------
     // open input file(s)
     // ------------------------------------------------------------
-    for(Int_t i=1;i<gApplication->Argc();i++){
-        TString opt=gApplication->Argv(i);
-        if((opt.Contains(".hipo"))){
-            inputFile=opt(5,opt.Sizeof());
-        }
-    }
+//    for(Int_t i=1;i<gApplication->Argc();i++){
+//        TString opt=gApplication->Argv(i);
+//        if((opt.Contains(".hipo"))){
+//            inputFile=opt(5,opt.Sizeof());
+//        }
+//    }
     if(inputFile==TString())  {
         std::cout << " *** please provide a file name..." << std::endl;
         exit(0);
@@ -1018,6 +1018,7 @@ TObjArray * OpenInputHipoFiles( TString inputFile, int fdebug ){
     //get the hipo data
     auto files = fake.GetListOfFiles();
     gBenchmark->Start("timer");
+    return files;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
