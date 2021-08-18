@@ -77,7 +77,7 @@ void                    ComputeKinematics ();
 void                   WriteEventToOutput ();
 void                        FinishProgram (TString outfilepath, TString outfilename);
 void                   GetParticlesByType (int event, int fdebug );
-void              Stream_e_pi_line_to_CSV (TString pionCharge, int piIdx );
+void              Stream_e_pi_line_to_CSV (TString pionCharge, int piIdx, bool IsSelectedEvent, int fdebug );
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 
 // globals
@@ -1112,7 +1112,7 @@ void WriteEventToOutput(){
         outTree_e_piplus -> Fill();
         Nevents_passed_e_pips_cuts ++ ;
         for (int pipsIdx=0; pipsIdx<Npips; pipsIdx++) {
-            Stream_e_pi_line_to_CSV( "pi+", pipsIdx );
+            Stream_e_pi_line_to_CSV( "pi+", pipsIdx, IsSelectedEvent, fdebug );
         }
     }
     
@@ -1121,7 +1121,7 @@ void WriteEventToOutput(){
         outTree_e_piminus -> Fill();
         Nevents_passed_e_pims_cuts ++ ;
         for (int pimsIdx=0; pimsIdx<Npims; pimsIdx++) {
-            Stream_e_pi_line_to_CSV( "pi-", pimsIdx );
+            Stream_e_pi_line_to_CSV( "pi-", pimsIdx, IsSelectedEvent, fdebug );
         }
     }
 
@@ -1265,7 +1265,7 @@ void GetParticlesByType (int event, int fdebug){
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-void Stream_e_pi_line_to_CSV( TString pionCharge, int piIdx ){
+void Stream_e_pi_line_to_CSV( TString pionCharge, int piIdx, bool IsSelectedEvent, int fdebug ){
     TLorentzVector  pi;
     TVector3        Vpi;
     double          Zpi;
