@@ -1,9 +1,6 @@
-// last edit Aug-18, 2021 (EOC, mbp), see README
+// last edit Aug-21, 2021 (EOC, mbp), see README
 // ToDo:
-// (1) add multiple pions per event
-// (2) Check beam helicity
-// (3) Add pion DC fiducial cuts
-
+// (1) Add pion DC fiducial cuts
 
 #include <cstdlib>
 #include <iostream>
@@ -989,10 +986,10 @@ TString GetRunNumberSTR(int RunNumber, int fdebug){
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void OpenResultFiles( TString outfilepath, TString outfilename ){
     OpenOutputFiles( outfilepath + outfilename,
-                    ( (TString)"status, runnum,     evnum,      beam_helicity,"
-                     +(TString)"e.P(),  e.Theta(),  e.Phi(),    Ve.Z(),"
-                     +(TString)"pi.P(), pi.Theta(), pi.Phi(),   Vpi.Z(),"
-                     +(TString)"Q2,     W,          x,          Zpi,"));
+                    ( (TString)"status,runnum,evnum,beam_helicity,"
+                     +(TString)"e_P,e_Theta,e_Phi,e_Vz,"
+                     +(TString)"pi_P,pi_Theta,pi_Phi,pi_Vz,"
+                     +(TString)"Q2,W,x,Zpi,omega,"));
     // output tree branches
     SetOutputTTrees();
 }
@@ -1080,8 +1077,7 @@ void ExtractPionsInformation(int fdebug){
 
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-void WriteEventToOutput(int fdebug){
-    
+void WriteEventToOutput(int fdebug){    
     // (Maybe) write this event to "selected events csv-file"
     bool IsSelectedEvent = false;
         
@@ -1102,8 +1098,6 @@ void WriteEventToOutput(int fdebug){
             Stream_e_pi_line_to_CSV( "pi-", pimsIdx, IsSelectedEvent, fdebug );
         }
     }
-
-
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -1283,6 +1277,7 @@ void Stream_e_pi_line_to_CSV( TString pionCharge, int piIdx, bool IsSelectedEven
         e.P(),          e.Theta(),          e.Phi(),            Ve.Z(),
         pi.P(),         pi.Theta(),         pi.Phi(),           Vpi.Z(),
         Q2,             W,                  xB,                 Zpi,
+        omega,
     };
     StreamToCSVfile( pionCharge, variables , IsSelectedEvent, fdebug );
 }
