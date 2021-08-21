@@ -8,10 +8,11 @@ import sys, os, linecache
 import argparse
 
 parser = argparse.ArgumentParser(description='Acquire data for TDC calibration')
-parser.add_argument("--NeventsMax", type=int, default=-1, required=False, help="maximal number of events to process")
+parser.add_argument("--Nruns",      type=int, default=1,    required=False, help="number of runs to process")
+parser.add_argument("--NeventsMax", type=int, default=-1,   required=False, help="maximal number of events to process")
 args = parser.parse_args()
 
-nruns         = 2
+Nruns         = args.Nruns
 NeventsMax    = args.NeventsMax
 runs_filename = "macros/runlists/good_runs_10-2.txt"
 
@@ -30,18 +31,8 @@ for line in run_fileLines:
     commandline = "processing run %d/%d clas12root -q 'SIDISc12rSkimmer.C+(%d,%d)'"%(runIdx,nruns, run,NeventsMax)
     print(commandline)
     os.system( "clas12root -q 'SIDISc12rSkimmer.C+(%d,%d)'"%(run,NeventsMax))
-    if runIdx >= nruns: break;
+    if runIdx >= Nruns: break;
 
-
+print(' ')
 print('done.')
-#    os.system( "./convert_raw_to_group --config %s -i %s -o %s --writeMultipleHits 128 >> outtextfile"%(configfile,datafile,groupfile))
-
-
-#file = open(outtextfile)
-#all_lines = file.readlines()
-#print(	all_lines[8],all_lines[9],all_lines[16],all_lines[17],all_lines[18],
-#	all_lines[19],all_lines[20],all_lines[21],all_lines[22])
-#
-#print( linecach.getline(outtextfile,17) )
-#
-#os.system("rm %s"%outputtextfile)
+print(' ')
