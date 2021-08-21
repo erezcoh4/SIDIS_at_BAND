@@ -1077,7 +1077,7 @@ void ExtractPionsInformation(int fdebug){
 
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-void WriteEventToOutput(int fdebug){    
+void WriteEventToOutput(int fdebug){
     // (Maybe) write this event to "selected events csv-file"
     bool IsSelectedEvent = false;
         
