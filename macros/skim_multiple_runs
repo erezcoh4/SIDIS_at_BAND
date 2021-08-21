@@ -5,9 +5,14 @@
 # last edit Aug-21, 2021 (EOC)
 #
 import sys, os, linecache
+import argparse
+
+parser = argparse.ArgumentParser(description='Acquire data for TDC calibration')
+parser.add_argument("--NeventsMax", type=int, default=-1, required=False, help="maximal number of events to process")
+args = parser.parse_args()
 
 nruns         = 2
-NeventsMax    = 10
+NeventsMax    = args.NeventsMax
 runs_filename = "macros/runlists/good_runs_10-2.txt"
 
 # Using readlines()
@@ -24,7 +29,7 @@ for line in run_fileLines:
     run = int(line.strip())
     commandline = "processing run %d/%d clas12root -q 'SIDISc12rSkimmer.C+(%d,%d)'"%(runIdx,nruns, run,NeventsMax)
     print(commandline)
-    #os.system( "clas12root -q 'SIDISc12rSkimmer.C+(%d,%d)'"%(run,NeventsMax))
+    os.system( "clas12root -q 'SIDISc12rSkimmer.C+(%d,%d)'"%(run,NeventsMax))
     if runIdx >= nruns: break;
 
 
