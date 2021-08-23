@@ -27,6 +27,7 @@
     2. DC_layer was always over-written by the last layer. This bug was fixed.
         DC layes is an array of dimensions [3], which equals {6,18,36}. 
         Region 1 is denoted at DC detector 6, Region 2 is denoted 18, Region 3 - as 36
+    3. changed output TTree names from "(e,e'pi+) events" to "tree", which is easier to read-off 
     
     
     

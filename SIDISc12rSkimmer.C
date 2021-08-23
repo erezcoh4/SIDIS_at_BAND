@@ -513,9 +513,9 @@ void OpenOutputFiles (TString outfilename,TString header){
     
     // Create output tree
     outFile_e_piplus  = new TFile( outfilename + "_e_piplus.root"  ,"RECREATE");
-    outTree_e_piplus  = new TTree( "(e,e'pi+) events" , "Event information");
+    outTree_e_piplus  = new TTree( "tree" , "(e,e'pi+) event information");
     outFile_e_piminus = new TFile( outfilename + "_e_piminus.root" ,"RECREATE");
-    outTree_e_piminus = new TTree( "(e,e'pi-) events" , "Event information");
+    outTree_e_piminus = new TTree( "tree" , "(e,e'pi-) event  information");
     
     // Create output csv files
     CSVfile_e_piplus.open( outfilename  + "_e_piplus.csv" );
