@@ -737,11 +737,11 @@ void SetOutputTTrees(){
     outTree_e_piplus->Branch("pi_E_ECIN"            ,pips_E_ECIN           );
     outTree_e_piplus->Branch("pi_E_ECIN"            ,pips_E_ECIN           );
     outTree_e_piplus->Branch("pi_E_ECOUT"           ,pips_E_ECOUT          );
-    outTree_e_piplus->Branch("DC_layer"             ,&DC_layer              );
+    outTree_e_piplus->Branch("DC_layers"            ,&DC_layers            , "DC_layers[3]"      );
     outTree_e_piplus->Branch("e"                    ,&e                     );
-    outTree_e_piplus->Branch("pi"                   ,piplus                );
+    outTree_e_piplus->Branch("pi"                   ,piplus                 );
     outTree_e_piplus->Branch("Ve"                   ,&Ve                    );
-    outTree_e_piplus->Branch("Vpi"                  ,Vpiplus               );
+    outTree_e_piplus->Branch("Vpi"                  ,Vpiplus                );
     outTree_e_piplus->Branch("Beam"                 ,&Beam                  );
     outTree_e_piplus->Branch("beam_helicity"        ,&beam_helicity         );
     outTree_e_piplus->Branch("q"                    ,&q                     );
@@ -750,11 +750,18 @@ void SetOutputTTrees(){
     outTree_e_piplus->Branch("Q2"                   ,&Q2                    );
     outTree_e_piplus->Branch("omega"                ,&omega                 );
     outTree_e_piplus->Branch("W"                    ,&W                     );
-    outTree_e_piplus->Branch("Z"                    ,Zpips                 );
+    outTree_e_piplus->Branch("Z"                    ,Zpips                  );
 
     outTree_e_piplus->Branch("EventPassedCuts"      ,&EventPassedCuts       );
     outTree_e_piplus->Branch("ePastCutsInEvent"     ,&ePastCutsInEvent      );
     outTree_e_piplus->Branch("piPastCutsInEvent"    ,&pipsPastCutsInEvent   );
+    outTree_e_piplus->Branch("Npips"                ,&Npips                 );
+    outTree_e_piplus->Branch("Npims"                ,&Npims                 );
+    outTree_e_piplus->Branch("Nelectrons"           ,&Ne                    );
+    outTree_e_piplus->Branch("Ngammas"              ,&Ngammas               );
+    outTree_e_piplus->Branch("Nprotons"             ,&Np                    );
+    outTree_e_piplus->Branch("Nneutrons"            ,&Nn                    );
+    
     
     
     // pi-
@@ -788,11 +795,11 @@ void SetOutputTTrees(){
     outTree_e_piminus->Branch("pi_E_ECIN"           ,pims_E_ECIN           );
     outTree_e_piminus->Branch("pi_E_ECIN"           ,pims_E_ECIN           );
     outTree_e_piminus->Branch("pi_E_ECOUT"          ,pims_E_ECOUT          );
-    outTree_e_piminus->Branch("DC_layer"            ,&DC_layer              );
+    outTree_e_piminus->Branch("DC_layers"           ,&DC_layers            , "DC_layers[3]"      );
     outTree_e_piminus->Branch("e"                   ,&e                     );
-    outTree_e_piminus->Branch("pi"                  ,piminus               );
+    outTree_e_piminus->Branch("pi"                  ,piminus                );
     outTree_e_piminus->Branch("Ve"                  ,&Ve                    );
-    outTree_e_piminus->Branch("Vpi"                 ,Vpiminus              );
+    outTree_e_piminus->Branch("Vpi"                 ,Vpiminus               );
     outTree_e_piminus->Branch("Beam"                ,&Beam                  );
     outTree_e_piminus->Branch("beam_helicity"       ,&beam_helicity         );
     outTree_e_piminus->Branch("q"                   ,&q                     );
@@ -806,7 +813,13 @@ void SetOutputTTrees(){
     outTree_e_piminus->Branch("EventPassedCuts"     ,&EventPassedCuts       );
     outTree_e_piminus->Branch("ePastCutsInEvent"     ,&ePastCutsInEvent      );
     outTree_e_piminus->Branch("piPastCutsInEvent"    ,&pimsPastCutsInEvent   );
-    
+    outTree_e_piminus->Branch("Npips"                ,&Npips                 );
+    outTree_e_piminus->Branch("Npims"                ,&Npims                 );
+    outTree_e_piminus->Branch("Nelectrons"           ,&Ne                    );
+    outTree_e_piminus->Branch("Ngammas"              ,&Ngammas               );
+    outTree_e_piminus->Branch("Nprotons"             ,&Np                    );
+    outTree_e_piminus->Branch("Nneutrons"            ,&Nn                    );
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

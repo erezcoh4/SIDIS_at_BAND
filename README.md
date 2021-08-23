@@ -2,13 +2,41 @@
 
 # Skimming for Semi Inclusive DIS (SIDIS) on a deuteron target with $pi^+$ and $pi^-$ tagging
 
-    last edit: Aug-18, 2021 (EOC, mbp)
+    last edit: Aug-22, 2021 (EOC, mbp)
     ToDo:
     (1) add multiple pions per event
     (2) Check beam helicity
     (3) Add pion DC fiducial cuts
     
-    ## We are interested in events:
+    
+    
+    
+    
+    
+# Revisions
+
+    Aug-22, 2021    
+    -------------
+    1. Added variables to the output ROOT TTree 
+        “Npips”         number of positive pions per event
+        “Npims”         number of negative pions per event        
+        “Nprotons”      number of protons
+        “Nneutrons”     number of neutrons
+        “Ngammas”       number of gammas
+        “Nelectrons”    number of electrons
+    2. DC_layer was always over-written by the last layer. This bug was fixed.
+        DC layes is an array of dimensions [3], which equals {6,18,36}. 
+        Region 1 is denoted at DC detector 6, Region 2 is denoted 18, Region 3 - as 36
+    
+    
+    
+    
+    
+    
+    
+# Goals
+    
+    identify and analyse the following events:
  
         $$D(e,e’pi+)X  $$
         $$D(e,e’pi+n)X $$
@@ -18,6 +46,7 @@
         
     ## Execute:
     ---------------------
+    ./macros/skim_multiple_runs --Nruns=3 --NeventsMax=10
     clas12root -q "SIDISc12rSkimmer.C+(6420,100)"
     root -l -q "MergeSIDISandBANDSkimmers.C(6420,100)"
     
