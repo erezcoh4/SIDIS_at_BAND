@@ -25,7 +25,8 @@ ToDo:
 2. added variables to CSV files: 
     "xF"           Feynman x = 2(p_pi \cdot q)/|q|W              
     "y"             omega / Ebeam
-    "M_X"       missing mass of the reaction = || beam + target - e' - pi ||^2
+    "M_X"       missing mass of the reaction = || beam + target - e' - pi ||^2 
+    
     
 3. added "selected_eepi" CSV file to include events that pass electron and pion selection
     A. fill ROOT TTree with "selected_eepi" events

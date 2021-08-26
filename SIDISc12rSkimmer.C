@@ -121,6 +121,7 @@ int         Ne, Nn, Np, Npips, Npims, Ngammas;
 // variables
 double          Mp = 0.938;
 double       Mp2 = Mp * Mp;
+double       Md = 1.875612; // NIST
 // leading electron
 double            e_E_PCAL; // electron energy deposit in PCAL [GeV]
 double            e_E_ECIN; // electron energy deposit in ECAL_in [GeV]
@@ -183,7 +184,7 @@ TTree * outTree_e_piplus, * outTree_e_piminus;
 std::ofstream   CSVfile_e_piplus,  SelectedEventsCSVfile_e_piplus;
 std::ofstream   CSVfile_e_piminus, SelectedEventsCSVfile_e_piminus;
 // vectors in lab-frame
-TLorentzVector                  Beam, e, q;
+TLorentzVector          Beam, target, e, q;
 std::vector<TLorentzVector>         piplus; // positive pions
 std::vector<TLorentzVector>        piminus; // negative pions
 // reconstructed vertex position
@@ -192,7 +193,7 @@ std::vector<TVector3>              Vpiplus;
 std::vector<TVector3>             Vpiminus;
 
 // kinematics
-Double_t     Ebeam, xB, Q2, omega, W, W2;
+Double_t     Ebeam, xB, Q2, omega, W, W2, xF, y, M_X;
 
 
 // vectors in q-frame
@@ -259,7 +260,7 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
             
             // filter events, extract information, and compute event kinematics:
             // we keep only d(e,e’pi+)X and d(e,e’pi-)X events
-            if(  0 < Ne
+            if(  0 < Ne // after studying some MC and data, we need to kill events with more than 1 electron
                &&
                ((0 < Npips && Npips < NMAXPIONS) || (0 < Npims && Npims < NMAXPIONS)) ){
                    
@@ -921,8 +922,10 @@ void InitializeFileReading(int NeventsMax, int c12Nentries, int fdebug){
     if (fdebug>1) {
         std::cout << "InitializeFileReading( " << NeventsMax << " , " << c12Nentries << " , " << fdebug << ")" << std::endl;
     }
-    Ebeam = GetBeamEnergy( fdebug );
-    Beam.SetPxPyPzE(0,0,Ebeam,Ebeam);
+    Ebeam   = GetBeamEnergy( fdebug );
+    Beam    .SetPxPyPzE (0, 0, Ebeam, Ebeam );
+    target  .SetXYZM    (0, 0, 0,     Md    );
+    
     NeventsMaxToProcess = NeventsMax;
     if (NeventsMax<0) NeventsMaxToProcess = c12Nentries;
     Nevents_processed           = 0;
@@ -941,6 +944,7 @@ void InitializeVariables(){
     e = TLorentzVector(0,0,0,db->GetParticle( 11   )->Mass());
     
     xB          = Q2        = omega     = -9999;
+    xF          = y         = M_X       = -9999;
     e_E_ECIN    = e_E_ECOUT = e_E_PCAL  = -9999;
     e_PCAL_W    = e_PCAL_V              = -9999;
     e_PCAL_x    = e_PCAL_y  = e_PCAL_z  = -9999;
@@ -1011,7 +1015,8 @@ void OpenResultFiles( TString outfilepath, TString outfilename ){
                     ( (TString)"status,runnum,evnum,beam_helicity,"
                      +(TString)"e_P,e_Theta,e_Phi,e_Vz,"
                      +(TString)"pi_P,pi_Theta,pi_Phi,pi_Vz,"
-                     +(TString)"Q2,W,x,Zpi,omega,"));
+                     +(TString)"Q2,W,xB,Zpi,omega,"
+                     +(TString)"xF,y,M_X,"));
     // output tree branches
     SetOutputTTrees();
 }
@@ -1133,13 +1138,14 @@ void FinishProgram(TString outfilepath, TString outfilename){
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void ComputeKinematics(){
-    // compute event kinematics
+    // compute event kinematics (from e-only information)
     q       = Beam - e;
     Q2      = -q.Mag2();
     omega   = q.E();
     xB      = Q2/(2. * Mp * q.E());
     W2      = Mp2 - Q2 + 2. * omega * Mp;
     W       = sqrt(W2);
+    y       = omega / Ebeam;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -1294,12 +1300,18 @@ void Stream_e_pi_line_to_CSV( TString pionCharge, int piIdx, bool IsSelectedEven
     //    Some, like azimuthal angles of pion (phi_pi) and proton (phi_p) in the CM frame may also be confusing.
     //    In addition to the first 16 columns (mandatory) you can add as many columns as you are comfortable to fill, and consider relevant for your process.
     
+    // ------------------------------------------------------------------------------------------------
+    // compute kinematics that also relies on pion information
+    // ------------------------------------------------------------------------------------------------
+    xF  = 2. * (pi.Dot(q)) / (q.Mag() * W);
+    M_X = ( beam + target - e - pi ).Mag();
+    // now stream data to CSV file
     std::vector<double> variables =
     {   (double)status, (double)runnum,     (double)evnum,      (double)beam_helicity,
         e.P(),          e.Theta(),          e.Phi(),            Ve.Z(),
         pi.P(),         pi.Theta(),         pi.Phi(),           Vpi.Z(),
         Q2,             W,                  xB,                 Zpi,
-        omega,
+        omega,          xF,                 y,                  M_X,
     };
     StreamToCSVfile( pionCharge, variables , IsSelectedEvent, fdebug );
 }
