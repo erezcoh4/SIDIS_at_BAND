@@ -712,34 +712,34 @@ void SetOutputTTrees(){
     outTree_e_piplus->Branch("e_E_PCAL"             ,&e_E_PCAL              );
     outTree_e_piplus->Branch("e_E_ECIN"             ,&e_E_ECIN              );
     outTree_e_piplus->Branch("e_E_ECOUT"            ,&e_E_ECOUT             );
-    outTree_e_piplus->Branch("pi_chi2PID"           ,pips_chi2PID          );
     outTree_e_piplus->Branch("e_PCAL_W"             ,&e_PCAL_W              );
     outTree_e_piplus->Branch("e_PCAL_V"             ,&e_PCAL_V              );
-    outTree_e_piplus->Branch("pi_PCAL_x"            ,pips_PCAL_x           );
-    outTree_e_piplus->Branch("pi_PCAL_y"            ,pips_PCAL_y           );
-    outTree_e_piplus->Branch("pi_PCAL_z"            ,pips_PCAL_z           );
     outTree_e_piplus->Branch("e_PCAL_x"             ,&e_PCAL_x              );
     outTree_e_piplus->Branch("e_PCAL_y"             ,&e_PCAL_y              );
     outTree_e_piplus->Branch("e_PCAL_z"             ,&e_PCAL_z              );
     outTree_e_piplus->Branch("e_PCAL_sector"        ,&e_PCAL_sector         );
     outTree_e_piplus->Branch("e_DC_sector"          ,&e_DC_sector           );
     outTree_e_piplus->Branch("e_DC_Chi2N"           ,&e_DC_Chi2N            );
-    outTree_e_piplus->Branch("e_DC_x"               ,e_DC_x                );
-    outTree_e_piplus->Branch("e_DC_y"               ,e_DC_y                );
-    outTree_e_piplus->Branch("e_DC_z"               ,e_DC_z                );
-    outTree_e_piplus->Branch("pi_PCAL_sector"       ,pips_PCAL_sector      );
-    outTree_e_piplus->Branch("pi_DC_sector"         ,pips_DC_sector        );
-    outTree_e_piplus->Branch("pi_Chi2N"             ,pips_Chi2N            );
+    outTree_e_piplus->Branch("e_DC_x"               ,&e_DC_x                , "e_DC_x[3]/F"  );
+    outTree_e_piplus->Branch("e_DC_y"               ,&e_DC_y                , "e_DC_y[3]/F"  );
+    outTree_e_piplus->Branch("e_DC_z"               ,&e_DC_z                , "e_DC_z[3]/F"  );
+    outTree_e_piplus->Branch("pi_chi2PID"           ,&pips_chi2PID          ,"pips_chi2PID[20]/F");
+    outTree_e_piplus->Branch("pi_PCAL_x"            ,&pips_PCAL_x           ,"pips_PCAL_x[20]/F");
+    outTree_e_piplus->Branch("pi_PCAL_y"            ,&pips_PCAL_y           ,"pips_PCAL_y[20]/F");
+    outTree_e_piplus->Branch("pi_PCAL_z"            ,&pips_PCAL_z           ,"pips_PCAL_z[20]/F");
+    outTree_e_piplus->Branch("pi_PCAL_sector"       ,&pips_PCAL_sector      , "pips_PCAL_sector[20]/F");
+    outTree_e_piplus->Branch("pi_DC_sector"         ,&pips_DC_sector        , "pips_DC_sector[20]/F");
+    outTree_e_piplus->Branch("pi_Chi2N"             ,&pips_Chi2N            , "pips_Chi2N[20]/F");
     outTree_e_piplus->Branch("pi_DC_x"              ,&pips_DC_x            , "pi_DC_x[20][3]/F"  );
     outTree_e_piplus->Branch("pi_DC_y"              ,&pips_DC_y            , "pi_DC_y[20][3]/F"  );
     outTree_e_piplus->Branch("pi_DC_z"              ,&pips_DC_z            , "pi_DC_z[20][3]/F"  );
-    outTree_e_piplus->Branch("pi_E_PCAL"            ,pips_E_PCAL           );
-    outTree_e_piplus->Branch("pi_E_ECIN"            ,pips_E_ECIN           );
-    outTree_e_piplus->Branch("pi_E_ECIN"            ,pips_E_ECIN           );
-    outTree_e_piplus->Branch("pi_E_ECOUT"           ,pips_E_ECOUT          );
+    outTree_e_piplus->Branch("pi_E_PCAL"            ,&pips_E_PCAL          ,"pips_E_PCAL[20]/F" );
+    outTree_e_piplus->Branch("pi_E_ECIN"            ,&pips_E_ECIN          ,"pips_E_ECIN[20]/F" );
+    outTree_e_piplus->Branch("pi_E_ECIN"            ,&pips_E_ECIN          ,"pips_E_ECIN[20]/F" );
+    outTree_e_piplus->Branch("pi_E_ECOUT"           ,&pips_E_ECOUT         ,"pips_E_ECOUT[20]/F" );
     outTree_e_piplus->Branch("DC_layers"            ,&DC_layers            , "DC_layers[3]"      );
     outTree_e_piplus->Branch("e"                    ,&e                     );
-    outTree_e_piplus->Branch("pi"                   ,piplus                 );
+    outTree_e_piplus->Branch("pi"                   ,"TLorentzVector"       , &piplus);
     outTree_e_piplus->Branch("Ve"                   ,&Ve                    );
     outTree_e_piplus->Branch("Vpi"                  ,Vpiplus                );
     outTree_e_piplus->Branch("Beam"                 ,&Beam                  );
@@ -782,9 +782,9 @@ void SetOutputTTrees(){
     outTree_e_piminus->Branch("e_PCAL_sector"       ,&e_PCAL_sector         );
     outTree_e_piminus->Branch("e_DC_sector"         ,&e_DC_sector           );
     outTree_e_piminus->Branch("e_DC_Chi2N"          ,&e_DC_Chi2N            );
-    outTree_e_piminus->Branch("e_DC_x"              ,e_DC_x                );
-    outTree_e_piminus->Branch("e_DC_y"              ,e_DC_y                );
-    outTree_e_piminus->Branch("e_DC_z"              ,e_DC_z                );
+    outTree_e_piminus->Branch("e_DC_x"              ,&e_DC_x                , "e_DC_x[3]/F"  ););
+    outTree_e_piminus->Branch("e_DC_y"              ,&e_DC_y                , "e_DC_y[3]/F"  ););
+    outTree_e_piminus->Branch("e_DC_z"              ,&e_DC_z                , "e_DC_z[3]/F"  ););
     outTree_e_piminus->Branch("pi_PCAL_sector"      ,pims_PCAL_sector      );
     outTree_e_piminus->Branch("pi_DC_sector"        ,pims_DC_sector        );
     outTree_e_piminus->Branch("pi_Chi2N"            ,pims_Chi2N            );
@@ -1296,93 +1296,4 @@ void Stream_e_pi_line_to_CSV( TString pionCharge, int piIdx, bool IsSelectedEven
 }
 
 
-
-
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-// Arxiv
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-//    OpenOutputFiles ( outfilepath + outfilename,
-//                     ( (TString)("status,runnum,evnum,")
-//                      +(TString)("Ebeam,beam_helicity,")
-//                      +(TString)("Ee,Pe,Pe_x,Pe_y,Pe_z,Pe_theta,Pe_phi,")
-//                      +(TString)("Ngammas,Np,Nn,Npips,Npims,")
-//                      +(TString)("omega,q,q_x,q_y,q_z,xB,Q2,z,W,")
-//                      +(TString)("Epi,Ppi,Ppi_x,Ppi_y,Ppi_z,")
-//                      +(TString)("Ppi_theta,Ppi_phi,")                              //                      +(TString)("Ppi_t_q,Ppips_q,")
-//                      +(TString)("e_E_PCAL,e_E_ECIN,e_E_ECOUT,")
-//                      +(TString)("Vx_e,Vy_e,Vz_e,Vx_pi,Vy_pi,Vz_pi,")
-//                      +(TString)("pi_chi2PID,")
-//                      +(TString)("e_PCAL_W,e_PCAL_V,pips_PCAL_W,pips_PCAL_V,")
-//                      +(TString)("e_PCAL_x,e_PCAL_y,e_PCAL_z,e_PCAL_sector,")
-//                      +(TString)("e_DC_sector,e_DC_Chi2N,")
-//                      +(TString)("e_DC_x[region-1],e_DC_y[region-1],e_DC_z[region-1],")
-//                      +(TString)("e_DC_x[region-2],e_DC_y[region-2],e_DC_z[region-2],")
-//                      +(TString)("e_DC_x[region-3],e_DC_y[region-3],e_DC_z[region-3],")
-//                      ));
-//StreamToCSVfile({
-//    (Double_t)status,
-//    (Double_t)runnum,
-//    (Double_t)event,
-//    Ebeam,
-//    (Double_t)beam_helicity,
-//    e.E(),
-//    e.P(),
-//    e.Px(),
-//    e.Py(),
-//    e.Pz(),
-//    e.Theta(),
-//    e.Phi(),
-//    (Double_t)Ngammas,
-//    (Double_t)Np,
-//    (Double_t)Nn,
-//    (Double_t)Npips,
-//    (Double_t)Npims,
-//    q.E(),
-//    q.P(),
-//    q.Px(),
-//    q.Py(),
-//    q.Pz(),
-//    xB,
-//    Q2,
-//    z,
-//    W,
-//    pi.E(),
-//    pi.P(),
-//    pi.Px(),
-//    pi.Py(),
-//    pi.Pz(),
-//    pi.Theta(),
-//    pi.Phi(),                                           // Ppips_t_q,          Ppips_q,
-//    e_E_PCAL,
-//    e_E_ECIN,
-//    e_E_ECOUT,
-//    Ve.X(),
-//    Ve.Y(),
-//    Ve.Z(),
-//    Vpi.X(),
-//    Vpi.Y(),
-//    Vpi.Z(),
-//    pi_chi2PID,
-//    e_PCAL_W,
-//    e_PCAL_V,
-//    pi_PCAL_W,
-//    pi_PCAL_V,
-//    e_PCAL_x,
-//    e_PCAL_y,
-//    e_PCAL_z,
-//    e_PCAL_sector,
-//    e_DC_sector,
-//    e_DC_Chi2N,
-//    e_DC_x[0],
-//    e_DC_y[0],
-//    e_DC_z[0],
-//    e_DC_x[1],
-//    e_DC_y[1],
-//    e_DC_z[1],
-//    e_DC_x[2],
-//    e_DC_y[2],
-//    e_DC_z[2],
-//}, IsSelectedEvent, fdebug);
-// ------------------------------------------------------------------------------------------------
 

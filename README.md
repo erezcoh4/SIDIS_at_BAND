@@ -3,10 +3,9 @@
 # Skimming for Semi Inclusive DIS (SIDIS) on a deuteron target with $pi^+$ and $pi^-$ tagging
 
     last edit: Aug-22, 2021 (EOC, mbp)
-    ToDo:
-    (1) add multiple pions per event
-    (2) Check beam helicity
-    (3) Add pion DC fiducial cuts
+    ToDo list:
+    (1) Validate pion DC fiducial cuts
+    (2) make a cut on missing mass. In Timothy H. thesis (RGA) Mx > 1.5 GeV is probably fine for you, but the way we actually determined that number was by plotting the A_LU as a function of Mx. There should be no dependence on Mx, so if you see regions where the A_LU is varying then you know you’re picking up more than just SIDIS events (exclusive proton, deltas, etc.). So we cut on Mx > 1.5 GeV because that was where the BSAs started to stabilize.
     
     
     
@@ -15,9 +14,43 @@
     
 # Revisions
 
-    Aug-22, 2021    
-    -------------
-    1. Added variables to the output ROOT TTree 
+Aug-26, 2021    
+-------------
+ToDo:
+1. corrected TTree variables that were wrong:
+e_DC_x, e_DC_y, and e_DC_z - were D, should be F[3] for 3 layers
+pi_DC_x, pi_DC_y, and pi_DC_z - were F[20], should be F[20][3] for 3 layers
+
+
+2. added variables to CSV files: 
+    "xF"           Feynman x = 2(p_pi \cdot q)/|q|W              
+    "y"             omega / Ebeam
+    "M_X"       missing mass of the reaction = || beam + target - e' - pi ||^2
+    
+3. added "selected_eepi" CSV file to include events that pass electron and pion selection
+    A. fill ROOT TTree with "selected_eepi" events
+    
+4. changed "selected_events" CSV file to include only events that pass electron and pion selection and kinematical cuts,
+following [SIDIS_analysis_note_final-5721534-2021-01-11-v15]
+    
+    - 0.3 < z < 1
+    - 1 (GeV/c)2 < Q2
+    - 2 GeV < W
+    - 5˚ < \theta_e < 35˚
+    - 5˚ < \theta_\pi < 35˚
+    - y < 0.75 (minimal electron momentum ~ 2.65 GeV/c)
+    -  1.25 GeV/c < p_pi < 5 GeV/c
+    
+    and channel selection cuts:
+    E. 1.5 GeV/c2 < M_X
+    F. 1.25 GeV/c < p_pi
+    
+
+
+
+Aug-22, 2021    
+-------------
+1. Added variables to the output ROOT TTree 
         “Npips”         number of positive pions per event
         “Npims”         number of negative pions per event        
         “Nprotons”      number of protons
@@ -27,7 +60,8 @@
     2. DC_layer was always over-written by the last layer. This bug was fixed.
         DC layes is an array of dimensions [3], which equals {6,18,36}. 
         Region 1 is denoted at DC detector 6, Region 2 is denoted 18, Region 3 - as 36
-    3. changed output TTree names from "(e,e'pi+) events" to "tree", which is easier to read-off 
+    3. changed output TTree names from "(e,e'pi+) events" to "tree", which is easier to read-off
+        
     
     
     
