@@ -184,12 +184,12 @@ std::ofstream   CSVfile_e_piplus,  SelectedEventsCSVfile_e_piplus;
 std::ofstream   CSVfile_e_piminus, SelectedEventsCSVfile_e_piminus;
 // vectors in lab-frame
 TLorentzVector                  Beam, e, q;
-std::vector<TLorentzVector>         piplus; // leading positive pion
-TLorentzVector          piminus[NMAXPIONS]; // leading negative pion
+std::vector<TLorentzVector>         piplus; // positive pions
+std::vector<TLorentzVector>        piminus; // negative pions
 // reconstructed vertex position
 TVector3                                Ve;
-TVector3                Vpiplus[NMAXPIONS];
-TVector3               Vpiminus[NMAXPIONS];
+std::vector<TVector3>              Vpiplus;
+std::vector<TVector3>             Vpiminus;
 
 // kinematics
 Double_t     Ebeam, xB, Q2, omega, W, W2;
