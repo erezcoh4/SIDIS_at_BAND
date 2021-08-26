@@ -25,6 +25,7 @@
 #include "/u/home/cohen/SIDIS_at_BAND/Auxiliary/DCfid_SIDIS.cpp"
 #include "/u/home/cohen/SIDIS_at_BAND/Auxiliary/csv_reader.h"
 #define NMAXPIONS 20 // maximal allowed number of pions
+#define r2d 180./3.1415 // radians to degrees
 using namespace clas12;
 
 
@@ -39,7 +40,8 @@ void                      OpenOutputFiles (TString csvfilename, TString header);
 void                     CloseOutputFiles (TString OutDataPath, TString outfilename);
 void                      StreamToCSVfile (TString pionCharge, // "pi+" or "pi-"
                                            std::vector<Double_t> observables,
-                                           bool IsSelectedEvent,
+                                           bool passed_cuts_e_pi,
+                                           bool passed_cuts_e_pi_kinematics,
                                            int fdebug);
 void                       printCutValues ();
 void                        loadCutValues (TString cutValuesFilename = "cutValues.csv", int fdebug=0);
@@ -62,6 +64,8 @@ bool      PionPassedSelectionCutsCriteria (TString pionCharge, // "pi+" or "pi-"
                                            Double_t chi2PID, Double_t p,
                                            TVector3 Ve,      TVector3 Vpi,
                                            int fdebug);
+bool        eepiPassedKinematicalCriteria (TLorentzVector pi,
+                                           int fdebug);
 Double_t          Chi2PID_pion_lowerBound (Double_t p, Double_t C=0.88); // C(pi+)=0.88, C(pi-)=0.93
 Double_t          Chi2PID_pion_upperBound (Double_t p, Double_t C=0.88); // C(pi+)=0.88, C(pi-)=0.93
 int                       GetBeamHelicity (event_ptr p_event, int runnum, int fdebug);
@@ -78,7 +82,10 @@ void                    ComputeKinematics ();
 void                   WriteEventToOutput (int fdebug);
 void                        FinishProgram (TString outfilepath, TString outfilename);
 void                   GetParticlesByType (int event, int fdebug );
-void              Stream_e_pi_line_to_CSV (TString pionCharge, int piIdx, bool IsSelectedEvent, int fdebug );
+void              Stream_e_pi_line_to_CSV (TString pionCharge, int piIdx,
+                                           bool passed_cuts_e_pi,
+                                           bool passed_cuts_e_pi_kinematics,
+                                           int fdebug );
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 
 // globals
@@ -92,12 +99,24 @@ double             cutValue_e_PCAL_V;
 double             cutValue_e_E_PCAL;
 double cutValue_SamplingFraction_min;
 double        cutValue_Ve_Vpi_dz_max;
-
+double               cutValue_Q2_min;
+double                cutValue_W_min;
+double                cutValue_y_max;
+double          cutValue_e_theta_min;
+double          cutValue_e_theta_max;
+double         cutValue_pi_theta_min;
+double         cutValue_pi_theta_max;
+double              cutValue_Ppi_min;
+double              cutValue_Ppi_max;
+double              cutValue_Zpi_min;
+double              cutValue_Zpi_max;
 
 bool        ePastCutsInEvent = false;
 bool     pipsPastCutsInEvent = false;
+bool   eepipsPastCutsInEvent = false;
 bool     pimsPastCutsInEvent = false;
 bool         EventPassedCuts = false;
+bool   eepimsPastCutsInEvent = false;
 
 // meta-data
 int           torusBending = -1; // -1 for In-bending, +1 for Out-bending
@@ -112,8 +131,10 @@ int           Nevents_processed;
 int       Nevents_passed_e_cuts;
 int    Nevents_passed_pips_cuts;
 int  Nevents_passed_e_pips_cuts;
+int Nevents_passed_e_pips_kinematics_cuts;
 int    Nevents_passed_pims_cuts;
 int  Nevents_passed_e_pims_cuts;
+int Nevents_passed_e_pims_kinematics_cuts
 
 // number of particles per event
 int         Ne, Nn, Np, Npips, Npims, Ngammas;
@@ -181,8 +202,8 @@ double               Zpims[NMAXPIONS]; // hadron rest-frame energy
 TFile * outFile_e_piplus, * outFile_e_piminus;
 TTree * outTree_e_piplus, * outTree_e_piminus;
 // Output CSV file
-std::ofstream   CSVfile_e_piplus,  SelectedEventsCSVfile_e_piplus;
-std::ofstream   CSVfile_e_piminus, SelectedEventsCSVfile_e_piminus;
+std::ofstream   CSVfile_e_piplus,  SelectedEventsCSVfile_e_piplus,  SelectedEventsCSVfile_e_piplus_kinematics;
+std::ofstream   CSVfile_e_piminus, SelectedEventsCSVfile_e_piminus, SelectedEventsCSVfile_e_piminus_kinematics;
 // vectors in lab-frame
 TLorentzVector          Beam, target, e, q;
 std::vector<TLorentzVector>         piplus; // positive pions
@@ -455,6 +476,25 @@ bool PionPassedSelectionCutsCriteria(TString pionCharge, // "pi+" or "pi-"
 }
 
 
+
+
+// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+bool eepiPassedKinematicalCriteria(TLorentzVector pi, int fdebug){
+    double Zpi = pi.E()/omega;
+    if(   (      cutValue_Q2_min < Q2)
+       && (       cutValue_W_min < W)
+       && (                    y < cutValue_y_max )
+       && ( cutValue_e_theta_min < e.Theta()*r2d  && e.Theta()*r2d  < cutValue_e_theta_max  )
+       && (cutValue_pi_theta_min < pi.Theta()*r2d && pi.Theta()*r2d < cutValue_pi_theta_max )
+       && (     cutValue_Ppi_min < pi.P()         &&         pi.P() < cutValue_Ppi_max      )
+       && (     cutValue_Zpi_min < Zpi            &&            Zpi < cutValue_Zpi_max      )
+       ) {
+        if (fdebug>3) { std::cout << "succesfully passed (e,e'pi) kinematical cuts" << std::endl; }
+        return true;
+    }
+    return false;
+}
+
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 Double_t Chi2PID_pion_lowerBound( Double_t p, Double_t C){
     // compute lower bound for chi2PID for a pi+
@@ -529,11 +569,15 @@ void OpenOutputFiles (TString outfilename,TString header){
     CSVfile_e_piminus.open( outfilename + "_e_piminus.csv" );
     CSVfile_e_piminus << header << std::endl;
     
-    SelectedEventsCSVfile_e_piplus.open( outfilename + "_e_piplus_selected_events.csv" );
+    SelectedEventsCSVfile_e_piplus.open( outfilename + "_e_piplus_selected_eepi.csv" );
     SelectedEventsCSVfile_e_piplus << header << std::endl;
-    SelectedEventsCSVfile_e_piminus.open( outfilename + "_e_piminus_selected_events.csv" );
+    SelectedEventsCSVfile_e_piminus.open( outfilename + "_e_piminus_selected_eepi.csv" );
     SelectedEventsCSVfile_e_piminus << header << std::endl;
 
+    SelectedEventsCSVfile_e_piplus_kinematics.open( outfilename + "_e_piplus_selected_eepi_kinematics.csv" );
+    SelectedEventsCSVfile_e_piplus_kinematics << header << std::endl;
+    SelectedEventsCSVfile_e_piminus_kinematics.open( outfilename + "_e_piminus_selected_eepi_kinematics.csv" );
+    SelectedEventsCSVfile_e_piminus_kinematics << header << std::endl;
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
@@ -541,9 +585,11 @@ void CloseOutputFiles (TString OutDataPath, TString outfilename){
     // close output CSV
     CSVfile_e_piplus                .close();
     SelectedEventsCSVfile_e_piplus  .close();
+    SelectedEventsCSVfile_e_piplus_kinematics  .close();
     CSVfile_e_piminus               .close();
     SelectedEventsCSVfile_e_piminus .close();
-    
+    SelectedEventsCSVfile_e_piminus_kinematics .close();
+
     int Nentires_e_piplus  = outTree_e_piplus  -> GetEntries();
     int Nentires_e_piminus = outTree_e_piminus -> GetEntries();
     
@@ -567,9 +613,13 @@ void CloseOutputFiles (TString OutDataPath, TString outfilename){
     << std::endl
     << (float)Nevents_passed_e_pips_cuts/Nevents_processed  << " events passed (e,e'pi+) cuts,"
     << std::endl
+    << (float)Nevents_passed_e_pips_kinematics_cuts/Nevents_processed  << " events passed (e,e'pi+) and kinematical cuts,"
+    << std::endl
     << (float)Nevents_passed_pims_cuts/Nevents_processed    << " events passed pi- cuts,"
     << std::endl
     << (float)Nevents_passed_e_pims_cuts/Nevents_processed  << " events passed (e,e'pi-) cuts,"
+    << std::endl
+    << (float)Nevents_passed_e_pims_kinematics_cuts/Nevents_processed  << " events passed (e,e'pi-) and kinematical cuts,"
     << std::endl;
     
     
@@ -578,17 +628,20 @@ void CloseOutputFiles (TString OutDataPath, TString outfilename){
     << std::endl
     << "wrote "  << Nentires_e_piplus  << " to (e,e'pi+) root file, "
     << std::endl << outFile_e_piplus -> GetName()
-    << std::endl << OutDataPath + outfilename + "_e_piplus_selected_events.csv"
+    << std::endl << OutDataPath + outfilename + "_e_piplus_selected_*.csv"
     << std::endl
     << "and "    << Nentires_e_piminus << " to (e,e'pi-) root file. "
     << std::endl << outFile_e_piminus -> GetName()
-    << std::endl << OutDataPath + outfilename + "_e_piminus_selected_events.csv"
+    << std::endl << OutDataPath + outfilename + "_e_piminus_selected_*.csv"
     << std::endl;
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void StreamToCSVfile (TString pionCharge, // "pi+" or "pi-"
-                      std::vector<Double_t> observables, bool IsSelectedEvent, int fdebug){
+                      std::vector<Double_t> observables,
+                      bool passed_cuts_e_pi,
+                      bool passed_cuts_e_pi_kinematics,
+                      int fdebug){
     if (fdebug>1) {
         std::cout << "streaming to CSVfile" << std::endl;
     }
@@ -597,9 +650,14 @@ void StreamToCSVfile (TString pionCharge, // "pi+" or "pi-"
         for (auto v:observables) CSVfile_e_piplus << v << ",";
         CSVfile_e_piplus << std::endl;
         
-        if (IsSelectedEvent) {
+        if (passed_cuts_e_pi) {
             for (auto v:observables) SelectedEventsCSVfile_e_piplus << v << ",";
             SelectedEventsCSVfile_e_piplus << std::endl;
+            
+            if (passed_cuts_e_pi_kinematics){
+                for (auto v:observables) SelectedEventsCSVfile_e_piplus_kinematics << v << ",";
+                SelectedEventsCSVfile_e_piplus_kinematics << std::endl;
+            }
         }
         
     }
@@ -607,9 +665,14 @@ void StreamToCSVfile (TString pionCharge, // "pi+" or "pi-"
         for (auto v:observables) CSVfile_e_piminus << v << ",";
         CSVfile_e_piminus << std::endl;
         
-        if (IsSelectedEvent) {
+        if (passed_cuts_e_pi) {
             for (auto v:observables) SelectedEventsCSVfile_e_piminus << v << ",";
             SelectedEventsCSVfile_e_piminus << std::endl;
+            
+            if (passed_cuts_e_pi_kinematics){
+                for (auto v:observables) SelectedEventsCSVfile_e_piminus_kinematics << v << ",";
+                SelectedEventsCSVfile_e_piminus_kinematics << std::endl;
+            }
         }
     }
     else {
@@ -654,6 +717,17 @@ void loadCutValues(TString cutValuesFilename, int fdebug){
     cutValue_e_E_PCAL               = FindCutValue("e_E_PCAL_min");
     cutValue_SamplingFraction_min   = FindCutValue("SamplingFraction_min");
     cutValue_Ve_Vpi_dz_max          = FindCutValue("(Ve-Vpi)_z_max");
+    cutValue_Q2_min                 = FindCutValue("Q2_min");
+    cutValue_W_min                  = FindCutValue("W_min");
+    cutValue_y_max                  = FindCutValue("y_max");
+    cutValue_e_theta_min            = FindCutValue("e_theta_min");
+    cutValue_e_theta_max            = FindCutValue("e_theta_max");
+    cutValue_pi_theta_min           = FindCutValue("pi_theta_min");
+    cutValue_pi_theta_max           = FindCutValue("pi_theta_max");
+    cutValue_Ppi_min                = FindCutValue("Ppi_min");
+    cutValue_Ppi_max                = FindCutValue("Ppi_max");
+    cutValue_Zpi_min                = FindCutValue("Zpi_min");
+    cutValue_Zpi_max                = FindCutValue("Zpi_max");
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -760,7 +834,8 @@ void SetOutputTTrees(){
 
     outTree_e_piplus->Branch("EventPassedCuts"      ,&EventPassedCuts       );
     outTree_e_piplus->Branch("ePastCutsInEvent"     ,&ePastCutsInEvent      );
-    outTree_e_piplus->Branch("piPastCutsInEvent"    ,&pipsPastCutsInEvent   ,"piPastCutsInEvent[20]/O"  );
+    outTree_e_piplus->Branch("piPastCutsInEvent"    ,&pipsPastCutsInEvent   ,"piPastCutsInEvent/O"  );
+    outTree_e_piplus->Branch("eepipsPastCutsInEvent",&eepipsPastCutsInEvent ,"eepipsPastCutsInEvent/O"  );
     outTree_e_piplus->Branch("Npips"                ,&Npips                 );
     outTree_e_piplus->Branch("Npims"                ,&Npims                 );
     outTree_e_piplus->Branch("Nelectrons"           ,&Ne                    );
@@ -803,9 +878,9 @@ void SetOutputTTrees(){
     outTree_e_piminus->Branch("pi_E_ECOUT"           ,&pims_E_ECOUT          , "pi_E_ECOUT[20]/F"       );
     outTree_e_piminus->Branch("DC_layers"            ,&DC_layers             , "DC_layers[3]"           );
     outTree_e_piminus->Branch("e"                   ,&e                     );
-    outTree_e_piminus->Branch("pi"                  ,&piminus                );
+    outTree_e_piminus->Branch("pi"                  ,&piminus               );
     outTree_e_piminus->Branch("Ve"                  ,&Ve                    );
-    outTree_e_piminus->Branch("Vpi"                 ,&Vpiminus               );
+    outTree_e_piminus->Branch("Vpi"                 ,&Vpiminus              );
     outTree_e_piminus->Branch("Beam"                ,&Beam                  );
     outTree_e_piminus->Branch("beam_helicity"       ,&beam_helicity         );
     outTree_e_piminus->Branch("q"                   ,&q                     );
@@ -814,11 +889,12 @@ void SetOutputTTrees(){
     outTree_e_piminus->Branch("Q2"                  ,&Q2                    );
     outTree_e_piminus->Branch("omega"               ,&omega                 );
     outTree_e_piminus->Branch("W"                   ,&W                     );
-    outTree_e_piplus->Branch("Z"                    ,Zpims                 );
+    outTree_e_piplus->Branch("Z"                    ,Zpims                  );
 
     outTree_e_piminus->Branch("EventPassedCuts"      ,&EventPassedCuts       );
     outTree_e_piminus->Branch("ePastCutsInEvent"     ,&ePastCutsInEvent      );
-    outTree_e_piminus->Branch("piPastCutsInEvent"    ,&pimsPastCutsInEvent   ,"piPastCutsInEvent[20]/O" );
+    outTree_e_piminus->Branch("piPastCutsInEvent"    ,&pimsPastCutsInEvent   ,"piPastCutsInEvent/O" );
+    outTree_e_piminus->Branch("eepimsPastCutsInEvent",&eepimsPastCutsInEvent ,"eepimsPastCutsInEvent/O"  );
     outTree_e_piminus->Branch("Npips"                ,&Npips                 );
     outTree_e_piminus->Branch("Npims"                ,&Npims                 );
     outTree_e_piminus->Branch("Nelectrons"           ,&Ne                    );
@@ -934,6 +1010,8 @@ void InitializeFileReading(int NeventsMax, int c12Nentries, int fdebug){
     Nevents_passed_pims_cuts    = 0;
     Nevents_passed_e_pips_cuts  = 0;
     Nevents_passed_e_pims_cuts  = 0;
+    Nevents_passed_e_pips_kinematics_cuts = 0;
+    Nevents_passed_e_pims_kinematics_cuts = 0;
     if (fdebug>1) {
         std::cout << "NeventsMaxToProcess =  " << NeventsMaxToProcess << "" << std::endl;
     }
@@ -998,7 +1076,9 @@ void InitializeVariables(){
     status                                          = 1; // 0 is good...
     
     pipsPastCutsInEvent                             = false;
+    eepipsPastCutsInEvent                           = false;
     pimsPastCutsInEvent                             = false;
+    eepimsPastCutsInEvent                           = false;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -1020,7 +1100,6 @@ void OpenResultFiles( TString outfilepath, TString outfilename ){
     // output tree branches
     SetOutputTTrees();
 }
-
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void ExtractElectronInformation(int fdebug){
@@ -1106,23 +1185,32 @@ void ExtractPionsInformation(int fdebug){
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void WriteEventToOutput(int fdebug){
     // (Maybe) write this event to "selected events csv-file"
-    bool IsSelectedEvent = false;
+    bool            IsSelected_eepi = false;
+    
         
     if (ePastCutsInEvent && pipsPastCutsInEvent) {
-        IsSelectedEvent = true;
+        IsSelected_eepi = true;
         outTree_e_piplus -> Fill();
         Nevents_passed_e_pips_cuts ++ ;
+        
+        
         for (int pipsIdx=0; pipsIdx<Npips; pipsIdx++) {
-            Stream_e_pi_line_to_CSV( "pi+", pipsIdx, IsSelectedEvent, fdebug );
+            
+            Stream_e_pi_line_to_CSV( "pi+", pipsIdx,
+                                    pipsPastSelectionCuts[pipsIdx], eepipsPastKinematicalCuts[pipsIdx],
+                                    fdebug );
         }
     }
     
     if (ePastCutsInEvent && pimsPastCutsInEvent) {
-        IsSelectedEvent = true;
+        IsSelected_eepi = true;
         outTree_e_piminus -> Fill();
         Nevents_passed_e_pims_cuts ++ ;
+        
         for (int pimsIdx=0; pimsIdx<Npims; pimsIdx++) {
-            Stream_e_pi_line_to_CSV( "pi-", pimsIdx, IsSelectedEvent, fdebug );
+            Stream_e_pi_line_to_CSV( "pi-", pimsIdx,
+                                    pimsPastSelectionCuts[pimsIdx], eepimsPastKinematicalCuts[pimsIdx],
+                                    fdebug );
         }
     }
 }
@@ -1190,10 +1278,17 @@ void ExtractPipsInformation( int pipsIdx, int fdebug ){
                                                                      Ve,
                                                                      Vpiplus[pipsIdx],
                                                                      fdebug);
+    eepipsPastKinematicalCuts[pipsIdx] = eepiPassedKinematicalCriteria(piplus[pipsIdx],
+                                                                       fdebug);
     if (pipsPastSelectionCuts[pipsIdx]) {
         pipsPastCutsInEvent = true;
         Nevents_passed_pips_cuts ++;
+        if (eepipsPastKinematicalCuts[pipsIdx]) {
+            eepipsPastCutsInEvent = true;
+            Nevents_passed_e_pips_kinematics_cuts ++;
+        }
     }
+    
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -1238,9 +1333,15 @@ void ExtractPimsInformation( int pimsIdx, int fdebug ){
                                                                      Ve,
                                                                      Vpiminus[pimsIdx],
                                                                      fdebug);
+    eepimsPastKinematicalCuts[pipsIdx] = eepiPassedKinematicalCriteria(piminus[pimsIdx],
+                                                                       fdebug);
     if (pimsPastSelectionCuts[pimsIdx]) {
         pimsPastCutsInEvent = true;
         Nevents_passed_pims_cuts ++;
+        if (eepimsPastKinematicalCuts[pimsIdx]) {
+            eepimsPastCutsInEvent = true;
+            Nevents_passed_e_pims_kinematics_cuts ++;
+        }
     }
 }
 
@@ -1267,7 +1368,10 @@ void GetParticlesByType (int event, int fdebug){
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-void Stream_e_pi_line_to_CSV( TString pionCharge, int piIdx, bool IsSelectedEvent, int fdebug ){
+void Stream_e_pi_line_to_CSV( TString pionCharge, int piIdx,
+                             bool passed_cuts_e_pi,
+                             bool passed_cuts_e_pi_kinematics,
+                             int fdebug ){
     TLorentzVector  pi;
     TVector3        Vpi;
     double          Zpi;
@@ -1313,7 +1417,9 @@ void Stream_e_pi_line_to_CSV( TString pionCharge, int piIdx, bool IsSelectedEven
         Q2,             W,                  xB,                 Zpi,
         omega,          xF,                 y,                  M_X,
     };
-    StreamToCSVfile( pionCharge, variables , IsSelectedEvent, fdebug );
+    StreamToCSVfile( pionCharge, variables ,
+                    passed_cuts_e_pi, passed_cuts_e_pi_kinematics,
+                    fdebug );
 }
 
 

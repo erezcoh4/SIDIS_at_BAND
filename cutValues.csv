@@ -8,3 +8,14 @@ e_PCAL_V_min,19.0
 e_E_PCAL_min,0.07
 SamplingFraction_min,0.17
 (Ve-Vpi)_z_max,20.0
+y_max,0.75
+Q2_min,1.0
+W_min,2.0
+Zpi_min,0.3
+Zpi_max,1.0
+e_theta_min,5.
+e_theta_max,35.
+pi_theta_min,5.
+pi_theta_max,35.
+Ppi_min,1.25
+Ppi_max,5.0

@@ -41,11 +41,7 @@ following [SIDIS_analysis_note_final-5721534-2021-01-11-v15]
     - 5˚ < \theta_\pi < 35˚
     - y < 0.75 (minimal electron momentum ~ 2.65 GeV/c)
     -  1.25 GeV/c < p_pi < 5 GeV/c
-    
-    and channel selection cuts:
-    E. 1.5 GeV/c2 < M_X
-    F. 1.25 GeV/c < p_pi
-    
+ 
 
 
 
