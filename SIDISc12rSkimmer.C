@@ -782,9 +782,9 @@ void SetOutputTTrees(){
     outTree_e_piminus->Branch("e_PCAL_sector"       ,&e_PCAL_sector         );
     outTree_e_piminus->Branch("e_DC_sector"         ,&e_DC_sector           );
     outTree_e_piminus->Branch("e_DC_Chi2N"          ,&e_DC_Chi2N            );
-    outTree_e_piminus->Branch("e_DC_x"              ,&e_DC_x                , "e_DC_x[3]/F"  ););
-    outTree_e_piminus->Branch("e_DC_y"              ,&e_DC_y                , "e_DC_y[3]/F"  ););
-    outTree_e_piminus->Branch("e_DC_z"              ,&e_DC_z                , "e_DC_z[3]/F"  ););
+    outTree_e_piminus->Branch("e_DC_x"              ,&e_DC_x                , "e_DC_x[3]/F"  );
+    outTree_e_piminus->Branch("e_DC_y"              ,&e_DC_y                , "e_DC_y[3]/F"  );
+    outTree_e_piminus->Branch("e_DC_z"              ,&e_DC_z                , "e_DC_z[3]/F"  );
     outTree_e_piminus->Branch("pi_PCAL_sector"      ,pims_PCAL_sector      );
     outTree_e_piminus->Branch("pi_DC_sector"        ,pims_DC_sector        );
     outTree_e_piminus->Branch("pi_Chi2N"            ,pims_Chi2N            );
