@@ -1196,10 +1196,10 @@ void WriteEventToOutput(int fdebug){
         IsSelected_eepi = true;
         outTree_e_piplus -> Fill();
         Nevents_passed_e_pips_cuts ++ ;
-        
+        if (eepipsPastCutsInEvent) Nevents_passed_e_pips_kinematics_cuts ++;
+
         
         for (int pipsIdx=0; pipsIdx<Npips; pipsIdx++) {
-            
             Stream_e_pi_line_to_CSV( "pi+", pipsIdx,
                                     pipsPastSelectionCuts[pipsIdx], eepipsPastKinematicalCuts[pipsIdx],
                                     fdebug );
@@ -1210,6 +1210,7 @@ void WriteEventToOutput(int fdebug){
         IsSelected_eepi = true;
         outTree_e_piminus -> Fill();
         Nevents_passed_e_pims_cuts ++ ;
+        if (eepimsPastCutsInEvent) Nevents_passed_e_pims_kinematics_cuts ++;
         
         for (int pimsIdx=0; pimsIdx<Npims; pimsIdx++) {
             Stream_e_pi_line_to_CSV( "pi-", pimsIdx,
@@ -1289,7 +1290,6 @@ void ExtractPipsInformation( int pipsIdx, int fdebug ){
         Nevents_passed_pips_cuts ++;
         if (eepipsPastKinematicalCuts[pipsIdx]) {
             eepipsPastCutsInEvent = true;
-            Nevents_passed_e_pips_kinematics_cuts ++;
         }
     }
     
@@ -1344,7 +1344,6 @@ void ExtractPimsInformation( int pimsIdx, int fdebug ){
         Nevents_passed_pims_cuts ++;
         if (eepimsPastKinematicalCuts[pimsIdx]) {
             eepimsPastCutsInEvent = true;
-            Nevents_passed_e_pims_kinematics_cuts ++;
         }
     }
 }
