@@ -2,6 +2,10 @@
 // ToDo:
 // (1) Add pion DC fiducial cuts
 
+#ifdef __CINT__
+#pragma link C++ class std::vector<TLorentzVector>+;
+#endif
+
 #include <cstdlib>
 #include <iostream>
 #include <chrono>
@@ -179,7 +183,7 @@ std::ofstream   CSVfile_e_piplus,  SelectedEventsCSVfile_e_piplus;
 std::ofstream   CSVfile_e_piminus, SelectedEventsCSVfile_e_piminus;
 // vectors in lab-frame
 TLorentzVector                  Beam, e, q;
-TLorentzVector           piplus[NMAXPIONS]; // leading positive pion
+std::vector<TLorentzVector>         piplus; // leading positive pion
 TLorentzVector          piminus[NMAXPIONS]; // leading negative pion
 // reconstructed vertex position
 TVector3                                Ve;
@@ -754,7 +758,7 @@ void SetOutputTTrees(){
 
     outTree_e_piplus->Branch("EventPassedCuts"      ,&EventPassedCuts       );
     outTree_e_piplus->Branch("ePastCutsInEvent"     ,&ePastCutsInEvent      );
-    outTree_e_piplus->Branch("piPastCutsInEvent"    ,&pipsPastCutsInEvent   );
+    outTree_e_piplus->Branch("piPastCutsInEvent"    ,&pipsPastCutsInEvent   ,"pipsPastCutsInEvent[20]/O");
     outTree_e_piplus->Branch("Npips"                ,&Npips                 );
     outTree_e_piplus->Branch("Npims"                ,&Npims                 );
     outTree_e_piplus->Branch("Nelectrons"           ,&Ne                    );
@@ -949,6 +953,7 @@ void InitializeVariables(){
     Ve                                  = TVector3();
     ePastCutsInEvent                    = false;
     
+    piplus.clear();
     for (int piIdx=0; piIdx<NMAXPIONS; piIdx++) {
         pips_chi2PID[piIdx]                         = -9999;
         pips_DC_sector[piIdx]                       = -9999;
@@ -973,7 +978,7 @@ void InitializeVariables(){
             pims_DC_x[piIdx][regionIdx]= pims_DC_y[piIdx][regionIdx]    = -9999;
             pims_DC_z[piIdx][regionIdx]                                 = -9999;
         }
-        piplus[piIdx]                               = TLorentzVector(0,0,0,db->GetParticle( 211 )->Mass());
+        piplus.push_back( TLorentzVector(0,0,0,db->GetParticle( 211 )->Mass()) );
         Vpiplus[piIdx]                              = TVector3();
         pipsPastSelectionCuts[piIdx]                = false;
         
