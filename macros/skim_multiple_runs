@@ -10,10 +10,12 @@ import argparse
 parser = argparse.ArgumentParser(description='Acquire data for TDC calibration')
 parser.add_argument("--Nruns",      type=int, default=1,    required=False, help="number of runs to process")
 parser.add_argument("--NeventsMax", type=int, default=-1,   required=False, help="maximal number of events to process")
+parser.add_argument("--fdebug",     type=int, default=0,    required=False, help="verbosity")
 args = parser.parse_args()
 
 Nruns         = args.Nruns
 NeventsMax    = args.NeventsMax
+fdebug        = args.fdebug
 runs_filename = "macros/runlists/good_runs_10-2.txt"
 
 # Using readlines()
@@ -28,9 +30,10 @@ for line in run_fileLines:
     runIdx += 1
     # print("Line{}: {}".format(runIdx, line.strip()))
     run = int(line.strip())
-    commandline = "processing run %d/%d clas12root -q 'SIDISc12rSkimmer.C+(%d,%d)'"%(runIdx,Nruns, run,NeventsMax)
+    commandline = ("processing run %d/%d clas12root -q 'SIDISc12rSkimmer.C+(%d,%d,%d)'"%
+                    (runIdx,Nruns, run,NeventsMax,fdebug))
     print(commandline)
-    os.system( "clas12root -q 'SIDISc12rSkimmer.C+(%d,%d)'"%(run,NeventsMax))
+    os.system( "clas12root -q 'SIDISc12rSkimmer.C+(%d,%d,%d)'"%(run,NeventsMax,fdebug))
     if runIdx >= Nruns: break;
 
 print(' ')
