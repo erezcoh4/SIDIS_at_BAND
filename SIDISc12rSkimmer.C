@@ -1304,7 +1304,7 @@ void Stream_e_pi_line_to_CSV( TString pionCharge, int piIdx, bool IsSelectedEven
     // compute kinematics that also relies on pion information
     // ------------------------------------------------------------------------------------------------
     xF  = 2. * (pi.Dot(q)) / (q.Mag() * W);
-    M_X = ( beam + target - e - pi ).Mag();
+    M_X = ( Beam + target - e - pi ).Mag();
     // now stream data to CSV file
     std::vector<double> variables =
     {   (double)status, (double)runnum,     (double)evnum,      (double)beam_helicity,
