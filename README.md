@@ -17,9 +17,9 @@
 Aug-26, 2021    
 -------------
 ToDo:
-1. corrected TTree variables that were wrong:
-e_DC_x, e_DC_y, and e_DC_z - were D, should be F[3] for 3 layers
-pi_DC_x, pi_DC_y, and pi_DC_z - were F[20], should be F[20][3] for 3 layers
+1. corrected TTree variables 
+    A. ones that were wrongly filled as singlets, e.g. e_DC_x, e_DC_y, and e_DC_z - were D, should be F[3] for 3 layers
+    B. piplus/piminus that were changed to std::vector<> type
 
 
 2. added variables to CSV files: 
