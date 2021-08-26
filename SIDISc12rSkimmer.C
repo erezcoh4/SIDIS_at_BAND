@@ -134,7 +134,7 @@ int  Nevents_passed_e_pips_cuts;
 int Nevents_passed_e_pips_kinematics_cuts;
 int    Nevents_passed_pims_cuts;
 int  Nevents_passed_e_pims_cuts;
-int Nevents_passed_e_pims_kinematics_cuts
+int Nevents_passed_e_pims_kinematics_cuts;
 
 // number of particles per event
 int         Ne, Nn, Np, Npips, Npims, Ngammas;
@@ -160,7 +160,8 @@ double           e_DC_y[3];
 double           e_DC_z[3];
 
 // positive pions
-bool pipsPastSelectionCuts[NMAXPIONS];
+bool     pipsPastSelectionCuts[NMAXPIONS];
+bool eepipsPastKinematicalCuts[NMAXPIONS];
 double        pips_chi2PID[NMAXPIONS];
 double         pips_PCAL_W[NMAXPIONS];
 double         pips_PCAL_V[NMAXPIONS];
@@ -178,7 +179,8 @@ double         pips_E_ECIN[NMAXPIONS];
 double        pips_E_ECOUT[NMAXPIONS];
 double               Zpips[NMAXPIONS]; // hadron rest-frame energy
 // negative pions
-bool pimsPastSelectionCuts[NMAXPIONS];
+bool     pimsPastSelectionCuts[NMAXPIONS];
+bool eepimsPastKinematicalCuts[NMAXPIONS];
 double        pims_chi2PID[NMAXPIONS];
 double         pims_PCAL_W[NMAXPIONS];
 double         pims_PCAL_V[NMAXPIONS];
@@ -1067,10 +1069,12 @@ void InitializeVariables(){
         piplus  .push_back( TLorentzVector(0,0,0,db->GetParticle( 211 )->Mass()) );
         Vpiplus .push_back( TVector3() );
         pipsPastSelectionCuts[piIdx]                = false;
+        eepipsPastKinematicalCuts[piIdx]            = false;
         
         piminus .push_back( TLorentzVector(0,0,0,db->GetParticle( -211 )->Mass()) );
         Vpiminus.push_back( TVector3() );
         pimsPastSelectionCuts[piIdx]                = false;
+        eepimsPastKinematicalCuts[piIdx]            = false;
     }
     DC_layer                                        = -9999;
     status                                          = 1; // 0 is good...
@@ -1333,7 +1337,7 @@ void ExtractPimsInformation( int pimsIdx, int fdebug ){
                                                                      Ve,
                                                                      Vpiminus[pimsIdx],
                                                                      fdebug);
-    eepimsPastKinematicalCuts[pipsIdx] = eepiPassedKinematicalCriteria(piminus[pimsIdx],
+    eepimsPastKinematicalCuts[pimsIdx] = eepiPassedKinematicalCriteria(piminus[pimsIdx],
                                                                        fdebug);
     if (pimsPastSelectionCuts[pimsIdx]) {
         pimsPastCutsInEvent = true;
