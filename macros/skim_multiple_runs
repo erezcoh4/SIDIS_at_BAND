@@ -10,7 +10,7 @@ import argparse
 parser = argparse.ArgumentParser(description='Acquire data for TDC calibration')
 parser.add_argument("--Nruns",      type=int, default=1,    required=False, help="number of runs to process")
 parser.add_argument("--NeventsMax", type=int, default=-1,   required=False, help="maximal number of events to process")
-parser.add_argument("--fdebug",     type=int, default=0,    required=False, help="verbosity")
+parser.add_argument("--fdebug",     type=int, default=1,    required=False, help="verbosity")
 args = parser.parse_args()
 
 Nruns         = args.Nruns
