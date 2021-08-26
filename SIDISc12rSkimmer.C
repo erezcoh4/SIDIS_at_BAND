@@ -615,13 +615,13 @@ void CloseOutputFiles (TString OutDataPath, TString outfilename){
     << std::endl
     << (float)Nevents_passed_e_pips_cuts/Nevents_processed  << " events passed (e,e'pi+) cuts,"
     << std::endl
-    << (float)Nevents_passed_e_pips_kinematics_cuts/Nevents_processed  << " events passed (e,e'pi+) and kinematical cuts,"
+    << "\t" << (float)Nevents_passed_e_pips_kinematics_cuts/Nevents_processed  << " also passed kinematical cuts,"
     << std::endl
     << (float)Nevents_passed_pims_cuts/Nevents_processed    << " events passed pi- cuts,"
     << std::endl
     << (float)Nevents_passed_e_pims_cuts/Nevents_processed  << " events passed (e,e'pi-) cuts,"
     << std::endl
-    << (float)Nevents_passed_e_pims_kinematics_cuts/Nevents_processed  << " events passed (e,e'pi-) and kinematical cuts,"
+    <<  "\t" << (float)Nevents_passed_e_pims_kinematics_cuts/Nevents_processed  << " also passed kinematical cuts,"
     << std::endl;
     
     
