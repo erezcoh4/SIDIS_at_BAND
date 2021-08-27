@@ -47,7 +47,7 @@ void                       printCutValues ();
 void                        loadCutValues (TString cutValuesFilename = "cutValues.csv", int fdebug=0);
 void                      SetOutputTTrees ();
 double                       FindCutValue ( std::string cutName );
-bool      ElectronPassedSelectionCriteria (Double_t e_PCAL_x, Double_t e_PCAL_y,
+bool      CheckIfElectronPassedSelectionCuts (Double_t e_PCAL_x, Double_t e_PCAL_y,
                                            Double_t e_PCAL_W,Double_t e_PCAL_V,
                                            Double_t e_E_PCAL,
                                            Double_t e_E_ECIN, Double_t e_E_ECOUT,
@@ -58,7 +58,7 @@ bool      ElectronPassedSelectionCriteria (Double_t e_PCAL_x, Double_t e_PCAL_y,
                                            Double_t e_DC_y[3],
                                            Double_t e_DC_z[3],
                                            int torusBending);
-bool      PionPassedSelectionCutsCriteria (TString pionCharge, // "pi+" or "pi-"
+bool      CheckIfPionPassedSelectionCuts (TString pionCharge, // "pi+" or "pi-"
                                            Double_t DC_sector,
                                            Double_t DC_x[3], Double_t DC_y[3], Double_t DC_z[3],
                                            Double_t chi2PID, Double_t p,
@@ -73,7 +73,7 @@ double                      GetBeamEnergy (int fdebug);
 TString                   GetRunNumberSTR (int RunNumber, int fdebug);
 void                InitializeFileReading (int NeventsMax,int c12Nentries, int fdebug);
 void                  InitializeVariables ();
-void                      OpenResultFiles ( TString outfilepath, TString outfilename );
+void                      OpenResultFiles (TString outfilepath, TString outfilename );
 void           ExtractElectronInformation (int fdebug);
 void              ExtractPionsInformation (int fdebug);
 void               ExtractPipsInformation (int pipsIdx, int fdebug );
@@ -316,7 +316,7 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
 
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-bool ElectronPassedSelectionCriteria(Double_t e_PCAL_x, Double_t e_PCAL_y,
+bool CheckIfElectronPassedSelectionCuts(Double_t e_PCAL_x, Double_t e_PCAL_y,
                                      Double_t e_PCAL_W, Double_t e_PCAL_V,
                                      Double_t e_E_PCAL,
                                      Double_t e_E_ECIN, Double_t e_E_ECOUT,
@@ -385,7 +385,7 @@ bool ElectronPassedSelectionCriteria(Double_t e_PCAL_x, Double_t e_PCAL_y,
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-bool PionPassedSelectionCutsCriteria(TString pionCharge, // "pi+" or "pi-"
+bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
                                      Double_t DC_sector,
                                      Double_t DC_x[3], Double_t DC_y[3], Double_t DC_z[3],
                                      Double_t chi2PID, Double_t p,
@@ -405,7 +405,7 @@ bool PionPassedSelectionCutsCriteria(TString pionCharge, // "pi+" or "pi-"
     // ---------------
     // DC - fiducial cuts on DC
     if (fdebug>3) {
-        std::cout << "PionPassedSelectionCutsCriteria()" << std::endl;
+        std::cout << "CheckIfPionPassedSelectionCuts()" << std::endl;
     }
     if (DC_sector == 0) { if (fdebug>2){std::cout << "DC_sector=0 (funny...)" << std::endl;} return false;}
     
@@ -418,7 +418,7 @@ bool PionPassedSelectionCutsCriteria(TString pionCharge, // "pi+" or "pi-"
         PDGcode = -211;
         C       = 0.93;
     } else {
-        std::cout << "pion charge is not defined in PionPassedSelectionCutsCriteria(), returning false" << std::endl;
+        std::cout << "pion charge is not defined in CheckIfPionPassedSelectionCuts(), returning false" << std::endl;
         return false;
     }
     
@@ -448,13 +448,13 @@ bool PionPassedSelectionCutsCriteria(TString pionCharge, // "pi+" or "pi-"
                                                 regionIdx+1,        // layer
                                                 bending);           // torus bending
         // ToDo: add this condition after verified by Alex!
-//        if (DC_fid == false) {
-//            return false;
-//        }
+        if (DC_fid == false) {
+            return false;
+        }
     }
     
     if (fdebug>3) {
-        std::cout << "in PionPassedSelectionCutsCriteria()"<< std::endl
+        std::cout << "in CheckIfPionPassedSelectionCuts()"<< std::endl
         << "pion charge: "          << pionCharge               << ","
         << "DC_x[0]: "              << DC_x[0]                  << ","
         << "chi2PID:"               << chi2PID                  << ","
@@ -470,7 +470,7 @@ bool PionPassedSelectionCutsCriteria(TString pionCharge, // "pi+" or "pi-"
        // Cut on the z-Vertex Difference Between Electrons and Hadrons.
        &&  ( fabs((Ve-Vpi).Z()) < cutValue_Ve_Vpi_dz_max )
        ) {
-        if (fdebug>3) { std::cout << "succesfully passed PionPassedSelectionCutsCriteria(), return true" << std::endl; }
+        if (fdebug>3) { std::cout << "succesfully passed CheckIfPionPassedSelectionCuts(), return true" << std::endl; }
         
         return true;
     }
@@ -1158,7 +1158,7 @@ void ExtractElectronInformation(int fdebug){
     // ------------------------------------------------------------------------------------------------
     // now, check if electron passed event selection requirements
     // ------------------------------------------------------------------------------------------------
-    ePastCutsInEvent = ElectronPassedSelectionCriteria(e_PCAL_x, e_PCAL_y,
+    ePastCutsInEvent = CheckIfElectronPassedSelectionCuts(e_PCAL_x, e_PCAL_y,
                                                               e_PCAL_W, e_PCAL_V,
                                                               e_E_PCAL, e_E_ECIN,
                                                               e_E_ECOUT,
@@ -1274,7 +1274,7 @@ void ExtractPipsInformation( int pipsIdx, int fdebug ){
     // ------------------------------------------------------------------------------------------------
     // now, check if pion passed event selection requirements
     // ------------------------------------------------------------------------------------------------
-    pipsPastSelectionCuts[pipsIdx] = PionPassedSelectionCutsCriteria("pi+",
+    pipsPastSelectionCuts[pipsIdx] = CheckIfPionPassedSelectionCuts("pi+",
                                                                      pips_DC_sector[pipsIdx],
                                                                      pips_DC_x[pipsIdx],
                                                                      pips_DC_y[pipsIdx],
@@ -1328,7 +1328,7 @@ void ExtractPimsInformation( int pimsIdx, int fdebug ){
     // ------------------------------------------------------------------------------------------------
     // now, check if pion passed event selection requirements
     // ------------------------------------------------------------------------------------------------
-    pimsPastSelectionCuts[pimsIdx] = PionPassedSelectionCutsCriteria("pi-",
+    pimsPastSelectionCuts[pimsIdx] = CheckIfPionPassedSelectionCuts("pi-",
                                                                      pims_DC_sector[pimsIdx],
                                                                      pims_DC_x[pimsIdx],
                                                                      pims_DC_y[pimsIdx],

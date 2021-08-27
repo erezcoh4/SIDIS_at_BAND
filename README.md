@@ -14,6 +14,12 @@
     
 # Revisions
 
+Aug-27, 2021    
+-------------
+1. Added pion fiducial requirements in the DC using DCfid_SIDIS::DC_fid_th_ph_sidis()
+    
+    
+
 Aug-26, 2021    
 -------------
 1. corrected TTree variables 
