@@ -81,7 +81,7 @@ void               ExtractPimsInformation (int pimsIdx, int fdebug );
 void                    ComputeKinematics ();
 void                   WriteEventToOutput (int fdebug);
 void                        FinishProgram (TString outfilepath, TString outfilename);
-void                   GetParticlesByType (int event, int fdebug );
+void                   GetParticlesByType (int evnum, int fdebug );
 void              Stream_e_pi_line_to_CSV (TString pionCharge, int piIdx,
                                            bool passed_cuts_e_pi,
                                            bool passed_cuts_e_pi_kinematics,
@@ -278,7 +278,7 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
             pipluses    = c12.getByID( 211  );
             piminuses   = c12.getByID(-211  );
             gammas      = c12.getByID( 22   );
-            GetParticlesByType ( event, fdebug );
+            GetParticlesByType ( evnum, fdebug );
             
             
             // filter events, extract information, and compute event kinematics:
@@ -300,7 +300,7 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
             }
             if (fdebug>1) {
                 std::cout << "done processing event " << evnum
-                << "(" << event << "/" << NeventsMaxToProcess<< ")"
+                << " (" << event << "/" << NeventsMaxToProcess<< ") "
                 << std::endl << "------------------------------------------------------------" << std::endl ;
             }
             event++; Nevents_processed++;
@@ -1375,7 +1375,7 @@ void ExtractPimsInformation( int pimsIdx, int fdebug ){
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-void GetParticlesByType (int event, int fdebug){
+void GetParticlesByType (int evnum, int fdebug){
     // get particles by type
     Ne      = electrons .size();
     Nn      = neutrons  .size();
@@ -1385,7 +1385,7 @@ void GetParticlesByType (int event, int fdebug){
     Ngammas = gammas    .size();
     if (fdebug>2){
         std::cout
-        << "particles in event "            << event        << " : "
+        << "particles in event "            << evnum        << " : "
         << "N(electrons): "                 << Ne           <<  ","
         << "N(protons): "                   << Np           <<  ","
         << "N(neutrons): "                  << Nn           <<  ","
