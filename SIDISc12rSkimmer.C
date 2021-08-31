@@ -299,7 +299,8 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
                 }
             }
             if (fdebug>1) {
-                std::cout << "done processing event " << event
+                std::cout << "done processing event " << evnum
+                << "(" << event << "/" << NeventsMaxToProcess<< ")"
                 << std::endl << "------------------------------------------------------------" << std::endl ;
             }
             event++; Nevents_processed++;
@@ -1281,9 +1282,9 @@ void ExtractPipsInformation( int pipsIdx, int fdebug ){
         pips_DC_z[pipsIdx][regionIdx] = pipluses[pipsIdx]->traj(DC,DC_layer)->getZ();
         if (fdebug>3) {
             std::cout
-            << "pips_DC_sector[pipsIdx="<<pipsIdx<<"]"
+            << "pips_DC_sector[pipsIdx="<<pipsIdx<<"]="
             << pips_DC_sector[pipsIdx]
-            << ", DC_layer = " << DC_layer 
+            << ", DC_layer = " << DC_layer
             << std::endl
             << "pips_DC_x[pipsIdx="<<pipsIdx<<"][regionIdx="<<regionIdx<<"]="
             << pips_DC_x[pipsIdx][regionIdx]
