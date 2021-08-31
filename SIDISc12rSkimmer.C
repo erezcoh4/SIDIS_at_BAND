@@ -1038,10 +1038,16 @@ void InitializeVariables(){
     Ve                                  = TVector3();
     ePastCutsInEvent                    = false;
     
-    piplus  .clear();
-    piminus .clear();
-    Vpiplus .clear();
-    Vpiminus.clear();
+    piplus      .clear();
+    piminus     .clear();
+    Vpiplus     .clear();
+    Vpiminus    .clear();
+    pipluses    .clear();
+    piminuses   .clear();
+    electrons   .clear();
+    neutrons    .clear();
+    protons     .clear();
+    gammas      .clear();
     for (int piIdx=0; piIdx<NMAXPIONS; piIdx++) {
         pips_chi2PID[piIdx]                         = -9999;
         pips_DC_sector[piIdx]                       = -9999;
@@ -1185,7 +1191,6 @@ void ExtractPionsInformation(int fdebug){
     if (fdebug > 2) std::cout << "done extracting pion information" << std::endl;
 }
 
-
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void WriteEventToOutput(int fdebug){
     // (Maybe) write this event to "selected events csv-file"
@@ -1243,6 +1248,10 @@ void ComputeKinematics(){
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void ExtractPipsInformation( int pipsIdx, int fdebug ){
+    if (fdebug>2)
+        std::cout << "ExtractPipsInformation( pipsIdx=" << pipsIdx << ", fdebug=" << fdebug << " )" << std::endl;
+    
+    
     // extract positive pion information
     SetLorentzVector(piplus[pipsIdx]  ,pipluses[pipsIdx]);
     Zpips[pipsIdx]              = piplus[pipsIdx].E() / omega;
@@ -1270,6 +1279,22 @@ void ExtractPipsInformation( int pipsIdx, int fdebug ){
         pips_DC_x[pipsIdx][regionIdx] = pipluses[pipsIdx]->traj(DC,DC_layer)->getX();
         pips_DC_y[pipsIdx][regionIdx] = pipluses[pipsIdx]->traj(DC,DC_layer)->getY();
         pips_DC_z[pipsIdx][regionIdx] = pipluses[pipsIdx]->traj(DC,DC_layer)->getZ();
+        if (fdebug>3) {
+            std::cout
+            << "pips_DC_sector[pipsIdx="<<pipsIdx<<"]"
+            << pips_DC_sector[pipsIdx]
+            << ", DC_layer = " << DC_layer 
+            << std::endl
+            << "pips_DC_x[pipsIdx="<<pipsIdx<<"][regionIdx="<<regionIdx<<"]="
+            << pips_DC_x[pipsIdx][regionIdx]
+            << std::endl
+            << "pips_DC_y[pipsIdx="<<pipsIdx<<"][regionIdx="<<regionIdx<<"]="
+            << pips_DC_y[pipsIdx][regionIdx]
+            << std::endl
+            << "pips_DC_z[pipsIdx="<<pipsIdx<<"][regionIdx="<<regionIdx<<"]="
+            << pips_DC_z[pipsIdx][regionIdx]
+            << std::endl;
+        }
     }
     // ------------------------------------------------------------------------------------------------
     // now, check if pion passed event selection requirements
