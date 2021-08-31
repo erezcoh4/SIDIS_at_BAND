@@ -21,12 +21,14 @@ runs_filename = "macros/runlists/good_runs_10-2.txt"
 # Using readlines()
 runs_file = open(runs_filename, 'r')
 run_fileLines = runs_file.readlines()
-print('good runs:')
-print(run_fileLines)
-print('processing %d runs'%Nruns)
+if fdebug>1:#{
+    print('good runs:')
+    print(run_fileLines)
+    print('processing %d runs'%Nruns)
+#}
 
 runIdx = 0
-for line in run_fileLines:
+for line in run_fileLines:#{
     runIdx += 1
     # print("Line{}: {}".format(runIdx, line.strip()))
     run = int(line.strip())
@@ -35,6 +37,7 @@ for line in run_fileLines:
     print(commandline)
     os.system( "clas12root -q 'SIDISc12rSkimmer.C+(%d,%d,%d)'"%(run,NeventsMax,fdebug))
     if runIdx >= Nruns: break;
+#}
 
 print(' ')
 print('done.')
