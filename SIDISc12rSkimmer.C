@@ -811,7 +811,7 @@ void SetOutputTTrees(){
     outTree_e_piplus->Branch("pi_PCAL_y"            ,&pips_PCAL_y           , "pi_PCAL_y[20]/F"     );
     outTree_e_piplus->Branch("pi_PCAL_z"            ,&pips_PCAL_z           , "pi_PCAL_z[20]/F"     );
     outTree_e_piplus->Branch("pi_PCAL_sector"       ,&pips_PCAL_sector      , "pi_PCAL_sector[20]/F");
-    outTree_e_piplus->Branch("pips_DC_sector"         ,&pips_DC_sector        , "pips_DC_sector[20]/F"  );
+    outTree_e_piplus->Branch("pi_DC_sector"         ,&pips_DC_sector        , "pi_DC_sector[20]/D"  );
     outTree_e_piplus->Branch("pi_Chi2N"             ,&pips_Chi2N            , "pi_Chi2N[20]/F"      );
     outTree_e_piplus->Branch("pi_DC_x"              ,&pips_DC_x             , "pi_DC_x[20][3]/F"    );
     outTree_e_piplus->Branch("pi_DC_y"              ,&pips_DC_y             , "pi_DC_y[20][3]/F"    );
