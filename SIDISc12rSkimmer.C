@@ -820,7 +820,7 @@ void SetOutputTTrees(){
     outTree_e_piplus->Branch("pi_E_ECIN"            ,&pips_E_ECIN           , "pi_E_ECIN[20]/F"     );
     outTree_e_piplus->Branch("pi_E_ECIN"            ,&pips_E_ECIN           , "pi_E_ECIN[20]/F"     );
     outTree_e_piplus->Branch("pi_E_ECOUT"           ,&pips_E_ECOUT          , "pi_E_ECOUT[20]/F"    );
-    outTree_e_piplus->Branch("DC_layers"            ,&DC_layers             , "DC_layers[3]"        );
+    outTree_e_piplus->Branch("DC_layers"            ,&DC_layers             , "DC_layers[3]/I"      );
     outTree_e_piplus->Branch("e"                    ,&e                     );
     outTree_e_piplus->Branch("pi"                   ,&piplus                );
     outTree_e_piplus->Branch("Ve"                   ,&Ve                    );
@@ -1201,6 +1201,8 @@ void WriteEventToOutput(int fdebug){
     if (ePastCutsInEvent && pipsPastCutsInEvent) {
         IsSelected_eepi = true;
         outTree_e_piplus -> Fill();
+        if (fdebug>3) std::cout << "Filling (e,e'pi+) TTree with this event!" << std::endl;
+        
         Nevents_passed_e_pips_cuts ++ ;
         if (eepipsPastCutsInEvent) Nevents_passed_e_pips_kinematics_cuts ++;
 
@@ -1215,6 +1217,7 @@ void WriteEventToOutput(int fdebug){
     if (ePastCutsInEvent && pimsPastCutsInEvent) {
         IsSelected_eepi = true;
         outTree_e_piminus -> Fill();
+        if (fdebug>3) std::cout << "Filling (e,e'pi-) TTree with this event!" << std::endl;
         Nevents_passed_e_pims_cuts ++ ;
         if (eepimsPastCutsInEvent) Nevents_passed_e_pims_kinematics_cuts ++;
         
