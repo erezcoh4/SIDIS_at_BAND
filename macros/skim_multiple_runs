@@ -30,6 +30,7 @@ runs_filename = "macros/runlists/good_runs_10-2.txt"
 # Using readlines()
 runs_file = open(runs_filename, 'r')
 run_fileLines = runs_file.readlines()
+if Nruns<0: Nruns = len(run_fileLines)
 if fdebug>1:#{
     print('good runs:')
     print(run_fileLines)
@@ -37,7 +38,7 @@ if fdebug>1:#{
 #}
 
 runIdx = 0
-for line in [run_fileLines[FirstRun:]]:#{
+for line in run_fileLines:#{
     runIdx += 1
     run = int(line.strip())
     commandline = ("clas12root -q 'SIDISc12rSkimmer.C+(%d,%d,%d,%d)'"%
@@ -49,7 +50,7 @@ for line in [run_fileLines[FirstRun:]]:#{
     print('')
     
     os.system( commandline )
-    if ((Nruns>0) and (runIdx >= Nruns)): break;
+    if (runIdx >= Nruns): break;
 #}
 
 print('')
