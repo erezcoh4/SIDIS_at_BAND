@@ -38,7 +38,7 @@ if fdebug>1:#{
 #}
 
 runIdx = 0
-for line in run_fileLines:#{
+for line in run_fileLines[FirstRun:]:#{
     runIdx += 1
     run = int(line.strip())
     commandline = ("clas12root -q 'SIDISc12rSkimmer.C+(%d,%d,%d,%d)'"%
