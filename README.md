@@ -14,14 +14,23 @@
     
 # Revisions
 
+Sep-2, 2021    
+-------------
+1. Added "PrintProgress" to python script
+2. Updated "Nruns" option in python script, such that '-1' is for all runs 
+
+
 Aug-31, 2021    
 -------------
 1. Debugged pion DC information (DC_x/y/z seem funny in ROOT TTree results)
-    There were two problems, one could be solved and the other is a general problem with the hipo files that we disregard for now:
-    A. Sometimes the readout-sector is 0. This is funny. We should throw away these events
+    There were two problems, one could be solved and the other is a general problem with the hipo files that we disregard for now.
+    
+    A. Sometimes the readout-sector is 0. This is funny, and, of-course, wrong. We should throw away these events.
     Justin B. Estee (June-21): "I also had this issue. I am throwing away sector 0. The way you check is plot the (x,y) coordinates of the sector and you will not see any thing."
     
-    B. TTrree branch writing was using /F for "double" variables. This was a bug that was subsequently corrected
+    B. TTrree branch writing was using "/F" for "double" variables instead of "/D". This was a bug that was subsequently corrected to "/D".
+    
+    
     
     
 Aug-27, 2021    

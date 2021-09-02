@@ -234,7 +234,7 @@ std::vector<region_part_ptr>  electrons, neutrons, protons, pipluses, piminuses,
 void SIDISc12rSkimmer(int  RunNumber=6420,
                       int  NeventsMax=-1,
                       int  fdebug=1,
-                      int  PrintProgress=5000,
+                      int  PrintProgress=50000,
                       int NpipsMin=1, // minimal number of pi+
                       TString DataPath = "/volatile/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train_20200610/inc/" ){
     TString RunNumberStr = GetRunNumberSTR(RunNumber,fdebug);
