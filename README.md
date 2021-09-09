@@ -16,7 +16,7 @@ Sep-9, 2021
 -------------
 1. Added number of particles from main species to output CSV file:
     "Npips,Npims,Nelectrons,Ngammas,Nprotons,Nneutrons,",
-The reason for this is that we observe too many events with z~1, which are featured by MX~2 (namely, exclusive events).
+The reason for this is that we observe too many events with z > 0.9, which are featured by MX = 2 (namely, exclusive events).
 We want to understand and perhaps throw away these unwanted events  
 
 
