@@ -2,10 +2,8 @@
 
 # Skimming for Semi Inclusive DIS (SIDIS) on a deuteron target with $pi^+$ and $pi^-$ tagging
 
-    last edit: Aug-22, 2021 (EOC, mbp)
-    ToDo list:
+    Main open ToDo items:
     (1) Validate pion DC fiducial cuts
-    (2) make a cut on missing mass. In Timothy H. thesis (RGA) Mx > 1.5 GeV is probably fine for you, but the way we actually determined that number was by plotting the A_LU as a function of Mx. There should be no dependence on Mx, so if you see regions where the A_LU is varying then you know you’re picking up more than just SIDIS events (exclusive proton, deltas, etc.). So we cut on Mx > 1.5 GeV because that was where the BSAs started to stabilize.
     
     
     
@@ -13,6 +11,14 @@
     
     
 # Revisions
+
+Sep-9, 2021    
+-------------
+1. Added number of particles from main species to output CSV file:
+    "Npips,Npims,Nelectrons,Ngammas,Nprotons,Nneutrons,",
+The reason for this is that we observe too many events with z~1, which are featured by MX~2 (namely, exclusive events).
+We want to understand and perhaps throw away these unwanted events  
+
 
 Sep-2, 2021    
 -------------

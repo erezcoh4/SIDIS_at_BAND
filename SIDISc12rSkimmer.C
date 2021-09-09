@@ -1,6 +1,3 @@
-// last edit Aug-21, 2021 (EOC, mbp), see README
-// ToDo:
-// (1) Add pion DC fiducial cuts
 
 #ifdef __CINT__
 #pragma link C++ class std::vector<TVector3>+;
@@ -1107,7 +1104,8 @@ void OpenResultFiles( TString outfilepath, TString outfilename ){
                      +(TString)"e_P,e_Theta,e_Phi,e_Vz,"
                      +(TString)"pi_P,pi_Theta,pi_Phi,pi_Vz,"
                      +(TString)"Q2,W,xB,Zpi,omega,"
-                     +(TString)"xF,y,M_X,"));
+                     +(TString)"xF,y,M_X,"
+                     +(TString)"Npips,Npims,Nelectrons,Ngammas,Nprotons,Nneutrons,")));
     // output tree branches
     SetOutputTTrees();
 }
@@ -1448,6 +1446,7 @@ void Stream_e_pi_line_to_CSV( TString pionCharge, int piIdx,
         pi.P(),         pi.Theta(),         pi.Phi(),           Vpi.Z(),
         Q2,             W,                  xB,                 Zpi,
         omega,          xF,                 y,                  M_X,
+        Npips,          Npims,              Ne,                 Ngammas,    Np,     Nn,
     };
     StreamToCSVfile( pionCharge, variables ,
                     passed_cuts_e_pi, passed_cuts_e_pi_kinematics,
