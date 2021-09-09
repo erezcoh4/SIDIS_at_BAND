@@ -135,6 +135,7 @@ int Nevents_passed_e_pims_kinematics_cuts;
 
 // number of particles per event
 int         Ne, Nn, Np, Npips, Npims, Ngammas;
+int                          Nd; // number of detected deuterons
 
 // variables
 double          Mp = 0.938;
@@ -221,7 +222,7 @@ Double_t     Ebeam, xB, Q2, omega, W, W2, xF, y, M_X;
 //Double_t        Ppips_t_q, Ppips_q;
 // auxiliary
 DCfid_SIDIS dcfid;
-std::vector<region_part_ptr>  electrons, neutrons, protons, pipluses, piminuses, gammas;
+std::vector<region_part_ptr>  electrons, neutrons, protons, pipluses, piminuses, gammas, deuterons;
 
 
 
@@ -275,6 +276,7 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
             pipluses    = c12.getByID( 211  );
             piminuses   = c12.getByID(-211  );
             gammas      = c12.getByID( 22   );
+            deuterons   = c12.getByID( 1000010020 );
             GetParticlesByType ( evnum, fdebug );
             
             
@@ -1105,7 +1107,7 @@ void OpenResultFiles( TString outfilepath, TString outfilename ){
                      +(TString)"pi_P,pi_Theta,pi_Phi,pi_Vz,"
                      +(TString)"Q2,W,xB,Zpi,omega,"
                      +(TString)"xF,y,M_X,"
-                     +(TString)"Npips,Npims,Nelectrons,Ngammas,Nprotons,Nneutrons,"));
+                     +(TString)"Npips,Npims,Nelectrons,Ngammas,Nprotons,Nneutrons,Ndeuterons,"));
     // output tree branches
     SetOutputTTrees();
 }
@@ -1384,6 +1386,7 @@ void GetParticlesByType (int evnum, int fdebug){
     Npips   = pipluses  .size();
     Npims   = piminuses .size();
     Ngammas = gammas    .size();
+    Nd      = deuterons.size();
     if (fdebug>2){
         std::cout
         << "particles in event "            << evnum        << " : "
@@ -1393,6 +1396,7 @@ void GetParticlesByType (int evnum, int fdebug){
         << "N(pi+): "                       << Npips        <<  ","
         << "N(pi-): "                       << Npims        <<  ","
         << "N(gammas): "                    << Ngammas      <<  ","
+        << "N(deuterons): "                 << Nd           <<  ","
         << std::endl;
     }
 }
@@ -1447,7 +1451,7 @@ void Stream_e_pi_line_to_CSV( TString pionCharge, int piIdx,
         Q2,             W,                  xB,                 Zpi,
         omega,          xF,                 y,                  M_X,
         (double)Npips, (double)Npims,       (double)Ne,         (double)Ngammas,
-        (double)Np,    (double)Nn,
+        (double)Np,    (double)Nn,          (double)Nd,
     };
     StreamToCSVfile( pionCharge, variables ,
                     passed_cuts_e_pi, passed_cuts_e_pi_kinematics,
