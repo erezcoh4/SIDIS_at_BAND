@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # continously take data and print the rate every few seconds
-# last edit Aug-21, 2021 (EOC)
+# last edit Sep-12, 2021 (EOC)
 #
 import sys, os, linecache
 import argparse
@@ -56,3 +56,5 @@ for line in run_fileLines[FirstRun:]:#{
 print('')
 print('done.')
 print('')
+
+os.system('mail -s "done processing skim_multiple_runs on ifarm" cohen.erez7@gmail.com < /dev/null')

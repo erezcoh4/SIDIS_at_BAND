@@ -688,7 +688,7 @@ void loadCutValues(TString cutValuesFilename, int fdebug){
     // read cut values csv file
     csv_reader csvr;
     cutValues = csvr.read_csv("cutValues.csv");
-    if (fdebug>0) { printCutValues(); }
+    if (fdebug>2) { printCutValues(); }
     
     // assign specific cut values - to speed things up
     // by avoiding recalling FindCutValue() on every event
