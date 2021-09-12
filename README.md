@@ -12,6 +12,12 @@
     
 # Revisions
 
+Sep-12, 2021    
+-------------
+1. Added a python script that merges CSV dataframes from multiple runs 
+    "combine_sidis_skim_multiple_runs"
+    
+
 Sep-9, 2021    
 -------------
 1. Added a counter for the number of deuterons in the event

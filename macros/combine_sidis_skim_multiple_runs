@@ -1,0 +1,53 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+#
+# continously take data and print the rate every few seconds
+# last edit Sep-12, 2021 (EOC)
+#
+import sys, os, linecache, pandas as pd
+import glob
+import argparse
+
+parser = argparse.ArgumentParser(description='merge SIDIS skimming of multiple runs')
+parser.add_argument("--Nruns",        type=int, default=1,
+                    required=False, help="number of runs to combine ('-1' for all runs)")
+parser.add_argument("--FirstRun",     type=int, default=0,
+                    required=False, help="first run to start from")
+parser.add_argument("--fdebug",       type=int, default=1,
+                    required=False, help="verbosity")
+parser.add_argument("--worker",       type=str, default="Erez-ifarm",
+                    required=False, help="verbosity")
+args = parser.parse_args()
+
+Nruns         = args.Nruns
+fdebug        = args.fdebug
+FirstRun      = args.FirstRun
+path          = "";
+if args.worker == "Erez-ifarm": #{
+    path = r'/volatile/clas12/users/ecohen/BAND/SIDIS_skimming/'
+#}
+elif args.worker == "ErezMBP": #{
+    path = r'/Users/erezcohen/Desktop/data/BAND/AnalysisFiles/AnalysisCSVfiles/skimmed_SIDIS'
+#}
+
+for pi_charge in ['piplus','piminus']:#{
+    if fdebug: print("merging (e,e%s) files "%pi_charge)
+    outcsvfilename  = path + "merged_ee%s.csv"%pi_charge
+    eepi_files      = glob.glob(os.path.join(path, "*%s_selected_eepi_kinematics.csv"%pi_charge ))
+    eepi_merged_df  = pd.DataFrame()
+    run_idx         = 0
+    for f in eepi_files:#{
+        eepi_df         = pd.read_csv(f)
+        eepi_merged_df  = pd.concat( [eepi_merged_df, eepi_df], ignore_index=True)
+        run_idx         = run_idx + 1;
+        if Nruns > 0 and run_idx > Nruns: break;
+        if fdebug>1: print("added %s with %d events"%(f,len(eepi_df)))
+    #}
+    if fdebug: print("done merging (e,e%s) files, with %.2g events"%(pi_charge,len(eepi_merged_df)))
+    eepi_merged_df.to_csv( outcsvfilename );
+    if fdebug: print("saved merged dataframe into a combined CSV file \n%s"%outcsvfilename)
+#}
+
+print('')
+print('done.')
+print('')

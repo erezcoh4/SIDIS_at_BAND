@@ -447,7 +447,6 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
                                                 DC_sector,          // sector
                                                 regionIdx+1,        // layer
                                                 bending);           // torus bending
-        // ToDo: add this condition after verified by Alex!
         if (DC_fid == false) {
             return false;
         }
