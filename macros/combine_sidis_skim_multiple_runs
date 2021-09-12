@@ -36,6 +36,7 @@ for pi_charge in ['piplus','piminus']:#{
     eepi_files      = glob.glob(os.path.join(path, "*%s_selected_eepi_kinematics.csv"%pi_charge ))
     eepi_merged_df  = pd.DataFrame()
     run_idx         = 0
+    if fdebug>1: print(eepi_files)
     for f in eepi_files:#{
         eepi_df         = pd.read_csv(f)
         eepi_merged_df  = pd.concat( [eepi_merged_df, eepi_df], ignore_index=True)
