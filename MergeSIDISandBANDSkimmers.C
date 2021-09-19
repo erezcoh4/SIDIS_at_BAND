@@ -217,7 +217,13 @@ void MergeSIDISandBANDevents (int NeventsToMerge=10,
     for (int MergedEvtId=0; MergedEvtId<Nevents2Merge; MergedEvtId++) {
         
         BANDTree -> GetEntry( BANDEventIndicesToMerge[MergedEvtId] );
-                
+        bool eepiPastKinematicalCuts = false;
+        if (pionCharge=="pi+") {
+            eepiPastKinematicalCuts = eepipsPastKinematicalCuts
+        } else if (pionCharge=="pi-") {
+            eepiPastKinematicalCuts = eepimsPastKinematicalCuts;
+        }
+        
         if (eepiPastKinematicalCuts) {
             
             // compute kinematical variables
