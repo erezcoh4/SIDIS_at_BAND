@@ -64,10 +64,6 @@ Int_t                 Npions, Npips, Npims;
 Int_t                  Ne, Np, Nn, Ngammas;
 
 // kinematics and observables
-Double_t Mp      = 0.938272; // GeV/c2
-Double_t Mn      = 0.939565; // GeV/c2
-Double_t Md      = 1.875;    // GeV/c2
-Double_t Mp2     = Mp * Mp;
 
 // SIDIS Tree
 TLorentzVector     *Beam=0;
@@ -76,6 +72,7 @@ TLorentzVector        *q=0;
 TLorentzVector       *Pn=0; // neutron momentum
 // reconstructed vertex position
 TVector3             *Ve=0;
+TVector3             *Vn=0;
 std::vector<TVector3>          *Vpiplus=0;
 std::vector<TVector3>         *Vpiminus=0;
 std::vector<TLorentzVector>     *piplus=0;
@@ -98,6 +95,11 @@ double        livetime = 0;
 double       starttime = 0;
 double         current = 0;
 double          weight = 0;
+
+Double_t Mp      = 0.938272; // GeV/c2
+Double_t Mn      = 0.939565; // GeV/c2
+Double_t Md      = 1.875;    // GeV/c2
+Double_t Mp2     = Mp * Mp;
 Double_t                        xB; // Bjorken x
 Double_t                        xF; // Feynman x
 Double_t                        Q2;
@@ -113,6 +115,7 @@ Double_t                        Es; // spectator energy
 Double_t                        Ps; // spectator momentum
 Double_t                  theta_sq; // spectator angle with respect to momentum transfer
 Double_t                       M_X;
+Double_t                         y;
 
 TClonesArray   * nHits = new TClonesArray("bandhit");
 TClonesArray  &saveHit = *nHits;
