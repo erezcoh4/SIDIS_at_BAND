@@ -542,8 +542,8 @@ void Stream_e_pi_n_line_to_CSV(int piIdx,
                                bool passed_cuts_e_pi_kinematics,
                                bool passed_cuts_n,
                                int fdebug ){
-    TLorentzVector  pi;
-    TVector3        Vpi;
+    TLorentzVector  * pi;
+    TVector3        * Vpi;
     double          Zpi;
     if (pionCharge=="pi+") {
         pi  = piplus [piIdx];
@@ -583,9 +583,9 @@ void Stream_e_pi_n_line_to_CSV(int piIdx,
     // now stream data to CSV file
     std::vector<double> variables =
     {   (double)status, (double)runnum,     (double)evnum,      (double)beam_helicity,
-        e.P(),          e.Theta(),          e.Phi(),            Ve.Z(),
-        pi.P(),         pi.Theta(),         pi.Phi(),           Vpi.Z(),
-        Pn.P(),         Pn.Theta(),         Pn.Phi(),           Vn.Z(),
+        e->P(),          e->Theta(),          e->Phi(),            Ve->Z(),
+        pi->P(),         pi->Theta(),         pi->Phi(),           Vpi->Z(),
+        Pn->P(),         Pn->Theta(),         Pn->Phi(),           Vn->Z(),
         Q2,             W,                  xB,                 Zpi,
         omega,          xF,                 y,                  M_X,
     };
