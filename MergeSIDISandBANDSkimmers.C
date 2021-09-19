@@ -449,12 +449,13 @@ void SetInputAndOutputTTrees (){
     SIDISTree  -> SetBranchAddress("eepiPastCutsInEvent"       ,&eepiPastCutsInEvent    );
     SIDISTree  -> SetBranchAddress("eepipsPastKinematicalCuts" ,&eepipsPastKinematicalCuts);
     SIDISTree  -> SetBranchAddress("eepimsPastKinematicalCuts" ,&eepimsPastKinematicalCuts);
-    SIDISTree  -> SetBranchAddress("Npips"                     ,&Npips                 );
-    SIDISTree  -> SetBranchAddress("Npims"                     ,&Npims                 );
-    SIDISTree  -> SetBranchAddress("Nelectrons"                ,&Ne                    );
-    SIDISTree  -> SetBranchAddress("Ngammas"                   ,&Ngammas               );
-    SIDISTree  -> SetBranchAddress("Nprotons"                  ,&Np                    );
-    SIDISTree  -> SetBranchAddress("Nneutrons"                 ,&Nn                    );
+    SIDISTree  -> SetBranchAddress("Npips"                     ,&Npips                  );
+    SIDISTree  -> SetBranchAddress("Npims"                     ,&Npims                  );
+    SIDISTree  -> SetBranchAddress("Nelectrons"                ,&Ne                     );
+    SIDISTree  -> SetBranchAddress("Ngammas"                   ,&Ngammas                );
+    SIDISTree  -> SetBranchAddress("Nprotons"                  ,&Np                     );
+    SIDISTree  -> SetBranchAddress("Nneutrons"                 ,&Nn                     );
+    SIDISTree  -> SetBranchAddress("y"                         ,&y                      );
 
     
     // BAND input tree branches
@@ -498,8 +499,15 @@ void SetInputAndOutputTTrees (){
     MergedTree->Branch("Q2"                     ,&Q2                    );
     MergedTree->Branch("omega"                  ,&omega                 );
     MergedTree->Branch("Z"                      ,&Zpips                 );
-    MergedTree->Branch("eepiPastCutsInEvent"    ,&eepiPastCutsInEvent );
-    
+    MergedTree->Branch("eepiPastCutsInEvent"    ,&eepiPastCutsInEvent   );
+    MergedTree->Branch("Npips"                  ,&Npips                  );
+    MergedTree->Branch("Npims"                  ,&Npims                  );
+    MergedTree->Branch("Nelectrons"             ,&Ne                     );
+    MergedTree->Branch("Ngammas"                ,&Ngammas                );
+    MergedTree->Branch("Nprotons"               ,&Np                     );
+    MergedTree->Branch("Nneutrons"              ,&Nn                     );
+    MergedTree->Branch("y"                      ,&y                      );
+
 }
 
 
@@ -519,7 +527,7 @@ void PrintMonitorHello(){
 void ComputeKinematics(){
     // compute kinematics
     // SIDISc12rSkimmer.C already computes few of the kinematical variables:
-    //     xB,  Q2, omega, W, Z
+    //     xB,  Q2, omega, W, Z, y
     Es      = Pn->E();
     Ps      = Pn->P();
     w2      = omega * omega;
