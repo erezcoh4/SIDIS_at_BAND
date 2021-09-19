@@ -62,7 +62,7 @@ Int_t             BANDeventIDs[NMAXEVENTS];
 Int_t            SIDISeventIDs[NMAXEVENTS];
 Int_t                 Npions, Npips, Npims;
 Int_t                  Ne, Np, Nn, Ngammas;
-
+Int_t                               status;
 // kinematics and observables
 
 // SIDIS Tree
@@ -74,10 +74,11 @@ TLorentzVector       *Pn=0; // neutron momentum
 // reconstructed vertex position
 TVector3             *Ve=0;
 TVector3             *Vn=0;
-std::vector<TVector3>          *Vpiplus=0;
-std::vector<TVector3>         *Vpiminus=0;
-std::vector<TLorentzVector>     *piplus=0;
-std::vector<TLorentzVector>    *piminus=0;
+
+std::vector<TVector3*>             Vpiplus;
+std::vector<TVector3*>            Vpiminus;
+std::vector<TLorentzVector*>        piplus;
+std::vector<TLorentzVector*>       piminus;
 
 bool                     eepiPastCutsInEvent;
 bool                     goodneutron = false;
@@ -590,8 +591,9 @@ void Stream_e_pi_n_line_to_CSV(int piIdx,
     // ------------------------------------------------------------------------------------------------
     // compute kinematics that also relies on pion information
     // ------------------------------------------------------------------------------------------------
-    xF  = 2. * (pi->Dot(q)) / (q->Mag() * W);
-    M_X = ( Beam + target - e - pi - Pn ).Mag(); // missing mass
+    xF      = 2. * (pi->Dot(q)) / (q->Mag() * W);
+    M_X     = ( Beam + target - e - pi - Pn ).Mag(); // missing mass
+    status  = 0;
     
     // now stream data to CSV file
     std::vector<double> variables =
