@@ -66,8 +66,8 @@ Int_t                               status;
 // kinematics and observables
 
 // SIDIS Tree
+TLorentzVector     *target = new TLorentzVector(0, 0, 0, Md );
 TLorentzVector     *Beam=0;
-TLorentzVector   *target=0; target -> SetXYZM (0, 0, 0, Md );
 TLorentzVector        *e=0;
 TLorentzVector        *q=0;
 TLorentzVector       *Pn=0; // neutron momentum
