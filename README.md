@@ -2,13 +2,10 @@
 
 # Skimming for Semi Inclusive DIS (SIDIS) on a deuteron target with $pi^+$ and $pi^-$ tagging
 
-    Main open ToDo items:
     
     
     
-    
-    
-# Revisions
+## Revisions
 
 Sep-19, 2021    
 -------------
@@ -19,6 +16,8 @@ Sep-19, 2021
         
 2. added eepipsPastKinematicalCuts and eepimsPastKinematicalCuts variables to SIDISc12rSkimmer.C output TTrees
 
+3. updated python script file names and added a script for neutron skimming:
+skim_sidis_multiple_runs, skim_neutron_multiple_runs
 
 Sep-12, 2021    
 -------------
@@ -222,6 +221,14 @@ execute:
         (inputFile = "sidisdvcs_" + RunNumberStr + ".hipo")
         
  
+ 
+ ## Using BAND skimmer
+
+ ./code [outputFile] [MC/DATA] [time sifts] [inputFile]
+
+ /u/home/cohen/BAND_analysis/bandsoft_tools/bin/neutrons  /volatile/clas12/users/ecohen/BAND/neutron_skimming/skimmed_neutrons_inc_006420.root 1 1 /volatile/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train_20200610/inc/inc_006420.hipo
+
+ (For SIDIS train /u/home/cohen/BAND_analysis/bandsoft_tools/bin/neutrons  /volatile/clas12/users/ecohen/BAND/BAND_skimmed_neutrons_sidisdvcs_run6420.root DATA 1 /cache/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train/sidisdvcs/sidisdvcs_006420.hipo)
  
  
  comments:

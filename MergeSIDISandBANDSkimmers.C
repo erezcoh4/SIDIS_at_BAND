@@ -105,6 +105,8 @@ std::vector<TLorentzVector*>        piplus;
 std::vector<TLorentzVector*>       piminus;
 
 bool                     eepiPastCutsInEvent;
+bool                   eepipsPastCutsInEvent;
+bool                   eepimsPastCutsInEvent;
 bool                     goodneutron = false;
 bool    eepipsPastKinematicalCuts[NMAXPIONS];
 bool    eepimsPastKinematicalCuts[NMAXPIONS];
@@ -151,6 +153,8 @@ void          ComputeKinematics ();
 void                  PrintDone ();
 void          PrintMonitorHello ();
 void              SetPionCharge ( TString fpionCharge ){ pionCharge = fpionCharge; };
+void               SetVerbosity ( ffdebug ){fdebug = ffdebug;};
+
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 // Main functionality
@@ -162,6 +166,7 @@ void MergeSIDISandBANDSkimmers(int RunNumber=6420,
                                int PrintProgress=5000){
     
     SetPionCharge    ( fpionCharge );
+    SetVerbosity     ( ffdebug );
     char RunNumberStr[20];
     sprintf( RunNumberStr, "00%d", RunNumber );
     OpenInputFiles   ( (TString)RunNumberStr );
@@ -217,11 +222,11 @@ void MergeSIDISandBANDevents (int NeventsToMerge=10,
     for (int MergedEvtId=0; MergedEvtId<Nevents2Merge; MergedEvtId++) {
         
         BANDTree -> GetEntry( BANDEventIndicesToMerge[MergedEvtId] );
-        bool eepiPastKinematicalCuts = false;
+        bool eepiPastCutsInEvent = false;
         if (pionCharge=="pi+") {
-            eepiPastKinematicalCuts = eepipsPastKinematicalCuts;
+            eepiPastCutsInEvent = eepipsPastCutsInEvent;
         } else if (pionCharge=="pi-") {
-            eepiPastKinematicalCuts = eepimsPastKinematicalCuts;
+            eepiPastCutsInEvent = eepimsPastCutsInEvent;
         }
         
         if (eepiPastKinematicalCuts) {
@@ -457,7 +462,9 @@ void SetInputAndOutputTTrees (){
     SIDISTree  -> SetBranchAddress("omega"                     ,&omega                  );
     SIDISTree  -> SetBranchAddress("Z"                         ,&Zpips                  );
     SIDISTree  -> SetBranchAddress("W"                         ,&W                      );
-    SIDISTree  -> SetBranchAddress("eepiPastCutsInEvent"       ,&eepiPastCutsInEvent    );
+    SIDISTree  -> SetBranchAddress("eepipsPastCutsInEvent"     ,&eepipsPastCutsInEvent    );
+    SIDISTree  -> SetBranchAddress("eepimsPastCutsInEvent"     ,&eepimsPastCutsInEvent    );
+    
     SIDISTree  -> SetBranchAddress("eepipsPastKinematicalCuts" ,&eepipsPastKinematicalCuts);
     SIDISTree  -> SetBranchAddress("eepimsPastKinematicalCuts" ,&eepimsPastKinematicalCuts);
     SIDISTree  -> SetBranchAddress("Npips"                     ,&Npips                  );

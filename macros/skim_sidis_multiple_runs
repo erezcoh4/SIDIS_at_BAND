@@ -57,4 +57,4 @@ print('')
 print('done.')
 print('')
 
-os.system('mail -s "done processing skim_multiple_runs on ifarm" cohen.erez7@gmail.com < /dev/null')
+os.system('mail -s "done processing skim_sidis_multiple_runs on ifarm" cohen.erez7@gmail.com < /dev/null')
