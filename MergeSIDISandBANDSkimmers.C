@@ -98,11 +98,13 @@ double        livetime = 0;
 double       starttime = 0;
 double         current = 0;
 double          weight = 0;
-Double_t                        xB;
+Double_t                        xB; // Bjorken x
+Double_t                        xF; // Feynman x
 Double_t                        Q2;
 Double_t                     omega;
 Double_t                        w2; // omega^2
 Double_t          Zpips[NMAXPIONS]; // energy fraction rest frame
+Double_t          Zpims[NMAXPIONS]; // energy fraction rest frame
 Double_t                         W; // energy of the hadronic system
 Double_t                   alpha_s; // light cone fraction of momentum of the recoil neutron
 Double_t                    WPrime; // moving proton
@@ -110,6 +112,7 @@ Double_t                    xPrime; // moving proton
 Double_t                        Es; // spectator energy
 Double_t                        Ps; // spectator momentum
 Double_t                  theta_sq; // spectator angle with respect to momentum transfer
+Double_t                       M_X;
 
 TClonesArray   * nHits = new TClonesArray("bandhit");
 TClonesArray  &saveHit = *nHits;
@@ -520,7 +523,7 @@ void ComputeKinematics(){
     Es      = Pn->E();
     Ps      = Pn->P();
     w2      = omega * omega;
-    theta_sq= Pn->Angle( q );
+    theta_sq= Pn->Angle( q->Vect() );
     xPrime  = Q2 / (2. * ((Md - Es) * omega + Pn->Vect()*q->Vect() ));
     W       = sqrt(Mp2 - Q2 + 2. * omega * Mp);
     WPrime  = sqrt(Mp2 - Q2 + 2. * omega * (Md - Es) + 2. * Ps * sqrt(Q2 + w2) * cos( theta_sq ));
@@ -577,8 +580,8 @@ void Stream_e_pi_n_line_to_CSV(int piIdx,
     // ------------------------------------------------------------------------------------------------
     // compute kinematics that also relies on pion information
     // ------------------------------------------------------------------------------------------------
-    xF  = 2. * (pi.Dot(q)) / (q.Mag() * W);
-    M_X = ( Beam + target - e - pi - Pn ).Mag();
+    xF  = 2. * (pi->Dot(q)) / (q->Mag() * W);
+    M_X = ( Beam + target - e - pi - Pn ).Mag(); // missing mass
     
     // now stream data to CSV file
     std::vector<double> variables =
