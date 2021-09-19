@@ -46,7 +46,7 @@ TFile * MergedFile;
 TTree * MergedTree;
 
 // Output CSV file
-std::ofstream   CSVfile;
+std::ofstream   CSVfile_e_pi_n;
 
 // time
 clock_t tStart = clock();
@@ -139,11 +139,7 @@ void Stream_e_pi_n_line_to_CSV (int piIdx,
                                 bool passed_cuts_e_pi_kinematics,
                                 bool passed_cuts_n,
                                 int fdebug );
-void           StreamToCSVfile (TString pionCharge, // "pi+" or "pi-"
-                                std::vector<Double_t> observables,
-                                bool passed_cuts_e_pi_kinematics,
-                                bool passed_cuts_n,
-                                int fdebug);
+
 
 void    SetInputAndOutputTTrees ();
 void          ComputeKinematics ();
@@ -316,8 +312,8 @@ void OpenOutputFiles (TString RunStr){
     MergedTree = new TTree( "T" , "Event information from merged SIDIS and BAND skimmers");
     
     // Create output csv files
-    CSVfile.open( skimmedMergedFilename + ".csv" );
-    CSVfile << csvheader << std::endl;
+    CSVfile_e_pi_n.open( skimmedMergedFilename + ".csv" );
+    CSVfile_e_pi_n << csvheader << std::endl;
     
 }
 
@@ -333,7 +329,7 @@ void CloseInputFiles (){
 void CloseOutputFiles (TString OutDataPath){
     
     // close output CSV
-    CSVfile.close();
+    CSVfile_e_pi_n.close();
     
     int Nevents = MergedTree->GetEntries();
     
@@ -351,9 +347,9 @@ void CloseOutputFiles (TString OutDataPath){
 void StreamToCSVfile (std::vector<Double_t> observables, int fdebug){
     if (fdebug>2) std::cout << "StreamToCSVfile()" << std::endl;
     for (auto v:observables) {
-        CSVfile << v << ",";
+        CSVfile_e_pi_n << v << ",";
     }
-    CSVfile << std::endl;
+    CSVfile_e_pi_n << std::endl;
 }
 
 
@@ -609,15 +605,3 @@ void Stream_e_pi_n_line_to_CSV(int piIdx,
                     fdebug );
 }
 
-
-// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-void StreamToCSVfile (std::vector<Double_t> observables,
-                      bool passed_cuts_e_pi_kinematics,
-                      bool passed_cuts_n,
-                      int fdebug){
-    if (fdebug>1) {
-        std::cout << "streaming to CSVfile" << std::endl;
-    }
-    for (auto v:observables) CSVfile_e_pi_n << v << ",";
-    CSVfile_e_pi_n << std::endl;
-}
