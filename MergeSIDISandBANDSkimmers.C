@@ -52,6 +52,30 @@ std::ofstream   CSVfile_e_pi_n;
 clock_t tStart = clock();
 
 // globals
+
+Double_t            Mp  = 0.938272; // GeV/c2
+Double_t             Mn = 0.939565; // GeV/c2
+Double_t                Md = 1.875; // GeV/c2
+Double_t             Mp2 = Mp * Mp;
+Double_t                        xB; // Bjorken x
+Double_t                        xF; // Feynman x
+Double_t                        Q2;
+Double_t                     omega;
+Double_t                        w2; // omega^2
+Double_t          Zpips[NMAXPIONS]; // energy fraction rest frame
+Double_t          Zpims[NMAXPIONS]; // energy fraction rest frame
+Double_t                         W; // energy of the hadronic system
+Double_t                   alpha_s; // light cone fraction of momentum of the recoil neutron
+Double_t                    WPrime; // moving proton
+Double_t                    xPrime; // moving proton
+Double_t                        Es; // spectator energy
+Double_t                        Ps; // spectator momentum
+Double_t                  theta_sq; // spectator angle with respect to momentum transfer
+Double_t                       M_X;
+Double_t                         y;
+
+
+
 TString                         pionCharge; // "pi+" or "pi-"
 Int_t               BANDrunID, BANDeventID;
 Int_t             SIDISrunID, SIDISeventID;
@@ -97,27 +121,6 @@ double        livetime = 0;
 double       starttime = 0;
 double         current = 0;
 double          weight = 0;
-
-Double_t Mp      = 0.938272; // GeV/c2
-Double_t Mn      = 0.939565; // GeV/c2
-Double_t Md      = 1.875;    // GeV/c2
-Double_t Mp2     = Mp * Mp;
-Double_t                        xB; // Bjorken x
-Double_t                        xF; // Feynman x
-Double_t                        Q2;
-Double_t                     omega;
-Double_t                        w2; // omega^2
-Double_t          Zpips[NMAXPIONS]; // energy fraction rest frame
-Double_t          Zpims[NMAXPIONS]; // energy fraction rest frame
-Double_t                         W; // energy of the hadronic system
-Double_t                   alpha_s; // light cone fraction of momentum of the recoil neutron
-Double_t                    WPrime; // moving proton
-Double_t                    xPrime; // moving proton
-Double_t                        Es; // spectator energy
-Double_t                        Ps; // spectator momentum
-Double_t                  theta_sq; // spectator angle with respect to momentum transfer
-Double_t                       M_X;
-Double_t                         y;
 
 TClonesArray   * nHits = new TClonesArray("bandhit");
 TClonesArray  &saveHit = *nHits;
