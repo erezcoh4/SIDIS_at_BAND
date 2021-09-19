@@ -219,7 +219,7 @@ void MergeSIDISandBANDevents (int NeventsToMerge=10,
         BANDTree -> GetEntry( BANDEventIndicesToMerge[MergedEvtId] );
         bool eepiPastKinematicalCuts = false;
         if (pionCharge=="pi+") {
-            eepiPastKinematicalCuts = eepipsPastKinematicalCuts
+            eepiPastKinematicalCuts = eepipsPastKinematicalCuts;
         } else if (pionCharge=="pi-") {
             eepiPastKinematicalCuts = eepimsPastKinematicalCuts;
         }
@@ -601,7 +601,7 @@ void Stream_e_pi_n_line_to_CSV(int piIdx,
     // compute kinematics that also relies on pion information
     // ------------------------------------------------------------------------------------------------
     xF      = 2. * (pi->Dot(*q)) / (q->Mag() * W);
-    M_X     = ( Beam + target - e - pi - Pn ).Mag(); // missing mass
+    M_X     = ( (Beam + target) - (e + pi + Pn) ).Mag(); // missing mass
     status  = 0;
     
     // now stream data to CSV file
