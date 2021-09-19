@@ -594,7 +594,7 @@ void Stream_e_pi_n_line_to_CSV(int piIdx,
     // ------------------------------------------------------------------------------------------------
     // compute kinematics that also relies on pion information
     // ------------------------------------------------------------------------------------------------
-    xF      = 2. * (pi->Dot(q)) / (q->Mag() * W);
+    xF      = 2. * (pi->Dot(*q)) / (q->Mag() * W);
     M_X     = ( Beam + target - e - pi - Pn ).Mag(); // missing mass
     status  = 0;
     
