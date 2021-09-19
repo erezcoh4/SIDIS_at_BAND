@@ -213,7 +213,7 @@ void MergeSIDISandBANDevents (int NeventsToMerge=10,
         
         BANDTree -> GetEntry( BANDEventIndicesToMerge[MergedEvtId] );
                 
-        if (eepiPastCutsInEvent) {
+        if (eepiPastKinematicalCuts) {
             
             // compute kinematical variables
             ComputeKinematics ();
@@ -238,10 +238,11 @@ void MergeSIDISandBANDevents (int NeventsToMerge=10,
                     eepiPastKinematicalCuts = eepimsPastKinematicalCuts[piIdx];
                 }
                 
-                
-                Stream_e_pi_n_line_to_CSV(piIdx,
-                                          eepiPastKinematicalCuts, goodneutron,
-                                          fdebug );
+                if (goodneutron){
+                    Stream_e_pi_n_line_to_CSV(piIdx,
+                                              eepiPastKinematicalCuts, goodneutron,
+                                              fdebug );
+                }
             }
             
             
@@ -599,9 +600,6 @@ void Stream_e_pi_n_line_to_CSV(int piIdx,
         Q2,             W,                  xB,                 Zpi,
         omega,          xF,                 y,                  M_X,
     };
-    StreamToCSVfile(pionCharge,
-                    variables ,
-                    passed_cuts_e_pi_kinematics, passed_cuts_n,
-                    fdebug );
+    StreamToCSVfile(variables, fdebug );
 }
 
