@@ -433,8 +433,8 @@ void SetInputAndOutputTTrees (){
     
     // SIDIS input tree branches
     
-    SIDISTree  -> SetBranchAddress("eventnumber"        ,&SIDISeventID                  );
-    SIDISTree  -> SetBranchAddress("runnum"             ,&SIDISrunID                    );
+    SIDISTree  -> SetBranchAddress("eventnumber"                ,&SIDISeventID          );
+    SIDISTree  -> SetBranchAddress("runnum"                     ,&SIDISrunID            );
     SIDISTree  -> SetBranchAddress("e"                          ,&e                     );
     SIDISTree  -> SetBranchAddress("pi"                         ,&piplus                );
     SIDISTree  -> SetBranchAddress("Ve"                         ,&Ve                    );
@@ -595,7 +595,7 @@ void Stream_e_pi_n_line_to_CSV(int piIdx,
     
     // now stream data to CSV file
     std::vector<double> variables =
-    {   (double)status, (double)RunNumber,    (double)eventnumber,    (double)beam_helicity,
+    {   (double)status, (double)SIDISrunID,   (double)eventnumber,    (double)beam_helicity,
         e->P(),          e->Theta(),          e->Phi(),             Ve->Z(),
         pi->P(),         pi->Theta(),         pi->Phi(),            Vpi->Z(),
         Pn->P(),         Pn->Theta(),         Pn->Phi(),            Vn->Z(),
