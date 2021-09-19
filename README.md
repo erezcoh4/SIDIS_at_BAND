@@ -15,7 +15,9 @@ Sep-19, 2021
 1. Refreshed SIDIS and BAND Skimmers merging:
     1. Update MergeSIDISandBANDSkimmers.C script
         1. Deleted all unnecessary and masive detector features like DC position etc. for electrons and pions
-        2. 
+        2. Updated pion momentum to an array of size [NMAXPIONS] (similarly for pion vertex, Z,...)
+        
+2. added eepipsPastKinematicalCuts and eepimsPastKinematicalCuts variables to SIDISc12rSkimmer.C output TTrees
 
 
 Sep-12, 2021    

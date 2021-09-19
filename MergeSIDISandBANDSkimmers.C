@@ -52,11 +52,16 @@ std::ofstream   CSVfile;
 clock_t tStart = clock();
 
 // globals
+TString                         pionCharge; // "pi+" or "pi-"
+Int_t               BANDrunID, BANDeventID;
+Int_t             SIDISrunID, SIDISeventID;
 Int_t          EventIDsToMerge[NMAXEVENTS];
 Int_t  BANDEventIndicesToMerge[NMAXEVENTS];
 Int_t SIDISEventIndicesToMerge[NMAXEVENTS];
 Int_t             BANDeventIDs[NMAXEVENTS];
 Int_t            SIDISeventIDs[NMAXEVENTS];
+Int_t                 Npions, Npips, Npims;
+Int_t                  Ne, Np, Nn, Ngammas;
 
 // kinematics and observables
 Double_t Mp      = 0.938272; // GeV/c2
@@ -65,16 +70,20 @@ Double_t Md      = 1.875;    // GeV/c2
 Double_t Mp2     = Mp * Mp;
 
 // SIDIS Tree
-TLorentzVector        *e=0;
-TLorentzVector   *piplus=0;
 TLorentzVector     *Beam=0;
+TLorentzVector        *e=0;
 TLorentzVector        *q=0;
+TLorentzVector       *Pn=0; // neutron momentum
+TLorentzVector       *Ps=0; // spectator momentum
 // reconstructed vertex position
 TVector3             *Ve=0;
-TVector3        *Vpiplus=0;
+std::vector<TVector3>        *Vpiplus=0;
+std::vector<TLorentzVector>   *piplus=0;
 
-bool      eepipsPastCutsInEvent = false;
-bool                goodneutron = false;
+bool                     eepiPastCutsInEvent;
+bool                     goodneutron = false;
+bool    eepipsPastKinematicalCuts[NMAXPIONS];
+bool    eepimsPastKinematicalCuts[NMAXPIONS];
 
 int        eventnumber = 0;
 int        nleadindex = -1;
@@ -91,11 +100,13 @@ double          weight = 0;
 Double_t                        xB;
 Double_t                        Q2;
 Double_t                     omega;
+Double_t                        w2; // omega^2
 Double_t          Zpips[NMAXPIONS]; // energy fraction rest frame
 Double_t                         W; // energy of the hadronic system
 Double_t                   alpha_s; // light cone fraction of momentum of the recoil neutron
 Double_t                    WPrime; // moving proton
 Double_t                    xPrime; // moving proton
+Double_t                        Es; // spectator energy
 
 TClonesArray   * nHits = new TClonesArray("bandhit");
 TClonesArray  &saveHit = *nHits;
@@ -114,20 +125,33 @@ Int_t CreateListOfEventsToMerge (TTree * BANDTree,
                                  TTree * SIDISTree,
                                  int NeventsToMerge=-1,
                                  int fdebug=0);
+
+void Stream_e_pi_n_line_to_CSV (int piIdx,
+                                bool passed_cuts_e_pi_kinematics,
+                                bool passed_cuts_n,
+                                int fdebug );
+void           StreamToCSVfile (TString pionCharge, // "pi+" or "pi-"
+                                std::vector<Double_t> observables,
+                                bool passed_cuts_e_pi_kinematics,
+                                bool passed_cuts_n,
+                                int fdebug);
+
 void    SetInputAndOutputTTrees ();
 void          ComputeKinematics ();
 void                  PrintDone ();
-
-
+void          PrintMonitorHello ();
+void              SetPionCharge ( fpionCharge ){ pionCharge = fpionCharge; };
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 // Main functionality
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void MergeSIDISandBANDSkimmers(int RunNumber=6420,
+                               TString fpionCharge="pi+", // "pi+" or "pi-"
                                int NeventsToMerge=-1,
                                int fdebug=1,
                                int PrintProgress=5000){
     
+    SetPionCharge    ( fpionCharge );
     char RunNumberStr[20];
     sprintf( RunNumberStr, "00%d", RunNumber );
     OpenInputFiles   ( (TString)RunNumberStr );
@@ -144,8 +168,7 @@ void MergeSIDISandBANDSkimmers(int RunNumber=6420,
 void MergeSIDISandBANDevents (int NeventsToMerge=10,
                               int fdebug=2,
                               int PrintProgress=5000){
-    
-    Int_t   BANDrunID, BANDeventID, SIDISrunID, SIDISeventID;
+        
     Int_t   NeventsBAND  = BANDTree->GetEntries();
     Int_t   NeventsSIDIS = SIDISTree->GetEntries();
     // Create a list of events to merge
@@ -183,30 +206,39 @@ void MergeSIDISandBANDevents (int NeventsToMerge=10,
     
     for (int MergedEvtId=0; MergedEvtId<Nevents2Merge; MergedEvtId++) {
         
-        BANDTree    -> GetEntry( BANDEventIndicesToMerge[MergedEvtId] );
-        if (eepipsPastCutsInEvent) {
+        BANDTree -> GetEntry( BANDEventIndicesToMerge[MergedEvtId] );
+                
+        if (eepiPastCutsInEvent) {
             
             // compute kinematical variables
-            ComputeKinematics       ();
+            ComputeKinematics ();
             
             // grab neturon information from BAND
             SIDISTree   -> GetEntry( SIDISEventIndicesToMerge[MergedEvtId] );
             
             // fill output TTree and CSV file
             MergedTree  -> Fill();
-            StreamToCSVfile ({  (double)BANDrunID,  (double)BANDeventID,
-                livetime,           current,
-                xB,                 Q2,
-                Ebeam,              z,
-                W,                  alpha_s,
-                WPrime,             xPrime,
-                e->Px(),            e->Py(),
-                e->Pz(),            e->E(),
-                q->Px(),            q->Py(),
-                q->Pz(),            q->E(),
-                Ve->z(),            Vpiplus->z(),
-                (double)goodneutron,
-            },fdebug);
+            
+            if (pionCharge=="pi+") {
+                Npions = Npips;
+            } else if (pionCharge=="pi-") {
+                Npions = Npims;
+            }
+            
+            for (int piIdx=0; piIdx<Npions; piIdx++) {
+                bool eepiPastKinematicalCuts = false;
+                if (pionCharge=="pi+") {
+                    eepiPastKinematicalCuts = eepipsPastKinematicalCuts[piIdx];
+                } else if (pionCharge=="pi-") {
+                    eepiPastKinematicalCuts = eepimsPastKinematicalCuts[piIdx];
+                }
+                
+                
+                Stream_e_pi_n_line_to_CSV(piIdx,
+                                          eepiPastKinematicalCuts, goodneutron,
+                                          fdebug );
+            }
+            
             
             if (fdebug>2){
                 std::cout
@@ -406,10 +438,18 @@ void SetInputAndOutputTTrees (){
     SIDISTree  -> SetBranchAddress("xB"                        ,&xB                     );
     SIDISTree  -> SetBranchAddress("Q2"                        ,&Q2                     );
     SIDISTree  -> SetBranchAddress("omega"                     ,&omega                  );
-    SIDISTree  -> SetBranchAddress("z"                         ,&Zpips                  );
+    SIDISTree  -> SetBranchAddress("Z"                         ,&Zpips                  );
     SIDISTree  -> SetBranchAddress("W"                         ,&W                      );
-    SIDISTree  -> SetBranchAddress("eepipsPastCutsInEvent"     ,&eepipsPastCutsInEvent  );
-    
+    SIDISTree  -> SetBranchAddress("eepiPastCutsInEvent"       ,&eepiPastCutsInEvent    );
+    SIDISTree  -> SetBranchAddress("eepipsPastKinematicalCuts" ,&eepipsPastKinematicalCuts);
+    SIDISTree  -> SetBranchAddress("eepimsPastKinematicalCuts" ,&eepimsPastKinematicalCuts);
+    SIDISTree  -> SetBranchAddress("Npips"                     ,&Npips                 );
+    SIDISTree  -> SetBranchAddress("Npims"                     ,&Npims                 );
+    SIDISTree  -> SetBranchAddress("Nelectrons"                ,&Ne                    );
+    SIDISTree  -> SetBranchAddress("Ngammas"                   ,&Ngammas               );
+    SIDISTree  -> SetBranchAddress("Nprotons"                  ,&Np                    );
+    SIDISTree  -> SetBranchAddress("Nneutrons"                 ,&Nn                    );
+
     
     // BAND input tree branches
     BANDTree   -> SetBranchAddress("eventnumber"  ,&BANDeventID);
@@ -430,65 +470,29 @@ void SetInputAndOutputTTrees (){
     // Merged Tree - containing all variables...
     // run and event number (ID) have to be consistent in the merged tree,
     // so it does not matter from where we take them...
-    MergedTree->Branch("Runno"              ,&SIDISrunID    );
-    MergedTree->Branch("eventnumber"        ,&SIDISeventID  );
-    MergedTree->Branch("Ebeam"              ,&Ebeam         );
-    MergedTree->Branch("gated_charge"       ,&gated_charge  );
-    MergedTree->Branch("livetime"           ,&livetime      );
-    MergedTree->Branch("starttime"          ,&starttime     );
-    MergedTree->Branch("current"            ,&current       );
-    MergedTree->Branch("weight"             ,&weight        );
-    MergedTree->Branch("nMult"              ,&nMult         );
-    MergedTree->Branch("nHits"              ,&nHits         );
-    MergedTree->Branch("goodneutron"        ,&goodneutron   );
-    MergedTree->Branch("nleadindex"         ,&nleadindex    );
-    
-    //    // SIDIS branches
-    //    MergedTree->Branch("e_E_PCAL"           ,&e_E_PCAL              );
-    //    MergedTree->Branch("e_E_ECIN"           ,&e_E_ECIN              );
-    //    MergedTree->Branch("e_E_ECOUT"          ,&e_E_ECOUT             );
-    //    MergedTree->Branch("pips_chi2PID"       ,&pips_chi2PID          );
-    //
-    //    MergedTree->Branch("e_PCAL_W"           ,&e_PCAL_W              );
-    //    MergedTree->Branch("e_PCAL_V"           ,&e_PCAL_V              );
-    //    MergedTree->Branch("pips_PCAL_x"        ,&pips_PCAL_x           );
-    //    MergedTree->Branch("pips_PCAL_y"        ,&pips_PCAL_y           );
-    //    MergedTree->Branch("pips_PCAL_z"        ,&pips_PCAL_z           );
-    //    MergedTree->Branch("e_PCAL_x"           ,&e_PCAL_x              );
-    //    MergedTree->Branch("e_PCAL_y"           ,&e_PCAL_y              );
-    //    MergedTree->Branch("e_PCAL_z"           ,&e_PCAL_z              );
-    //
-    //    MergedTree->Branch("e_PCAL_sector"      ,&e_PCAL_sector         );
-    //    MergedTree->Branch("e_DC_sector"        ,&e_DC_sector           );
-    //    MergedTree->Branch("e_DC_Chi2N"         ,&e_DC_Chi2N            );
-    //    //    MergedTree->Branch("e_DC_x"             ,&e_DC_x                );
-    //    //    MergedTree->Branch("e_DC_y"             ,&e_DC_y                );
-    //
-    //    MergedTree->Branch("pips_PCAL_sector"   ,&pips_PCAL_sector      );
-    //    MergedTree->Branch("pips_DC_sector"     ,&pips_DC_sector        );
-    //    MergedTree->Branch("pips_Chi2N"         ,&pips_Chi2N            );
-    //    //    MergedTree->Branch("pips_DC_x"          ,&pips_DC_x             );
-    //    //    MergedTree->Branch("pips_DC_y"          ,&pips_DC_y             );
-    //
-    //    MergedTree->Branch("pips_E_PCAL"        ,&pips_E_PCAL           );
-    //    MergedTree->Branch("pips_E_ECIN"        ,&pips_E_ECIN           );
-    //
-    //    MergedTree->Branch("pips_E_ECIN"        ,&pips_E_ECIN           );
-    //    MergedTree->Branch("pips_E_ECOUT"       ,&pips_E_ECOUT          );
-    //    MergedTree->Branch("DC_layer"           ,&DC_layer              );
-    
+    MergedTree->Branch("Runno"                  ,&SIDISrunID            );
+    MergedTree->Branch("eventnumber"            ,&SIDISeventID          );
+    MergedTree->Branch("Ebeam"                  ,&Ebeam                 );
+    MergedTree->Branch("gated_charge"           ,&gated_charge          );
+    MergedTree->Branch("livetime"               ,&livetime              );
+    MergedTree->Branch("starttime"              ,&starttime             );
+    MergedTree->Branch("current"                ,&current               );
+    MergedTree->Branch("weight"                 ,&weight                );
+    MergedTree->Branch("nMult"                  ,&nMult                 );
+    MergedTree->Branch("nHits"                  ,&nHits                 );
+    MergedTree->Branch("goodneutron"            ,&goodneutron           );
+    MergedTree->Branch("nleadindex"             ,&nleadindex            );
     MergedTree->Branch("e"                      ,&e                     );
     MergedTree->Branch("piplus"                 ,&piplus                );
     MergedTree->Branch("Ve"                     ,&Ve                    );
     MergedTree->Branch("Vpiplus"                ,&Vpiplus               );
     MergedTree->Branch("Beam"                   ,&Beam                  );
     MergedTree->Branch("q"                      ,&q                     );
-    
     MergedTree->Branch("xB"                     ,&xB                    );
     MergedTree->Branch("Q2"                     ,&Q2                    );
     MergedTree->Branch("omega"                  ,&omega                 );
-    MergedTree->Branch("z"                      ,&z                     );
-    MergedTree->Branch("eepipsPastCutsInEvent" ,&eepipsPastCutsInEvent  );
+    MergedTree->Branch("Z"                      ,&Zpips                 );
+    MergedTree->Branch("eepiPastCutsInEvent"  ,&eepiPastCutsInEvent );
     
 }
 
@@ -510,14 +514,14 @@ void ComputeKinematics(){
     // compute kinematics
     // SIDISc12rSkimmer.C already computes few of the kinematical variables:
     //     xB,  Q2, omega, W, Z
-    Q2      = -q.Mag2();
-    omega   = q.E();
-    Es      = Pn.E();
-    Ps      = Pn.P();
+    Q2      = -q->Mag2();
+    omega   = q->E();
+    Es      = Pn->E();
+    Ps      = Pn->P();
     w2      = omega * omega;
-    theta_sq= Pn.Angle();
+    theta_sq= Pn->Angle();
     xB      = Q2 / (2. * Mp * omega);
-    xPrime  = Q2 / (2. * ((Md - Es) * omega + Pn.Vect()*q.Vect() ));
+    xPrime  = Q2 / (2. * ((Md - Es) * omega + Pn->Vect()*q->Vect() ));
     W       = sqrt(Mp2 - Q2 + 2. * omega * Mp);
     WPrime  = sqrt(Mp2 - Q2 + 2. * omega * (Md - Es) + 2. * Ps * sqrt(Q2 + w2) * cos( theta_sq ));
     // move to q-frame
@@ -525,13 +529,81 @@ void ComputeKinematics(){
     alpha_s = ComputeLightConeFraction( Pn_qFrame );
 }
 
-
-
-
-
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void PrintDone(){
     std::cout << "Done. " << "Execution time: "
     << double(clock() - tStart) / (double)CLOCKS_PER_SEC
     << " sec "<< std::endl;
+}
+
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+void Stream_e_pi_n_line_to_CSV(int piIdx,
+                               bool passed_cuts_e_pi_kinematics,
+                               bool passed_cuts_n,
+                               int fdebug ){
+    TLorentzVector  pi;
+    TVector3        Vpi;
+    double          Zpi;
+    if (pionCharge=="pi+") {
+        pi  = piplus [piIdx];
+        Vpi = Vpiplus[piIdx];
+        Zpi = Zpips  [piIdx];
+    }
+    else if (pionCharge=="pi-") {
+        pi  = piminus [piIdx];
+        Vpi = Vpiminus[piIdx];
+        Zpi = Zpims   [piIdx];
+   }
+    else {
+        std::cout << "pion charge ill defined at Stream_e_pi_line_to_CSV(), returning " << std::endl;
+        return;
+    }
+    
+    // write a (e,e'pi) event-line to CSV file
+
+    // from Harut A., Aug-2, 2021:
+    //    1: status, 2: runnum, 3: evnum, 4: helicity, 5: e_p, 6: e_theta, 7: e_phi, 8: vz_e, 9: pi_p, 10: pi_theta, 11: pi_phi, 12: vz_pi, 13: P_p, 14: P_theta, 15: P_phi, 16: vz_P, 17: Q2, 18: W, 19: x, 20: y, 21: z_pi, 22: z_P, 23: Mx(e:pi:P:X), 24: Mx(e:pi:X), 25: Mx(e:P:X), 26: zeta, 27: Mh, 28: pT_pi, 29: pT_P, 30: pTpT, 31: xF_pi, 32: xF_P, 33: eta_pi, 34: eta_P, 35: Delta_eta, 36: phi_pi (gamma*N COM), 37: phi_P (gamma*N COM), 38: Delta_phi.
+    //
+    //    1: status is a number indicating the quality of the event with the non-0 number indicating something was not not good (ex. out of fiducial region, not within the final cuts on energies of particles, missing or invarian masses....) The final observables will be done using status==0, while sensitivity of the observable to different cuts could be studied for various values of status>0
+    //    2-3: run number and event number to identify the event
+    //    4: helicity of the electron +1 along the beam and -1 opposite to it
+    //    5,6,7,8 electron momentum,theta,phi_Lab, and z-vertex
+    //    9,10,11,12 the same for pi+
+    //    All other columns could be calculated from the first 16, but are included for cross check and minimizing the work in production of final observables. Some of them simple, like x,Q^2,W,y,  z=E\pion/nu, zome less trivial like Breit frame rapidities of pion (eta_pi) and proton eta_P, or corresponding values for X_Feynman variable xF_pi, xF_P.
+    //    Some, like azimuthal angles of pion (phi_pi) and proton (phi_p) in the CM frame may also be confusing.
+    //    In addition to the first 16 columns (mandatory) you can add as many columns as you are comfortable to fill, and consider relevant for your process.
+    
+    // ------------------------------------------------------------------------------------------------
+    // compute kinematics that also relies on pion information
+    // ------------------------------------------------------------------------------------------------
+    xF  = 2. * (pi.Dot(q)) / (q.Mag() * W);
+    M_X = ( Beam + target - e - pi - Pn ).Mag();
+    
+    // now stream data to CSV file
+    std::vector<double> variables =
+    {   (double)status, (double)runnum,     (double)evnum,      (double)beam_helicity,
+        e.P(),          e.Theta(),          e.Phi(),            Ve.Z(),
+        pi.P(),         pi.Theta(),         pi.Phi(),           Vpi.Z(),
+        Pn.P(),         Pn.Theta(),         Pn.Phi(),           Vn.Z(),
+        Q2,             W,                  xB,                 Zpi,
+        omega,          xF,                 y,                  M_X,
+    };
+    StreamToCSVfile(pionCharge,
+                    variables ,
+                    passed_cuts_e_pi_kinematics, passed_cuts_n,
+                    fdebug );
+}
+
+
+// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+void StreamToCSVfile (std::vector<Double_t> observables,
+                      bool passed_cuts_e_pi_kinematics,
+                      bool passed_cuts_n,
+                      int fdebug){
+    if (fdebug>1) {
+        std::cout << "streaming to CSVfile" << std::endl;
+    }
+    for (auto v:observables) CSVfile_e_pi_n << v << ",";
+    CSVfile_e_pi_n << std::endl;
 }
