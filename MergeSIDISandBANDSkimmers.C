@@ -74,11 +74,12 @@ TLorentzVector     *Beam=0;
 TLorentzVector        *e=0;
 TLorentzVector        *q=0;
 TLorentzVector       *Pn=0; // neutron momentum
-TLorentzVector       *Ps=0; // spectator momentum
 // reconstructed vertex position
 TVector3             *Ve=0;
-std::vector<TVector3>        *Vpiplus=0;
-std::vector<TLorentzVector>   *piplus=0;
+std::vector<TVector3>          *Vpiplus=0;
+std::vector<TVector3>         *Vpiminus=0;
+std::vector<TLorentzVector>     *piplus=0;
+std::vector<TLorentzVector>    *piminus=0;
 
 bool                     eepiPastCutsInEvent;
 bool                     goodneutron = false;
@@ -107,6 +108,8 @@ Double_t                   alpha_s; // light cone fraction of momentum of the re
 Double_t                    WPrime; // moving proton
 Double_t                    xPrime; // moving proton
 Double_t                        Es; // spectator energy
+Double_t                        Ps; // spectator momentum
+Double_t                  theta_sq; // spectator angle with respect to momentum transfer
 
 TClonesArray   * nHits = new TClonesArray("bandhit");
 TClonesArray  &saveHit = *nHits;
@@ -140,7 +143,7 @@ void    SetInputAndOutputTTrees ();
 void          ComputeKinematics ();
 void                  PrintDone ();
 void          PrintMonitorHello ();
-void              SetPionCharge ( fpionCharge ){ pionCharge = fpionCharge; };
+void              SetPionCharge ( TString fpionCharge ){ pionCharge = fpionCharge; };
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 // Main functionality
@@ -284,18 +287,18 @@ void OpenInputFiles (TString RunStr){
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void OpenOutputFiles (TString RunStr){
-    csvheader = ("runID,eventID,"
-                 +(TString)"livetime,current,"
-                 +(TString)"xB,Q2,"
-                 +(TString)"Ebeam,z,"
-                 +(TString)"W,alpha_s,"
-                 +(TString)"WPrime,xPrime,",
-                 +(TString)"e_Px,e_Py,"
-                 +(TString)"e_Pz,e_E,"
-                 +(TString)"q_Px,q_Py,"
-                 +(TString)"q_Pz,q_E,"
-                 +(TString)"Ve_z,Vpiplus_z,"
-                 +(TString)"goodneutron,");
+    TString csvheader = ("runID,eventID,"
+                         +(TString)"livetime,current,"
+                         +(TString)"xB,Q2,"
+                         +(TString)"Ebeam,z,"
+                         +(TString)"W,alpha_s,"
+                         +(TString)"WPrime,xPrime,",
+                         +(TString)"e_Px,e_Py,"
+                         +(TString)"e_Pz,e_E,"
+                         +(TString)"q_Px,q_Py,"
+                         +(TString)"q_Pz,q_E,"
+                         +(TString)"Ve_z,Vpiplus_z,"
+                         +(TString)"goodneutron,");
     
     TString skimmedMergedFilename = (DataPath + "merged_SIDIS_and_BAND_skimming/"
                                      + "skimmed_SIDIS_and_BAND_inc_"  + RunStr );
@@ -492,7 +495,7 @@ void SetInputAndOutputTTrees (){
     MergedTree->Branch("Q2"                     ,&Q2                    );
     MergedTree->Branch("omega"                  ,&omega                 );
     MergedTree->Branch("Z"                      ,&Zpips                 );
-    MergedTree->Branch("eepiPastCutsInEvent"  ,&eepiPastCutsInEvent );
+    MergedTree->Branch("eepiPastCutsInEvent"    ,&eepiPastCutsInEvent );
     
 }
 
@@ -514,19 +517,16 @@ void ComputeKinematics(){
     // compute kinematics
     // SIDISc12rSkimmer.C already computes few of the kinematical variables:
     //     xB,  Q2, omega, W, Z
-    Q2      = -q->Mag2();
-    omega   = q->E();
     Es      = Pn->E();
     Ps      = Pn->P();
     w2      = omega * omega;
-    theta_sq= Pn->Angle();
-    xB      = Q2 / (2. * Mp * omega);
+    theta_sq= Pn->Angle( q );
     xPrime  = Q2 / (2. * ((Md - Es) * omega + Pn->Vect()*q->Vect() ));
     W       = sqrt(Mp2 - Q2 + 2. * omega * Mp);
     WPrime  = sqrt(Mp2 - Q2 + 2. * omega * (Md - Es) + 2. * Ps * sqrt(Q2 + w2) * cos( theta_sq ));
     // move to q-frame
     // compute light-cone fraction of momentum
-    alpha_s = ComputeLightConeFraction( Pn_qFrame );
+    // alpha_s = ComputeLightConeFraction( Pn_qFrame );
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
