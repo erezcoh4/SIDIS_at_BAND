@@ -3,14 +3,20 @@
 # Skimming for Semi Inclusive DIS (SIDIS) on a deuteron target with $pi^+$ and $pi^-$ tagging
 
     Main open ToDo items:
-    (1) Validate pion DC fiducial cuts
-    
     
     
     
     
     
 # Revisions
+
+Sep-19, 2021    
+-------------
+1. Refreshed SIDIS and BAND Skimmers merging:
+    1. Update MergeSIDISandBANDSkimmers.C script
+        1. Deleted all unnecessary and masive detector features like DC position etc. for electrons and pions
+        2. 
+
 
 Sep-12, 2021    
 -------------
@@ -122,7 +128,6 @@ Aug-22, 2021
     
     ## ToDo list:
     ---------------------    
-    (1) add fiducial cuts for pions in the DC
     (2) Compare electron-only with BAND analysis results or RGA results (e.g. single-spin assymetries)
     (3) Verify that event matching between SIDIS and BAND skimming  is done correctly
     (4) Add neuton fiducial cuts
@@ -146,6 +151,10 @@ Aug-22, 2021
 
 
 
+# Merge SIDIS and BAND Skimmers
+
+    This script assumes that the input trees from SIDISc12rSkimmer.C,
+    have a boolean flag "eepipsPastCutsInEvent/O" that states if event passed (e,e'\pi) event selection criteria
 
 
  ---------------------------------------------
