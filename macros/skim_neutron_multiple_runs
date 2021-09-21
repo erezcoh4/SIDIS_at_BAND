@@ -25,7 +25,7 @@ FirstRun      = args.FirstRun
 runs_filename = "macros/runlists/good_runs_10-2.txt"
 outdir        = "/volatile/clas12/users/ecohen/BAND/neutron_skimming"
 indir         = "/volatile/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train_20200610/inc/"
-skimmer       = "/u/home/cohen/BAND_analysis/bandsoft_tools/bin/neutrons"
+skimmer       = "/u/home/cohen/BAND_analysis/bandsoft_tools/bin/ncalibration_newbandclass"
 
 # Using readlines()
 runs_file = open(runs_filename, 'r')
@@ -42,7 +42,11 @@ for line in run_fileLines[FirstRun:]:#{
     runIdx += 1
     run = int(line.strip())
     
-    commandline = ("%s %s/skimmed_neutrons_inc_00%d.root 1 1 %s/inc_00%d.hipo"%(skimmer,outdir,run,indir,run))
+    # from bandsoft_tools: ./code [outputFile] [load shifts] [inputFile]
+    # <load shifts N,Y> = <0, 1>
+    # for ncalibration: /work/clas12/users/hauenst/bandsoft_tools/bin/ncalibration_newbandclass $output 1 $filetoget
+    # for neutrons at 10,2 runs: /work/clas12/users/hauenst/bandsoft_tools/bin/neutrons $output 1 1 1 $filetoget
+    commandline = ("%s %s/skimmed_neutrons_inc_00%d.root 1 %s/inc_00%d.hipo"%(skimmer,outdir,run,indir,run))
     print('')
     print("neutron skimming for run %d (%d/%d):"%(run,runIdx,Nruns))
     print('')
