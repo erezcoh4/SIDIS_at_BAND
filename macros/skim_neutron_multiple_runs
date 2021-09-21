@@ -12,8 +12,6 @@ parser.add_argument("--Nruns",        type=int, default=1,
                     required=False, help="number of runs to process ('-1' for all runs)")
 parser.add_argument("--FirstRun",     type=int, default=0,
                     required=False, help="first run to start from")
-parser.add_argument("--NeventsMax",   type=int, default=-1,
-                    required=False, help="maximal number of events to process")
 parser.add_argument("--fdebug",       type=int, default=1,
                     required=False, help="verbosity")
 parser.add_argument("--PrintProgress",type=int, default=50000,
@@ -21,7 +19,6 @@ parser.add_argument("--PrintProgress",type=int, default=50000,
 args = parser.parse_args()
 
 Nruns         = args.Nruns
-NeventsMax    = args.NeventsMax
 fdebug        = args.fdebug
 PrintProgress = args.PrintProgress
 FirstRun      = args.FirstRun
