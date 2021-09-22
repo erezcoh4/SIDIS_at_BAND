@@ -291,23 +291,20 @@ void MergeSIDISandBANDevents (int NeventsToMerge=10,
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void OpenInputFiles (TString RunStr){
     
-    std::cout << "Opening " << DataPath + "neutron_skimming/"
-    + "skimmed_neutrons_inc_"  + RunStr + ".root" << std::endl;
     
     TString   skimmedBANDFilename = (DataPath + "neutron_skimming/"
                                      + "skimmed_neutrons_inc_"  + RunStr + ".root");
+    std::cout << "Opening " << skimmedBANDFilename << std::endl;
     BANDFile                      = new TFile( skimmedBANDFilename );
     BANDTree                      = (TTree*)BANDFile->Get("neutrons");
     
     
     
-    std::cout << "Opening " << DataPath + "SIDIS_skimming/"
-    + "skimmed_SIDIS_inc_"  + RunStr + pionStr + ".root" << std::endl;
-    
     
     
     TString  skimmedSIDISFilename = (DataPath + "SIDIS_skimming/"
                                      + "skimmed_SIDIS_inc_"  + RunStr + pionStr + ".root");
+    std::cout << "Opening " << skimmedSIDISFilename << std::endl;
     SIDISFile                     = new TFile( skimmedSIDISFilename );
     SIDISTree                     = (TTree*)SIDISFile->Get("sidis");
     
@@ -331,9 +328,10 @@ void OpenOutputFiles (TString RunStr){
                          +(TString)"goodneutron,");
     
     TString skimmedMergedFilename = (DataPath + "merged_SIDIS_and_BAND_skimming/"
-                                     + "skimmed_SIDIS_and_BAND_inc_"  + RunStr );
+                                     + "skimmed_SIDIS_and_BAND_inc_"  + RunStr + pionStr );
     
-    
+    std::cout << "Opening output file: " << skimmedMergedFilename  << ".root/csv " << std::endl;
+
     
     // Create output tree
     MergedFile = new TFile( skimmedMergedFilename + ".root" ,"RECREATE");
