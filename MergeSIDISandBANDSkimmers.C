@@ -125,10 +125,12 @@ double       starttime = 0;
 double         current = 0;
 double          weight = 0;
 
-TClonesArray   * nHits = new TClonesArray("bandhit");
-TClonesArray  &saveHit = *nHits;
-TClonesArray * mcParts = new TClonesArray("genpart");
-TClonesArray   &saveMC = *mcParts;
+TClonesArray      * eHits = new TClonesArray("clashit"); // CLAS12 electrons in BAND analysis
+TClonesArray  &save_e_Hit = *eHits;
+TClonesArray      * nHits = new TClonesArray("bandhit"); // BAND neutrons in BAND analysis
+TClonesArray     &saveHit = *nHits;
+TClonesArray    * mcParts = new TClonesArray("genpart");
+TClonesArray      &saveMC = *mcParts;
 
 void             OpenInputFiles (TString RunStr);
 void            OpenOutputFiles (TString RunStr);
@@ -169,7 +171,7 @@ void MergeSIDISandBANDSkimmers(int RunNumber=6420,
     sprintf( RunNumberStr, "00%d", RunNumber );
     OpenInputFiles   ( (TString)RunNumberStr );
     OpenOutputFiles  ( (TString)RunNumberStr );
-    MergeSIDISandBANDevents( NeventsToMerge, fdebug, PrintProgress );
+    MergeSIDISandBANDevents( NeventsToMerge, PrintProgress );
     CloseOutputFiles (DataPath + "merged_SIDIS_and_BAND_skimming/");
     CloseInputFiles  ();
     PrintDone();
@@ -196,7 +198,7 @@ void MergeSIDISandBANDevents (int NeventsToMerge=10,
         << "Take some coffee, this takes some 20-40 ms per event to merge."
         << std::endl;
     }
-    Int_t Nevents2Merge = CreateListOfEventsToMerge(BANDTree, SIDISTree, NeventsToMerge, fdebug);
+    Int_t Nevents2Merge = CreateListOfEventsToMerge(BANDTree, SIDISTree, NeventsToMerge);
     if (fdebug>1) {
         std::cout << std::endl;
         std::cout << "Done creating merge list of " << Nevents2Merge << " events, after "
@@ -226,7 +228,7 @@ void MergeSIDISandBANDevents (int NeventsToMerge=10,
             eepiPastCutsInEvent = eepimsPastCutsInEvent;
         }
         
-        if (eepiPastKinematicalCuts) {
+        if (eepiPastCutsInEvent) {
             
             // compute kinematical variables
             ComputeKinematics ();
@@ -253,8 +255,7 @@ void MergeSIDISandBANDevents (int NeventsToMerge=10,
                 
                 if (goodneutron){
                     Stream_e_pi_n_line_to_CSV(piIdx,
-                                              eepiPastKinematicalCuts, goodneutron,
-                                              fdebug );
+                                              eepiPastKinematicalCuts, goodneutron);
                 }
             }
             
