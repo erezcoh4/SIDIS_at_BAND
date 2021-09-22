@@ -111,6 +111,7 @@ bool                     goodneutron = false;
 bool    eepipsPastKinematicalCuts[NMAXPIONS];
 bool    eepimsPastKinematicalCuts[NMAXPIONS];
 
+int             fdebug = 1;
 int        eventnumber = 0;
 int        nleadindex = -1;
 int              nMult = 0;
@@ -131,21 +132,18 @@ TClonesArray   &saveMC = *mcParts;
 
 void             OpenInputFiles (TString RunStr);
 void            OpenOutputFiles (TString RunStr);
-void            StreamToCSVfile (std::vector<Double_t> observables, int fdebug=0);
+void            StreamToCSVfile (std::vector<Double_t> observables);
 void            CloseInputFiles ();
 void           CloseOutputFiles (TString OutDataPath);
 void    MergeSIDISandBANDevents (int NeventsToMerge=10,
-                                 int fdebug=2,
                                  int PrintProgress=5000);
 Int_t CreateListOfEventsToMerge (TTree * BANDTree,
                                  TTree * SIDISTree,
-                                 int NeventsToMerge=-1,
-                                 int fdebug=0);
+                                 int NeventsToMerge=-1);
 
 void Stream_e_pi_n_line_to_CSV (int piIdx,
                                 bool passed_cuts_e_pi_kinematics,
-                                bool passed_cuts_n,
-                                int fdebug );
+                                bool passed_cuts_n);
 
 
 void    SetInputAndOutputTTrees ();
@@ -162,7 +160,7 @@ void               SetVerbosity ( int ffdebug ){fdebug = ffdebug;};
 void MergeSIDISandBANDSkimmers(int RunNumber=6420,
                                TString fpionCharge="pi+", // "pi+" or "pi-"
                                int NeventsToMerge=-1,
-                               int fdebug=1,
+                               int ffdebug=1,
                                int PrintProgress=5000){
     
     SetPionCharge    ( fpionCharge );
@@ -181,7 +179,6 @@ void MergeSIDISandBANDSkimmers(int RunNumber=6420,
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void MergeSIDISandBANDevents (int NeventsToMerge=10,
-                              int fdebug=2,
                               int PrintProgress=5000){
         
     Int_t   NeventsBAND  = BANDTree->GetEntries();
@@ -361,7 +358,7 @@ void CloseOutputFiles (TString OutDataPath){
 
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-void StreamToCSVfile (std::vector<Double_t> observables, int fdebug){
+void StreamToCSVfile (std::vector<Double_t> observables){
     if (fdebug>2) std::cout << "StreamToCSVfile()" << std::endl;
     for (auto v:observables) {
         CSVfile_e_pi_n << v << ",";
@@ -373,8 +370,7 @@ void StreamToCSVfile (std::vector<Double_t> observables, int fdebug){
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 Int_t CreateListOfEventsToMerge(TTree * BANDTree,
                                 TTree * SIDISTree,
-                                int NeventsToMerge,
-                                int fdebug){
+                                int NeventsToMerge){
     
     // Decide which event-indices to merge from the two TTrees
     // Since this functionallity takes the most time,
@@ -486,7 +482,8 @@ void SetInputAndOutputTTrees (){
     BANDTree   -> SetBranchAddress("current"      ,&current);
     BANDTree   -> SetBranchAddress("weight"       ,&weight);
     BANDTree   -> SetBranchAddress("nMult"        ,&nMult);
-    BANDTree   -> SetBranchAddress("nHits"        ,&nHits);
+    BANDTree   -> SetBranchAddress("nHits"        ,&nHits); // BAND neutrons in BAND skimming
+    BANDTree   -> SetBranchAddress("eHits"        ,&eHits); // CLAS12 electrons in BAND skimming
     BANDTree   -> SetBranchAddress("goodneutron"  ,&goodneutron);
     BANDTree   -> SetBranchAddress("nleadindex"   ,&nleadindex);
     BANDTree   -> SetBranchAddress("genMult"      ,&genMult);
@@ -504,7 +501,8 @@ void SetInputAndOutputTTrees (){
     MergedTree->Branch("current"                ,&current               );
     MergedTree->Branch("weight"                 ,&weight                );
     MergedTree->Branch("nMult"                  ,&nMult                 );
-    MergedTree->Branch("nHits"                  ,&nHits                 );
+    MergedTree->Branch("nHits"                  ,&nHits                 ); // BAND neutrons in BAND skimming
+    MergedTree->Branch("eHits"                  ,&eHits                 ); // CLAS12 electrons in BAND skimming
     MergedTree->Branch("goodneutron"            ,&goodneutron           );
     MergedTree->Branch("nleadindex"             ,&nleadindex            );
     MergedTree->Branch("e"                      ,&e                     );
@@ -569,8 +567,7 @@ void PrintDone(){
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void Stream_e_pi_n_line_to_CSV(int piIdx,
                                bool passed_cuts_e_pi_kinematics,
-                               bool passed_cuts_n,
-                               int fdebug ){
+                               bool passed_cuts_n){
     
     TLorentzVector  * pi;
     TVector3        * Vpi;

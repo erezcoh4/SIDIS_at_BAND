@@ -7,6 +7,13 @@
     
 ## Revisions
 
+Sep-22, 2021    
+-------------
+1. Continue polishing neutron and SIDIS merging
+2. Updated auxilary BAND classes from *bandsoft_tools* commit "cfb8879..3f0c9c8"
+
+
+
 Sep-19, 2021    
 -------------
 1. Refreshed SIDIS and BAND Skimmers merging:
@@ -234,10 +241,36 @@ execute:
  
  comments:
  -----------------
- DVCS train recommended by Florian for SIDIS skimming:
+1. DVCS train recommended by Florian for SIDIS skimming:
 	"/cache/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train/sidisdvcs/"
- Tyler: There is a semi-exclusive filter to the DVCS train, so use RGM data trains:
+2. Tyler: There is a semi-exclusive filter to the DVCS train, so use RGM data trains:
 	"/volatile/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train_20200610/"
+3. The following objects are taken from *bandsoft_tools* for Auxiliary:
+
+genpart/genpart.cpp
+hipolib/dictionary.h
+hipolib/dictionary.cpp
+include/constants.h
+clashit/clashit.cpp
+hipolib/bank.h
+hipolib/bank.cpp
+include/bandhit.h
+bandhit/bandhit.cpp
+include/BScintillator.h
+banklib/BScintillator.cpp
+include/BScaler.h
+banklib/BScaler.cpp
+include/BParticle.h
+banklib/BParticle.cpp
+include/BEvent.h
+banklib/BEvent.cpp
+include/BConfig.h
+banklib/BConfig.cpp
+include/BCalorimeter.h
+banklib/BCalorimeter.cpp
+include/BBand.h
+banklib/BBand.cpp
+
 
 
  [Originally based on Ex1_CLAS12Reader.C]

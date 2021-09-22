@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # continously take data and print the rate every few seconds
-# last edit Sep-12, 2021 (EOC)
+# last edit Sep-22, 2021 (EOC)
 #
 import sys, os, linecache, pandas as pd
 import glob
