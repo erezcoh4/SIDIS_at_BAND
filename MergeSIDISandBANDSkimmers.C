@@ -77,6 +77,7 @@ Double_t                         y;
 
 
 TString                         pionCharge; // "pi+" or "pi-"
+TString                            pionStr;
 Int_t               BANDrunID, BANDeventID;
 Int_t             SIDISrunID, SIDISeventID;
 Int_t          EventIDsToMerge[NMAXEVENTS];
@@ -152,7 +153,17 @@ void    SetInputAndOutputTTrees ();
 void          ComputeKinematics ();
 void                  PrintDone ();
 void          PrintMonitorHello ();
-void              SetPionCharge ( TString fpionCharge ){ pionCharge = fpionCharge; };
+void              SetPionCharge ( TString fpionCharge ){
+    pionCharge = fpionCharge;
+    if (pionCharge=="pi+") {
+        pionStr = "_e_piplus";
+    } else if (pionCharge=="pi+") {
+        pionStr = "_e_piminus";
+    } else {
+        pionStr = "_no_pion_charge_info";
+    }
+    
+};
 void               SetVerbosity ( int ffdebug ){fdebug = ffdebug;};
 
 
@@ -293,8 +304,10 @@ void OpenInputFiles (TString RunStr){
     std::cout << "Opening " << DataPath + "SIDIS_skimming/"
     + "skimmed_SIDIS_inc_"  + RunStr + ".root" << std::endl;
     
+    
+    
     TString  skimmedSIDISFilename = (DataPath + "SIDIS_skimming/"
-                                     + "skimmed_SIDIS_inc_"  + RunStr + ".root");
+                                     + "skimmed_SIDIS_inc_"  + RunStr + pionStr + ".root");
     SIDISFile                     = new TFile( skimmedSIDISFilename );
     SIDISTree                     = (TTree*)SIDISFile->Get("sidis");
     
