@@ -157,7 +157,7 @@ void              SetPionCharge ( TString fpionCharge ){
     pionCharge = fpionCharge;
     if (pionCharge=="pi+") {
         pionStr = "_e_piplus";
-    } else if (pionCharge=="pi+") {
+    } else if (pionCharge=="pi-") {
         pionStr = "_e_piminus";
     } else {
         pionStr = "_no_pion_charge_info";
@@ -302,7 +302,7 @@ void OpenInputFiles (TString RunStr){
     
     
     std::cout << "Opening " << DataPath + "SIDIS_skimming/"
-    + "skimmed_SIDIS_inc_"  + RunStr + ".root" << std::endl;
+    + "skimmed_SIDIS_inc_"  + RunStr + pionStr + ".root" << std::endl;
     
     
     
