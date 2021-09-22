@@ -171,6 +171,7 @@ Merge SIDIS skimming (based on SIDISc12rSkimmer.C) with BAND skimming (based on 
 -----------------
 
     root -l MergeSIDISandBANDSkimmers.C
+    root -l -q "MergeSIDISandBANDSkimmers.C(6420,3,3)"
     root -l -q "MergeSIDISandBANDSkimmers.C(6420,-1)"
 
 

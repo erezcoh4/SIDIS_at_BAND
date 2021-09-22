@@ -4,6 +4,8 @@
 # continously take data and print the rate every few seconds
 # last edit Sep-19, 2021 (EOC)
 #
+# Skimmer: ncalibration_newbandclass
+# 
 import sys, os, linecache
 import argparse
 

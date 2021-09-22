@@ -1,4 +1,4 @@
-// last edit Sep-19, 2021
+// last edit Sep-22, 2021
 
 #ifdef __CINT__
 #pragma link C++ class std::vector<TVector3>+;
@@ -153,7 +153,7 @@ void          ComputeKinematics ();
 void                  PrintDone ();
 void          PrintMonitorHello ();
 void              SetPionCharge ( TString fpionCharge ){ pionCharge = fpionCharge; };
-void               SetVerbosity ( ffdebug ){fdebug = ffdebug;};
+void               SetVerbosity ( int ffdebug ){fdebug = ffdebug;};
 
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
