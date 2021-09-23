@@ -4,6 +4,9 @@
 # continously take data and print the rate every few seconds
 # last edit Sep-22, 2021 (EOC)
 #
+# example execute:
+# ./macros/merge_sidis_and_band_skims --Nruns=1 --worker=ErezMBP --NeventsMax=10 --fdebug=5 --doPipsAndPims=0
+#
 import sys, os, linecache, pandas as pd
 import glob
 import argparse
@@ -13,40 +16,71 @@ parser.add_argument("--Nruns",        type=int, default=1,
                     required=False, help="number of runs to combine ('-1' for all runs)")
 parser.add_argument("--FirstRun",     type=int, default=0,
                     required=False, help="first run to start from")
+parser.add_argument("--NeventsMax",   type=int, default=-1,
+                    required=False, help="maximal number of events to process")
 parser.add_argument("--fdebug",       type=int, default=1,
                     required=False, help="verbosity")
 parser.add_argument("--worker",       type=str, default="Erez-ifarm",
                     required=False, help="verbosity")
+parser.add_argument("--PrintProgress",type=int, default=50000,
+                    required=False, help="print progress (every N events)")
+parser.add_argument("--doPipsAndPims",type=int, default=1,
+                    required=False, help="do both pi+ and pi-")
+
 args = parser.parse_args()
 
 Nruns         = args.Nruns
+NeventsMax    = args.NeventsMax
 fdebug        = args.fdebug
 FirstRun      = args.FirstRun
+PrintProgress = args.PrintProgress
+runs_filename = "macros/runlists/good_runs_10-2.txt"
+
+pi_charges    = ['pi+']
+if args.doPipsAndPims > 0: #{
+    pi_charges = ['pi+','pi-']
+#}
+print(args.doPipsAndPims)
+print(pi_charges);
+
+
 path          = "";
 if args.worker == "Erez-ifarm": #{
-    path = r'/volatile/clas12/users/ecohen/BAND/SIDIS_skimming/'
+        data_path = r'/volatile/clas12/users/ecohen/BAND'
 #}
 elif args.worker == "ErezMBP": #{
-    path = r'/Users/erezcohen/Desktop/data/BAND/AnalysisFiles/AnalysisCSVfiles/skimmed_SIDIS'
+    data_path = r'/Users/erezcohen/Desktop/data/BAND'
 #}
 
-for pi_charge in ['piplus','piminus']:#{
-    if fdebug: print("merging (e,e%s) files "%pi_charge)
-    outcsvfilename  = path + "merged_ee%s.csv"%pi_charge
-    eepi_files      = glob.glob(os.path.join(path, "*%s_selected_eepi_kinematics.csv"%pi_charge ))
-    eepi_merged_df  = pd.DataFrame()
-    run_idx         = 0
-    if fdebug>1: print(eepi_files)
-    for f in eepi_files:#{
-        eepi_df         = pd.read_csv(f)
-        eepi_merged_df  = pd.concat( [eepi_merged_df, eepi_df], ignore_index=True)
-        run_idx         = run_idx + 1;
-        if Nruns > 0 and run_idx > Nruns: break;
-        if fdebug>1: print("added %s with %d events"%(f,len(eepi_df)))
+
+
+# Using readlines()
+runs_file = open(runs_filename, 'r')
+run_fileLines = runs_file.readlines()
+if Nruns<0: Nruns = len(run_fileLines)
+if fdebug>3:#{
+    print('good runs to process:')
+    for line in run_fileLines[FirstRun:]:#{
+        print(int(line.strip()), end =" ")
     #}
-    if fdebug: print("done merging (e,e%s) files, with %.2g events"%(pi_charge,len(eepi_merged_df)))
-    eepi_merged_df.to_csv( outcsvfilename );
-    if fdebug: print("saved merged dataframe into a combined CSV file \n%s"%outcsvfilename)
+    print('')
+    print('processing %d runs, starting from run %d'%(Nruns-FirstRun,FirstRun))
+#}
+
+runIdx = 0
+for line in run_fileLines[FirstRun:]:#{
+    runIdx += 1
+    run = int(line.strip())
+    
+    for pi_charge in pi_charges:#{
+        commandline = ("root -l -q 'MergeSIDISandBANDSkimmers.C(%d,\"%s\",%d,%d,%d,\"%s\")'"%
+                        (run,pi_charge,NeventsMax,fdebug,PrintProgress,data_path))
+        print("merge neutron and sidis %s skimming for run %d (%d/%d):"%(pi_charge,run,runIdx,Nruns))
+        print(commandline)
+        print('')
+        os.system( commandline )
+    #}
+    if (runIdx >= Nruns): break;
 #}
 
 print('')

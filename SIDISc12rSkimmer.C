@@ -832,6 +832,7 @@ void SetOutputTTrees(){
     outTree_e_piplus->Branch("omega"                ,&omega                 );
     outTree_e_piplus->Branch("W"                    ,&W                     );
     outTree_e_piplus->Branch("Z"                    ,Zpips                  );
+    outTree_e_piplus->Branch("y"                    ,&y                     );
 
     outTree_e_piplus->Branch("EventPassedCuts"      ,&EventPassedCuts       );
     outTree_e_piplus->Branch("ePastCutsInEvent"     ,&ePastCutsInEvent      );

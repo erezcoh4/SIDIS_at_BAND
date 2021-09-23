@@ -1,7 +1,10 @@
 
 
-# Skimming for Semi Inclusive DIS (SIDIS) on a deuteron target with $pi^+$ and $pi^-$ tagging
+# Semi Inclusive DIS (SIDIS) on a deuteron target with $pi^+$ and $pi^-$ tagging and a fast neutron recoiling from a SRC pair breakup 
 
+This repository is responsible for 
+(A) skimming for (e,e'$\pi^{\pm}$) events,
+(B) merging (e,e'$\pi^{\pm}$) events with fast neutron recoiling from BAND data.    
     
     
     
@@ -10,8 +13,16 @@
 Sep-22, 2021    
 -------------
 1. Continue polishing neutron and SIDIS merging
+    1. Added a Python scipt to control neutron and SIDIS merging
+    2. Updated neutron TTree name to "calib", for "ncalibration_newclass" skimmer     
+    
 2. Updated auxilary BAND classes from *bandsoft_tools* commit "cfb8879..3f0c9c8"
 
+3. Added "y" variable to SIDIS TTree
+
+4. Updated the name of the python script used for plotting the kinematical distributions from SIDIS data to *SIDISKinematicalDistributions.ipynb*
+
+ 
 
 
 Sep-19, 2021    
@@ -179,6 +190,7 @@ Merge SIDIS skimming (based on SIDISc12rSkimmer.C) with BAND skimming (based on 
 
     root -l MergeSIDISandBANDSkimmers.C
     root -l -q 'MergeSIDISandBANDSkimmers.C(6420,"pi+",3,3)'
+    root -l -q 'MergeSIDISandBANDSkimmers.C(6420,"pi+",10,3,1000,"/Users/erezcohen/Desktop/data/BAND")'
     root -l -q "MergeSIDISandBANDSkimmers.C(6420,-1)"
 
 

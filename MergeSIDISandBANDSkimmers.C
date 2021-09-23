@@ -21,10 +21,15 @@
 #include <TBenchmark.h>
 #include<time.h>
 
-#include "/u/home/cohen/SIDIS_at_BAND/Auxiliary/bank.h"
-#include "/u/home/cohen/SIDIS_at_BAND/Auxiliary/BBand.h"
-#include "/u/home/cohen/SIDIS_at_BAND/Auxiliary/BEvent.h"
-#include "/u/home/cohen/SIDIS_at_BAND/Auxiliary/constants.h"
+#include "Auxiliary/bank.h"
+#include "Auxiliary/BBand.h"
+#include "Auxiliary/BEvent.h"
+#include "Auxiliary/constants.h"
+
+//#include "/u/home/cohen/SIDIS_at_BAND/Auxiliary/bank.h"
+//#include "/u/home/cohen/SIDIS_at_BAND/Auxiliary/BBand.h"
+//#include "/u/home/cohen/SIDIS_at_BAND/Auxiliary/BEvent.h"
+//#include "/u/home/cohen/SIDIS_at_BAND/Auxiliary/constants.h"
 
 #define NMAXEVENTS 5000000
 #define NMAXPIONS 20 // maximal allowed number of pions
@@ -34,6 +39,8 @@
 // Globals
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 TString DataPath = "/volatile/clas12/users/ecohen/BAND/";
+TString   skimmedBANDFilename;
+TString  skimmedSIDISFilename;
 
 
 
@@ -127,11 +134,11 @@ double         current = 0;
 double          weight = 0;
 
 TClonesArray      * eHits = new TClonesArray("clashit"); // CLAS12 electrons in BAND analysis
-TClonesArray  &save_e_Hit = *eHits;
+// TClonesArray  &save_e_Hit = *eHits;
 TClonesArray      * nHits = new TClonesArray("bandhit"); // BAND neutrons in BAND analysis
-TClonesArray     &saveHit = *nHits;
+// TClonesArray     &saveHit = *nHits;
 TClonesArray    * mcParts = new TClonesArray("genpart");
-TClonesArray      &saveMC = *mcParts;
+// TClonesArray      &saveMC = *mcParts;
 
 void             OpenInputFiles (TString RunStr);
 void            OpenOutputFiles (TString RunStr);
@@ -153,7 +160,7 @@ void    SetInputAndOutputTTrees ();
 void          ComputeKinematics ();
 void                  PrintDone ();
 void          PrintMonitorHello ();
-void              SetPionCharge ( TString fpionCharge ){
+void              SetPionCharge ( TString fpionCharge ) {
     pionCharge = fpionCharge;
     if (pionCharge=="pi+") {
         pionStr = "_e_piplus";
@@ -162,9 +169,9 @@ void              SetPionCharge ( TString fpionCharge ){
     } else {
         pionStr = "_no_pion_charge_info";
     }
-    
 };
-void               SetVerbosity ( int ffdebug ){fdebug = ffdebug;};
+void                SetDataPath ( TString fDataPath )   {DataPath = fDataPath + "/";};
+void               SetVerbosity ( int ffdebug )         {fdebug = ffdebug;};
 
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
@@ -174,10 +181,12 @@ void MergeSIDISandBANDSkimmers(int RunNumber=6420,
                                TString fpionCharge="pi+", // "pi+" or "pi-"
                                int NeventsToMerge=-1,
                                int ffdebug=1,
-                               int PrintProgress=5000){
+                               int PrintProgress=5000,
+                               TString fDataPath="/volatile/clas12/users/ecohen/BAND/"){
     
     SetPionCharge    ( fpionCharge );
     SetVerbosity     ( ffdebug );
+    SetDataPath      ( fDataPath );
     char RunNumberStr[20];
     sprintf( RunNumberStr, "00%d", RunNumber );
     OpenInputFiles   ( (TString)RunNumberStr );
@@ -193,7 +202,7 @@ void MergeSIDISandBANDSkimmers(int RunNumber=6420,
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void MergeSIDISandBANDevents (int NeventsToMerge=10,
                               int PrintProgress=5000){
-        
+            
     Int_t   NeventsBAND  = BANDTree->GetEntries();
     Int_t   NeventsSIDIS = SIDISTree->GetEntries();
     // Create a list of events to merge
@@ -290,25 +299,19 @@ void MergeSIDISandBANDevents (int NeventsToMerge=10,
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void OpenInputFiles (TString RunStr){
-    
-    
-    TString   skimmedBANDFilename = (DataPath + "neutron_skimming/"
+        
+    skimmedBANDFilename = (DataPath + "neutron_skimming/"
                                      + "skimmed_neutrons_inc_"  + RunStr + ".root");
     std::cout << "Opening " << skimmedBANDFilename << std::endl;
     BANDFile                      = new TFile( skimmedBANDFilename );
-    BANDTree                      = (TTree*)BANDFile->Get("neutrons");
+    // Sep-21, "ncalibration_newclass" skimmer Tree name is "calib"
+    BANDTree                      = (TTree*)BANDFile->Get("calib");
     
-    
-    
-    
-    
-    TString  skimmedSIDISFilename = (DataPath + "SIDIS_skimming/"
+    skimmedSIDISFilename = (DataPath + "SIDIS_skimming/"
                                      + "skimmed_SIDIS_inc_"  + RunStr + pionStr + ".root");
     std::cout << "Opening " << skimmedSIDISFilename << std::endl;
     SIDISFile                     = new TFile( skimmedSIDISFilename );
-    SIDISTree                     = (TTree*)SIDISFile->Get("sidis");
-    
-    
+    SIDISTree                     = (TTree*)SIDISFile->Get("tree");
 }
 
 
@@ -390,21 +393,33 @@ Int_t CreateListOfEventsToMerge(TTree * BANDTree,
     if (fdebug>2) {
         std::cout << "CreateListOfEventsToMerge()" << std::endl;
     }
+    Int_t  NeventsBAND = BANDTree->GetEntries();
+    Int_t NeventsSIDIS = SIDISTree->GetEntries();
+    
     
     // first define two vectors that containt the event IDs in each TTree
-    // BAND
-    Int_t     fBANDeventID, NeventsBAND = BANDTree->GetEntries();
-    BANDTree   -> SetBranchAddress("eventnumber"  ,&fBANDeventID);
-    for (int BANDevent=0; BANDevent < NeventsBAND ; BANDevent++){
-        BANDTree -> GetEntry(BANDevent);
-        BANDeventIDs[BANDevent] = fBANDeventID;
+    TTreeReader BANDReader("calib", BANDFile);
+    TTreeReaderValue<Int_t> fBANDeventID(BANDReader, "eventnumber");
+    int BANDevent=0;
+    while (BANDReader.Next()) { BANDeventIDs[BANDevent] = *fBANDeventID; BANDevent++; }
+        
+    TTreeReader SIDISReader("tree", SIDISFile);
+    TTreeReaderValue<Int_t> fSIDISeventID(SIDISReader, "eventnumber");
+    int SIDISevent=0;
+    while (SIDISReader.Next()) { SIDISeventIDs[SIDISevent] = *fSIDISeventID; SIDISevent++; }
+    if (fdebug>3){
+        std::cout << "done filling BANDeventIDs and SIDISeventIDs" << std::endl;
+        if (fdebug>4){
+            std::cout << "BANDeventIDs: " << std::endl;
+            for (int BANDevent=0; BANDevent<50; BANDevent++)     std::cout << BANDeventIDs[BANDevent] << ",";
+            std::cout << "..." << std::endl;
+            std::cout << "SIDISeventIDs: " << std::endl;
+            for (int SIDISevent=0; SIDISevent<50; SIDISevent++) std::cout << SIDISeventIDs[SIDISevent] << ",";
+            std::cout << "..." << std::endl;
+        }
     }
-    Int_t     fSIDISeventID, NeventsSIDIS = SIDISTree->GetEntries();
-    SIDISTree  -> SetBranchAddress("eventnumber"  ,&fSIDISeventID);
-    for (int SIDISevent=0; SIDISevent < NeventsSIDIS ; SIDISevent++){
-        SIDISTree -> GetEntry(SIDISevent);
-        SIDISeventIDs[SIDISevent] = fSIDISeventID;
-    }
+    
+    
     
     // now, we merge the events
     Int_t         NmergedEvents = 0;
@@ -414,10 +429,24 @@ Int_t CreateListOfEventsToMerge(TTree * BANDTree,
          BANDeventIndex < NeventsBAND ;
          BANDeventIndex++){
         
+        if (fdebug>3){
+            std::cout
+            << "-----" << std::endl
+            << "BANDeventIndex " << BANDeventIndex
+            << ", BANDeventIDs[" << BANDeventIndex << "]: "
+            << BANDeventIDs[BANDeventIndex] << std::endl
+            << "-----" << std::endl;
+        }
         
         for (int SIDISeventIndex=SIDISEventIndicesToMerge[NmergedEvents];
              SIDISeventIndex < NeventsSIDIS ;
              SIDISeventIndex++){
+            
+            if (fdebug>3) {
+                std::cout << "SIDISeventIndex " << SIDISeventIndex
+                << ", SIDISeventIDs[" << SIDISeventIndex << "]: " << SIDISeventIDs[SIDISeventIndex]
+                << std::endl;
+            }
             
             if ( SIDISeventIDs[SIDISeventIndex] > BANDeventIDs[BANDeventIndex] ) {
                 break;
@@ -470,6 +499,15 @@ void SetInputAndOutputTTrees (){
     SIDISTree  -> SetBranchAddress("omega"                     ,&omega                  );
     SIDISTree  -> SetBranchAddress("Z"                         ,&Zpips                  );
     SIDISTree  -> SetBranchAddress("W"                         ,&W                      );
+    SIDISTree  -> SetBranchAddress("Nelectrons"                ,&Ne                     );
+    SIDISTree  -> SetBranchAddress("Ngammas"                   ,&Ngammas                );
+    SIDISTree  -> SetBranchAddress("Nprotons"                  ,&Np                     );
+    SIDISTree  -> SetBranchAddress("Nneutrons"                 ,&Nn                     );
+    SIDISTree  -> SetBranchAddress("y"                         ,&y                      );
+
+    
+    
+    // branches that depend on pion charge
     SIDISTree  -> SetBranchAddress("eepipsPastCutsInEvent"     ,&eepipsPastCutsInEvent    );
     SIDISTree  -> SetBranchAddress("eepimsPastCutsInEvent"     ,&eepimsPastCutsInEvent    );
     
@@ -477,12 +515,6 @@ void SetInputAndOutputTTrees (){
     SIDISTree  -> SetBranchAddress("eepimsPastKinematicalCuts" ,&eepimsPastKinematicalCuts);
     SIDISTree  -> SetBranchAddress("Npips"                     ,&Npips                  );
     SIDISTree  -> SetBranchAddress("Npims"                     ,&Npims                  );
-    SIDISTree  -> SetBranchAddress("Nelectrons"                ,&Ne                     );
-    SIDISTree  -> SetBranchAddress("Ngammas"                   ,&Ngammas                );
-    SIDISTree  -> SetBranchAddress("Nprotons"                  ,&Np                     );
-    SIDISTree  -> SetBranchAddress("Nneutrons"                 ,&Nn                     );
-    SIDISTree  -> SetBranchAddress("y"                         ,&y                      );
-
     
     // BAND input tree branches
     BANDTree   -> SetBranchAddress("eventnumber"  ,&BANDeventID);
