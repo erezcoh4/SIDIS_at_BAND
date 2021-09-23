@@ -32,7 +32,7 @@
 #include "Auxiliary/bandhit.h"
 #include "Auxiliary/clashit.h"
 #include "Auxiliary/genpart.h"
-#include "Auxiliary/match_arrays.h"
+#include "Auxiliary/match_arrays_adapted.h"
 
 
 #define NMAXEVENTS 5000000
