@@ -416,9 +416,9 @@ Int_t CreateListOfEventsToMerge(TTree * BANDTree,
     Int_t                    NmergedEvents = 0;
     Int_t                      NeventsBAND = 0;
     Int_t                     NeventsSIDIS = 0;
-    bool              DefineEventIDvectors = TRUE;
-    bool                 ListEventsToMerge = TRUE;
-    bool ListEventsToMergeMyImplementation = FALSE;
+    bool              DefineEventIDvectors = true;
+    bool                 ListEventsToMerge = true;
+    bool ListEventsToMergeMyImplementation = false;
         
     BANDeventIDs        .clear();
     SIDISeventIDs       .clear();
