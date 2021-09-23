@@ -5,7 +5,7 @@
 # last edit Sep-22, 2021 (EOC)
 #
 # example execute:
-# ./macros/merge_sidis_and_band_skims --Nruns=1 --worker=ErezMBP --NeventsMax=10 --fdebug=5 --doPipsAndPims=0
+# ./macros/merge_sidis_and_band_skims --Nruns=1 --worker=ErezMBP --NeventsMax=10 --fdebug=5 --only-pi+
 #
 import sys, os, linecache, pandas as pd
 import glob
@@ -24,8 +24,7 @@ parser.add_argument("--worker",       type=str, default="Erez-ifarm",
                     required=False, help="verbosity")
 parser.add_argument("--PrintProgress",type=int, default=50000,
                     required=False, help="print progress (every N events)")
-parser.add_argument("--doPipsAndPims",type=int, default=1,
-                    required=False, help="do both pi+ and pi-")
+parser.add_argument('--only-pi+',   dest='only_pips', action='store_true', help="do only pi+ (and not pi-)")
 
 args = parser.parse_args()
 
@@ -36,13 +35,10 @@ FirstRun      = args.FirstRun
 PrintProgress = args.PrintProgress
 runs_filename = "macros/runlists/good_runs_10-2.txt"
 
-pi_charges    = ['pi+']
-if args.doPipsAndPims > 0: #{
-    pi_charges = ['pi+','pi-']
+pi_charges = ['pi+','pi-']
+if args.only_pips: #{
+    pi_charges    = ['pi+']
 #}
-print(args.doPipsAndPims)
-print(pi_charges);
-
 
 path          = "";
 if args.worker == "Erez-ifarm": #{
@@ -77,7 +73,6 @@ for line in run_fileLines[FirstRun:]:#{
                         (run,pi_charge,NeventsMax,fdebug,PrintProgress,data_path))
         print("merge neutron and sidis %s skimming for run %d (%d/%d):"%(pi_charge,run,runIdx,Nruns))
         print(commandline)
-        print('')
         os.system( commandline )
     #}
     if (runIdx >= Nruns): break;
@@ -86,3 +81,5 @@ for line in run_fileLines[FirstRun:]:#{
 print('')
 print('done.')
 print('')
+
+os.system('date | mail -s "Done processing merge_sidis_and_band_skims on ifarm" cohen.erez7@gmail.com')

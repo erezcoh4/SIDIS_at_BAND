@@ -60,4 +60,4 @@ print('')
 print('done.')
 print('')
 
-os.system('mail -s "done processing skim_sidis_multiple_runs on ifarm" cohen.erez7@gmail.com < /dev/null')
+os.system('date | mail -s "Done processing skim_sidis_multiple_runs on ifarm" cohen.erez7@gmail.com')

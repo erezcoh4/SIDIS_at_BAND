@@ -1,9 +1,13 @@
 // last edit Sep-22, 2021
 
+#include <vector>
 #ifdef __CINT__
 #pragma link C++ class std::vector<TVector3>+;
+#pragma link C++ class std::vector<TVector3*>+;
 #pragma link C++ class std::vector<TLorentzVector>+;
+#pragma link C++ class std::vector<TLorentzVector*>+;
 #endif
+
 
 #include <cstdlib>
 #include <iostream>
@@ -19,17 +23,17 @@
 #include <TChain.h>
 #include <TCanvas.h>
 #include <TBenchmark.h>
-#include<time.h>
+#include <time.h>
 
 #include "Auxiliary/bank.h"
 #include "Auxiliary/BBand.h"
 #include "Auxiliary/BEvent.h"
 #include "Auxiliary/constants.h"
+#include "Auxiliary/bandhit.h"
+#include "Auxiliary/clashit.h"
+#include "Auxiliary/genpart.h"
+#include "Auxiliary/match_arrays.h"
 
-//#include "/u/home/cohen/SIDIS_at_BAND/Auxiliary/bank.h"
-//#include "/u/home/cohen/SIDIS_at_BAND/Auxiliary/BBand.h"
-//#include "/u/home/cohen/SIDIS_at_BAND/Auxiliary/BEvent.h"
-//#include "/u/home/cohen/SIDIS_at_BAND/Auxiliary/constants.h"
 
 #define NMAXEVENTS 5000000
 #define NMAXPIONS 20 // maximal allowed number of pions
@@ -41,7 +45,6 @@
 TString DataPath = "/volatile/clas12/users/ecohen/BAND/";
 TString   skimmedBANDFilename;
 TString  skimmedSIDISFilename;
-
 
 
 // Input root files and trees
@@ -88,10 +91,12 @@ TString                            pionStr;
 Int_t               BANDrunID, BANDeventID;
 Int_t             SIDISrunID, SIDISeventID;
 Int_t          EventIDsToMerge[NMAXEVENTS];
-Int_t  BANDEventIndicesToMerge[NMAXEVENTS];
-Int_t SIDISEventIndicesToMerge[NMAXEVENTS];
-Int_t             BANDeventIDs[NMAXEVENTS];
-Int_t            SIDISeventIDs[NMAXEVENTS];
+std::vector<Int_t>                   BANDeventIDs;
+std::vector<Int_t>                  SIDISeventIDs;
+std::vector<Int_t>            EventNumbersToMerge;
+std::vector<std::size_t>  BANDEventIndicesToMerge;
+std::vector<std::size_t> SIDISEventIndicesToMerge;
+
 Int_t                 Npions, Npips, Npims;
 Int_t                  Ne, Np, Nn, Ngammas;
 Int_t                               status;
@@ -107,10 +112,10 @@ TLorentzVector       *Pn=0; // neutron momentum
 TVector3             *Ve=0;
 TVector3             *Vn=0;
 
-std::vector<TVector3*>             Vpiplus;
-std::vector<TVector3*>            Vpiminus;
-std::vector<TLorentzVector*>        piplus;
-std::vector<TLorentzVector*>       piminus;
+std::vector<TVector3*>             *Vpiplus;
+std::vector<TVector3*>            *Vpiminus;
+std::vector<TLorentzVector>          piplus;
+std::vector<TLorentzVector*>       *piminus;
 
 bool                     eepiPastCutsInEvent;
 bool                   eepipsPastCutsInEvent;
@@ -133,11 +138,11 @@ double       starttime = 0;
 double         current = 0;
 double          weight = 0;
 
-TClonesArray      * eHits = new TClonesArray("clashit"); // CLAS12 electrons in BAND analysis
-// TClonesArray  &save_e_Hit = *eHits;
+TClonesArray      * eHit  = new TClonesArray("clashit"); // CLAS12 electrons in BAND analysis
 TClonesArray      * nHits = new TClonesArray("bandhit"); // BAND neutrons in BAND analysis
-// TClonesArray     &saveHit = *nHits;
 TClonesArray    * mcParts = new TClonesArray("genpart");
+// TClonesArray  &save_e_Hit = *eHit;
+// TClonesArray     &saveHit = *nHits;
 // TClonesArray      &saveMC = *mcParts;
 
 void             OpenInputFiles (TString RunStr);
@@ -172,7 +177,11 @@ void              SetPionCharge ( TString fpionCharge ) {
 };
 void                SetDataPath ( TString fDataPath )   {DataPath = fDataPath + "/";};
 void               SetVerbosity ( int ffdebug )         {fdebug = ffdebug;};
-
+void                  PrintTime ( TString prefix ){
+    std::cout << prefix << ", after "
+    << double(clock() - tStart) / (double)CLOCKS_PER_SEC
+    << " sec "<< std::endl;
+}
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 // Main functionality
@@ -209,7 +218,7 @@ void MergeSIDISandBANDevents (int NeventsToMerge=10,
     // this takes the most resources, and the largest amount of time.
     // typically, per 1 merged event, it takes about 14-40 ms
     // and we typically merge 1M events = 1e4 sec
-    if (fdebug>1) {
+    if (fdebug>2) {
         std::cout << "Create a list of events to merge" << std::endl
         << "stepping over "
         << NeventsBAND << " BAND and "
@@ -217,81 +226,91 @@ void MergeSIDISandBANDevents (int NeventsToMerge=10,
         << std::endl
         << "Take some coffee, this takes some 20-40 ms per event to merge."
         << std::endl;
+        PrintTime ( (TString)"Done creating event list to merge " );
     }
+    
+    
     Int_t Nevents2Merge = CreateListOfEventsToMerge(BANDTree, SIDISTree, NeventsToMerge);
-    if (fdebug>1) {
+    if (Nevents2Merge > NeventsToMerge) Nevents2Merge = NeventsToMerge;
+    
+    
+    if (fdebug>2) {
         std::cout << std::endl;
-        std::cout << "Done creating merge list of " << Nevents2Merge << " events, after "
-        << double(clock() - tStart) / (double)CLOCKS_PER_SEC
-        << " sec "<< std::endl;
-        
-        if (fdebug>2) {
-            std::cout << "Merging events (BAND/SIDIS):"  << std::endl;
-            for (int i=0; i<Nevents2Merge; i++) {
-                auto         eventID = EventIDsToMerge[i];
-                auto  BANDEventIndex = BANDEventIndicesToMerge[i];
-                auto SIDISEventIndex = SIDISEventIndicesToMerge[i];
-                std::cout << eventID << "(" << BANDEventIndex << "/" << SIDISEventIndex << "),";
-            }
-        }
+        PrintTime( (TString)"Done creating merge list of " + (TString)std::to_string(Nevents2Merge) + (TString)" events " );
     }
     
     SetInputAndOutputTTrees ();
     
-    for (int MergedEvtId=0; MergedEvtId<Nevents2Merge; MergedEvtId++) {
+    for (int MergedEvtId=0; MergedEvtId < Nevents2Merge; MergedEvtId++) {
         
-        BANDTree -> GetEntry( BANDEventIndicesToMerge[MergedEvtId] );
+        // grab electron and pion information from SIDIS TTree
+        SIDISTree -> GetEntry( SIDISEventIndicesToMerge[MergedEvtId] );
+        if (fdebug>-1) {
+            std::cout
+            << "SIDISEventIndicesToMerge["<<MergedEvtId<<"]: "  << SIDISEventIndicesToMerge[MergedEvtId] << ","
+            << "SIDISeventID: "                                 << SIDISeventID << ","
+            << "E(electron): "                                  << e->E() << " GeV,"
+            << "eepipsPastCutsInEvent: "                        << eepipsPastCutsInEvent << ","
+            << std::endl;
+        }
+        
         bool eepiPastCutsInEvent = false;
         if (pionCharge=="pi+") {
             eepiPastCutsInEvent = eepipsPastCutsInEvent;
+            Npions = Npips;
         } else if (pionCharge=="pi-") {
             eepiPastCutsInEvent = eepimsPastCutsInEvent;
+            Npions = Npims;
+        }
+        if (eepiPastCutsInEvent==false) continue;
+        
+        
+        // grab neturon information from BAND
+        BANDTree -> GetEntry( BANDEventIndicesToMerge[MergedEvtId] );
+        if (fdebug>-1) {
+            std::cout
+            << "BANDEventIndicesToMerge["<<MergedEvtId<<"]: "   << BANDEventIndicesToMerge[MergedEvtId] << ","
+            << "BANDeventID: "                                  << BANDeventID << ","
+            << "Ebeam: "                                        << Ebeam << ","
+            << "eepipsPastCutsInEvent: "                        << eepipsPastCutsInEvent << ","
+            << "goodneutron: "                                  << goodneutron << ","
+            << std::endl;
+        }
+        if (goodneutron==false) continue;
+        
+        // compute kinematical variables, also for the neutron
+        ComputeKinematics ();
+        
+        // fill output TTree and CSV file
+        MergedTree  -> Fill();
+        
+        for (int piIdx=0; piIdx<Npions; piIdx++) {
+            bool eepiPastKinematicalCuts = false;
+            if (pionCharge=="pi+") {
+                eepiPastKinematicalCuts = eepipsPastKinematicalCuts[piIdx];
+            } else if (pionCharge=="pi-") {
+                eepiPastKinematicalCuts = eepimsPastKinematicalCuts[piIdx];
+            }
+            
+            if (goodneutron){
+                Stream_e_pi_n_line_to_CSV(piIdx,
+                                          eepiPastKinematicalCuts, goodneutron);
+            }
         }
         
-        if (eepiPastCutsInEvent) {
-            
-            // compute kinematical variables
-            ComputeKinematics ();
-            
-            // grab neturon information from BAND
-            SIDISTree   -> GetEntry( SIDISEventIndicesToMerge[MergedEvtId] );
-            
-            // fill output TTree and CSV file
-            MergedTree  -> Fill();
-            
-            if (pionCharge=="pi+") {
-                Npions = Npips;
-            } else if (pionCharge=="pi-") {
-                Npions = Npims;
-            }
-            
-            for (int piIdx=0; piIdx<Npions; piIdx++) {
-                bool eepiPastKinematicalCuts = false;
-                if (pionCharge=="pi+") {
-                    eepiPastKinematicalCuts = eepipsPastKinematicalCuts[piIdx];
-                } else if (pionCharge=="pi-") {
-                    eepiPastKinematicalCuts = eepimsPastKinematicalCuts[piIdx];
-                }
-                
-                if (goodneutron){
-                    Stream_e_pi_n_line_to_CSV(piIdx,
-                                              eepiPastKinematicalCuts, goodneutron);
-                }
-            }
-            
-            
-            if (fdebug>2){
-                std::cout
-                << "merging event " << BANDeventID << " from run " << BANDrunID
-                << std::endl;
-            }
+        
+        if (fdebug>2){
+            std::cout
+            << "merging event " << BANDeventID << " from run " << BANDrunID
+            << std::endl;
         }
+        
     } // end merged event loop
     
     
     if (fdebug>2){
         std::cout << "merged " << Nevents2Merge << " SIDIS and BAND events." << std::endl;
-        PrintMonitorHello();
+        if (fdebug>6) PrintMonitorHello();
     }
 }
 
@@ -393,79 +412,136 @@ Int_t CreateListOfEventsToMerge(TTree * BANDTree,
     if (fdebug>2) {
         std::cout << "CreateListOfEventsToMerge()" << std::endl;
     }
-    Int_t  NeventsBAND = BANDTree->GetEntries();
-    Int_t NeventsSIDIS = SIDISTree->GetEntries();
     
-    
-    // first define two vectors that containt the event IDs in each TTree
-    TTreeReader BANDReader("calib", BANDFile);
-    TTreeReaderValue<Int_t> fBANDeventID(BANDReader, "eventnumber");
-    int BANDevent=0;
-    while (BANDReader.Next()) { BANDeventIDs[BANDevent] = *fBANDeventID; BANDevent++; }
+    Int_t                    NmergedEvents = 0;
+    Int_t                      NeventsBAND = 0;
+    Int_t                     NeventsSIDIS = 0;
+    bool              DefineEventIDvectors = TRUE;
+    bool                 ListEventsToMerge = TRUE;
+    bool ListEventsToMergeMyImplementation = FALSE;
         
-    TTreeReader SIDISReader("tree", SIDISFile);
-    TTreeReaderValue<Int_t> fSIDISeventID(SIDISReader, "eventnumber");
-    int SIDISevent=0;
-    while (SIDISReader.Next()) { SIDISeventIDs[SIDISevent] = *fSIDISeventID; SIDISevent++; }
-    if (fdebug>3){
-        std::cout << "done filling BANDeventIDs and SIDISeventIDs" << std::endl;
-        if (fdebug>4){
-            std::cout << "BANDeventIDs: " << std::endl;
-            for (int BANDevent=0; BANDevent<50; BANDevent++)     std::cout << BANDeventIDs[BANDevent] << ",";
-            std::cout << "..." << std::endl;
-            std::cout << "SIDISeventIDs: " << std::endl;
-            for (int SIDISevent=0; SIDISevent<50; SIDISevent++) std::cout << SIDISeventIDs[SIDISevent] << ",";
-            std::cout << "..." << std::endl;
+    BANDeventIDs        .clear();
+    SIDISeventIDs       .clear();
+    
+    if (DefineEventIDvectors){
+        // first define two vectors that containt the event IDs in each TTree
+        TTreeReader BANDReader("calib", BANDFile);
+        TTreeReaderValue<Int_t> fBANDeventID(BANDReader, "eventnumber");
+        while (BANDReader.Next()) {
+                BANDeventIDs.push_back(*fBANDeventID);
+                NeventsBAND++;
+        }
+        
+        TTreeReader SIDISReader("tree", SIDISFile);
+        TTreeReaderValue<Int_t> fSIDISeventID(SIDISReader, "eventnumber");
+        while (SIDISReader.Next()) {
+                SIDISeventIDs.push_back(*fSIDISeventID);
+                NeventsSIDIS++;
+        }
+        
+
+        if (fdebug>3){
+            PrintTime ( "done filling BANDeventIDs and SIDISeventIDs" );
+            if (fdebug>4){
+                std::cout << "BANDeventIDs: " << std::endl << std::endl;
+                for (int BANDevent=0; BANDevent<50; BANDevent++){
+                    std::cout << BANDeventIDs[BANDevent] << ",";
+                }
+                std::cout << "..." << std::endl << std::endl;
+                std::cout << "SIDISeventIDs: "  << std::endl << std::endl;
+                for (int SIDISevent=0; SIDISevent < std::min(50,NeventsSIDIS); SIDISevent++) {
+                    std::cout << SIDISeventIDs[SIDISevent] << ",";
+                }
+                if (NeventsSIDIS > 50) {
+                    std::cout << "..." << std::endl << std::endl;
+                } else {
+                    std::cout << std::endl;
+                }
+            }
         }
     }
-    
     
     
     // now, we merge the events
-    Int_t         NmergedEvents = 0;
-    int      SIDISeventIndexMin = 0;
-    SIDISEventIndicesToMerge[0] = 0; // initialize for loop efficiency
-    for (int BANDeventIndex=0;
-         BANDeventIndex < NeventsBAND ;
-         BANDeventIndex++){
+    if (ListEventsToMerge){ // efficient implementation I took from the internet
+        match_arrays mcharr;
+        mcharr.match_indices(BANDeventIDs, SIDISeventIDs,
+                             std::back_inserter(BANDEventIndicesToMerge),
+                             std::back_inserter(SIDISEventIndicesToMerge));
         
-        if (fdebug>3){
-            std::cout
-            << "-----" << std::endl
-            << "BANDeventIndex " << BANDeventIndex
-            << ", BANDeventIDs[" << BANDeventIndex << "]: "
-            << BANDeventIDs[BANDeventIndex] << std::endl
-            << "-----" << std::endl;
+        NmergedEvents = BANDEventIndicesToMerge.size();
+        // print outs
+        if (fdebug>4){
+            std::cout << NmergedEvents << " events to merge: ";
+            for(int i=0; i < NmergedEvents ; i++ ) std::cout << BANDeventIDs.at(BANDEventIndicesToMerge.at(i)) << ' ';
+            std::cout << std::endl<< std::endl;
+            
+            std::cout << "indices in BANDEventIndicesToMerge: ";
+            for(std::vector<int>::size_type i : BANDEventIndicesToMerge)
+                std::cout << i << ' ';
+            
+            std::cout << std::endl << std::endl;
+            
+            std::cout << "indices in SIDISEventIndicesToMerge: ";
+            for(std::vector<int>::size_type i : SIDISEventIndicesToMerge)
+                std::cout << i << ' ';
+            std::cout << std::endl << std::endl;
+                        
+            PrintTime("Done, using match_arrays");
         }
         
-        for (int SIDISeventIndex=SIDISEventIndicesToMerge[NmergedEvents];
-             SIDISeventIndex < NeventsSIDIS ;
-             SIDISeventIndex++){
-            
-            if (fdebug>3) {
-                std::cout << "SIDISeventIndex " << SIDISeventIndex
-                << ", SIDISeventIDs[" << SIDISeventIndex << "]: " << SIDISeventIDs[SIDISeventIndex]
-                << std::endl;
-            }
-            
-            if ( SIDISeventIDs[SIDISeventIndex] > BANDeventIDs[BANDeventIndex] ) {
-                break;
-            }
-            
-            if ( BANDeventIDs[BANDeventIndex] == SIDISeventIDs[SIDISeventIndex] ){
+        // arxiv - my implementation of this part
+        if (ListEventsToMergeMyImplementation){ //my humble implementation
+            EventNumbersToMerge .clear();
+            int      SIDISeventIndexMin = 0;
+            SIDISEventIndicesToMerge[0] = 0; // initialize for loop efficiency
+            for (int BANDeventIndex=0;
+                 BANDeventIndex < NeventsBAND ;
+                 BANDeventIndex++){
                 
-                EventIDsToMerge[NmergedEvents] = BANDeventID;
-                BANDEventIndicesToMerge[NmergedEvents] = BANDeventIndex;
-                SIDISEventIndicesToMerge[NmergedEvents] = SIDISeventIndex;
-                NmergedEvents ++ ;
+                if (fdebug>5){
+                    std::cout
+                    << "-----" << std::endl
+                    << "BANDeventIndex " << BANDeventIndex
+                    << ", BANDeventIDs[" << BANDeventIndex << "]: "
+                    << BANDeventIDs[BANDeventIndex] << std::endl
+                    << "-----" << std::endl;
+                }
                 
-                if ((NeventsToMerge>0) && (NmergedEvents >= NeventsToMerge)){
-                    return NmergedEvents;
+                for (int SIDISeventIndex=SIDISEventIndicesToMerge[NmergedEvents];
+                     SIDISeventIndex < NeventsSIDIS ;
+                     SIDISeventIndex++){
+                    
+                    if (fdebug>5) {
+                        std::cout << "SIDISeventIndex " << SIDISeventIndex
+                        << ", SIDISeventIDs[" << SIDISeventIndex << "]: "
+                        << SIDISeventIDs[SIDISeventIndex] << std::endl
+                        << std::endl;
+                    }
+                    
+                    if ( SIDISeventIDs[SIDISeventIndex] > BANDeventIDs[BANDeventIndex] ) {
+                        break;
+                    }
+                    
+                    if ( BANDeventIDs[BANDeventIndex] == SIDISeventIDs[SIDISeventIndex] ){
+                        
+                        EventIDsToMerge[NmergedEvents]          = BANDeventID;
+                        BANDEventIndicesToMerge[NmergedEvents]  = BANDeventIndex;
+                        SIDISEventIndicesToMerge[NmergedEvents] = SIDISeventIndex;
+                        
+                        EventNumbersToMerge.push_back( BANDeventIDs[BANDeventIndex] );
+                        NmergedEvents ++ ;
+                        
+                        if ((NeventsToMerge>0) && (NmergedEvents >= NeventsToMerge)){
+                            return NmergedEvents;
+                        }
+                    }
+                    
                 }
             }
-            
         }
     }
+    
     return NmergedEvents;
 }
 
@@ -482,39 +558,44 @@ Double_t ComputeLightConeFraction( TLorentzVector p ){
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void SetInputAndOutputTTrees (){
-    
+        
     // SIDIS input tree branches
-    
     SIDISTree  -> SetBranchAddress("eventnumber"                ,&SIDISeventID          );
     SIDISTree  -> SetBranchAddress("runnum"                     ,&SIDISrunID            );
     SIDISTree  -> SetBranchAddress("e"                          ,&e                     );
-    SIDISTree  -> SetBranchAddress("pi"                         ,&piplus                );
-    SIDISTree  -> SetBranchAddress("Ve"                         ,&Ve                    );
-    SIDISTree  -> SetBranchAddress("Vpi"                        ,&Vpiplus               );
-    SIDISTree  -> SetBranchAddress("Beam"                       ,&Beam                  );
-    SIDISTree  -> SetBranchAddress("beam_helicity"              ,&beam_helicity         );
-    SIDISTree  -> SetBranchAddress("q"                          ,&q                     );
-    SIDISTree  -> SetBranchAddress("xB"                        ,&xB                     );
-    SIDISTree  -> SetBranchAddress("Q2"                        ,&Q2                     );
-    SIDISTree  -> SetBranchAddress("omega"                     ,&omega                  );
-    SIDISTree  -> SetBranchAddress("Z"                         ,&Zpips                  );
-    SIDISTree  -> SetBranchAddress("W"                         ,&W                      );
-    SIDISTree  -> SetBranchAddress("Nelectrons"                ,&Ne                     );
-    SIDISTree  -> SetBranchAddress("Ngammas"                   ,&Ngammas                );
-    SIDISTree  -> SetBranchAddress("Nprotons"                  ,&Np                     );
-    SIDISTree  -> SetBranchAddress("Nneutrons"                 ,&Nn                     );
-    SIDISTree  -> SetBranchAddress("y"                         ,&y                      );
-
+//    SIDISTree  -> SetBranchAddress("Ve"                         ,&Ve                    );
+//    SIDISTree  -> SetBranchAddress("Beam"                       ,&Beam                  );
+//    SIDISTree  -> SetBranchAddress("beam_helicity"              ,&beam_helicity         );
+//    SIDISTree  -> SetBranchAddress("q"                          ,&q                     );
+//    SIDISTree  -> SetBranchAddress("xB"                        ,&xB                     );
+//    SIDISTree  -> SetBranchAddress("Q2"                        ,&Q2                     );
+//    SIDISTree  -> SetBranchAddress("omega"                     ,&omega                  );
+//    SIDISTree  -> SetBranchAddress("Z"                         ,&Zpips                  );
+//    SIDISTree  -> SetBranchAddress("W"                         ,&W                      );
+//    SIDISTree  -> SetBranchAddress("y"                         ,&y                      );
+//    SIDISTree  -> SetBranchAddress("Nelectrons"                ,&Ne                     );
+//    SIDISTree  -> SetBranchAddress("Ngammas"                   ,&Ngammas                );
+//    SIDISTree  -> SetBranchAddress("Nprotons"                  ,&Np                     );
+//    SIDISTree  -> SetBranchAddress("Nneutrons"                 ,&Nn                     );
+//    SIDISTree  -> SetBranchAddress("Npips"                     ,&Npips                  );
+//    SIDISTree  -> SetBranchAddress("Npims"                     ,&Npims                  );
     
     
-    // branches that depend on pion charge
-    SIDISTree  -> SetBranchAddress("eepipsPastCutsInEvent"     ,&eepipsPastCutsInEvent    );
-    SIDISTree  -> SetBranchAddress("eepimsPastCutsInEvent"     ,&eepimsPastCutsInEvent    );
     
-    SIDISTree  -> SetBranchAddress("eepipsPastKinematicalCuts" ,&eepipsPastKinematicalCuts);
-    SIDISTree  -> SetBranchAddress("eepimsPastKinematicalCuts" ,&eepimsPastKinematicalCuts);
-    SIDISTree  -> SetBranchAddress("Npips"                     ,&Npips                  );
-    SIDISTree  -> SetBranchAddress("Npims"                     ,&Npims                  );
+//    // branches that depend on pion charge
+    if (pionCharge=="pi+") {
+        SIDISTree  -> SetBranchAddress("eepipsPastCutsInEvent"     ,&eepipsPastCutsInEvent    );
+        SIDISTree  -> SetBranchAddress("eepipsPastKinematicalCuts" ,&eepipsPastKinematicalCuts);
+//        SIDISTree  -> SetBranchAddress("pi"                        ,&piplus                );
+////        SIDISTree  -> SetBranchAddress("Vpi"                       ,&Vpiplus               );
+//
+    } else if (pionCharge=="pi-") {
+        SIDISTree  -> SetBranchAddress("eepimsPastCutsInEvent"     ,&eepimsPastCutsInEvent    );
+        SIDISTree  -> SetBranchAddress("eepimsPastKinematicalCuts" ,&eepimsPastKinematicalCuts);
+//        SIDISTree  -> SetBranchAddress("pi"                        ,&piminus                );
+//        SIDISTree  -> SetBranchAddress("Vpi"                       ,&Vpiminus               );
+    }
+    
     
     // BAND input tree branches
     BANDTree   -> SetBranchAddress("eventnumber"  ,&BANDeventID);
@@ -524,14 +605,12 @@ void SetInputAndOutputTTrees (){
     BANDTree   -> SetBranchAddress("livetime"     ,&livetime);
     BANDTree   -> SetBranchAddress("starttime"    ,&starttime);
     BANDTree   -> SetBranchAddress("current"      ,&current);
-    BANDTree   -> SetBranchAddress("weight"       ,&weight);
     BANDTree   -> SetBranchAddress("nMult"        ,&nMult);
     BANDTree   -> SetBranchAddress("nHits"        ,&nHits); // BAND neutrons in BAND skimming
-    BANDTree   -> SetBranchAddress("eHits"        ,&eHits); // CLAS12 electrons in BAND skimming
+    BANDTree   -> SetBranchAddress("eHit"         ,&eHit); // CLAS12 electrons in BAND skimming
     BANDTree   -> SetBranchAddress("goodneutron"  ,&goodneutron);
     BANDTree   -> SetBranchAddress("nleadindex"   ,&nleadindex);
-    BANDTree   -> SetBranchAddress("genMult"      ,&genMult);
-    BANDTree   -> SetBranchAddress("mcParts"      ,&mcParts);
+    
     
     // Merged Tree - containing all variables...
     // run and event number (ID) have to be consistent in the merged tree,
@@ -546,28 +625,36 @@ void SetInputAndOutputTTrees (){
     MergedTree->Branch("weight"                 ,&weight                );
     MergedTree->Branch("nMult"                  ,&nMult                 );
     MergedTree->Branch("nHits"                  ,&nHits                 ); // BAND neutrons in BAND skimming
-    MergedTree->Branch("eHits"                  ,&eHits                 ); // CLAS12 electrons in BAND skimming
+    MergedTree->Branch("eHit"                   ,&eHit                  ); // CLAS12 electrons in BAND skimming
     MergedTree->Branch("goodneutron"            ,&goodneutron           );
     MergedTree->Branch("nleadindex"             ,&nleadindex            );
     MergedTree->Branch("e"                      ,&e                     );
-    MergedTree->Branch("piplus"                 ,&piplus                );
     MergedTree->Branch("Ve"                     ,&Ve                    );
-    MergedTree->Branch("Vpiplus"                ,&Vpiplus               );
     MergedTree->Branch("Beam"                   ,&Beam                  );
     MergedTree->Branch("q"                      ,&q                     );
     MergedTree->Branch("xB"                     ,&xB                    );
     MergedTree->Branch("Q2"                     ,&Q2                    );
     MergedTree->Branch("omega"                  ,&omega                 );
-    MergedTree->Branch("Z"                      ,&Zpips                 );
+    MergedTree->Branch("Z"                      ,Zpips                  );
     MergedTree->Branch("eepiPastCutsInEvent"    ,&eepiPastCutsInEvent   );
-    MergedTree->Branch("Npips"                  ,&Npips                  );
-    MergedTree->Branch("Npims"                  ,&Npims                  );
-    MergedTree->Branch("Nelectrons"             ,&Ne                     );
-    MergedTree->Branch("Ngammas"                ,&Ngammas                );
-    MergedTree->Branch("Nprotons"               ,&Np                     );
-    MergedTree->Branch("Nneutrons"              ,&Nn                     );
-    MergedTree->Branch("y"                      ,&y                      );
+    MergedTree->Branch("Npips"                  ,&Npips                 );
+    MergedTree->Branch("Npims"                  ,&Npims                 );
+    MergedTree->Branch("Nelectrons"             ,&Ne                    );
+    MergedTree->Branch("Ngammas"                ,&Ngammas               );
+    MergedTree->Branch("Nprotons"               ,&Np                    );
+    MergedTree->Branch("Nneutrons"              ,&Nn                    );
+    MergedTree->Branch("y"                      ,&y                     );
+    
+    
+    // branches that depend on pion charge
+    if (pionCharge=="pi+") {
+        MergedTree->Branch("piplus"                 ,&piplus                );
+        MergedTree->Branch("Vpiplus"                ,&Vpiplus               );
+    } else if (pionCharge=="pi-") {
+        MergedTree->Branch("piminus"                 ,&piminus              );
+        MergedTree->Branch("Vpiminus"                ,&Vpiminus             );
 
+    }
 }
 
 
@@ -617,13 +704,13 @@ void Stream_e_pi_n_line_to_CSV(int piIdx,
     TVector3        * Vpi;
     double          Zpi;
     if (pionCharge=="pi+") {
-        pi  = piplus [piIdx];
-        Vpi = Vpiplus[piIdx];
+        pi  = &piplus[piIdx];
+        Vpi = Vpiplus->at(piIdx);
         Zpi = Zpips  [piIdx];
     }
     else if (pionCharge=="pi-") {
-        pi  = piminus [piIdx];
-        Vpi = Vpiminus[piIdx];
+        pi  = piminus ->at(piIdx);
+        Vpi = Vpiminus->at(piIdx);
         Zpi = Zpims   [piIdx];
    }
     else {

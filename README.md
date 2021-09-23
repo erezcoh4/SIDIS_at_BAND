@@ -22,6 +22,7 @@ Sep-22, 2021
 
 4. Updated the name of the python script used for plotting the kinematical distributions from SIDIS data to *SIDISKinematicalDistributions.ipynb*
 
+5. added *match_arrays.h*, that implmements an efficient algorithm to find index of matching values in two sorted arrays using C++
  
 
 
