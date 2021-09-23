@@ -21,14 +21,14 @@ public:
     struct search_data {
         // is any there clearer way to get iterator that might be either
         // a Range::const_iterator or const T*?
-        using iterator = decltype(std::begin(std::declval<Range&>()));
+        using iterator = decltype(std::cbegin(std::declval<Range&>()));
         iterator curr;
         const iterator begin, end;
         Out out;
     };
     
     template<class Range, class Out>
-    auto init_search_data(const Range& range, Out out) -> int {
+    auto init_search_data(const Range& range, Out out) {
         return search_data<Range, Out>{
             std::begin(range),
             std::begin(range),
