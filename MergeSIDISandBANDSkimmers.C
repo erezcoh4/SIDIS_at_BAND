@@ -32,7 +32,7 @@
 #include "Auxiliary/bandhit.h"
 #include "Auxiliary/clashit.h"
 #include "Auxiliary/genpart.h"
-#include "Auxiliary/match_arrays_adapted.h"
+//#include "Auxiliary/match_arrays_adapted.h"
 
 
 #define NMAXEVENTS 5000000
@@ -489,25 +489,25 @@ Int_t CreateListOfEventsToMerge(TTree * BANDTree,
 //        mcharr.match_indices(BANDeventIDs, SIDISeventIDs,
 //                             std::back_inserter(BANDEventIndicesToMerge),
 //                             std::back_inserter(SIDISEventIndicesToMerge));
-//        
+//
 //        NmergedEvents = BANDEventIndicesToMerge.size();
 //        // print outs
 //        if (fdebug>4){
 //            std::cout << NmergedEvents << " events to merge: ";
 //            for(int i=0; i < NmergedEvents ; i++ ) std::cout << BANDeventIDs.at(BANDEventIndicesToMerge.at(i)) << ' ';
 //            std::cout << std::endl<< std::endl;
-//            
+//
 //            std::cout << "indices in BANDEventIndicesToMerge: ";
 //            for(std::vector<int>::size_type i : BANDEventIndicesToMerge)
 //                std::cout << i << ' ';
-//            
+//
 //            std::cout << std::endl << std::endl;
-//            
+//
 //            std::cout << "indices in SIDISEventIndicesToMerge: ";
 //            for(std::vector<int>::size_type i : SIDISEventIndicesToMerge)
 //                std::cout << i << ' ';
 //            std::cout << std::endl << std::endl;
-//                        
+//
 //            PrintTime("Done, using match_arrays");
         }
         
