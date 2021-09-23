@@ -464,31 +464,55 @@ Int_t CreateListOfEventsToMerge(TTree * BANDTree,
     
     // now, we merge the events
     if (ListEventsToMerge){ // efficient implementation I took from the internet
-        match_arrays mcharr;
-        mcharr.match_indices(BANDeventIDs, SIDISeventIDs,
-                             std::back_inserter(BANDEventIndicesToMerge),
-                             std::back_inserter(SIDISEventIndicesToMerge));
         
-        NmergedEvents = BANDEventIndicesToMerge.size();
-        // print outs
-        if (fdebug>4){
-            std::cout << NmergedEvents << " events to merge: ";
-            for(int i=0; i < NmergedEvents ; i++ ) std::cout << BANDeventIDs.at(BANDEventIndicesToMerge.at(i)) << ' ';
-            std::cout << std::endl<< std::endl;
-            
-            std::cout << "indices in BANDEventIndicesToMerge: ";
-            for(std::vector<int>::size_type i : BANDEventIndicesToMerge)
-                std::cout << i << ' ';
-            
-            std::cout << std::endl << std::endl;
-            
-            std::cout << "indices in SIDISEventIndicesToMerge: ";
-            for(std::vector<int>::size_type i : SIDISEventIndicesToMerge)
-                std::cout << i << ' ';
-            std::cout << std::endl << std::endl;
-                        
-            PrintTime("Done, using match_arrays");
+        
+        // Initialise a vector
+        // to store the common values
+        // and an iterator
+        // to traverse this vector
+        vector<Int_t> v(BANDeventIDs.size() + SIDISeventIDs.size());
+        vector<Int_t>::iterator it, st;
+        
+        it = std::set_intersection(BANDeventIDs.begin(),
+                                   BANDeventIDs.end(),
+                                   SIDISeventIDs.begin(),
+                                   SIDISeventIDs.end(),
+                                   v.begin());
+        
+        cout << "\nCommon elements:\n";
+        for (st = v.begin(); st != it; ++st)
+        cout << *st << ", ";
+        cout << '\n';
+        PrintTime("Done, using set_intersection");
+        
+//        match_arrays mcharr;
+//        mcharr.match_indices(BANDeventIDs, SIDISeventIDs,
+//                             std::back_inserter(BANDEventIndicesToMerge),
+//                             std::back_inserter(SIDISEventIndicesToMerge));
+//        
+//        NmergedEvents = BANDEventIndicesToMerge.size();
+//        // print outs
+//        if (fdebug>4){
+//            std::cout << NmergedEvents << " events to merge: ";
+//            for(int i=0; i < NmergedEvents ; i++ ) std::cout << BANDeventIDs.at(BANDEventIndicesToMerge.at(i)) << ' ';
+//            std::cout << std::endl<< std::endl;
+//            
+//            std::cout << "indices in BANDEventIndicesToMerge: ";
+//            for(std::vector<int>::size_type i : BANDEventIndicesToMerge)
+//                std::cout << i << ' ';
+//            
+//            std::cout << std::endl << std::endl;
+//            
+//            std::cout << "indices in SIDISEventIndicesToMerge: ";
+//            for(std::vector<int>::size_type i : SIDISEventIndicesToMerge)
+//                std::cout << i << ' ';
+//            std::cout << std::endl << std::endl;
+//                        
+//            PrintTime("Done, using match_arrays");
         }
+        
+        
+        
         
         // arxiv - my implementation of this part
         if (ListEventsToMergeMyImplementation){ //my humble implementation
