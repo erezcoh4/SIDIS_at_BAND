@@ -28,7 +28,7 @@ public:
     };
     
     template<class Range, class Out>
-    auto init_search_data(const Range& range, Out out) {
+    auto init_search_data(const Range& range, Out out) -> int {
         return search_data<Range, Out>{
             std::begin(range),
             std::begin(range),
