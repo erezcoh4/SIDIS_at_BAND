@@ -223,10 +223,7 @@ void MergeSIDISandBANDevents (int NeventsToMerge=10,
         << "stepping over "
         << NeventsBAND << " BAND and "
         << NeventsSIDIS << " SIDIS events"
-        << std::endl
-        << "Take some coffee, this takes some 20-40 ms per event to merge."
         << std::endl;
-        PrintTime ( (TString)"Done creating event list to merge " );
     }
     
     
@@ -243,9 +240,11 @@ void MergeSIDISandBANDevents (int NeventsToMerge=10,
     
     for (int MergedEvtId=0; MergedEvtId < Nevents2Merge; MergedEvtId++) {
         
+        if (fdebug>3) { std::cout << "MergedEvtId: " << MergedEvtId << std::endl; }
+        
         // grab electron and pion information from SIDIS TTree
         SIDISTree -> GetEntry( SIDISEventIndicesToMerge[MergedEvtId] );
-        if (fdebug>-1) {
+        if (fdebug>3) {
             std::cout
             << "SIDISEventIndicesToMerge["<<MergedEvtId<<"]: "  << SIDISEventIndicesToMerge[MergedEvtId] << ","
             << "SIDISeventID: "                                 << SIDISeventID << ","
@@ -266,8 +265,9 @@ void MergeSIDISandBANDevents (int NeventsToMerge=10,
         
         
         // grab neturon information from BAND
+        if (fdebug>3) { std::cout << "BANDTree->GetEntry("<<BANDEventIndicesToMerge[MergedEvtId]<<")" << std::endl; }
         BANDTree -> GetEntry( BANDEventIndicesToMerge[MergedEvtId] );
-        if (fdebug>-1) {
+        if (fdebug>3) {
             std::cout
             << "BANDEventIndicesToMerge["<<MergedEvtId<<"]: "   << BANDEventIndicesToMerge[MergedEvtId] << ","
             << "BANDeventID: "                                  << BANDeventID << ","
@@ -418,9 +418,11 @@ Int_t CreateListOfEventsToMerge(TTree * BANDTree,
     Int_t                     NeventsSIDIS = 0;
     bool              DefineEventIDvectors = true;
     bool                 ListEventsToMerge = true;
-    BANDeventIDs        .clear();
-    SIDISeventIDs       .clear();
-    EventNumbersToMerge .clear();
+    BANDeventIDs                .clear();
+    BANDEventIndicesToMerge     .clear();
+    SIDISeventIDs               .clear();
+    SIDISEventIndicesToMerge    .clear();
+    EventNumbersToMerge         .clear();
     
     // first define two vectors that containt the event IDs in each TTree
     if (DefineEventIDvectors){
@@ -466,12 +468,10 @@ Int_t CreateListOfEventsToMerge(TTree * BANDTree,
         
         std::vector<int> tmpBANDeventIDs(BANDeventIDs);
         std::sort(std::begin(tmpBANDeventIDs), std::end(tmpBANDeventIDs));
-        std::vector<size_t> BANDEventIndicesToMerge;
         BANDEventIndicesToMerge.reserve(BANDeventIDs.size());
         
         std::vector<int> tmpSIDISeventIDs(SIDISeventIDs);
         std::sort(std::begin(tmpSIDISeventIDs), std::end(tmpSIDISeventIDs));
-        std::vector<size_t> SIDISEventIndicesToMerge;
         SIDISEventIndicesToMerge.reserve(SIDISeventIDs.size());
 
         for (size_t i = 0; i < SIDISeventIDs.size(); ++i) {
@@ -533,6 +533,9 @@ Double_t ComputeLightConeFraction( TLorentzVector p ){
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void SetInputAndOutputTTrees (){
+    if (fdebug>3) {
+        std::cout << "SetInputAndOutputTTrees()" << std::endl;
+    }
     
     // SIDIS input tree branches
     SIDISTree  -> SetBranchAddress("eventnumber"                ,&SIDISeventID          );
@@ -575,16 +578,16 @@ void SetInputAndOutputTTrees (){
     // BAND input tree branches
     BANDTree   -> SetBranchAddress("eventnumber"  ,&BANDeventID);
     BANDTree   -> SetBranchAddress("Runno"        ,&BANDrunID);
-    BANDTree   -> SetBranchAddress("Ebeam"        ,&Ebeam);
-    BANDTree   -> SetBranchAddress("gated_charge" ,&gated_charge);
-    BANDTree   -> SetBranchAddress("livetime"     ,&livetime);
-    BANDTree   -> SetBranchAddress("starttime"    ,&starttime);
-    BANDTree   -> SetBranchAddress("current"      ,&current);
-    BANDTree   -> SetBranchAddress("nMult"        ,&nMult);
-    BANDTree   -> SetBranchAddress("nHits"        ,&nHits); // BAND neutrons in BAND skimming
-    BANDTree   -> SetBranchAddress("eHit"         ,&eHit); // CLAS12 electrons in BAND skimming
-    BANDTree   -> SetBranchAddress("goodneutron"  ,&goodneutron);
-    BANDTree   -> SetBranchAddress("nleadindex"   ,&nleadindex);
+//    BANDTree   -> SetBranchAddress("Ebeam"        ,&Ebeam);
+//    BANDTree   -> SetBranchAddress("gated_charge" ,&gated_charge);
+//    BANDTree   -> SetBranchAddress("livetime"     ,&livetime);
+//    BANDTree   -> SetBranchAddress("starttime"    ,&starttime);
+//    BANDTree   -> SetBranchAddress("current"      ,&current);
+//    BANDTree   -> SetBranchAddress("nMult"        ,&nMult);
+//    BANDTree   -> SetBranchAddress("nHits"        ,&nHits); // BAND neutrons in BAND skimming
+//    BANDTree   -> SetBranchAddress("eHit"         ,&eHit); // CLAS12 electrons in BAND skimming
+//    BANDTree   -> SetBranchAddress("goodneutron"  ,&goodneutron);
+//    BANDTree   -> SetBranchAddress("nleadindex"   ,&nleadindex);
     
     
     // Merged Tree - containing all variables...
@@ -592,43 +595,47 @@ void SetInputAndOutputTTrees (){
     // so it does not matter from where we take them...
     MergedTree->Branch("Runno"                  ,&SIDISrunID            );
     MergedTree->Branch("eventnumber"            ,&SIDISeventID          );
-    MergedTree->Branch("Ebeam"                  ,&Ebeam                 );
-    MergedTree->Branch("gated_charge"           ,&gated_charge          );
-    MergedTree->Branch("livetime"               ,&livetime              );
-    MergedTree->Branch("starttime"              ,&starttime             );
-    MergedTree->Branch("current"                ,&current               );
-    MergedTree->Branch("weight"                 ,&weight                );
-    MergedTree->Branch("nMult"                  ,&nMult                 );
-    MergedTree->Branch("nHits"                  ,&nHits                 ); // BAND neutrons in BAND skimming
-    MergedTree->Branch("eHit"                   ,&eHit                  ); // CLAS12 electrons in BAND skimming
-    MergedTree->Branch("goodneutron"            ,&goodneutron           );
-    MergedTree->Branch("nleadindex"             ,&nleadindex            );
-    MergedTree->Branch("e"                      ,&e                     );
-    MergedTree->Branch("Ve"                     ,&Ve                    );
-    MergedTree->Branch("Beam"                   ,&Beam                  );
-    MergedTree->Branch("q"                      ,&q                     );
-    MergedTree->Branch("xB"                     ,&xB                    );
-    MergedTree->Branch("Q2"                     ,&Q2                    );
-    MergedTree->Branch("omega"                  ,&omega                 );
-    MergedTree->Branch("Z"                      ,Zpips                  );
-    MergedTree->Branch("eepiPastCutsInEvent"    ,&eepiPastCutsInEvent   );
-    MergedTree->Branch("Npips"                  ,&Npips                 );
-    MergedTree->Branch("Npims"                  ,&Npims                 );
-    MergedTree->Branch("Nelectrons"             ,&Ne                    );
-    MergedTree->Branch("Ngammas"                ,&Ngammas               );
-    MergedTree->Branch("Nprotons"               ,&Np                    );
-    MergedTree->Branch("Nneutrons"              ,&Nn                    );
-    MergedTree->Branch("y"                      ,&y                     );
+//    MergedTree->Branch("Ebeam"                  ,&Ebeam                 );
+//    MergedTree->Branch("gated_charge"           ,&gated_charge          );
+//    MergedTree->Branch("livetime"               ,&livetime              );
+//    MergedTree->Branch("starttime"              ,&starttime             );
+//    MergedTree->Branch("current"                ,&current               );
+//    MergedTree->Branch("weight"                 ,&weight                );
+//    MergedTree->Branch("nMult"                  ,&nMult                 );
+//    MergedTree->Branch("nHits"                  ,&nHits                 ); // BAND neutrons in BAND skimming
+//    MergedTree->Branch("eHit"                   ,&eHit                  ); // CLAS12 electrons in BAND skimming
+//    MergedTree->Branch("goodneutron"            ,&goodneutron           );
+//    MergedTree->Branch("nleadindex"             ,&nleadindex            );
+//    MergedTree->Branch("e"                      ,&e                     );
+//    MergedTree->Branch("Ve"                     ,&Ve                    );
+//    MergedTree->Branch("Beam"                   ,&Beam                  );
+//    MergedTree->Branch("q"                      ,&q                     );
+//    MergedTree->Branch("xB"                     ,&xB                    );
+//    MergedTree->Branch("Q2"                     ,&Q2                    );
+//    MergedTree->Branch("omega"                  ,&omega                 );
+//    MergedTree->Branch("Z"                      ,Zpips                  );
+//    MergedTree->Branch("eepiPastCutsInEvent"    ,&eepiPastCutsInEvent   );
+//    MergedTree->Branch("Npips"                  ,&Npips                 );
+//    MergedTree->Branch("Npims"                  ,&Npims                 );
+//    MergedTree->Branch("Nelectrons"             ,&Ne                    );
+//    MergedTree->Branch("Ngammas"                ,&Ngammas               );
+//    MergedTree->Branch("Nprotons"               ,&Np                    );
+//    MergedTree->Branch("Nneutrons"              ,&Nn                    );
+//    MergedTree->Branch("y"                      ,&y                     );
+//
+//
+//    // branches that depend on pion charge
+//    if (pionCharge=="pi+") {
+//        MergedTree->Branch("piplus"                 ,&piplus                );
+//        MergedTree->Branch("Vpiplus"                ,&Vpiplus               );
+//    } else if (pionCharge=="pi-") {
+//        MergedTree->Branch("piminus"                 ,&piminus              );
+//        MergedTree->Branch("Vpiminus"                ,&Vpiminus             );
+//
+//    }
     
-    
-    // branches that depend on pion charge
-    if (pionCharge=="pi+") {
-        MergedTree->Branch("piplus"                 ,&piplus                );
-        MergedTree->Branch("Vpiplus"                ,&Vpiplus               );
-    } else if (pionCharge=="pi-") {
-        MergedTree->Branch("piminus"                 ,&piminus              );
-        MergedTree->Branch("Vpiminus"                ,&Vpiminus             );
-        
+    if (fdebug>3) {
+        std::cout << "done SetInputAndOutputTTrees()" << std::endl;
     }
 }
 
