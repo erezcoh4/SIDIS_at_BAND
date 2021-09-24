@@ -420,9 +420,11 @@ Int_t CreateListOfEventsToMerge(TTree * BANDTree,
     bool                 ListEventsToMerge = true;
     BANDeventIDs        .clear();
     SIDISeventIDs       .clear();
+    EventNumbersToMerge .clear();
     
+    // first define two vectors that containt the event IDs in each TTree
     if (DefineEventIDvectors){
-        // first define two vectors that containt the event IDs in each TTree
+        
         TTreeReader BANDReader("calib", BANDFile);
         TTreeReaderValue<Int_t> fBANDeventID(BANDReader, "eventnumber");
         while (BANDReader.Next()) {
@@ -458,10 +460,9 @@ Int_t CreateListOfEventsToMerge(TTree * BANDTree,
             }
         }
     }
+    
     // now, we merge the events
-    if (ListEventsToMerge){ // efficient implementation I took from the internet
-
-
+    if (ListEventsToMerge){
         
         std::vector<int> tmpBANDeventIDs(BANDeventIDs);
         std::sort(std::begin(tmpBANDeventIDs), std::end(tmpBANDeventIDs));
@@ -494,10 +495,7 @@ Int_t CreateListOfEventsToMerge(TTree * BANDTree,
                 EventNumbersToMerge.push_back( BANDeventIDs[i] );
             }
         }
-        PrintTime("Done, using binary_search");
-
         NmergedEvents = EventNumbersToMerge.size();
-        std::cout << "NmergedEvents: " << NmergedEvents << std::endl;
         
         // print-outs
         if (fdebug>4){
@@ -516,7 +514,7 @@ Int_t CreateListOfEventsToMerge(TTree * BANDTree,
                 std::cout << i << ' ';
             std::cout << std::endl << std::endl;
 
-            PrintTime("Done, using match_arrays");
+            PrintTime("Done creating a list of events to merge, using binary_search");
         }
     }
     return NmergedEvents;
