@@ -176,6 +176,17 @@ double         pips_E_PCAL[NMAXPIONS];
 double         pips_E_ECIN[NMAXPIONS];
 double        pips_E_ECOUT[NMAXPIONS];
 double               Zpips[NMAXPIONS]; // hadron rest-frame energy
+
+double           piplus_Px[NMAXPIONS];
+double           piplus_Py[NMAXPIONS];
+double           piplus_Pz[NMAXPIONS];
+double            piplus_E[NMAXPIONS];
+double           Vpiplus_X[NMAXPIONS];
+double           Vpiplus_Y[NMAXPIONS];
+double           Vpiplus_Z[NMAXPIONS];
+
+
+
 // negative pions
 bool     pimsPastSelectionCuts[NMAXPIONS];
 bool eepimsPastKinematicalCuts[NMAXPIONS];
@@ -196,6 +207,13 @@ double         pims_E_ECIN[NMAXPIONS];
 double        pims_E_ECOUT[NMAXPIONS];
 double               Zpims[NMAXPIONS]; // hadron rest-frame energy
 
+double           piminus_Px[NMAXPIONS];
+double           piminus_Py[NMAXPIONS];
+double           piminus_Pz[NMAXPIONS];
+double            piminus_E[NMAXPIONS];
+double           Vpiminus_X[NMAXPIONS];
+double           Vpiminus_Y[NMAXPIONS];
+double           Vpiminus_Z[NMAXPIONS];
 
 
 // Output root file and tree
@@ -820,8 +838,8 @@ void SetOutputTTrees(){
     outTree_e_piplus->Branch("pi_E_ECOUT"           ,&pips_E_ECOUT          , "pi_E_ECOUT[20]/D"    );
     outTree_e_piplus->Branch("DC_layers"            ,&DC_layers             , "DC_layers[3]/I"      );
     outTree_e_piplus->Branch("e"                    ,&e                     );
-    outTree_e_piplus->Branch("pi"                   ,&piplus                );
     outTree_e_piplus->Branch("Ve"                   ,&Ve                    );
+    outTree_e_piplus->Branch("pi"                   ,&piplus                );
     outTree_e_piplus->Branch("Vpi"                  ,&Vpiplus               );
     outTree_e_piplus->Branch("Beam"                 ,&Beam                  );
     outTree_e_piplus->Branch("beam_helicity"        ,&beam_helicity         );
@@ -846,6 +864,14 @@ void SetOutputTTrees(){
     outTree_e_piplus->Branch("Nprotons"             ,&Np                    );
     outTree_e_piplus->Branch("Nneutrons"            ,&Nn                    );
     
+    outTree_e_piplus->Branch("piplus_Px"                ,&piplus_Px              , "piplus_Px[20]/D"    );
+    outTree_e_piplus->Branch("piplus_Py"                ,&piplus_Py              , "piplus_Py[20]/D"    );
+    outTree_e_piplus->Branch("piplus_Pz"                ,&piplus_Pz              , "piplus_Pz[20]/D"    );
+    outTree_e_piplus->Branch("piplus_E"                 ,&piplus_E               , "piplus_E[20]/D"    );
+    outTree_e_piplus->Branch("Vpiplus_X"                ,&Vpiplus_X              , "Vpiplus_X[20]/D"    );
+    outTree_e_piplus->Branch("Vpiplus_Y"                ,&Vpiplus_Y              , "Vpiplus_Y[20]/D"    );
+    outTree_e_piplus->Branch("Vpiplus_Z"                ,&Vpiplus_Z              , "Vpiplus_Z[20]/D"    );
+
     
     
     // pi-
@@ -906,6 +932,15 @@ void SetOutputTTrees(){
     outTree_e_piminus->Branch("Nprotons"             ,&Np                    );
     outTree_e_piminus->Branch("Nneutrons"            ,&Nn                    );
 
+    outTree_e_piminus->Branch("piminus_Px"                ,&piminus_Px              , "piminus_Px[20]/D"    );
+    outTree_e_piminus->Branch("piminus_Py"                ,&piminus_Py              , "piminus_Py[20]/D"    );
+    outTree_e_piminus->Branch("piminus_Pz"                ,&piminus_Pz              , "piminus_Pz[20]/D"    );
+    outTree_e_piminus->Branch("piminus_E"                 ,&piminus_E               , "piminus_E[20]/D"    );
+    outTree_e_piminus->Branch("Vpiminus_X"                ,&Vpiminus_X              , "Vpiminus_X[20]/D"    );
+    outTree_e_piminus->Branch("Vpiminus_Y"                ,&Vpiminus_Y              , "Vpiminus_Y[20]/D"    );
+    outTree_e_piminus->Branch("Vpiminus_Z"                ,&Vpiminus_Z              , "Vpiminus_Z[20]/D"    );
+
+    
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -1083,6 +1118,12 @@ void InitializeVariables(){
         Vpiminus.push_back( TVector3() );
         pimsPastSelectionCuts[piIdx]                = false;
         eepimsPastKinematicalCuts[piIdx]            = false;
+        
+        piplus_Px[piIdx]    = piplus_Py[piIdx]  = piplus_Pz[piIdx]  = piplus_E[piIdx]   = -9999;
+        piminus_Px[piIdx]   = piminus_Py[piIdx] = piminus_Pz[piIdx] = piminus_E[piIdx]  = -9999;
+        Vpiplus_X[piIdx]    = Vpiplus_Y[piIdx]  = Vpiplus_Z[piIdx]  = -9999;
+        Vpiminus_X[piIdx]   = Vpiminus_Y[piIdx] = Vpiminus_Z[piIdx] = -9999;
+         
     }
     DC_layer                                        = -9999;
     status                                          = 1; // 0 is good...
@@ -1324,6 +1365,15 @@ void ExtractPipsInformation( int pipsIdx, int fdebug ){
         }
     }
     
+    piplus_Px[pipsIdx]          = piplus[pipsIdx].Px();
+    piplus_Py[pipsIdx]          = piplus[pipsIdx].Py();
+    piplus_Pz[pipsIdx]          = piplus[pipsIdx].Pz();
+    piplus_E[pipsIdx]           = piplus[pipsIdx].E();
+    Vpiplus_X[pipsIdx]          = Vpiplus[pipsIdx].X();
+    Vpiplus_Y[pipsIdx]          = Vpiplus[pipsIdx].Y();
+    Vpiplus_Z[pipsIdx]          = Vpiplus[pipsIdx].Z();
+    
+    
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -1377,6 +1427,16 @@ void ExtractPimsInformation( int pimsIdx, int fdebug ){
             eepimsPastCutsInEvent = true;
         }
     }
+    
+    piminus_Px[pipsIdx]          = piminus[pipsIdx].Px();
+    piminus_Py[pipsIdx]          = piminus[pipsIdx].Py();
+    piminus_Pz[pipsIdx]          = piminus[pipsIdx].Pz();
+    piminus_E[pipsIdx]           = piminus[pipsIdx].E();
+    Vpiminus_X[pipsIdx]          = Vpiminus[pipsIdx].X();
+    Vpiminus_Y[pipsIdx]          = Vpiminus[pipsIdx].Y();
+    Vpiminus_Z[pipsIdx]          = Vpiminus[pipsIdx].Z();
+    
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
