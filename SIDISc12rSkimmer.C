@@ -1428,13 +1428,13 @@ void ExtractPimsInformation( int pimsIdx, int fdebug ){
         }
     }
     
-    piminus_Px[pipsIdx]          = piminus[pipsIdx].Px();
-    piminus_Py[pipsIdx]          = piminus[pipsIdx].Py();
-    piminus_Pz[pipsIdx]          = piminus[pipsIdx].Pz();
-    piminus_E[pipsIdx]           = piminus[pipsIdx].E();
-    Vpiminus_X[pipsIdx]          = Vpiminus[pipsIdx].X();
-    Vpiminus_Y[pipsIdx]          = Vpiminus[pipsIdx].Y();
-    Vpiminus_Z[pipsIdx]          = Vpiminus[pipsIdx].Z();
+    piminus_Px[pimsIdx]          = piminus[pimsIdx].Px();
+    piminus_Py[pimsIdx]          = piminus[pimsIdx].Py();
+    piminus_Pz[pimsIdx]          = piminus[pimsIdx].Pz();
+    piminus_E[pimsIdx]           = piminus[pimsIdx].E();
+    Vpiminus_X[pimsIdx]          = Vpiminus[pimsIdx].X();
+    Vpiminus_Y[pimsIdx]          = Vpiminus[pimsIdx].Y();
+    Vpiminus_Z[pimsIdx]          = Vpiminus[pimsIdx].Z();
     
 
 }
