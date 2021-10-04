@@ -10,6 +10,26 @@ This repository is responsible for
     
 ## Revisions
 
+Oct-3, 2021    
+-------------
+1. removed Vn variable from "merging" script, as there is no information about neutron track and thus none about the neutron vertex
+
+2. replaced std::vector<TLorentzVector> variable "piplus" and "piminus" in output TTree with float array branches, as it just cauases too much hustle in ROOT structure 
+
+
+ 
+Sep-30, 2021    
+-------------
+1. Added float array branches to sidis skimming TTree, that will allow easier reading in the sidis-neutron merging stage
+    piminus_Px[NMAXPIONS]
+    piminus_Py[NMAXPIONS]
+    piminus_Pz[NMAXPIONS]
+    piminus_E[NMAXPIONS] 
+    Vpiminus_X[NMAXPIONS]
+    Vpiminus_Y[NMAXPIONS]
+    Vpiminus_Z[NMAXPIONS]
+
+
 Sep-22, 2021    
 -------------
 1. Continue polishing neutron and SIDIS merging
