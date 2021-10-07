@@ -99,6 +99,8 @@ std::vector<TVector3>             Vpiminus;
 // auxiliary
 DCfid_SIDIS             dcfid;
 SIDISatBAND_auxiliary   aux;
+
+auto                                 db = TDatabasePDG::Instance();
 std::vector<region_part_ptr>        electrons, pipluses, piminuses;
 std::vector<region_part_ptr>  neutrons, protons, gammas, deuterons;
 
