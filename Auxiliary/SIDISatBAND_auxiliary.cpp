@@ -72,7 +72,7 @@ void SIDISatBAND_auxiliary::SetParticle4Momentum (TLorentzVector &p4,clas12::reg
 
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-void SIDISatBAND_auxiliary::loadCutValues(TString cutValuesFilename){
+void SIDISatBAND_auxiliary::loadCutValues(std::string cutValuesFilename){
     
     // read cut values csv file
     csv_reader csvr;

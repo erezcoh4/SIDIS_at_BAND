@@ -16,7 +16,7 @@ public:
         
     TVector3       GetParticleVertex (clas12::region_part_ptr rp);
     void        SetParticle4Momentum (TLorentzVector &p4,clas12::region_part_ptr rp);
-    void               loadCutValues (TString cutValuesFilename="cutValues.csv");
+    void               loadCutValues (std::string cutValuesFilename="cutValues.csv");
     void              printCutValues ();
     void                SetVerbosity (int _fdebug_)         {fdebug = _fdebug_;};
     void             SetTorusBending (int _torusBending_)   {torusBending = _torusBending_;};
