@@ -114,14 +114,19 @@ void         SetOutFilename ()                        { OutFilename = EventListN
 void       SetEventListName (TString fEventListName)  { EventListName = fEventListName;                     SetOutFilename(); };
 
 void           SetVerbosity (Int_t _fdebug_)          { fdebug = _fdebug_;    };
-// methods
-void         PrintEventList ();
-void          ReadEventList ();
-void    AssignPionsToEvents (Int_t NeventsMax);
-void       CloseOutputFiles ();
-void          FinishProgram ();
-void    InitializeVariables ();
-void     WriteEventToOutput ();
+
+// methods implemented below
+void                       PrintEventList ();
+void                        ReadEventList ();
+void                  AssignPionsToEvents (Int_t NeventsMax);
+void                     CloseOutputFiles ();
+void                        FinishProgram ();
+void                  InitializeVariables ();
+void                   WriteEventToOutput ();
+void              ExtractPionsInformation (int fdebug);
+void               ExtractPipsInformation (int pipsIdx, int fdebug );
+void               ExtractPimsInformation (int pimsIdx, int fdebug );
+
 
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
