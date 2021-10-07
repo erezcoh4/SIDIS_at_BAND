@@ -135,6 +135,7 @@ double SIDISatBAND_auxiliary::FindCutValue( std::string cutName ){
             return cut.second;
         }
     }
+    return -1;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

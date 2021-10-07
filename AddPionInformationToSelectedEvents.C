@@ -175,10 +175,10 @@ void AssignPionsToEvents(Int_t NeventsMax){
                     pipluses    = c12.getByID( 211  );          Npips   = pipluses  .size();
                     piminuses   = c12.getByID(-211  );          Npims   = piminuses .size();
                     electrons   = c12.getByID( 11   );          Ne      = electrons .size();
-//                    neutrons    = c12.getByID( 2112 );          Nn      = neutrons  .size();
-//                    protons     = c12.getByID( 2212 );          Np      = protons   .size();
-//                    gammas      = c12.getByID( 22   );          Ngammas = gammas    .size();
-//                    deuterons   = c12.getByID( 1000010020 );    Nd      = deuterons.size();
+                    //                    neutrons    = c12.getByID( 2112 );          Nn      = neutrons  .size();
+                    //                    protons     = c12.getByID( 2212 );          Np      = protons   .size();
+                    //                    gammas      = c12.getByID( 22   );          Ngammas = gammas    .size();
+                    //                    deuterons   = c12.getByID( 1000010020 );    Nd      = deuterons.size();
                     
                     ExtractPionsInformation     ();
                     WriteEventToOutput          ();
@@ -195,7 +195,7 @@ void WriteEventToOutput(){
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void InitializeVariables(){
-
+    
     piplus      .clear();
     piminus     .clear();
     Vpiplus     .clear();
@@ -215,7 +215,7 @@ void InitializeVariables(){
         pips_PCAL_z[piIdx]                          = -9999;
         pips_E_PCAL[piIdx]                          = -9999;
         pips_E_ECIN[piIdx] = pips_E_ECOUT[piIdx]    = -9999;
-
+        
         pims_chi2PID[piIdx]                         = -9999;
         pims_DC_sector[piIdx]                       = -9999;
         pims_PCAL_sector[piIdx]                     = -9999;
@@ -233,11 +233,11 @@ void InitializeVariables(){
         piplus  .push_back( TLorentzVector(0,0,0,db->GetParticle( 211 )->Mass()) );
         Vpiplus .push_back( TVector3() );
         pipsPastSelectionCuts[piIdx]                = false;
-
+        
         piminus .push_back( TLorentzVector(0,0,0,db->GetParticle( -211 )->Mass()) );
         Vpiminus.push_back( TVector3() );
         pimsPastSelectionCuts[piIdx]                = false;
-
+        
     }
     DC_layer                                        = -9999;
 }
@@ -351,14 +351,14 @@ void ExtractPipsInformation( int pipsIdx, int fdebug ){
     // now, check if pion passed event selection requirements
     // ------------------------------------------------------------------------------------------------
     pipsPastSelectionCuts[pipsIdx] = CheckIfPionPassedSelectionCuts("pi+",
-                                                                     pips_DC_sector[pipsIdx],
-                                                                     pips_DC_x[pipsIdx],
-                                                                     pips_DC_y[pipsIdx],
-                                                                     pips_DC_z[pipsIdx],
-                                                                     pips_chi2PID[pipsIdx],  piplus[pipsIdx].P(),
-                                                                     Ve,
-                                                                     Vpiplus[pipsIdx],
-                                                                     fdebug);
+                                                                    pips_DC_sector[pipsIdx],
+                                                                    pips_DC_x[pipsIdx],
+                                                                    pips_DC_y[pipsIdx],
+                                                                    pips_DC_z[pipsIdx],
+                                                                    pips_chi2PID[pipsIdx],  piplus[pipsIdx].P(),
+                                                                    Ve,
+                                                                    Vpiplus[pipsIdx],
+                                                                    fdebug);
     eepipsPastKinematicalCuts[pipsIdx] = eepiPassedKinematicalCriteria(piplus[pipsIdx],
                                                                        fdebug);
     if (pipsPastSelectionCuts[pipsIdx]) {
@@ -400,14 +400,14 @@ void ExtractPimsInformation( int pimsIdx, int fdebug ){
     // now, check if pion passed event selection requirements
     // ------------------------------------------------------------------------------------------------
     pimsPastSelectionCuts[pimsIdx] = CheckIfPionPassedSelectionCuts("pi-",
-                                                                     pims_DC_sector[pimsIdx],
-                                                                     pims_DC_x[pimsIdx],
-                                                                     pims_DC_y[pimsIdx],
-                                                                     pims_DC_z[pimsIdx],
-                                                                     pims_chi2PID[pimsIdx],  piminus[pimsIdx].P(),
-                                                                     Ve,
-                                                                     Vpiminus[pimsIdx],
-                                                                     fdebug);
+                                                                    pims_DC_sector[pimsIdx],
+                                                                    pims_DC_x[pimsIdx],
+                                                                    pims_DC_y[pimsIdx],
+                                                                    pims_DC_z[pimsIdx],
+                                                                    pims_chi2PID[pimsIdx],  piminus[pimsIdx].P(),
+                                                                    Ve,
+                                                                    Vpiminus[pimsIdx],
+                                                                    fdebug);
     eepimsPastKinematicalCuts[pimsIdx] = eepiPassedKinematicalCriteria(piminus[pimsIdx],
                                                                        fdebug);
     if (pimsPastSelectionCuts[pimsIdx]) {
@@ -418,11 +418,11 @@ void ExtractPimsInformation( int pimsIdx, int fdebug ){
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
-                                     Double_t DC_sector,
-                                     Double_t DC_x[3], Double_t DC_y[3], Double_t DC_z[3],
-                                     Double_t chi2PID, Double_t p,
-                                     TVector3 Ve,
-                                     TVector3 Vpi){
+                                    Double_t DC_sector,
+                                    Double_t DC_x[3], Double_t DC_y[3], Double_t DC_z[3],
+                                    Double_t chi2PID, Double_t p,
+                                    TVector3 Ve,
+                                    TVector3 Vpi){
     
     // decide if pion (pi+ or pi-) passed event selection cuts
     //
@@ -500,10 +500,10 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
        // Cut on the z-Vertex Difference Between Electrons and Hadrons.
        &&  ( fabs((Ve-Vpi).Z()) < cutValue_Ve_Vpi_dz_max )
        ) {
-        if (fdebug>3) { std::cout << "succesfully passed CheckIfPionPassedSelectionCuts(), return true" << std::endl; }
-        
-        return true;
-    }
+           if (fdebug>3) { std::cout << "succesfully passed CheckIfPionPassedSelectionCuts(), return true" << std::endl; }
+           
+           return true;
+       }
     return false;
 }
 
