@@ -22,8 +22,8 @@
 #include "Auxiliary/DCfid_SIDIS.cpp"
 #include "Auxiliary/SIDISatBAND_auxiliary.cpp"
 //#include "/u/home/cohen/SIDIS_at_BAND/Auxiliary/DCfid_SIDIS.cpp"
-//#include "clas12reader.h"
-//using namespace clas12;
+#include "clas12reader.h"
+using namespace clas12;
 
 // start clock
 auto start = std::chrono::high_resolution_clock::now();
