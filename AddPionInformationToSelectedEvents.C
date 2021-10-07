@@ -121,8 +121,7 @@ void    AssignPionsToEvents (Int_t NeventsMax);
 void       CloseOutputFiles ();
 void          FinishProgram ();
 void    InitializeVariables ();
-TString     GetRunNumberSTR ( int RunNumber );
-
+void     WriteEventToOutput ();
 
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
@@ -131,8 +130,9 @@ void AddPionInformationToSelectedEvents(Int_t      NeventsMax=-1,
                                         Int_t     _fdebug_=1,
                                         TString   _OutDataPath_="/volatile/clas12/users/ecohen/BAND/PionInformationInEventLists/"){
     
-    aux.loadCutValues   ("cutValues.csv",fdebug);
+    aux.loadCutValues   ("cutValues.csv");
     SetVerbosity        (_fdebug_);
+    aux.SetVerbosity    (_fdebug_);
     SetEventListName    (_EventListName_);
     SetOutDataPath      (_OutDataPath_);
     ReadEventList       ();
@@ -148,29 +148,28 @@ void AssignPionsToEvents(Int_t NeventsMax){
     for (size_t eventIdx=0 ; eventIdx < eventlist.size() && eventIdx < NeventsMax; eventIdx++ ){
         auto event = eventlist.at( eventIdx );
         
-        //        InitializeVariables();
-        
-        if (event.run_number != run_number){
+        InitializeVariables();
+        if (event.run_number != RunNumber){
             
             RunNumber = event.run_number;
             if (fdebug>2) std::cout << "looking at run " << RunNumber << std::endl;
             
             // every time that the run number changes, we open a new hipo file
-            TString    inputFile = DataPath + "inc_" + GetRunNumberSTR( RunNumber ) + ".hipo";
+            TString    inputFile = DataPath + "inc_" + aux.GetRunNumberSTR( RunNumber ) + ".hipo";
             TChain fake("hipo");
             fake.Add(inputFile.Data());
             //get the hipo data
-            clas12reader c12(fake.GetListOfFiles->At(0)->GetTitle(),{0});
-            while(c12.next()==true)){
+            clas12reader c12(fake.GetListOfFiles()->At(0)->GetTitle(),{0});
+            while(c12.next()==true){
                 auto runnum = c12.runconfig()->getRun();
                 auto evnum  = c12.runconfig()->getEvent();
                 
                 if ( evnum==event.event_number ){
-                    if (fdebug>2) std::cout << "looking at run " << event.run_number << " event " << event.event_number << std::endl;
+                    if (fdebug>2) std::cout << "looking at event " << event.event_number << std::endl;
                     
                     pipluses    = c12.getByID( 211  );          Npips   = pipluses  .size();
                     piminuses   = c12.getByID(-211  );          Npims   = piminuses .size();
-//                    electrons   = c12.getByID( 11   );          Ne      = electrons .size();
+                    electrons   = c12.getByID( 11   );          Ne      = electrons .size();
 //                    neutrons    = c12.getByID( 2112 );          Nn      = neutrons  .size();
 //                    protons     = c12.getByID( 2212 );          Np      = protons   .size();
 //                    gammas      = c12.getByID( 22   );          Ngammas = gammas    .size();
@@ -178,14 +177,16 @@ void AssignPionsToEvents(Int_t NeventsMax){
                     
                     ExtractPionsInformation     ();
                     WriteEventToOutput          ();
-                    
-                    
                 }
             }
         }
     }
 }
 
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+void WriteEventToOutput(){
+    
+}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void InitializeVariables(){
@@ -236,21 +237,11 @@ void InitializeVariables(){
     DC_layer                                        = -9999;
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-TString GetRunNumberSTR( int RunNumber ){
-    char RunNumberStr[20];
-    sprintf( RunNumberStr, "00%d", RunNumber );
-    if (fdebug>1) std::cout << "(SIDIS) skimming run " << RunNumberStr << std::endl;
-    return (TString)RunNumberStr;
-}
-
-
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void OpenOutputFiles (){
     outcsvfile.open( OutFullFilename );
     outcsvfile << csvheader << std::endl;
 }
-
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void FinishProgram(){
@@ -260,8 +251,6 @@ void FinishProgram(){
     if (fdebug>2) std::cout << "Done. Elapsed time: " << elapsed.count() << std::endl;
     CloseOutputFiles( );
 }
-
-
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void CloseOutputFiles (){
@@ -302,7 +291,6 @@ void ExtractPionsInformation(int fdebug){
     // done
     if (fdebug > 2) std::cout << "done extracting pion information" << std::endl;
 }
-
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void ExtractPipsInformation( int pipsIdx, int fdebug ){

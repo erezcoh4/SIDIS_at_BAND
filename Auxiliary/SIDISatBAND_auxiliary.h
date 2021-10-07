@@ -1,8 +1,8 @@
 // Erez O. C., Oct-6, 2021
-#ifndef __DCFID_SIDIS_H__
-#define __DCFID_SIDIS_H__
+#ifndef __SIDISatBAND_auxiliary_H__
+#define __SIDISatBAND_auxiliary_H__
 
-#include "Auxiliary/csv_reader.h"
+#include "csv_reader.h"
 
 class SIDISatBAND_auxiliary {
 public:
@@ -18,7 +18,10 @@ public:
     void              printCutValues ();
     void                SetVerbosity (int _fdebug_)         {fdebug = _fdebug_;};
     void             SetTorusBending (int _torusBending_)   {torusBending = _torusBending_;};
-    
+    double              FindCutValue ( std::string cutName );
+    TString          GetRunNumberSTR ( int RunNumber );
+
+
     
     int                           fdebug;
     int                     torusBending; // -1 for In-bending, +1 for Out-bending

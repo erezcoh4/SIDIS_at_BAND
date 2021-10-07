@@ -76,7 +76,7 @@ void SIDISatBAND_auxiliary::loadCutValues(TString cutValuesFilename){
     
     // read cut values csv file
     csv_reader csvr;
-    cutValues = csvr.read_csv();
+    cutValues = csvr.read_csv(cutValuesFilename);
     if (fdebug>2) { printCutValues(); }
     
     // assign specific cut values - to speed things up
@@ -127,3 +127,21 @@ void SIDISatBAND_auxiliary::printCutValues(){
         std::cout << cut.first << ": " << cut.second << std::endl;
     }
 }
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+double SIDISatBAND_auxiliary::FindCutValue( std::string cutName ){
+    for (auto cut: cutValues) {
+        if (strcmp(cut.first.c_str(),cutName.c_str())==0){
+            return cut.second;
+        }
+    }
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+TString SIDISatBAND_auxiliary::GetRunNumberSTR( int RunNumber ){
+    char RunNumberStr[20];
+    sprintf( RunNumberStr, "00%d", RunNumber );
+    if (fdebug>1) std::cout << "(SIDIS) skimming run " << RunNumberStr << std::endl;
+    return (TString)RunNumberStr;
+}
+
