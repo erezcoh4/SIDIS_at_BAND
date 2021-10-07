@@ -497,8 +497,8 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
         << "pion charge: "          << pionCharge               << ","
         << "DC_x[0]: "              << DC_x[0]                  << ","
         << "chi2PID:"               << chi2PID                  << ","
-        << "Chi2PID_pion_lowerBound( p="<<p<<", C="<<C<<" ): "  << Chi2PID_pion_lowerBound( p, C ) << ","
-        << "Chi2PID_pion_upperBound( p="<<p<<", C="<<C<<" ): "  << Chi2PID_pion_upperBound( p, C ) << ","
+        << "Chi2PID_pion_lowerBound( p="<<p<<", C="<<C<<" ): "  << aux.Chi2PID_pion_lowerBound( p, C ) << ","
+        << "Chi2PID_pion_upperBound( p="<<p<<", C="<<C<<" ): "  << aux.Chi2PID_pion_upperBound( p, C ) << ","
         << "fabs((Ve-Vpi).Z()): "   << fabs((Ve-Vpi).Z())       << ","
         << std::endl;
     }
@@ -507,7 +507,7 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
        ( aux.Chi2PID_pion_lowerBound( p, C ) < chi2PID && chi2PID < aux.Chi2PID_pion_upperBound( p , C ) )
        
        // Cut on the z-Vertex Difference Between Electrons and Hadrons.
-       &&  ( fabs((Ve-Vpi).Z()) < cutValue_Ve_Vpi_dz_max )
+       &&  ( fabs((Ve-Vpi).Z()) < aux.cutValue_Ve_Vpi_dz_max )
        ) {
            if (fdebug>3) { std::cout << "succesfully passed CheckIfPionPassedSelectionCuts(), return true" << std::endl; }
            
