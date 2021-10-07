@@ -3,6 +3,8 @@
 #define __SIDISatBAND_auxiliary_H__
 
 #include "csv_reader.h"
+#include "clas12reader.h"
+using namespace clas12;
 
 class SIDISatBAND_auxiliary {
 public:
