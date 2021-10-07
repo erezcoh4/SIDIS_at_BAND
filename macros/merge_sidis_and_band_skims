@@ -79,7 +79,6 @@ for line in run_fileLines[FirstRun:]:#{
 #}
 
 print('')
-print('done.')
-print('')
+print('Done processing merge_sidis_and_band_skims.')
 
 os.system('date | mail -s "Done processing merge_sidis_and_band_skims on ifarm" cohen.erez7@gmail.com')

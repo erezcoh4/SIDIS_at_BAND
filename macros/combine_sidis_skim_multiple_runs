@@ -50,5 +50,4 @@ for pi_charge in ['piplus','piminus']:#{
 #}
 
 print('')
-print('done.')
-print('')
+print('Done processing combine_sidis_skim_multiple_runs.')

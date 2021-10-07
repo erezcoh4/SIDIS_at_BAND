@@ -10,11 +10,17 @@ This repository is responsible for
     
 ## Revisions
 
+Oct-6, 2021    
+-------------
+1. Added a script to add pion information to selected list of events 
+
 Oct-3, 2021    
 -------------
 1. removed Vn variable from "merging" script, as there is no information about neutron track and thus none about the neutron vertex
 
-2. replaced std::vector<TLorentzVector> variable "piplus" and "piminus" in output TTree with float array branches, as it just cauases too much hustle in ROOT structure 
+2. replaced std::vector<TLorentzVector> variable "piplus" and "piminus" in output TTree with float array branches, as it just cauases too much hustle in ROOT structure
+
+3. Added requirement for "goodneutron", and "eepiPastCutsInEvent" to speed up CreateListOfEventsToMerge() by reducing the number of events we need to go through in the merging stage  
 
 
  
