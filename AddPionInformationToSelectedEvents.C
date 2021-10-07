@@ -284,6 +284,8 @@ void FinishProgram(){
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void CloseOutputFiles (){
     // close output CSV
+    if (fdebug>2) std::cout << "Closing output csvfile " << OutFullFilename << std::endl;
+
     outcsvfile.close();
     if (fdebug>2){
         std::cout
