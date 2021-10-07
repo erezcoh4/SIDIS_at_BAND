@@ -278,6 +278,8 @@ void OpenOutputFiles (){
     if (fdebug>2) std::cout << "Opening output csvfile: " << OutFullFilename << std::endl;
     
     outcsvfile.open( OutFullFilename );
+    if (fdebug>2) std::cout << "Writing to output csvfile: " << OutFullFilename << std::endl;
+    
     outcsvfile << csvheader << std::endl;
     
     if (fdebug>2) std::cout << "Opened output csvfile: " << OutFullFilename << std::endl;
