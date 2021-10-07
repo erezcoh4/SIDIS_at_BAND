@@ -77,7 +77,7 @@ std::vector<TVector3>              Vpiplus;
 
 
 // negative pions
-bool              pipsPastCutsInEvent;
+bool              pimsPastCutsInEvent;
 bool pimsPastSelectionCuts[NMAXPIONS];
 double        pims_chi2PID[NMAXPIONS];
 double         pims_PCAL_W[NMAXPIONS];
