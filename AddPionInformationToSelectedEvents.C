@@ -51,6 +51,7 @@ std::ofstream          outcsvfile;
 
 
 // positive pions
+bool              pipsPastCutsInEvent;
 bool pipsPastSelectionCuts[NMAXPIONS];
 double        pips_chi2PID[NMAXPIONS];
 double         pips_PCAL_W[NMAXPIONS];
@@ -74,6 +75,7 @@ std::vector<TVector3>              Vpiplus;
 
 
 // negative pions
+bool              pipsPastCutsInEvent;
 bool pimsPastSelectionCuts[NMAXPIONS];
 double        pims_chi2PID[NMAXPIONS];
 double         pims_PCAL_W[NMAXPIONS];
@@ -208,6 +210,9 @@ void InitializeVariables(){
     neutrons    .clear();
     protons     .clear();
     gammas      .clear();
+    
+    pipsPastCutsInEvent = false;
+    pimsPastCutsInEvent = false;
     for (int piIdx=0; piIdx<NMAXPIONS; piIdx++) {
         pips_chi2PID[piIdx]                         = -9999;
         pips_DC_sector[piIdx]                       = -9999;
