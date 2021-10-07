@@ -129,9 +129,9 @@ void                     CloseOutputFiles ();
 void                        FinishProgram ();
 void                  InitializeVariables ();
 void                   WriteEventToOutput ();
-void              ExtractPionsInformation (int fdebug);
-void               ExtractPipsInformation (int pipsIdx, int fdebug );
-void               ExtractPimsInformation (int pimsIdx, int fdebug );
+void              ExtractPionsInformation ();
+void               ExtractPipsInformation (int pipsIdx);
+void               ExtractPimsInformation (int pimsIdx);
 
 
 
@@ -178,9 +178,11 @@ void AssignPionsToEvents(Int_t NeventsMax){
                 if ( evnum==event.event_number ){
                     if (fdebug>2) std::cout << "looking at event " << event.event_number << std::endl;
                     
+                    
                     pipluses    = c12.getByID( 211  );          Npips   = pipluses  .size();
                     piminuses   = c12.getByID(-211  );          Npims   = piminuses .size();
                     electrons   = c12.getByID( 11   );          Ne      = electrons .size();
+                    if (fdebug>2) std::cout << "Ne " << Ne << ", Npips: " << Npips << ", Npims: " << Npims << std::endl;
                     //                    neutrons    = c12.getByID( 2112 );          Nn      = neutrons  .size();
                     //                    protons     = c12.getByID( 2212 );          Np      = protons   .size();
                     //                    gammas      = c12.getByID( 22   );          Ngammas = gammas    .size();
@@ -282,7 +284,7 @@ void CloseOutputFiles (){
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-void ExtractElectronInformation(int fdebug){
+void ExtractElectronInformation(){
     // ------------------------------------------------------------------------------------------------
     // extract information from first electron
     // here only the reconstructed vertext position, as it affects the pion vertex cut position
@@ -291,7 +293,7 @@ void ExtractElectronInformation(int fdebug){
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-void ExtractPionsInformation(int fdebug){
+void ExtractPionsInformation(){
     
     // positive pions)
     for (int pipsIdx=0; pipsIdx < Npips; pipsIdx++) {
@@ -307,7 +309,7 @@ void ExtractPionsInformation(int fdebug){
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-void ExtractPipsInformation( int pipsIdx, int fdebug ){
+void ExtractPipsInformation( int pipsIdx ){
     if (fdebug>2)
         std::cout << "ExtractPipsInformation( pipsIdx=" << pipsIdx << ", fdebug=" << fdebug << " )" << std::endl;
     
@@ -376,7 +378,7 @@ void ExtractPipsInformation( int pipsIdx, int fdebug ){
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-void ExtractPimsInformation( int pimsIdx, int fdebug ){
+void ExtractPimsInformation( int pimsIdx ){
     // extract negative pion information
     aux.SetParticle4Momentum(piminus[pimsIdx]  ,piminuses[pimsIdx]);
     Zpims[pimsIdx]              = piminus[pimsIdx].E() / omega;
