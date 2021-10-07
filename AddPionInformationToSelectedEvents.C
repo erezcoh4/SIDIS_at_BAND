@@ -267,10 +267,11 @@ void InitializeVariables(){
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void OpenOutputFiles (){
+    if (fdebug>2) std::cout << "Opening output csvfile: " << OutFullFilename << std::endl;
+    
     outcsvfile.open( OutFullFilename );
     outcsvfile << csvheader << std::endl;
     
-    if (fdebug>2) std::cout << "Opened output csvfile: " << OutFullFilename << std::endl;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
