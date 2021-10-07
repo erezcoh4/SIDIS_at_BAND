@@ -140,7 +140,7 @@ bool       CheckIfPionPassedSelectionCuts (TString pionCharge, // "pi+" or "pi-"
                                            Double_t DC_x[3], Double_t DC_y[3], Double_t DC_z[3],
                                            Double_t chi2PID, Double_t p,
                                            TVector3 Ve,      TVector3 Vpi);
-
+void                      OpenOutputFiles ();
 
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
@@ -152,6 +152,7 @@ void AddPionInformationToSelectedEvents(Int_t      NeventsMax=-1,
     aux.loadCutValues   ("cutValues.csv");
     SetVerbosity        (_fdebug_);
     aux.SetVerbosity    (_fdebug_);
+    OpenOutputFiles     ();
     SetEventListName    (_EventListName_);
     SetOutDataPath      (_OutDataPath_);
     ReadEventList       ();
