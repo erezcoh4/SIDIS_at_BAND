@@ -123,6 +123,7 @@ void       SetEventListName (TString fEventListName)  { EventListName = fEventLi
 void           SetVerbosity (Int_t _fdebug_)          { fdebug = _fdebug_;    };
 void               SetEbeam (Double_t _Ebeam_)        { Ebeam = _Ebeam_;    Beam.SetPxPyPzE(0, 0, Ebeam, Ebeam );};
 
+
 // methods implemented below
 void                       PrintEventList ();
 void                        ReadEventList ();
@@ -134,6 +135,11 @@ void                   WriteEventToOutput ();
 void              ExtractPionsInformation ();
 void               ExtractPipsInformation (int pipsIdx);
 void               ExtractPimsInformation (int pimsIdx);
+bool       CheckIfPionPassedSelectionCuts (TString pionCharge, // "pi+" or "pi-"
+                                           Double_t DC_sector,
+                                           Double_t DC_x[3], Double_t DC_y[3], Double_t DC_z[3],
+                                           Double_t chi2PID, Double_t p,
+                                           TVector3 Ve,      TVector3 Vpi);
 
 
 

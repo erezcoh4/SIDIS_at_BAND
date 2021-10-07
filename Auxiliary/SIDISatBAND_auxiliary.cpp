@@ -171,15 +171,15 @@ void SIDISatBAND_auxiliary::SetTorusBendingFromRunNumber ( Int_t RunNumber ){
     // Fall 2019 (without low-energy-run) was out-bending
     
     if (6420 <= RunNumber && RunNumber <= 6598){
-        this.torusBending = -1;
+        this->torusBending = -1;
     }
     else if (11362 <= RunNumber && RunNumber <= 11571){
-        this.torusBending = -1;
+        this->torusBending = -1;
     }
     else if (6164 <= RunNumber && RunNumber <= 6399){
-        this.torusBending = +1;
+        this->torusBending = +1;
     }
     else{
-        this.torusBending = 0;
+        this->torusBending = 0;
     }
 }
