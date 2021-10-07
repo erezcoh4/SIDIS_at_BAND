@@ -116,12 +116,20 @@ std::vector<region_part_ptr>  neutrons, protons, gammas, deuterons;
 // Setters
 void            SetDataPath (TString fDataPath)       { DataPath = fDataPath; };
 void     SetOutFullFilename ()                        { OutFullFilename = OutDataPath + OutFilename + ".csv"; };
-void         SetOutDataPath (TString fOutDataPath)    { OutDataPath = fOutDataPath + "/";                   SetOutFullFilename(); };
-void         SetOutFilename ()                        { OutFilename = EventListName + "_PionInformation";   SetOutFullFilename(); };
-void       SetEventListName (TString fEventListName)  { EventListName = fEventListName;                     SetOutFilename(); };
-
 void           SetVerbosity (Int_t _fdebug_)          { fdebug = _fdebug_;    };
 void               SetEbeam (Double_t _Ebeam_)        { Ebeam = _Ebeam_;    Beam.SetPxPyPzE(0, 0, Ebeam, Ebeam );};
+void         SetOutDataPath (TString fOutDataPath)    {
+    OutDataPath = fOutDataPath + "/";
+    SetOutFullFilename();
+};
+void         SetOutFilename ()                        {
+    OutFilename = EventListName + "_PionInformation";
+    SetOutFullFilename();
+};
+void       SetEventListName (TString fEventListName)  {
+    EventListName = fEventListName;
+    SetOutFilename();
+};
 
 
 // methods implemented below
@@ -152,9 +160,9 @@ void AddPionInformationToSelectedEvents(Int_t      NeventsMax=-1,
     aux.loadCutValues   ("cutValues.csv");
     SetVerbosity        (_fdebug_);
     aux.SetVerbosity    (_fdebug_);
-    OpenOutputFiles     ();
     SetEventListName    (_EventListName_);
     SetOutDataPath      (_OutDataPath_);
+    OpenOutputFiles     ();
     ReadEventList       ();
     AssignPionsToEvents ( NeventsMax);
     FinishProgram       ();
