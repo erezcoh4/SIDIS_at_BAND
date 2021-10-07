@@ -146,3 +146,20 @@ TString SIDISatBAND_auxiliary::GetRunNumberSTR( int RunNumber ){
     return (TString)RunNumberStr;
 }
 
+
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+Double_t GetEbeamFromRunNumber ( Double_t RunNumber ){
+    if (6420 <= RunNumber && RunNumber <= 6598){
+        return 10.2; // GeV
+    }
+    else if (11362 <= RunNumber && RunNumber <= 11571){
+        return 10.4; // GeV
+    }
+    else if (6164 <= RunNumber && RunNumber <= 6399){
+        return 10.6; // GeV
+    }
+    else{
+        return 0;
+    }
+}

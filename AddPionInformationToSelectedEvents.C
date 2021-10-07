@@ -37,17 +37,18 @@ TString          OutFilename = "NonameOutputFile";
 TString      OutFullFilename = "";
 TString            csvheader = "Npips,Npims,Nelectrons,Ngammas,Nprotons,Nneutrons,Ndeuterons,";
 
-Int_t              RunNumber = 0;
-Int_t            EventNumber = 0;
-Int_t                 fdebug = 0;
-Int_t       NeventsProcessed = 0;
-Int_t             Ne, Nn, Np, Nd;
-Int_t      Npips, Npims, Ngammas;
+Int_t                  RunNumber = 0;
+Int_t                EventNumber = 0;
+Int_t                     fdebug = 0;
+Int_t           NeventsProcessed = 0;
+Int_t                 Ne, Nn, Np, Nd;
+Int_t          Npips, Npims, Ngammas;
+Double_t                Ebeam = 10.2;
+TLorentzVector            Beam, e, q;
+TVector3                          Ve;
 
-TVector3                      Ve;
-
-std::vector<event_id>   eventlist;
-std::ofstream          outcsvfile;
+std::vector<event_id>      eventlist;
+std::ofstream             outcsvfile;
 
 int          DC_layers[3] = {6,18,36};// Region 1 is denoted at DC detector 6, Region 2 is denoted 18, Region 3 - as 36
 int                          DC_layer;
@@ -120,6 +121,7 @@ void         SetOutFilename ()                        { OutFilename = EventListN
 void       SetEventListName (TString fEventListName)  { EventListName = fEventListName;                     SetOutFilename(); };
 
 void           SetVerbosity (Int_t _fdebug_)          { fdebug = _fdebug_;    };
+void               SetEbeam (Double_t _Ebeam_)        { Ebeam = _Ebeam_;    Beam.SetPxPyPzE(0, 0, Ebeam, Ebeam );};
 
 // methods implemented below
 void                       PrintEventList ();
@@ -172,12 +174,12 @@ void AssignPionsToEvents(Int_t NeventsMax){
             //get the hipo data
             clas12reader c12(fake.GetListOfFiles()->At(0)->GetTitle(),{0});
             while(c12.next()==true){
-                auto runnum = c12.runconfig()->getRun();
+                
                 auto evnum  = c12.runconfig()->getEvent();
+                SetEbeam ( aux.GetEbeamFromRunNumber( RunNumber ) );
                 
                 if ( evnum==event.event_number ){
                     if (fdebug>2) std::cout << "looking at event " << event.event_number << std::endl;
-                    
                     
                     pipluses    = c12.getByID( 211  );          Npips   = pipluses  .size();
                     piminuses   = c12.getByID(-211  );          Npims   = piminuses .size();
@@ -204,16 +206,19 @@ void WriteEventToOutput(){
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void InitializeVariables(){
     
+    e  = TLorentzVector(0,0,0,db->GetParticle( 11   )->Mass());
+    Ve = TVector3(-9999,-9999,-9999);
+    
     piplus      .clear();
     piminus     .clear();
     Vpiplus     .clear();
     Vpiminus    .clear();
     pipluses    .clear();
     piminuses   .clear();
-    electrons   .clear();
-    neutrons    .clear();
-    protons     .clear();
-    gammas      .clear();
+//    electrons   .clear();
+//    neutrons    .clear();
+//    protons     .clear();
+//    gammas      .clear();
     
     pipsPastCutsInEvent = pimsPastCutsInEvent       = false;
     DC_layer                                        = -9999;
@@ -289,7 +294,10 @@ void ExtractElectronInformation(){
     // extract information from first electron
     // here only the reconstructed vertext position, as it affects the pion vertex cut position
     // ------------------------------------------------------------------------------------------------
-    Ve = aux.GetParticleVertex( electrons[leading_e_index] );
+    aux.SetParticle4Momentum( e , electrons[0] );
+    q = Beam - e;
+    Ve = aux.GetParticleVertex( electrons[0] );
+    
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -297,11 +305,11 @@ void ExtractPionsInformation(){
     
     // positive pions)
     for (int pipsIdx=0; pipsIdx < Npips; pipsIdx++) {
-        ExtractPipsInformation( pipsIdx, fdebug );
+        ExtractPipsInformation( pipsIdx );
     }
     // negative pions
     for (int pimsIdx=0; pimsIdx < Npims; pimsIdx++) {
-        ExtractPimsInformation( pimsIdx, fdebug );
+        ExtractPimsInformation( pimsIdx );
     }
     
     // done
@@ -316,7 +324,7 @@ void ExtractPipsInformation( int pipsIdx ){
     
     // extract positive pion information
     aux.SetParticle4Momentum(piplus[pipsIdx]  ,pipluses[pipsIdx]);
-    Zpips[pipsIdx]              = piplus[pipsIdx].E() / omega;
+    Zpips[pipsIdx]              = piplus[pipsIdx].E() / q.E();
     Vpiplus[pipsIdx]            = aux.GetParticleVertex( pipluses[pipsIdx] );
     pips_chi2PID[pipsIdx]       = pipluses[pipsIdx]->par()->getChi2Pid();
     
@@ -381,7 +389,7 @@ void ExtractPipsInformation( int pipsIdx ){
 void ExtractPimsInformation( int pimsIdx ){
     // extract negative pion information
     aux.SetParticle4Momentum(piminus[pimsIdx]  ,piminuses[pimsIdx]);
-    Zpims[pimsIdx]              = piminus[pimsIdx].E() / omega;
+    Zpims[pimsIdx]              = piminus[pimsIdx].E() / q.E();
     Vpiminus[pimsIdx]           = aux.GetParticleVertex( piminuses[pimsIdx] );
     pims_chi2PID[pimsIdx]       = piminuses[pimsIdx]->par()->getChi2Pid();
     
