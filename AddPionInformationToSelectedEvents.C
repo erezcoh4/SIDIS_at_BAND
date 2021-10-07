@@ -306,7 +306,7 @@ void ExtractPipsInformation( int pipsIdx, int fdebug ){
     
     
     // extract positive pion information
-    aux.SetLorentzVector(piplus[pipsIdx]  ,pipluses[pipsIdx]);
+    aux.SetParticle4Momentum(piplus[pipsIdx]  ,pipluses[pipsIdx]);
     Zpips[pipsIdx]              = piplus[pipsIdx].E() / omega;
     Vpiplus[pipsIdx]            = aux.GetParticleVertex( pipluses[pipsIdx] );
     pips_chi2PID[pipsIdx]       = pipluses[pipsIdx]->par()->getChi2Pid();
@@ -371,7 +371,7 @@ void ExtractPipsInformation( int pipsIdx, int fdebug ){
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void ExtractPimsInformation( int pimsIdx, int fdebug ){
     // extract negative pion information
-    aux.SetLorentzVector(piminus[pimsIdx]  ,piminuses[pimsIdx]);
+    aux.SetParticle4Momentum(piminus[pimsIdx]  ,piminuses[pimsIdx]);
     Zpims[pimsIdx]              = piminus[pimsIdx].E() / omega;
     Vpiminus[pimsIdx]           = aux.GetParticleVertex( piminuses[pimsIdx] );
     pims_chi2PID[pimsIdx]       = piminuses[pimsIdx]->par()->getChi2Pid();
