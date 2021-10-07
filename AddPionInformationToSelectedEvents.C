@@ -177,7 +177,7 @@ void AssignPionsToEvents(Int_t NeventsMax){
                 
                 auto evnum  = c12.runconfig()->getEvent();
                 SetEbeam ( aux.GetEbeamFromRunNumber( RunNumber ) );
-                
+                aux.SetTorusBendingFromRunNumber( RunNumber );
                 if ( evnum==event.event_number ){
                     if (fdebug>2) std::cout << "looking at event " << event.event_number << std::endl;
                     
@@ -471,7 +471,7 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
         // sector:  1-6
         // layer:   1-3
         // bending: 0(out)/1(in)
-        int bending  = 1 ? (torusBending==-1) : 0;
+        int bending  = 1 ? (aux.torusBending==-1) : 0;
         // new version Aug-11,2021
         if (fdebug>3) {
             std::cout << "dcfid.DC_fid_th_ph_sidis(): "

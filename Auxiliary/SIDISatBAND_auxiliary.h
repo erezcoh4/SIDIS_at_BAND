@@ -14,16 +14,16 @@ public:
     Double_t Chi2PID_pion_upperBound (Double_t p, Double_t C);
     Double_t Chi2PID_pion_lowerBound (Double_t p, Double_t C);
         
-    TVector3       GetParticleVertex (clas12::region_part_ptr rp);
-    void        SetParticle4Momentum (TLorentzVector &p4,clas12::region_part_ptr rp);
-    void               loadCutValues (std::string cutValuesFilename="cutValues.csv");
-    void              printCutValues ();
-    void                SetVerbosity (int _fdebug_)         {fdebug = _fdebug_;};
-    void             SetTorusBending (int _torusBending_)   {torusBending = _torusBending_;};
-    double              FindCutValue ( std::string cutName );
-    TString          GetRunNumberSTR ( int RunNumber );
-    Double_t   GetEbeamFromRunNumber ( Double_t RunNumber );
-
+    TVector3        GetParticleVertex (clas12::region_part_ptr rp);
+    void         SetParticle4Momentum (TLorentzVector &p4,clas12::region_part_ptr rp);
+    void                loadCutValues (std::string cutValuesFilename="cutValues.csv");
+    void               printCutValues ();
+    void                 SetVerbosity (int _fdebug_)         {fdebug = _fdebug_;};
+    void              SetTorusBending (int _torusBending_)   {torusBending = _torusBending_;};
+    double               FindCutValue ( std::string cutName );
+    TString           GetRunNumberSTR ( int RunNumber );
+    Double_t    GetEbeamFromRunNumber ( Double_t RunNumber );
+    void SetTorusBendingFromRunNumber ( RunNumber );
     
     int                           fdebug;
     int                     torusBending; // -1 for In-bending, +1 for Out-bending

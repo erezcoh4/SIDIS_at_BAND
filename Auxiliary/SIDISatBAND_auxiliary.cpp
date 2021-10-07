@@ -146,8 +146,6 @@ TString SIDISatBAND_auxiliary::GetRunNumberSTR( int RunNumber ){
     return (TString)RunNumberStr;
 }
 
-
-
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 Double_t GetEbeamFromRunNumber ( Double_t RunNumber ){
     if (6420 <= RunNumber && RunNumber <= 6598){
@@ -161,5 +159,27 @@ Double_t GetEbeamFromRunNumber ( Double_t RunNumber ){
     }
     else{
         return 0;
+    }
+}
+
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+void SetTorusBendingFromRunNumber ( RunNumber ){
+    // -1 for In-bending, +1 for Out-bending
+    // For BAND data
+    // Spring 19 and Spring 2020 was in-bending
+    // Fall 2019 (without low-energy-run) was out-bending
+    
+    if (6420 <= RunNumber && RunNumber <= 6598){
+        this.torusBending = -1;
+    }
+    else if (11362 <= RunNumber && RunNumber <= 11571){
+        this.torusBending = -1;
+    }
+    else if (6164 <= RunNumber && RunNumber <= 6399){
+        this.torusBending = +1;
+    }
+    else{
+        this.torusBending = 0;
     }
 }
