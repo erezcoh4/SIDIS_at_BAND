@@ -49,6 +49,8 @@ TVector3                      Ve;
 std::vector<event_id>   eventlist;
 std::ofstream          outcsvfile;
 
+int          DC_layers[3] = {6,18,36};// Region 1 is denoted at DC detector 6, Region 2 is denoted 18, Region 3 - as 36
+int                          DC_layer;
 
 // positive pions
 bool              pipsPastCutsInEvent;
@@ -211,8 +213,8 @@ void InitializeVariables(){
     protons     .clear();
     gammas      .clear();
     
-    pipsPastCutsInEvent = false;
-    pimsPastCutsInEvent = false;
+    pipsPastCutsInEvent = pimsPastCutsInEvent       = false;
+    DC_layer                                        = -9999;
     for (int piIdx=0; piIdx<NMAXPIONS; piIdx++) {
         pips_chi2PID[piIdx]                         = -9999;
         pips_DC_sector[piIdx]                       = -9999;
