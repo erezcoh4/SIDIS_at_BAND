@@ -1,7 +1,10 @@
 // Erez O. C., Oct-6, 2021
 #include "SIDISatBAND_auxiliary.h"
 
-SIDISatBAND_auxiliary::SIDISatBAND_auxiliary(){}
+SIDISatBAND_auxiliary::SIDISatBAND_auxiliary(int _fdebug_, int _torusBending_){
+    SetVerbosity    (_fdebug_);
+    SetTorusBending (_torusBending_);
+}
 
 SIDISatBAND_auxiliary::~SIDISatBAND_auxiliary(){}
 
@@ -51,3 +54,76 @@ Double_t SIDISatBAND_auxiliary::Chi2PID_pion_upperBound( Double_t p, Double_t C)
 }
 
 
+// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+TVector3 SIDISatBAND_auxiliary::GetParticleVertex(clas12::region_part_ptr rp){
+    TVector3 V(rp->par()->getVx(),
+               rp->par()->getVy(),
+               rp->par()->getVz());
+    return V;
+}
+
+// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+void SIDISatBAND_auxiliary::SetParticle4Momentum (TLorentzVector &p4,clas12::region_part_ptr rp){
+    p4.SetXYZM(rp->par()->getPx(),
+               rp->par()->getPy(),
+               rp->par()->getPz(),
+               p4.M());
+}
+
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+void SIDISatBAND_auxiliary::loadCutValues(TString cutValuesFilename){
+    
+    // read cut values csv file
+    csv_reader csvr;
+    cutValues = csvr.read_csv();
+    if (fdebug>2) { printCutValues(); }
+    
+    // assign specific cut values - to speed things up
+    // by avoiding recalling FindCutValue() on every event
+    
+    // Cut on z-vertex position:
+    // based on RGA_Analysis_Overview_and_Procedures_Nov_4_2020-6245173-2020-12-09-v3.pdf
+    // p. 71
+    if (torusBending==-1){ // in-bending torus field
+        // Spring 19 and Spring 2020 in-bending.
+        cutValue_Vz_min = FindCutValue("Vz_e_min_inbending");
+        cutValue_Vz_max = FindCutValue("Vz_e_max_inbending");
+    } else if (torusBending==1){ // Out-bending torus field
+        // Fall 2019 (without low-energy-run) was out-bending.
+        cutValue_Vz_min = FindCutValue("Vz_e_min_outbending");
+        cutValue_Vz_max = FindCutValue("Vz_e_max_outbending");
+        
+    } else {
+        std::cout
+        << "Un-identified torus bending "
+        << torusBending
+        << ", return" << std::endl;
+        return;
+    }
+        
+    cutValue_e_PCAL_W               = FindCutValue("e_PCAL_W_min");
+    cutValue_e_PCAL_V               = FindCutValue("e_PCAL_V_min");
+    cutValue_e_E_PCAL               = FindCutValue("e_E_PCAL_min");
+    cutValue_SamplingFraction_min   = FindCutValue("SamplingFraction_min");
+    cutValue_Ve_Vpi_dz_max          = FindCutValue("(Ve-Vpi)_z_max");
+    cutValue_Q2_min                 = FindCutValue("Q2_min");
+    cutValue_W_min                  = FindCutValue("W_min");
+    cutValue_y_max                  = FindCutValue("y_max");
+    cutValue_e_theta_min            = FindCutValue("e_theta_min");
+    cutValue_e_theta_max            = FindCutValue("e_theta_max");
+    cutValue_pi_theta_min           = FindCutValue("pi_theta_min");
+    cutValue_pi_theta_max           = FindCutValue("pi_theta_max");
+    cutValue_Ppi_min                = FindCutValue("Ppi_min");
+    cutValue_Ppi_max                = FindCutValue("Ppi_max");
+    cutValue_Zpi_min                = FindCutValue("Zpi_min");
+    cutValue_Zpi_max                = FindCutValue("Zpi_max");
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+void SIDISatBAND_auxiliary::printCutValues(){
+    std::cout << "Using cut values:" << std::endl;
+    for (auto cut: cutValues) {
+        std::cout << cut.first << ": " << cut.second << std::endl;
+    }
+}

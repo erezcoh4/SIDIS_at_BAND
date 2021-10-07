@@ -3,8 +3,9 @@
 # Semi Inclusive DIS (SIDIS) on a deuteron target with $pi^+$ and $pi^-$ tagging and a fast neutron recoiling from a SRC pair breakup 
 
 This repository is responsible for 
-(A) skimming for (e,e'$\pi^{\pm}$) events,
-(B) merging (e,e'$\pi^{\pm}$) events with fast neutron recoiling from BAND data.    
+(A) skimming for (e,e'$\pi^{\pm}$) events
+(B) merging (e,e'$\pi^{\pm}$) events with fast neutron recoiling from BAND data
+(C) adding pion information to an arbitrary event list    
     
     
     

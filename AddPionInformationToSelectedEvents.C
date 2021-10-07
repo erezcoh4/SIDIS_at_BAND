@@ -44,11 +44,10 @@ Int_t       NeventsProcessed = 0;
 Int_t             Ne, Nn, Np, Nd;
 Int_t      Npips, Npims, Ngammas;
 
+TVector3                      Ve;
+
 std::vector<event_id>   eventlist;
 std::ofstream          outcsvfile;
-
-
-
 
 
 // positive pions
@@ -100,7 +99,8 @@ std::vector<TVector3>             Vpiminus;
 // auxiliary
 DCfid_SIDIS             dcfid;
 SIDISatBAND_auxiliary   aux;
-std::vector<region_part_ptr>  electrons, neutrons, protons, pipluses, piminuses, gammas, deuterons;
+std::vector<region_part_ptr>        electrons, pipluses, piminuses;
+std::vector<region_part_ptr>  neutrons, protons, gammas, deuterons;
 
 
 
@@ -131,6 +131,7 @@ void AddPionInformationToSelectedEvents(Int_t      NeventsMax=-1,
                                         Int_t     _fdebug_=1,
                                         TString   _OutDataPath_="/volatile/clas12/users/ecohen/BAND/PionInformationInEventLists/"){
     
+    aux.loadCutValues   ("cutValues.csv",fdebug);
     SetVerbosity        (_fdebug_);
     SetEventListName    (_EventListName_);
     SetOutDataPath      (_OutDataPath_);
@@ -138,7 +139,6 @@ void AddPionInformationToSelectedEvents(Int_t      NeventsMax=-1,
     AssignPionsToEvents ( NeventsMax);
     FinishProgram       ();
 }
-
 
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
@@ -251,45 +251,6 @@ void OpenOutputFiles (){
     outcsvfile << csvheader << std::endl;
 }
 
-// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-std::istream &operator >>(std::istream &ist, event_id &event) {
-    char comma ;
-    ist
-    >> event.run_number   >> comma
-    >> event.event_number >> comma;
-    return ist ;
-}
-
-
-// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-void ReadEventList(){
-    std::ifstream data(EventListPath + EventListName + ".csv" );
-    std::string   line;
-    std::getline(data,line); // kill header line
-    while(std::getline(data,line)) {
-        event_id event_entry ;
-        std::stringstream lineStream(line);
-        lineStream >> event_entry ;
-        eventlist.push_back( event_entry ) ;
-    }
-    
-    if (fdebug>2) PrintEventList();
-};
-
-
-// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-void PrintEventList(){
-    std::cout
-    << "Event list to process"
-    << std::endl
-    << "run,event"
-    << std::endl;
-    
-    for (auto event: eventlist){
-        std::cout << event.run_number << "," << event.event_number << std::endl;
-    }
-}
-
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void FinishProgram(){
@@ -317,6 +278,14 @@ void CloseOutputFiles (){
     }
 }
 
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+void ExtractElectronInformation(int fdebug){
+    // ------------------------------------------------------------------------------------------------
+    // extract information from first electron
+    // here only the reconstructed vertext position, as it affects the pion vertex cut position
+    // ------------------------------------------------------------------------------------------------
+    Ve = aux.GetParticleVertex( electrons[leading_e_index] );
+}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void ExtractPionsInformation(int fdebug){
@@ -342,9 +311,9 @@ void ExtractPipsInformation( int pipsIdx, int fdebug ){
     
     
     // extract positive pion information
-    SetLorentzVector(piplus[pipsIdx]  ,pipluses[pipsIdx]);
+    aux.SetLorentzVector(piplus[pipsIdx]  ,pipluses[pipsIdx]);
     Zpips[pipsIdx]              = piplus[pipsIdx].E() / omega;
-    Vpiplus[pipsIdx]            = GetParticleVertex( pipluses[pipsIdx] );
+    Vpiplus[pipsIdx]            = aux.GetParticleVertex( pipluses[pipsIdx] );
     pips_chi2PID[pipsIdx]       = pipluses[pipsIdx]->par()->getChi2Pid();
     
     // EC in and out
@@ -407,9 +376,9 @@ void ExtractPipsInformation( int pipsIdx, int fdebug ){
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void ExtractPimsInformation( int pimsIdx, int fdebug ){
     // extract negative pion information
-    SetLorentzVector(piminus[pimsIdx]  ,piminuses[pimsIdx]);
+    aux.SetLorentzVector(piminus[pimsIdx]  ,piminuses[pimsIdx]);
     Zpims[pimsIdx]              = piminus[pimsIdx].E() / omega;
-    Vpiminus[pimsIdx]           = GetParticleVertex( piminuses[pimsIdx] );
+    Vpiminus[pimsIdx]           = aux.GetParticleVertex( piminuses[pimsIdx] );
     pims_chi2PID[pimsIdx]       = piminuses[pimsIdx]->par()->getChi2Pid();
     
     // EC in and out
@@ -460,8 +429,7 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
                                      Double_t DC_x[3], Double_t DC_y[3], Double_t DC_z[3],
                                      Double_t chi2PID, Double_t p,
                                      TVector3 Ve,
-                                     TVector3 Vpi,
-                                     int fdebug){
+                                     TVector3 Vpi){
     
     // decide if pion (pi+ or pi-) passed event selection cuts
     //
