@@ -544,3 +544,44 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
 }
 
 
+
+
+
+// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+std::istream &operator >>(std::istream &ist, event_id &event) {
+    char comma ;
+    ist
+    >> event.run_number   >> comma
+    >> event.event_number >> comma;
+    return ist ;
+}
+
+
+// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+void ReadEventList(){
+    std::ifstream data(EventListPath + EventListName + ".csv" );
+    std::string   line;
+    std::getline(data,line); // kill header line
+    while(std::getline(data,line)) {
+        event_id event_entry ;
+        std::stringstream lineStream(line);
+        lineStream >> event_entry ;
+        eventlist.push_back( event_entry ) ;
+    }
+    
+    if (fdebug>2) PrintEventList();
+};
+
+
+// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+void PrintEventList(){
+    std::cout
+    << "Event list to process"
+    << std::endl
+    << "run,event"
+    << std::endl;
+    
+    for (auto event: eventlist){
+        std::cout << event.run_number << "," << event.event_number << std::endl;
+    }
+}
