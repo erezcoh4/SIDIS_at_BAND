@@ -22,8 +22,8 @@ public:
     void              SetTorusBending (int _torusBending_)   {torusBending = _torusBending_;};
     double               FindCutValue ( std::string cutName );
     TString           GetRunNumberSTR ( int RunNumber );
-    Double_t    GetEbeamFromRunNumber ( Double_t RunNumber );
-    void SetTorusBendingFromRunNumber ( RunNumber );
+    Double_t    GetEbeamFromRunNumber ( Int_t RunNumber );
+    void SetTorusBendingFromRunNumber ( Int_t RunNumber );
     
     int                           fdebug;
     int                     torusBending; // -1 for In-bending, +1 for Out-bending

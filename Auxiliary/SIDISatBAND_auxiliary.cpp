@@ -147,7 +147,7 @@ TString SIDISatBAND_auxiliary::GetRunNumberSTR( int RunNumber ){
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-Double_t GetEbeamFromRunNumber ( Double_t RunNumber ){
+Double_t SIDISatBAND_auxiliary::GetEbeamFromRunNumber ( Int_t RunNumber ){
     if (6420 <= RunNumber && RunNumber <= 6598){
         return 10.2; // GeV
     }
@@ -164,7 +164,7 @@ Double_t GetEbeamFromRunNumber ( Double_t RunNumber ){
 
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-void SetTorusBendingFromRunNumber ( RunNumber ){
+void SIDISatBAND_auxiliary::SetTorusBendingFromRunNumber ( Int_t RunNumber ){
     // -1 for In-bending, +1 for Out-bending
     // For BAND data
     // Spring 19 and Spring 2020 was in-bending
