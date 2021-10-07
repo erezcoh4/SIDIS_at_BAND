@@ -376,10 +376,7 @@ void ExtractPipsInformation( int pipsIdx ){
                                                                     pips_DC_z[pipsIdx],
                                                                     pips_chi2PID[pipsIdx],  piplus[pipsIdx].P(),
                                                                     Ve,
-                                                                    Vpiplus[pipsIdx],
-                                                                    fdebug);
-    eepipsPastKinematicalCuts[pipsIdx] = eepiPassedKinematicalCriteria(piplus[pipsIdx],
-                                                                       fdebug);
+                                                                    Vpiplus[pipsIdx]);
     if (pipsPastSelectionCuts[pipsIdx]) {
         pipsPastCutsInEvent = true;
     }
@@ -425,10 +422,7 @@ void ExtractPimsInformation( int pimsIdx ){
                                                                     pims_DC_z[pimsIdx],
                                                                     pims_chi2PID[pimsIdx],  piminus[pimsIdx].P(),
                                                                     Ve,
-                                                                    Vpiminus[pimsIdx],
-                                                                    fdebug);
-    eepimsPastKinematicalCuts[pimsIdx] = eepiPassedKinematicalCriteria(piminus[pimsIdx],
-                                                                       fdebug);
+                                                                    Vpiminus[pimsIdx]);
     if (pimsPastSelectionCuts[pimsIdx]) {
         pimsPastCutsInEvent = true;
     }
