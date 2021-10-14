@@ -180,7 +180,7 @@ void AssignPionsToEvents(Int_t NeventsMax){
         
         
         InitializeVariables();
-        clas12reader c12;
+        clas12reader c12; // first just initiallize c12
         if (event.run_number != RunNumber){
             
             RunNumber = event.run_number;
@@ -190,37 +190,67 @@ void AssignPionsToEvents(Int_t NeventsMax){
             TString    inputFile = DataPath + "inc_" + aux.GetRunNumberSTR( RunNumber ) + ".hipo";
             TChain fake("hipo");
             fake.Add(inputFile.Data());
+            
             //get the hipo data
             if (fdebug>2) std::cout << "Reading hipo file " << fake.GetListOfFiles()->At(0)->GetTitle() << std::endl;
             clas12reader c12(fake.GetListOfFiles()->At(0)->GetTitle(),{0});
             
         }
+        
+        
         if (fdebug>2) std::cout << "grabbing event " << evnum << " from run " << RunNumber << std::endl;
-        //            grabEvent(evnum);
-        //clear event, so can read next
-        c12.clearEvent();
-        if (fdebug>2) std::cout << "c12.clearEvent()" << std::endl;
-        //move to Nev via hipo::reader
-        c12.getReader().gotoEvent(evnum);
-        if (fdebug>2) std::cout << "c12.getReader().gotoEvent("<<evnum<<");" << std::endl;
-        //read full event
-        c12.readEvent();
-        if (fdebug>2) std::cout << "c12.readEvent();" << std::endl;
+        while(c12.getReader().next()){
+            c12.clearEvent();
+            //only get runconfig banks
+            c12.getStructure(c12.runconfig());
+            //check if DAQ event is correct one
+            if(c12.runconfig()->getEvent()==evnum){
+                c12.readEvent();
+                if (fdebug>2) std::cout << "c12.readEvent();" << std::endl;
+                
+                pipluses    = c12.getByID( 211  );          Npips   = pipluses  .size();
+                piminuses   = c12.getByID(-211  );          Npims   = piminuses .size();
+                electrons   = c12.getByID( 11   );          Ne      = electrons .size();
+                //                    neutrons    = c12.getByID( 2112 );          Nn      = neutrons  .size();
+                //                    protons     = c12.getByID( 2212 );          Np      = protons   .size();
+                //                    gammas      = c12.getByID( 22   );          Ngammas = gammas    .size();
+                //                    deuterons   = c12.getByID( 1000010020 );    Nd      = deuterons.size();
+                
+                ExtractPionsInformation     ();
+                WriteEventToOutput          ();
+                
+                if (fdebug>2) std::cout << "evnum " << evnum << ", Npips " << Npips << std::endl;
+                if ( eventIdx%10000==0 ) std::cout << eventIdx << "/" <<  NeventsMax << std::endl;
+            }
+        }
         
-        pipluses    = c12.getByID( 211  );          Npips   = pipluses  .size();
-        piminuses   = c12.getByID(-211  );          Npims   = piminuses .size();
-        electrons   = c12.getByID( 11   );          Ne      = electrons .size();
-        //                    neutrons    = c12.getByID( 2112 );          Nn      = neutrons  .size();
-        //                    protons     = c12.getByID( 2212 );          Np      = protons   .size();
-        //                    gammas      = c12.getByID( 22   );          Ngammas = gammas    .size();
-        //                    deuterons   = c12.getByID( 1000010020 );    Nd      = deuterons.size();
         
-        ExtractPionsInformation     ();
-        WriteEventToOutput          ();
-        
-        if (fdebug>2) std::cout << "evnum " << evnum << ", Npips " << Npips << std::endl;
-        if ( eventIdx%10000==0 ) std::cout << eventIdx << "/" <<  NeventsMax << std::endl;
-        
+//        
+//        //            grabEvent(evnum);
+//        //clear event, so can read next
+//        c12.clearEvent();
+//        if (fdebug>2) std::cout << "c12.clearEvent()" << std::endl;
+//        //move to Nev via hipo::reader
+//        c12.getReader().gotoEvent(evnum);
+//        if (fdebug>2) std::cout << "c12.getReader().gotoEvent("<<evnum<<");" << std::endl;
+//        //read full event
+//        c12.readEvent();
+//        if (fdebug>2) std::cout << "c12.readEvent();" << std::endl;
+//        
+//        pipluses    = c12.getByID( 211  );          Npips   = pipluses  .size();
+//        piminuses   = c12.getByID(-211  );          Npims   = piminuses .size();
+//        electrons   = c12.getByID( 11   );          Ne      = electrons .size();
+//        //                    neutrons    = c12.getByID( 2112 );          Nn      = neutrons  .size();
+//        //                    protons     = c12.getByID( 2212 );          Np      = protons   .size();
+//        //                    gammas      = c12.getByID( 22   );          Ngammas = gammas    .size();
+//        //                    deuterons   = c12.getByID( 1000010020 );    Nd      = deuterons.size();
+//        
+//        ExtractPionsInformation     ();
+//        WriteEventToOutput          ();
+//        
+//        if (fdebug>2) std::cout << "evnum " << evnum << ", Npips " << Npips << std::endl;
+//        if ( eventIdx%10000==0 ) std::cout << eventIdx << "/" <<  NeventsMax << std::endl;
+//        
     }
 }
 
