@@ -204,8 +204,11 @@ void AssignPionsToEvents(Int_t NeventsMax){
             //only get runconfig banks
             c12.getStructure(c12.runconfig());
             //check if DAQ event is correct one
+            std::cout << "c12.runconfig()->getEvent(): " << c12.runconfig()->getEvent() << std::endl;
             if(c12.runconfig()->getEvent()==evnum){
+                if (fdebug>2) std::cout << "found event " << evnum << " from run " << RunNumber << std::endl;
                 c12.readEvent();
+                c12.sort();
                 if (fdebug>2) std::cout << "c12.readEvent();" << std::endl;
                 
                 pipluses    = c12.getByID( 211  );          Npips   = pipluses  .size();
@@ -225,7 +228,7 @@ void AssignPionsToEvents(Int_t NeventsMax){
         }
         
         
-//        
+//
 //        //            grabEvent(evnum);
 //        //clear event, so can read next
 //        c12.clearEvent();
@@ -236,7 +239,7 @@ void AssignPionsToEvents(Int_t NeventsMax){
 //        //read full event
 //        c12.readEvent();
 //        if (fdebug>2) std::cout << "c12.readEvent();" << std::endl;
-//        
+//
 //        pipluses    = c12.getByID( 211  );          Npips   = pipluses  .size();
 //        piminuses   = c12.getByID(-211  );          Npims   = piminuses .size();
 //        electrons   = c12.getByID( 11   );          Ne      = electrons .size();
@@ -244,13 +247,13 @@ void AssignPionsToEvents(Int_t NeventsMax){
 //        //                    protons     = c12.getByID( 2212 );          Np      = protons   .size();
 //        //                    gammas      = c12.getByID( 22   );          Ngammas = gammas    .size();
 //        //                    deuterons   = c12.getByID( 1000010020 );    Nd      = deuterons.size();
-//        
+//
 //        ExtractPionsInformation     ();
 //        WriteEventToOutput          ();
-//        
+//
 //        if (fdebug>2) std::cout << "evnum " << evnum << ", Npips " << Npips << std::endl;
 //        if ( eventIdx%10000==0 ) std::cout << eventIdx << "/" <<  NeventsMax << std::endl;
-//        
+//
     }
 }
 
