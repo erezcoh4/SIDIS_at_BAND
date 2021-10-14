@@ -202,7 +202,7 @@ void AssignPionsToEvents(Int_t NeventsMax){
         if (fdebug>2) std::cout << "c12.clearEvent()" << std::endl;
         //move to Nev via hipo::reader
         c12.getReader().gotoEvent(evnum);
-        if (fdebug>2) std::cout << "c12.getReader().gotoEvent(evnum);" << std::endl;
+        if (fdebug>2) std::cout << "c12.getReader().gotoEvent("<<evnum<<");" << std::endl;
         //read full event
         c12.readEvent();
         if (fdebug>2) std::cout << "c12.readEvent();" << std::endl;
