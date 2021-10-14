@@ -188,21 +188,22 @@ void AssignPionsToEvents(Int_t NeventsMax){
             
             // every time that the run number changes, we open a new hipo file
             TString    inputFile = DataPath + "inc_" + aux.GetRunNumberSTR( RunNumber ) + ".hipo";
-            TChain fake("hipo");
-            fake.Add(inputFile.Data());
+//            TChain fake("hipo");
+//            fake.Add(inputFile.Data());
             
             //get the hipo data
             if (fdebug>2) std::cout << "Reading hipo file " << fake.GetListOfFiles()->At(0)->GetTitle() << std::endl;
-            clas12reader c12(fake.GetListOfFiles()->At(0)->GetTitle(),{0});
+            clas12reader c12(inputFile, {0});//fake.GetListOfFiles()->At(0)->GetTitle(),{0});
             
         }
         
         
         if (fdebug>2) std::cout << "grabbing event " << evnum << " from run " << RunNumber << std::endl;
         while(c12.next()){
-            c12.clearEvent();
+//            c12.clearEvent();
             //only get runconfig banks
-            c12.getStructure(c12.runconfig());
+//            c12.getStructure(c12.runconfig());
+//            c12.runconfig()->getEvent();
             //check if DAQ event is correct one
             std::cout << "c12.runconfig()->getEvent(): " << c12.runconfig()->getEvent() << std::endl;
             if(c12.runconfig()->getEvent()==evnum){
