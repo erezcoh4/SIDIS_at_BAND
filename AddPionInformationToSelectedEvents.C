@@ -199,7 +199,7 @@ void AssignPionsToEvents(Int_t NeventsMax){
         
         
         if (fdebug>2) std::cout << "grabbing event " << evnum << " from run " << RunNumber << std::endl;
-        while(c12.getReader().next()){
+        while(c12.next()){
             c12.clearEvent();
             //only get runconfig banks
             c12.getStructure(c12.runconfig());
