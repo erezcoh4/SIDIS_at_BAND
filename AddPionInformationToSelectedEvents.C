@@ -187,9 +187,11 @@ void AssignPionsToEvents(Int_t NeventsMax){
             TChain fake("hipo");
             fake.Add(inputFile.Data());
             //get the hipo data
+            if (fdebug>2) std::cout << "Reading hipo file event " << fake.GetListOfFiles()->At(0)->GetTitle() << std::endl;
             clas12reader c12(fake.GetListOfFiles()->At(0)->GetTitle(),{0});
             
             for (int evnum = 1003; evnum<1006; evnum++){
+                if (fdebug>2) std::cout << "grabbing event " << evnum << std::endl;
                 //            grabEvent(evnum);
                 //clear event, so can read next
                 c12.clearEvent();
@@ -199,7 +201,7 @@ void AssignPionsToEvents(Int_t NeventsMax){
                 c12.readEvent();
                 
                 pipluses    = c12.getByID( 211  );          Npips   = pipluses  .size();
-                std::cout << "evnum " << evnum << ", Npips " << Npips << std::endl;
+                if (fdebug>2) std::cout << "evnum " << evnum << ", Npips " << Npips << std::endl;
             }
             
 //            while(c12.next()==true){ // THIS does not work well, we need to call specific events...
