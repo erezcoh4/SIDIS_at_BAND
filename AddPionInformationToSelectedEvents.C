@@ -180,6 +180,7 @@ void AssignPionsToEvents(Int_t NeventsMax){
         
         
         InitializeVariables();
+        clas12reader c12;
         if (event.run_number != RunNumber){
             
             RunNumber = event.run_number;
@@ -190,7 +191,7 @@ void AssignPionsToEvents(Int_t NeventsMax){
             TChain fake("hipo");
             fake.Add(inputFile.Data());
             //get the hipo data
-            if (fdebug>2) std::cout << "Reading hipo file event " << fake.GetListOfFiles()->At(0)->GetTitle() << std::endl;
+            if (fdebug>2) std::cout << "Reading hipo file " << fake.GetListOfFiles()->At(0)->GetTitle() << std::endl;
             clas12reader c12(fake.GetListOfFiles()->At(0)->GetTitle(),{0});
             
         }
