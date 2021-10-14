@@ -176,12 +176,10 @@ void AssignPionsToEvents(Int_t NeventsMax){
     for (size_t eventIdx=0 ; eventIdx < eventlist.size() && eventIdx < NeventsMax; eventIdx++ ){
         
         auto  event = eventlist.at( eventIdx );
-        auto runnum = event.run_number;
         auto  evnum = event.event_number;
         
         
         InitializeVariables();
-        clas12reader c12;
         if (event.run_number != RunNumber){
             
             RunNumber = event.run_number;
@@ -193,7 +191,7 @@ void AssignPionsToEvents(Int_t NeventsMax){
             fake.Add(inputFile.Data());
             //get the hipo data
             if (fdebug>2) std::cout << "Reading hipo file event " << fake.GetListOfFiles()->At(0)->GetTitle() << std::endl;
-            c12 = clas12reader(fake.GetListOfFiles()->At(0)->GetTitle(),{0});
+            clas12reader c12(fake.GetListOfFiles()->At(0)->GetTitle(),{0});
             
         }
         if (fdebug>2) std::cout << "grabbing event " << evnum << " from run " << RunNumber << std::endl;
