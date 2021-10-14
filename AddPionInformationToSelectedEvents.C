@@ -199,10 +199,13 @@ void AssignPionsToEvents(Int_t NeventsMax){
         //            grabEvent(evnum);
         //clear event, so can read next
         c12.clearEvent();
+        if (fdebug>2) std::cout << "c12.clearEvent()" << std::endl;
         //move to Nev via hipo::reader
         c12.getReader().gotoEvent(evnum);
+        if (fdebug>2) std::cout << "c12.getReader().gotoEvent(evnum);" << std::endl;
         //read full event
         c12.readEvent();
+        if (fdebug>2) std::cout << "c12.readEvent();" << std::endl;
         
         pipluses    = c12.getByID( 211  );          Npips   = pipluses  .size();
         piminuses   = c12.getByID(-211  );          Npims   = piminuses .size();
@@ -347,6 +350,7 @@ void ExtractElectronInformation(){
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void ExtractPionsInformation(){
+    if (fdebug>2) std::cout << "ExtractPionsInformation()" << std::endl;
     
     // positive pions)
     for (int pipsIdx=0; pipsIdx < Npips; pipsIdx++) {
