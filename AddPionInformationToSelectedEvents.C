@@ -188,30 +188,61 @@ void AssignPionsToEvents(Int_t NeventsMax){
             fake.Add(inputFile.Data());
             //get the hipo data
             clas12reader c12(fake.GetListOfFiles()->At(0)->GetTitle(),{0});
-            while(c12.next()==true){
+            
+            for (int evnum = 1003; evnum<1006; evnum++){
+                //            grabEvent(evnum);
+                //clear event, so can read next
+                c12.clearEvent();
+                //move to Nev via hipo::reader
+                c12.getReader().gotoEvent(evnum);
+                //read full event
+                c12.readEvent();
                 
-                auto evnum  = c12.runconfig()->getEvent();
-                SetEbeam ( aux.GetEbeamFromRunNumber( RunNumber ) );
-                aux.SetTorusBendingFromRunNumber( RunNumber );
-                if ( evnum==event.event_number ){
-                    if (fdebug>2) std::cout << "looking at event " << event.event_number << std::endl;
-                    
-                    pipluses    = c12.getByID( 211  );          Npips   = pipluses  .size();
-                    piminuses   = c12.getByID(-211  );          Npims   = piminuses .size();
-                    electrons   = c12.getByID( 11   );          Ne      = electrons .size();
-                    if (fdebug>2) std::cout << "Ne " << Ne << ", Npips: " << Npips << ", Npims: " << Npims << std::endl;
-                    //                    neutrons    = c12.getByID( 2112 );          Nn      = neutrons  .size();
-                    //                    protons     = c12.getByID( 2212 );          Np      = protons   .size();
-                    //                    gammas      = c12.getByID( 22   );          Ngammas = gammas    .size();
-                    //                    deuterons   = c12.getByID( 1000010020 );    Nd      = deuterons.size();
-                    
-                    ExtractPionsInformation     ();
-                    WriteEventToOutput          ();
-                }
+                pipluses    = c12.getByID( 211  );          Npips   = pipluses  .size();
+                std::cout << "evnum " << evnum << ", Npips " << Npips << std::endl;
             }
+            
+//            while(c12.next()==true){ // THIS does not work well, we need to call specific events...
+//
+//                auto evnum  = c12.runconfig()->getEvent();
+//                SetEbeam ( aux.GetEbeamFromRunNumber( RunNumber ) );
+//                aux.SetTorusBendingFromRunNumber( RunNumber );
+//                if ( evnum==event.event_number ){
+//                    if (fdebug>2) std::cout << "looking at event " << event.event_number << std::endl;
+//
+//                    pipluses    = c12.getByID( 211  );          Npips   = pipluses  .size();
+//                    piminuses   = c12.getByID(-211  );          Npims   = piminuses .size();
+//                    electrons   = c12.getByID( 11   );          Ne      = electrons .size();
+//                    if (fdebug>2) std::cout << "Ne " << Ne << ", Npips: " << Npips << ", Npims: " << Npims << std::endl;
+//                    //                    neutrons    = c12.getByID( 2112 );          Nn      = neutrons  .size();
+//                    //                    protons     = c12.getByID( 2212 );          Np      = protons   .size();
+//                    //                    gammas      = c12.getByID( 22   );          Ngammas = gammas    .size();
+//                    //                    deuterons   = c12.getByID( 1000010020 );    Nd      = deuterons.size();
+//
+//                    ExtractPionsInformation     ();
+//                    WriteEventToOutput          ();
+//                }
+//                if ( evnum%100000==0 ){
+//                    std::cout << "event " << evnum << std::endl;
+//                }
+//            }
         }
     }
 }
+
+
+////got to the Nev event in the file
+////....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+//auto grabEvent = [&c12](Long64_t Nev){
+//    //clear event, so can read next
+//    c12.clearEvent();
+//    //move to Nev via hipo::reader
+//    c12.getReader().gotoEvent(Nev);
+//    //read full event
+//    c12.readEvent();
+//    c12.sort();
+//};
+
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void WriteEventToOutput(){
