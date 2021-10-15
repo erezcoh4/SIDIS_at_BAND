@@ -208,7 +208,7 @@ void AssignPionsToEvents(Int_t NeventsMax){
                 //            //read full event
                 //            c12.readEvent();
                 
-                std::cout << "c12.runconfig()->getEvent()==EventNumber: " << c12.runconfig()->getEvent()==EventNumber << std::endl;
+                std::cout << "c12.runconfig()->getEvent()==EventNumber: " << c12.runconfig()->getEvent() << std::endl;
                 if(c12.runconfig()->getEvent()==EventNumber){
                     if (fdebug>3) std::cout << "Found event " << EventNumber << " in run " << RunNumber << std::endl;
                     pipluses    = c12.getByID( 211  );          Npips   = pipluses  .size();
