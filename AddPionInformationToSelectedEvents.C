@@ -682,7 +682,7 @@ void PrintEventList(){
         std::cout << "Run " << run_numbers.at(run_idx) << std::endl ;
         
         for (int evt_idx=0; evt_idx<(int)event_numbers.at(run_idx).size(); evt_idx++){
-            std::cout << run_numbers.at(run_idx) << "," << std::endl;
+            std::cout << run_numbers.at(run_idx).at(evt_idx) << "," << std::endl;
         }
     }
     
