@@ -154,7 +154,7 @@ bool       CheckIfPionPassedSelectionCuts (TString pionCharge, // "pi+" or "pi-"
                                            Double_t chi2PID, Double_t p,
                                            TVector3 Ve,      TVector3 Vpi);
 void                      OpenOutputFiles ();
-
+int              FindRunNumberIndexInList ( int run_number_to_find );
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void AddPionInformationToSelectedEvents(Int_t      NeventsMax=-1,
@@ -193,12 +193,12 @@ void AssignPionsToEvents(Int_t NeventsMax){
             
             // every time that the run number changes, we open a new hipo file
             TString    inputFile = DataPath + "inc_" + aux.GetRunNumberSTR( RunNumber ) + ".hipo";
-//            TChain fake("hipo");
-//            fake.Add(inputFile.Data());
+            TChain fake("hipo");
+            fake.Add(inputFile.Data());
             
             //get the hipo data
-            if (fdebug>2) std::cout << "Reading hipo file " << inputFile << std::endl;
-            clas12reader c12(inputFile, {0});//fake.GetListOfFiles()->At(0)->GetTitle(),{0});
+            if (fdebug>2) std::cout << "Reading hipo file " << fake.GetListOfFiles()->At(0)->GetTitle() << std::endl;
+            clas12reader c12(fake.GetListOfFiles()->At(0)->GetTitle(),{0});
             // I NEED TO THINK OF A BETTER WAY TO IMPLEMENT THIS IF, AS I SUSPECT THAT C12 RETURNS TO NULL AFTER THIS IF
         }
         
@@ -657,7 +657,7 @@ void ReadEventList(){
 int FindRunNumberIndexInList( int run_number_to_find ){
     // find the index of "run_number_to_find" in the list "run_numbers"
     for (int i=0; i<(int)run_numbers.size(); i++){
-        run_number = run_numbers.at(i);
+        int run_number = run_numbers.at(i);
         if ( run_number==run_number_to_find ) return i;
     }
     return -1;
