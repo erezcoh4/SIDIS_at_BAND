@@ -169,7 +169,7 @@ void AddPionInformationToSelectedEvents(Int_t      NeventsMax=-1,
     SetOutDataPath      (_OutDataPath_);
     OpenOutputFiles     ();
     ReadEventList       ();
-    //AssignPionsToEvents ( NeventsMax);
+    AssignPionsToEvents ( NeventsMax);
     FinishProgram       ();
 }
 
@@ -177,63 +177,117 @@ void AddPionInformationToSelectedEvents(Int_t      NeventsMax=-1,
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void AssignPionsToEvents(Int_t NeventsMax){
     if (fdebug>2) {std::cout << "AssignPionsToEvents("<<NeventsMax<<")"<< std::endl;}
+
+    int eventIdx = 0;
+    for (int run_idx=0; run_idx<(int)run_numbers.size(); run_idx++){
+        auto RunNumber = run_numbers.at(run_idx);
+        if (fdebug>3) std::cout << "Processing run " <<  RunNumber << std::endl ;
+        
+        // every time that the run number changes, we open a new hipo file
+        TString    inputFile = DataPath + "inc_" + aux.GetRunNumberSTR( RunNumber ) + ".hipo";
+        TChain fake("hipo");
+        fake.Add(inputFile.Data());
+
+        //get the hipo data
+        if (fdebug>3) std::cout << "Reading hipo file " << fake.GetListOfFiles()->At(0)->GetTitle() << std::endl;
+        clas12reader c12(fake.GetListOfFiles()->At(0)->GetTitle(),{0});
+
+        
+        for (int evt_idx=0; evt_idx<(int)event_numbers.at(run_idx).size(); evt_idx++){
+            auto EventNumber = event_numbers.at(run_idx).at(evt_idx);
+            if (fdebug>3) std::cout << "Grabbing event " << EventNumber << " from run " << RunNumber << std::endl;
+            
+            InitializeVariables();
+            c12.clearEvent();
+            if (fdebug>3) std::cout << "c12.clearEvent()" << std::endl;
+            //move to Nev via hipo::reader
+            c12.getReader().gotoEvent(EventNumber);
+            if (fdebug>3) std::cout << "c12.getReader().gotoEvent("<<EventNumber<<");" << std::endl;
+            //read full event
+            c12.readEvent();
+            
+            
+            pipluses    = c12.getByID( 211  );          Npips   = pipluses  .size();
+            piminuses   = c12.getByID(-211  );          Npims   = piminuses .size();
+            electrons   = c12.getByID( 11   );          Ne      = electrons .size();
+            //                    neutrons    = c12.getByID( 2112 );          Nn      = neutrons  .size();
+            //                    protons     = c12.getByID( 2212 );          Np      = protons   .size();
+            //                    gammas      = c12.getByID( 22   );          Ngammas = gammas    .size();
+            //                    deuterons   = c12.getByID( 1000010020 );    Nd      = deuterons.size();
+            
+            ExtractPionsInformation     ();
+            WriteEventToOutput          ();
+            
+            if (fdebug>2) std::cout << "evnum " << evnum << ", Npips " << Npips << std::endl;
+            if ( eventIdx%10==0 ) std::cout << eventIdx << "/" <<  NeventsMax << std::endl;
+            eventIdx++;
+        }
+    }
     
-    for (size_t eventIdx=0 ; eventIdx < eventlist.size() && eventIdx < NeventsMax; eventIdx++ ){
-        
-        auto  event = eventlist.at( eventIdx );
-        auto  evnum = event.event_number;
-        
-        
-        InitializeVariables();
-        clas12reader c12; // first just initiallize c12
-        if (event.run_number != RunNumber){
-            
-            RunNumber = event.run_number;
-            if (fdebug>2) std::cout << "looking at run " << RunNumber << std::endl;
-            
-            // every time that the run number changes, we open a new hipo file
-            TString    inputFile = DataPath + "inc_" + aux.GetRunNumberSTR( RunNumber ) + ".hipo";
-            TChain fake("hipo");
-            fake.Add(inputFile.Data());
-            
-            //get the hipo data
-            if (fdebug>2) std::cout << "Reading hipo file " << fake.GetListOfFiles()->At(0)->GetTitle() << std::endl;
-            clas12reader c12(fake.GetListOfFiles()->At(0)->GetTitle(),{0});
-            // I NEED TO THINK OF A BETTER WAY TO IMPLEMENT THIS IF, AS I SUSPECT THAT C12 RETURNS TO NULL AFTER THIS IF
-        }
-        
-        
-        if (fdebug>2) std::cout << "grabbing event " << evnum << " from run " << RunNumber << std::endl;
-        while(c12.next()){
-//            c12.clearEvent();
-            //only get runconfig banks
-//            c12.getStructure(c12.runconfig());
-//            c12.runconfig()->getEvent();
-            //check if DAQ event is correct one
-            std::cout << "c12.runconfig()->getEvent(): " << c12.runconfig()->getEvent() << std::endl;
-            if(c12.runconfig()->getEvent()==evnum){
-                if (fdebug>2) std::cout << "found event " << evnum << " from run " << RunNumber << std::endl;
-                c12.readEvent();
-                c12.sort();
-                if (fdebug>2) std::cout << "c12.readEvent();" << std::endl;
-                
-                pipluses    = c12.getByID( 211  );          Npips   = pipluses  .size();
-                piminuses   = c12.getByID(-211  );          Npims   = piminuses .size();
-                electrons   = c12.getByID( 11   );          Ne      = electrons .size();
-                //                    neutrons    = c12.getByID( 2112 );          Nn      = neutrons  .size();
-                //                    protons     = c12.getByID( 2212 );          Np      = protons   .size();
-                //                    gammas      = c12.getByID( 22   );          Ngammas = gammas    .size();
-                //                    deuterons   = c12.getByID( 1000010020 );    Nd      = deuterons.size();
-                
-                ExtractPionsInformation     ();
-                WriteEventToOutput          ();
-                
-                if (fdebug>2) std::cout << "evnum " << evnum << ", Npips " << Npips << std::endl;
-                if ( eventIdx%10000==0 ) std::cout << eventIdx << "/" <<  NeventsMax << std::endl;
-            }
-        }
-        
-        
+    
+    
+    
+//    for (size_t eventIdx=0 ; eventIdx < eventlist.size() && eventIdx < NeventsMax; eventIdx++ ){
+//
+//        auto  event = eventlist.at( eventIdx );
+//        auto  evnum = event.event_number;
+//
+//
+//        InitializeVariables();
+//        clas12reader c12; // first just initiallize c12
+//        if (event.run_number != RunNumber){
+//
+//            RunNumber = event.run_number;
+//            if (fdebug>2) std::cout << "looking at run " << RunNumber << std::endl;
+//
+//            // every time that the run number changes, we open a new hipo file
+//            TString    inputFile = DataPath + "inc_" + aux.GetRunNumberSTR( RunNumber ) + ".hipo";
+//            TChain fake("hipo");
+//            fake.Add(inputFile.Data());
+//
+//            //get the hipo data
+//            if (fdebug>2) std::cout << "Reading hipo file " << fake.GetListOfFiles()->At(0)->GetTitle() << std::endl;
+//            clas12reader c12(fake.GetListOfFiles()->At(0)->GetTitle(),{0});
+//            // I NEED TO THINK OF A BETTER WAY TO IMPLEMENT THIS IF, AS I SUSPECT THAT C12 RETURNS TO NULL AFTER THIS IF
+//        }
+//
+//
+//        if (fdebug>2) std::cout << "grabbing event " << evnum << " from run " << RunNumber << std::endl;
+//        
+//        
+//        
+//        
+//        
+//        while(c12.next()){
+////            c12.clearEvent();
+//            //only get runconfig banks
+////            c12.getStructure(c12.runconfig());
+////            c12.runconfig()->getEvent();
+//            //check if DAQ event is correct one
+//            std::cout << "c12.runconfig()->getEvent(): " << c12.runconfig()->getEvent() << std::endl;
+//            if(c12.runconfig()->getEvent()==evnum){
+//                if (fdebug>2) std::cout << "found event " << evnum << " from run " << RunNumber << std::endl;
+//                c12.readEvent();
+//                c12.sort();
+//                if (fdebug>2) std::cout << "c12.readEvent();" << std::endl;
+//
+//                pipluses    = c12.getByID( 211  );          Npips   = pipluses  .size();
+//                piminuses   = c12.getByID(-211  );          Npims   = piminuses .size();
+//                electrons   = c12.getByID( 11   );          Ne      = electrons .size();
+//                //                    neutrons    = c12.getByID( 2112 );          Nn      = neutrons  .size();
+//                //                    protons     = c12.getByID( 2212 );          Np      = protons   .size();
+//                //                    gammas      = c12.getByID( 22   );          Ngammas = gammas    .size();
+//                //                    deuterons   = c12.getByID( 1000010020 );    Nd      = deuterons.size();
+//
+//                ExtractPionsInformation     ();
+//                WriteEventToOutput          ();
+//
+//                if (fdebug>2) std::cout << "evnum " << evnum << ", Npips " << Npips << std::endl;
+//                if ( eventIdx%10000==0 ) std::cout << eventIdx << "/" <<  NeventsMax << std::endl;
+//            }
+//        }
+
+
 //
 //        //            grabEvent(evnum);
 //        //clear event, so can read next
@@ -263,31 +317,17 @@ void AssignPionsToEvents(Int_t NeventsMax){
     }
 }
 
-
-////got to the Nev event in the file
-////....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-//auto grabEvent = [&c12](Long64_t Nev){
-//    //clear event, so can read next
-//    c12.clearEvent();
-//    //move to Nev via hipo::reader
-//    c12.getReader().gotoEvent(Nev);
-//    //read full event
-//    c12.readEvent();
-//    c12.sort();
-//};
-
-
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void WriteEventToOutput(){
-    
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void InitializeVariables(){
-    
+
     e  = TLorentzVector(0,0,0,db->GetParticle( 11   )->Mass());
     Ve = TVector3(-9999,-9999,-9999);
-    
+
     piplus      .clear();
     piminus     .clear();
     Vpiplus     .clear();
@@ -298,7 +338,7 @@ void InitializeVariables(){
 //    neutrons    .clear();
 //    protons     .clear();
 //    gammas      .clear();
-    
+
     pipsPastCutsInEvent = pimsPastCutsInEvent       = false;
     DC_layer                                        = -9999;
     for (int piIdx=0; piIdx<NMAXPIONS; piIdx++) {
@@ -310,7 +350,7 @@ void InitializeVariables(){
         pips_PCAL_z[piIdx]                          = -9999;
         pips_E_PCAL[piIdx]                          = -9999;
         pips_E_ECIN[piIdx] = pips_E_ECOUT[piIdx]    = -9999;
-        
+
         pims_chi2PID[piIdx]                         = -9999;
         pims_DC_sector[piIdx]                       = -9999;
         pims_PCAL_sector[piIdx]                     = -9999;
@@ -328,51 +368,13 @@ void InitializeVariables(){
         piplus  .push_back( TLorentzVector(0,0,0,db->GetParticle( 211 )->Mass()) );
         Vpiplus .push_back( TVector3() );
         pipsPastSelectionCuts[piIdx]                = false;
-        
+
         piminus .push_back( TLorentzVector(0,0,0,db->GetParticle( -211 )->Mass()) );
         Vpiminus.push_back( TVector3() );
         pimsPastSelectionCuts[piIdx]                = false;
-        
+
     }
     DC_layer                                        = -9999;
-}
-
-// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-void OpenOutputFiles (){
-    if (fdebug>2) std::cout << "Opening output csvfile: " << OutFullFilename << std::endl;
-    
-    outcsvfile.open( OutFullFilename );
-    if (fdebug>2) std::cout << "Writing to output csvfile: " << OutFullFilename << std::endl;
-    
-    outcsvfile << csvheader << std::endl;
-    
-    if (fdebug>2) std::cout << "Opened output csvfile: " << OutFullFilename << std::endl;
-}
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-void FinishProgram(){
-    auto finish = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> elapsed = finish - start;
-    
-    if (fdebug>2) std::cout << "Done. Elapsed time: " << elapsed.count() << std::endl;
-    CloseOutputFiles( );
-}
-
-// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-void CloseOutputFiles (){
-    // close output CSV
-    if (fdebug>2) std::cout << "Closing output csvfile " << OutFullFilename << std::endl;
-
-    outcsvfile.close();
-    if (fdebug>2){
-        std::cout
-        << "Done processesing "  <<  NeventsProcessed  << " events,"
-        << std::endl
-        << "See results in "
-        << std::endl
-        << OutFullFilename
-        << std::endl;
-    }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -384,13 +386,13 @@ void ExtractElectronInformation(){
     aux.SetParticle4Momentum( e , electrons[0] );
     q = Beam - e;
     Ve = aux.GetParticleVertex( electrons[0] );
-    
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void ExtractPionsInformation(){
     if (fdebug>2) std::cout << "ExtractPionsInformation()" << std::endl;
-    
+
     // positive pions)
     for (int pipsIdx=0; pipsIdx < Npips; pipsIdx++) {
         ExtractPipsInformation( pipsIdx );
@@ -399,7 +401,7 @@ void ExtractPionsInformation(){
     for (int pimsIdx=0; pimsIdx < Npims; pimsIdx++) {
         ExtractPimsInformation( pimsIdx );
     }
-    
+
     // done
     if (fdebug > 2) std::cout << "done extracting pion information" << std::endl;
 }
@@ -408,14 +410,14 @@ void ExtractPionsInformation(){
 void ExtractPipsInformation( int pipsIdx ){
     if (fdebug>2)
         std::cout << "ExtractPipsInformation( pipsIdx=" << pipsIdx << ", fdebug=" << fdebug << " )" << std::endl;
-    
-    
+
+
     // extract positive pion information
     aux.SetParticle4Momentum(piplus[pipsIdx]  ,pipluses[pipsIdx]);
     Zpips[pipsIdx]              = piplus[pipsIdx].E() / q.E();
     Vpiplus[pipsIdx]            = aux.GetParticleVertex( pipluses[pipsIdx] );
     pips_chi2PID[pipsIdx]       = pipluses[pipsIdx]->par()->getChi2Pid();
-    
+
     // EC in and out
     pips_E_ECIN[pipsIdx]        = pipluses[pipsIdx]->cal(ECIN)->getEnergy();
     pips_E_ECOUT[pipsIdx]       = pipluses[pipsIdx]->cal(ECOUT)->getEnergy();
@@ -477,7 +479,7 @@ void ExtractPimsInformation( int pimsIdx ){
     Zpims[pimsIdx]              = piminus[pimsIdx].E() / q.E();
     Vpiminus[pimsIdx]           = aux.GetParticleVertex( piminuses[pimsIdx] );
     pims_chi2PID[pimsIdx]       = piminuses[pimsIdx]->par()->getChi2Pid();
-    
+
     // EC in and out
     pims_E_ECIN[pimsIdx]        = piminuses[pimsIdx]->cal(ECIN)->getEnergy();
     pims_E_ECOUT[pimsIdx]       = piminuses[pimsIdx]->cal(ECOUT)->getEnergy();
@@ -524,7 +526,7 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
                                     Double_t chi2PID, Double_t p,
                                     TVector3 Ve,
                                     TVector3 Vpi){
-    
+
     // decide if pion (pi+ or pi-) passed event selection cuts
     //
     // input:
@@ -540,7 +542,7 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
         std::cout << "CheckIfPionPassedSelectionCuts()" << std::endl;
     }
     if (DC_sector == 0) { if (fdebug>2){std::cout << "DC_sector=0 (funny...)" << std::endl;} return false;}
-    
+
     int PDGcode;
     double    C;
     if (pionCharge=="pi+"){
@@ -553,7 +555,7 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
         std::cout << "pion charge is not defined in CheckIfPionPassedSelectionCuts(), returning false" << std::endl;
         return false;
     }
-    
+
     for (int regionIdx=0; regionIdx<3; regionIdx++) {
         // DC_e_fid:
         // sector:  1-6
@@ -570,7 +572,7 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
             << regionIdx+1     <<     ","
             << bending         <<     ","
             << std::endl;
-            
+
         }
         bool DC_fid  = dcfid.DC_fid_th_ph_sidis(PDGcode,            // particle PID
                                                 DC_x[regionIdx],    // x
@@ -583,7 +585,7 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
             return false;
         }
     }
-    
+
     if (fdebug>3) {
         std::cout << "in CheckIfPionPassedSelectionCuts()"<< std::endl
         << "pion charge: "          << pionCharge               << ","
@@ -597,12 +599,12 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
     if(
        // pi+ Identification Refinement - chi2PID vs. momentum
        ( aux.Chi2PID_pion_lowerBound( p, C ) < chi2PID && chi2PID < aux.Chi2PID_pion_upperBound( p , C ) )
-       
+
        // Cut on the z-Vertex Difference Between Electrons and Hadrons.
        &&  ( fabs((Ve-Vpi).Z()) < aux.cutValue_Ve_Vpi_dz_max )
        ) {
            if (fdebug>3) { std::cout << "succesfully passed CheckIfPionPassedSelectionCuts(), return true" << std::endl; }
-           
+
            return true;
        }
     return false;
@@ -638,9 +640,10 @@ void ReadEventList(){
         int RunNumberIdxInList = FindRunNumberIndexInList( RunNumber );
         if (RunNumberIdxInList==-1) {
             // this means that the run number is not in our list - its a new run number
-            run_numbers  .push_back( EventNumber );
+            run_numbers  .push_back( RunNumber );
             // initialize the event-number sublist of events in this run
             event_numbers.push_back( std::vector<int>{} );
+            event_numbers.at( run_numbers.size()-1 ).push_back( EventNumber );
         } else {
             // this means that the run number is in our list,
             // and we can add the event number to the run sublist of events
@@ -651,7 +654,6 @@ void ReadEventList(){
     
     if (fdebug>2) PrintEventList();
 };
-
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 int FindRunNumberIndexInList( int run_number_to_find ){
@@ -679,11 +681,50 @@ void PrintEventList(){
     << "Events to process in specific runs"
     << std::endl;
     for (int run_idx=0; run_idx<(int)run_numbers.size(); run_idx++){
-        std::cout << "Run " << run_numbers.at(run_idx) << std::endl ;
+        std::cout << "Run " << run_numbers.at(run_idx) << ": " ;
         
         for (int evt_idx=0; evt_idx<(int)event_numbers.at(run_idx).size(); evt_idx++){
-            std::cout << run_numbers.at(run_idx).at(evt_idx) << "," << std::endl;
+            std::cout << event_numbers.at(run_idx).at(evt_idx) << "," ;
         }
+        std::cout << std::endl;
     }
     
+}
+
+// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+void OpenOutputFiles (){
+    if (fdebug>2) std::cout << "Opening output csvfile: " << OutFullFilename << std::endl;
+
+    outcsvfile.open( OutFullFilename );
+    if (fdebug>2) std::cout << "Writing to output csvfile: " << OutFullFilename << std::endl;
+
+    outcsvfile << csvheader << std::endl;
+
+    if (fdebug>2) std::cout << "Opened output csvfile: " << OutFullFilename << std::endl;
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+void FinishProgram(){
+    auto finish = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed = finish - start;
+
+    if (fdebug>2) std::cout << "Done. Elapsed time: " << elapsed.count() << std::endl;
+    CloseOutputFiles( );
+}
+
+// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+void CloseOutputFiles (){
+    // close output CSV
+    if (fdebug>2) std::cout << "Closing output csvfile " << OutFullFilename << std::endl;
+
+    outcsvfile.close();
+    if (fdebug>2){
+        std::cout
+        << "Done processesing "  <<  NeventsProcessed  << " events,"
+        << std::endl
+        << "See results in "
+        << std::endl
+        << OutFullFilename
+        << std::endl;
+    }
 }
