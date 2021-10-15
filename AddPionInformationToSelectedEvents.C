@@ -221,6 +221,7 @@ void AssignPionsToEvents(Int_t NeventsMax){
                     }
                     if ( eventIdx%10==0 ) std::cout << eventIdx << "/" <<  NeventsMax << std::endl;
                     eventIdx++;
+                    break;
                 }
             }
             if(FoundEvent == false ){
