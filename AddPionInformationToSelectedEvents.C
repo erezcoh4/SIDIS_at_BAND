@@ -198,7 +198,8 @@ void AssignPionsToEvents(Int_t NeventsMax){
             if (fdebug>3) std::cout << "Grabbing event " << EventNumber << " from run " << RunNumber << std::endl;
             
             InitializeVariables();
-            c12.clearEvent();
+            
+            // c12.clearEvent();
             if (fdebug>3) std::cout << "c12.clearEvent()" << std::endl;
             //move to Nev via hipo::reader
             c12.getReader().gotoEvent(EventNumber);
