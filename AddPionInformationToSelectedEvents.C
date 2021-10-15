@@ -21,7 +21,6 @@
 #include <TBenchmark.h>
 #include "Auxiliary/DCfid_SIDIS.cpp"
 #include "Auxiliary/SIDISatBAND_auxiliary.cpp"
-//#include "/u/home/cohen/SIDIS_at_BAND/Auxiliary/DCfid_SIDIS.cpp"
 #include "clas12reader.h"
 using namespace clas12;
 
@@ -49,6 +48,12 @@ TVector3                          Ve;
 
 std::vector<event_id>      eventlist;
 std::ofstream             outcsvfile;
+
+// a list of run numbers
+std::vector<int>                run_numbers;
+// and for each run, a list of event numbers in that run
+std::vector<std::vector<int>>   event_numbers;
+
 
 int          DC_layers[3] = {6,18,36};// Region 1 is denoted at DC detector 6, Region 2 is denoted 18, Region 3 - as 36
 int                          DC_layer;
@@ -194,7 +199,7 @@ void AssignPionsToEvents(Int_t NeventsMax){
             //get the hipo data
             if (fdebug>2) std::cout << "Reading hipo file " << fake.GetListOfFiles()->At(0)->GetTitle() << std::endl;
             clas12reader c12(inputFile, {0});//fake.GetListOfFiles()->At(0)->GetTitle(),{0});
-            
+            // I NEED TO THINK OF A BETTER WAY TO IMPLEMENT THIS IF, AS I SUSPECT THAT C12 RETURNS TO NULL AFTER THIS IF
         }
         
         
@@ -627,11 +632,36 @@ void ReadEventList(){
         std::stringstream lineStream(line);
         lineStream >> event_entry ;
         eventlist.push_back( event_entry ) ;
+        
+        int   RunNumber = event_entry.run_number;
+        int EventNumber = event_entry.event_number;
+        int RunNumberIdxInList = FindRunNumberIndexInList( RunNumber );
+        if (RunNumberIdxInList==-1) {
+            // this means that the run number is not in our list - its a new run number
+            run_numbers  .push_back( EventNumber );
+            // initialize the event-number sublist of events in this run
+            event_numbers.push_back( std::vector<int>{} );
+        } else {
+            // this means that the run number is in our list,
+            // and we can add the event number to the run sublist of events
+            event_numbers.at( RunNumberIdxInList ).push_back( EventNumber );
+        }
+        
     }
     
     if (fdebug>2) PrintEventList();
 };
 
+
+// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+int FindRunNumberIndexInList( int run_number_to_find ){
+    // find the index of "run_number_to_find" in the list "run_numbers"
+    for (int i=0; i<(int)run_numbers.size(); i++){
+        run_number = run_numbers.at(i);
+        if ( run_number==run_number_to_find ) return i;
+    }
+    return -1;
+}
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void PrintEventList(){
@@ -644,4 +674,16 @@ void PrintEventList(){
     for (auto event: eventlist){
         std::cout << event.run_number << "," << event.event_number << std::endl;
     }
+    
+    std::cout
+    << "Events to process in specific runs"
+    << std::endl;
+    for (int run_idx=0; run_idx<(int)run_numbers.size(); run_idx++){
+        std::cout << "Run " << run_numbers.at(run_idx) << std::endl ;
+        
+        for (int evt_idx=0; evt_idx<(int)event_numbers.at(run_idx).size(); evt_idx++){
+            std::cout << run_numbers.at(run_idx) << "," << std::endl;
+        }
+    }
+    
 }

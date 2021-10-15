@@ -1,0 +1,49 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+# continously take data and print the rate every few seconds
+# last edit Oct-15, 2021 (EOC)
+#
+import sys, os, linecache
+import argparse
+
+parser = argparse.ArgumentParser(description='add pion information to a given event list')
+parser.add_argument("--NeventsMax",     type=int, default=-1,
+                    required=False, help="maximal number of events to process")
+parser.add_argument("--fdebug",         type=int, default=1,
+                    required=False, help="verbosity")
+parser.add_argument("--worker",         type=str, default="Erez-ifarm",
+                    required=False, help="verbosity")
+parser.add_argument("--event_list",     type=str, default="example_eventlist",
+                    required=False, help="verbosity")
+
+args = parser.parse_args()
+
+fdebug        = args.fdebug
+event_list    = args.event_list
+NeventsMax    = args.NeventsMax
+
+
+out_data_path = "";
+if args.worker == "Erez-ifarm": #{
+    out_data_path = r'/volatile/clas12/users/ecohen/BAND/PionInformationInEventLists/'
+    commandline = ("clas12root -q 'AddPionInformationToSelectedEvents.C+(%d,%s,%d,%s)'"%
+                (NeventsMax,event_list,fdebug,out_data_path))
+
+#}
+elif args.worker == "ErezMBP": #{
+    out_data_path = r'/Users/erezcohen/Desktop/Software/CLAS12/'
+    commandline = ("root -q 'AddPionInformationToSelectedEvents.C(%d,%s,%d,%s)'"%
+                (NeventsMax,event_list,fdebug,out_data_path))
+#}
+
+print('')
+print( commandline )
+print('')
+os.system( commandline )
+
+print('')
+print('done.')
+print('')
+
+os.system('date | mail -s "Done processing add_pion_information_to_event_list on %s" cohen.erez7@gmail.com'%args.worker)

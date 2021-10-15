@@ -11,9 +11,13 @@ This repository is responsible for
     
 ## Revisions
 
+Oct-15, 2021    
+-------------
+1. Added a python script that runs *MergeSIDISandBANDSkimmers.C*
+
 Oct-6, 2021    
 -------------
-1. Added a script to add pion information to selected list of events 
+1. Added a clas12root script to add pion information to selected list of events *MergeSIDISandBANDSkimmers.C* 
 
 Oct-3, 2021    
 -------------
