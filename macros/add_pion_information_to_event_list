@@ -27,13 +27,13 @@ NeventsMax    = args.NeventsMax
 out_data_path = "";
 if args.worker == "Erez-ifarm": #{
     out_data_path = r'/volatile/clas12/users/ecohen/BAND/PionInformationInEventLists/'
-    commandline = ("clas12root -q 'AddPionInformationToSelectedEvents.C+(%d,%s,%d,%s)'"%
+    commandline = ("clas12root -q 'AddPionInformationToSelectedEvents.C+(%d,\"%s\",%d,\"%s\")'"%
                 (NeventsMax,event_list,fdebug,out_data_path))
 
 #}
 elif args.worker == "ErezMBP": #{
     out_data_path = r'/Users/erezcohen/Desktop/Software/CLAS12/'
-    commandline = ("root -q 'AddPionInformationToSelectedEvents.C(%d,%s,%d,%s)'"%
+    commandline = ("root -q 'AddPionInformationToSelectedEvents.C(%d,\"%s\",%d,\"%s\")'"%
                 (NeventsMax,event_list,fdebug,out_data_path))
 #}
 
