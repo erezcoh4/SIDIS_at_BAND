@@ -218,7 +218,14 @@ void AssignPionsToEvents(Int_t NeventsMax){
             ExtractPionsInformation     ();
             WriteEventToOutput          ();
             
-            if (fdebug>2) std::cout << "evnum " << EventNumber << ", Npips " << Npips << std::endl;
+            if (fdebug>2) {
+                std::cout << "Event number " << EventNumber
+                << ", Npips " << Npips
+                << ", Npims " << Npims
+                << ", Ne "    << Ne
+                
+                << std::endl;
+            }
             if ( eventIdx%10==0 ) std::cout << eventIdx << "/" <<  NeventsMax << std::endl;
             eventIdx++;
         }
