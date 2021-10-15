@@ -191,7 +191,7 @@ void AssignPionsToEvents(Int_t NeventsMax){
         //get the hipo data
         if (fdebug>3) std::cout << "Reading hipo file " << fake.GetListOfFiles()->At(0)->GetTitle() << std::endl;
         clas12reader c12(fake.GetListOfFiles()->At(0)->GetTitle(),{0});
-
+        
         
         for (int evt_idx=0; evt_idx<(int)event_numbers.at(run_idx).size(); evt_idx++){
             auto EventNumber = event_numbers.at(run_idx).at(evt_idx);
@@ -218,20 +218,20 @@ void AssignPionsToEvents(Int_t NeventsMax){
             ExtractPionsInformation     ();
             WriteEventToOutput          ();
             
-            if (fdebug>2) std::cout << "evnum " << evnum << ", Npips " << Npips << std::endl;
+            if (fdebug>2) std::cout << "evnum " << EventNumber << ", Npips " << Npips << std::endl;
             if ( eventIdx%10==0 ) std::cout << eventIdx << "/" <<  NeventsMax << std::endl;
             eventIdx++;
         }
-    }
-    
-    
-    
-    
-//    for (size_t eventIdx=0 ; eventIdx < eventlist.size() && eventIdx < NeventsMax; eventIdx++ ){
-//
-//        auto  event = eventlist.at( eventIdx );
-//        auto  evnum = event.event_number;
-//
+        
+        
+        
+        
+        
+        //    for (size_t eventIdx=0 ; eventIdx < eventlist.size() && eventIdx < NeventsMax; eventIdx++ ){
+        //
+        //        auto  event = eventlist.at( eventIdx );
+        //        auto  evnum = event.event_number;
+        //
 //
 //        InitializeVariables();
 //        clas12reader c12; // first just initiallize c12
@@ -253,11 +253,11 @@ void AssignPionsToEvents(Int_t NeventsMax){
 //
 //
 //        if (fdebug>2) std::cout << "grabbing event " << evnum << " from run " << RunNumber << std::endl;
-//        
-//        
-//        
-//        
-//        
+//
+//
+//
+//
+//
 //        while(c12.next()){
 ////            c12.clearEvent();
 //            //only get runconfig banks
