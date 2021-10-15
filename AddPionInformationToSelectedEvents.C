@@ -203,22 +203,22 @@ void AssignPionsToEvents(Int_t NeventsMax){
                 
                 if(c12.runconfig()->getEvent()==EventNumber){
                     FoundEvent = true;
+                    
                     if (fdebug>3) std::cout << "Found event " << EventNumber << " in run " << RunNumber << std::endl;
                     pipluses    = c12.getByID( 211  );          Npips   = pipluses  .size();
                     piminuses   = c12.getByID(-211  );          Npims   = piminuses .size();
                     electrons   = c12.getByID( 11   );          Ne      = electrons .size();
-                    
-                    ExtractPionsInformation     ();
-                    WriteEventToOutput          ();
-                    
-                    if (fdebug>2) {
-                        std::cout << "Event number " << EventNumber
+                    if (fdebug>3) {
+                        std::cout << "Event number " << EventNumber << " in run " << RunNumber
                         << ", Npips " << Npips
                         << ", Npims " << Npims
                         << ", Ne "    << Ne
-                        
                         << std::endl;
                     }
+
+                    ExtractPionsInformation     ();
+                    WriteEventToOutput          ();
+                    
                     if ( eventIdx%10==0 ) std::cout << eventIdx << "/" <<  NeventsMax << std::endl;
                     eventIdx++;
                     break;
@@ -227,6 +227,7 @@ void AssignPionsToEvents(Int_t NeventsMax){
             if(FoundEvent == false ){
                 if(fdebug>3) std::cout << "Did not find event " << EventNumber << " in run " << RunNumber << std::endl;
             }
+            if (fdebug>3)  std::cout << "-------------------------------------------------------------------" << std::endl;
         }
     }
 }
