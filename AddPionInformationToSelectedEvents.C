@@ -198,37 +198,38 @@ void AssignPionsToEvents(Int_t NeventsMax){
             if (fdebug>3) std::cout << "Grabbing event " << EventNumber << " from run " << RunNumber << std::endl;
             
             InitializeVariables();
-            
-            // c12.clearEvent();
-            if (fdebug>3) std::cout << "c12.clearEvent()" << std::endl;
-            //move to Nev via hipo::reader
-            c12.getReader().gotoEvent(EventNumber);
-            if (fdebug>3) std::cout << "c12.getReader().gotoEvent("<<EventNumber<<");" << std::endl;
-            //read full event
-            c12.readEvent();
-            
-            
-            pipluses    = c12.getByID( 211  );          Npips   = pipluses  .size();
-            piminuses   = c12.getByID(-211  );          Npims   = piminuses .size();
-            electrons   = c12.getByID( 11   );          Ne      = electrons .size();
-            //                    neutrons    = c12.getByID( 2112 );          Nn      = neutrons  .size();
-            //                    protons     = c12.getByID( 2212 );          Np      = protons   .size();
-            //                    gammas      = c12.getByID( 22   );          Ngammas = gammas    .size();
-            //                    deuterons   = c12.getByID( 1000010020 );    Nd      = deuterons.size();
-            
-            ExtractPionsInformation     ();
-            WriteEventToOutput          ();
-            
-            if (fdebug>2) {
-                std::cout << "Event number " << EventNumber
-                << ", Npips " << Npips
-                << ", Npims " << Npims
-                << ", Ne "    << Ne
+            while(c12.next()){
+                                
+                //            // c12.clearEvent();
+                //            if (fdebug>3) std::cout << "c12.clearEvent()" << std::endl;
+                //            //move to Nev via hipo::reader
+                //            c12.getReader().gotoEvent(EventNumber);
+                //            if (fdebug>3) std::cout << "c12.getReader().gotoEvent("<<EventNumber<<");" << std::endl;
+                //            //read full event
+                //            c12.readEvent();
                 
-                << std::endl;
+                std::cout << "c12.runconfig()->getEvent()==EventNumber: " << c12.runconfig()->getEvent()==EventNumber << std::endl;
+                if(c12.runconfig()->getEvent()==EventNumber){
+                    if (fdebug>3) std::cout << "Found event " << EventNumber << " in run " << RunNumber << std::endl;
+                    pipluses    = c12.getByID( 211  );          Npips   = pipluses  .size();
+                    piminuses   = c12.getByID(-211  );          Npims   = piminuses .size();
+                    electrons   = c12.getByID( 11   );          Ne      = electrons .size();
+
+                    ExtractPionsInformation     ();
+                    WriteEventToOutput          ();
+                    
+                    if (fdebug>2) {
+                        std::cout << "Event number " << EventNumber
+                        << ", Npips " << Npips
+                        << ", Npims " << Npims
+                        << ", Ne "    << Ne
+                        
+                        << std::endl;
+                    }
+                    if ( eventIdx%10==0 ) std::cout << eventIdx << "/" <<  NeventsMax << std::endl;
+                    eventIdx++;
+                }
             }
-            if ( eventIdx%10==0 ) std::cout << eventIdx << "/" <<  NeventsMax << std::endl;
-            eventIdx++;
         }
         
         
