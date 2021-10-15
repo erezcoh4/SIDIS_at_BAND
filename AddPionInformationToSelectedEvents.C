@@ -169,7 +169,7 @@ void AddPionInformationToSelectedEvents(Int_t      NeventsMax=-1,
     SetOutDataPath      (_OutDataPath_);
     OpenOutputFiles     ();
     ReadEventList       ();
-    AssignPionsToEvents ( NeventsMax);
+    //AssignPionsToEvents ( NeventsMax);
     FinishProgram       ();
 }
 
@@ -197,7 +197,7 @@ void AssignPionsToEvents(Int_t NeventsMax){
 //            fake.Add(inputFile.Data());
             
             //get the hipo data
-            if (fdebug>2) std::cout << "Reading hipo file " << fake.GetListOfFiles()->At(0)->GetTitle() << std::endl;
+            if (fdebug>2) std::cout << "Reading hipo file " << inputFile << std::endl;
             clas12reader c12(inputFile, {0});//fake.GetListOfFiles()->At(0)->GetTitle(),{0});
             // I NEED TO THINK OF A BETTER WAY TO IMPLEMENT THIS IF, AS I SUSPECT THAT C12 RETURNS TO NULL AFTER THIS IF
         }
