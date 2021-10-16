@@ -297,9 +297,11 @@ void ExtractElectronInformation(){
     // here only the reconstructed vertext position, as it affects the pion vertex cut position
     // ------------------------------------------------------------------------------------------------
     aux.SetParticle4Momentum( e , electrons[0] );
+    if (fdebug>3) std::cout << "e.E(): " << e.E() << " GeV/c" << std::endl;
     q = Beam - e;
+    if (fdebug>3) std::cout << "q.E(): " << q.E() << " GeV/c" << std::endl;
     Ve = aux.GetParticleVertex( electrons[0] );
-
+    if (fdebug>3) std::cout << "Ve.X(): " << Ve.X() << " cm" << std::endl;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

@@ -77,7 +77,7 @@ void SIDISatBAND_auxiliary::loadCutValues(std::string cutValuesFilename){
     // read cut values csv file
     csv_reader csvr;
     cutValues = csvr.read_csv(cutValuesFilename);
-    if (fdebug>3) { printCutValues(); }
+    if (fdebug>4) { printCutValues(); }
     
     // assign specific cut values - to speed things up
     // by avoiding recalling FindCutValue() on every event
