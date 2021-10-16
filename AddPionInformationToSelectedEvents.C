@@ -157,6 +157,7 @@ bool       CheckIfPionPassedSelectionCuts (TString pionCharge, // "pi+" or "pi-"
                                            TVector3 Ve,      TVector3 Vpi);
 void                      OpenOutputFiles ();
 int              FindRunNumberIndexInList ( int run_number_to_find );
+void          ExtractElectronInformation  ();
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void AddPionInformationToSelectedEvents(Int_t      NeventsMax=-1,
