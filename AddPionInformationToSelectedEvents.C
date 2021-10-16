@@ -165,9 +165,9 @@ void AddPionInformationToSelectedEvents(Int_t      NeventsMax=-1,
                                         Int_t     _fdebug_=1,
                                         TString   _OutDataPath_="/volatile/clas12/users/ecohen/BAND/PionInformationInEventLists/"){
     
-    aux.loadCutValues   ("cutValues.csv");
     SetVerbosity        (_fdebug_);
     aux.SetVerbosity    (_fdebug_);
+    aux.loadCutValues   ("cutValues.csv");
     SetEventListName    (_EventListName_);
     SetOutDataPath      (_OutDataPath_);
     OpenOutputFiles     ();
@@ -291,6 +291,7 @@ void InitializeVariables(){
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void ExtractElectronInformation(){
+    if (fdebug>3) std::cout << "ExtractElectronInformation()" << std::endl;
     // ------------------------------------------------------------------------------------------------
     // extract information from first electron
     // here only the reconstructed vertext position, as it affects the pion vertex cut position
@@ -303,7 +304,7 @@ void ExtractElectronInformation(){
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void ExtractPionsInformation(){
-    if (fdebug>2) std::cout << "ExtractPionsInformation()" << std::endl;
+    if (fdebug>3) std::cout << "ExtractPionsInformation()" << std::endl;
 
     // positive pions)
     for (int pipsIdx=0; pipsIdx < Npips; pipsIdx++) {
@@ -579,14 +580,16 @@ int FindRunNumberIndexInList( int run_number_to_find ){
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void PrintEventList(){
-    std::cout
-    << "Event list to process"
-    << std::endl
-    << "run,event"
-    << std::endl;
-    
-    for (auto event: eventlist){
-        std::cout << event.run_number << "," << event.event_number << std::endl;
+    if (fdebug>5){
+        std::cout
+        << "Event list to process"
+        << std::endl
+        << "run,event"
+        << std::endl;
+        
+        for (auto event: eventlist){
+            std::cout << event.run_number << "," << event.event_number << std::endl;
+        }
     }
     
     std::cout
