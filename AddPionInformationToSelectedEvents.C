@@ -205,7 +205,7 @@ void AssignPionsToEvents(Int_t NeventsMax){
             InitializeVariables();
             while(c12.next()){
                 
-                if (fdebug>3) std::cout << "(c12.runconfig()->getEvent()==EventNumber): " << c12.runconfig()->getEvent()==EventNumber << << std::endl;
+                if (fdebug>3) std::cout << "(c12.runconfig()->getEvent()==EventNumber): " << c12.runconfig()->getEvent()==EventNumber << std::endl;
                 
                 if (c12.runconfig()->getEvent()==EventNumber){
                     FoundEvent = true;
@@ -219,8 +219,8 @@ void AssignPionsToEvents(Int_t NeventsMax){
                         if (fdebug>3) {
                             std::cout
                             << Ne << " e, "
-                            << Npips << " \pi+ & "
-                            << Npims << " \pi- in event "
+                            << Npips << " pi+ & "
+                            << Npims << " pi- in event "
                             << EventNumber << std::endl;
                         }
                         ExtractElectronInformation  ();
