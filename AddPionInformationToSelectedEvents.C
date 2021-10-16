@@ -213,7 +213,7 @@ void AssignPionsToEvents(Int_t NeventsMax){
                     piminuses   = c12.getByID(-211  );          Npims   = piminuses .size();
                     electrons   = c12.getByID( 11   );          Ne      = electrons .size();
 
-                    if (Npips>0 || Npims>0){
+                    if (Ne>0 && (Npips>0 || Npims>0)){
                         if (fdebug>3) {
                             std::cout
                             << Ne << " e, "
@@ -225,7 +225,10 @@ void AssignPionsToEvents(Int_t NeventsMax){
                         ExtractPionsInformation     ();
                         WriteEventToOutput          ();
                     } else {
-                        if(fdebug>3) std::cout << "no pions in event " << EventNumber << std::endl;
+                        if(fdebug>3) {
+                            if (Ne==0) std::cout << "no electrons in event " << EventNumber << std::endl;
+                            else std::cout << "no pions in event " << EventNumber << std::endl;
+                        }
                     }
                     if ( eventIdx%10==0 ) std::cout << eventIdx << "/" <<  NeventsMax << std::endl;
                     eventIdx++;
