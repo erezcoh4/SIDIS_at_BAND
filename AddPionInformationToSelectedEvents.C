@@ -205,7 +205,9 @@ void AssignPionsToEvents(Int_t NeventsMax){
             InitializeVariables();
             while(c12.next()){
                 
-                if(c12.runconfig()->getEvent()==EventNumber){
+                if (fdebug>3) std::cout << "(c12.runconfig()->getEvent()==EventNumber): " << c12.runconfig()->getEvent()==EventNumber << << std::endl;
+                
+                if (c12.runconfig()->getEvent()==EventNumber){
                     FoundEvent = true;
                     
                     if (fdebug>3) std::cout << "Found event " << EventNumber << " in run " << RunNumber << std::endl;
