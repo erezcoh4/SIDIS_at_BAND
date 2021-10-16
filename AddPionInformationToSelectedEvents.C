@@ -304,6 +304,8 @@ void ExtractElectronInformation(){
     // extract information from first electron
     // here only the reconstructed vertext position, as it affects the pion vertex cut position
     // ------------------------------------------------------------------------------------------------
+    if (fdebug>3) std::cout << "electrons[0]->par()->getPx(): " << electrons[0]->par()->getPx() << " GeV/c" << std::endl;
+    
     SetParticle4Momentum( e , electrons[0] );
     if (fdebug>3) std::cout << "e.E(): " << e.E() << " GeV/c" << std::endl;
     q = Beam - e;
