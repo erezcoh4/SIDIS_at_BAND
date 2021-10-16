@@ -214,7 +214,13 @@ void AssignPionsToEvents(Int_t NeventsMax){
                     electrons   = c12.getByID( 11   );          Ne      = electrons .size();
 
                     if (Npips>0 || Npims>0){
-                        if (fdebug>3) std::cout << Npips << " \pi+ & " << Npims << " \pi- in event " << EventNumber << std::endl;
+                        if (fdebug>3) {
+                            std::cout
+                            << Ne << " e, "
+                            << Npips << " \pi+ & "
+                            << Npims << " \pi- in event "
+                            << EventNumber << std::endl;
+                        }
                         ExtractElectronInformation  ();
                         ExtractPionsInformation     ();
                         WriteEventToOutput          ();
@@ -242,7 +248,7 @@ void WriteEventToOutput(){
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void InitializeVariables(){
     FoundEvent = false;
-    e  = TLorentzVector(0,0,0,db->GetParticle( 11   )->Mass());
+    e  = TLorentzVector(0,0,0,db->GetParticle( 11 )->Mass());
     Ve = TVector3(-9999,-9999,-9999);
 
     piplus      .clear();
