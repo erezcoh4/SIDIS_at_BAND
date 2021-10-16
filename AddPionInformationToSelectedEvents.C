@@ -37,6 +37,7 @@ TString      OutFullFilename = "";
 TString            csvheader = "Npips,Npims,Nelectrons,Ngammas,Nprotons,Nneutrons,Ndeuterons,";
 
 bool                      FoundEvent;
+Int_t              NeventsInList = 0;
 Int_t                  RunNumber = 0;
 Int_t                EventNumber = 0;
 Int_t                     fdebug = 0;
@@ -170,7 +171,7 @@ void AddPionInformationToSelectedEvents(Int_t      NeventsMax=-1,
     SetOutDataPath      (_OutDataPath_);
     OpenOutputFiles     ();
     ReadEventList       ();
-    AssignPionsToEvents ( NeventsMax);
+    AssignPionsToEvents ( NeventsMax );
     FinishProgram       ();
 }
 
@@ -179,6 +180,8 @@ void AddPionInformationToSelectedEvents(Int_t      NeventsMax=-1,
 void AssignPionsToEvents(Int_t NeventsMax){
     if (fdebug>2) {std::cout << "AssignPionsToEvents("<<NeventsMax<<")"<< std::endl;}
 
+    if (NeventsMax<0) NeventsMax = NeventsInList;
+    
     int eventIdx = 0;
     for (int run_idx=0; run_idx<(int)run_numbers.size(); run_idx++){
         auto RunNumber = run_numbers.at(run_idx);
@@ -208,17 +211,15 @@ void AssignPionsToEvents(Int_t NeventsMax){
                     pipluses    = c12.getByID( 211  );          Npips   = pipluses  .size();
                     piminuses   = c12.getByID(-211  );          Npims   = piminuses .size();
                     electrons   = c12.getByID( 11   );          Ne      = electrons .size();
-                    if (fdebug>3) {
-                        std::cout << "Event number " << EventNumber << " in run " << RunNumber
-                        << ", Npips " << Npips
-                        << ", Npims " << Npims
-                        << ", Ne "    << Ne
-                        << std::endl;
-                    }
 
-                    ExtractPionsInformation     ();
-                    WriteEventToOutput          ();
-                    
+                    if (Npips>0 || Npims>0){
+                        if (fdebug>3) std::cout << Npips << " \pi+ & " << Npims << " \pi- in event " << EventNumber << std::endl;
+                        ExtractElectronInformation  ();
+                        ExtractPionsInformation     ();
+                        WriteEventToOutput          ();
+                    } else {
+                        if(fdebug>3) std::cout << "no pions in event " << EventNumber << std::endl;
+                    }
                     if ( eventIdx%10==0 ) std::cout << eventIdx << "/" <<  NeventsMax << std::endl;
                     eventIdx++;
                     break;
@@ -559,7 +560,7 @@ void ReadEventList(){
             // and we can add the event number to the run sublist of events
             event_numbers.at( RunNumberIdxInList ).push_back( EventNumber );
         }
-        
+        NeventsInList++;
     }
     
     if (fdebug>2) PrintEventList();
