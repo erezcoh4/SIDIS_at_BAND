@@ -187,7 +187,7 @@ void AssignPionsToEvents(Int_t NeventsMax){
     for (int run_idx=0; run_idx<(int)run_numbers.size(); run_idx++){
         auto RunNumber = run_numbers.at(run_idx);
         if (fdebug>3) std::cout << "Processing run " <<  RunNumber << std::endl ;
-        
+        SetEbeam ( aux.GetEbeamFromRunNumber( RunNumber ) );
         // every time that the run number changes, we open a new hipo file
         TString    inputFile = DataPath + "inc_" + aux.GetRunNumberSTR( RunNumber ) + ".hipo";
         TChain fake("hipo");
