@@ -254,9 +254,9 @@ void WriteEventToOutput(){
     
     if(fdebug>3){
         std::cout << std::endl << "WriteEventToOutput()" << std::endl ;
-        std::cout << piplus.size() << " pi+ " << std::endl;
+        std::cout << Npips << " pi+ " << std::endl;
         if (piplus.size()>0){
-            for (int piIdx=0; piIdx<(int)piplus.size(); piIdx++){
+            for (int piIdx=0; piIdx<Npips; piIdx++){
                 auto Ppi = piplus.at(piIdx);
                 std::cout
                 << "z = "  << Zpips[piIdx]          << ","
@@ -265,9 +265,9 @@ void WriteEventToOutput(){
                 << std::endl;
             }
         }
-        std::cout << piminus.size() << " pi- " << std::endl;
+        std::cout << Npims << " pi- " << std::endl;
         if (piplus.size()>0){
-            for (int piIdx=0; piIdx<(int)piminus.size(); piIdx++){
+            for (int piIdx=0; piIdx<Npims; piIdx++){
                 auto Ppi = piminus.at(piIdx);
                 std::cout
                 << "z = "  << Zpims[piIdx]          << ","
@@ -329,8 +329,6 @@ void InitializeVariables(){
     DC_layer                                        = -9999;
 }
 
-
-
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void ExtractElectronInformation(){
     if (fdebug>3) std::cout << "ExtractElectronInformation()" << std::endl;
@@ -347,7 +345,6 @@ void ExtractElectronInformation(){
     Ve = aux.GetParticleVertex( electrons[0] );
     if (fdebug>3) std::cout << "Ve.X(): " << Ve.X() << " cm" << std::endl;
 }
-
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void ExtractPionsInformation(){
@@ -477,7 +474,6 @@ void ExtractPimsInformation( int pimsIdx ){
         pimsPastCutsInEvent = true;
     }
 }
-
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
