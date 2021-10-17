@@ -201,7 +201,8 @@ void AssignPionsToEvents(Int_t NeventsMax){
         for (int evt_idx=0; evt_idx<(int)event_numbers.at(run_idx).size(); evt_idx++){
             auto EventNumber = event_numbers.at(run_idx).at(evt_idx);
             if (fdebug>3) std::cout << "Grabbing event " << EventNumber << " from run " << RunNumber << std::endl;
-            
+            // ToDo: Check if this loop forces event-ids in file to be sorted.
+            // If yes, its wrong - as we know they are not sorted!
             InitializeVariables();
             while(c12.next()){
                 
