@@ -34,7 +34,7 @@ TString        EventListName = "example_eventlist";
 TString          OutDataPath = ""; // or e.g. /Users/erezcohen/Desktop/Software/CLAS12/
 TString          OutFilename = "NonameOutputFile";
 TString      OutFullFilename = "";
-TString            csvheader = "Npips,Npims,Nelectrons,Ngammas,Nprotons,Nneutrons,Ndeuterons,";
+TString            csvheader = "run,event,Npips,Npims,Nelectrons,piCharge,Zpi,piPassedCuts,E_pi,Px_pi,Py_pi,Pz_pi";
 
 bool                      FoundEvent;
 Int_t              NeventsInList = 0;
@@ -146,7 +146,8 @@ void                  AssignPionsToEvents (Int_t NeventsMax);
 void                     CloseOutputFiles ();
 void                        FinishProgram ();
 void                  InitializeVariables ();
-void                   WriteEventToOutput ();
+void                   WriteEventToOutput (Int_t RunNumber, Int_t EventNumber);
+void                      StreamToCSVfile (std::vector<Double_t> observables);
 void              ExtractPionsInformation ();
 void               ExtractPipsInformation (int pipsIdx);
 void               ExtractPimsInformation (int pimsIdx);
@@ -176,6 +177,18 @@ void AddPionInformationToSelectedEvents(Int_t      NeventsMax=-1,
     FinishProgram       ();
 }
 
+
+// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+void StreamToCSVfile (std::vector<Double_t> observables){
+    for (auto v:observables) csvfile << v << ",";
+    csvfile << std::endl;
+    if (fdebug>3) {
+        std::cout << "StreamToCSVfile()" << std::endl;
+        std::cout << csvheader << std::endl;
+        for (auto v:observables) std::cout << v << ",";
+        std::cout << std::endl;
+    }
+}
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void AssignPionsToEvents(Int_t NeventsMax){
@@ -226,7 +239,7 @@ void AssignPionsToEvents(Int_t NeventsMax){
                         }
                         ExtractElectronInformation  ();
                         ExtractPionsInformation     ();
-                        WriteEventToOutput          ();
+                        WriteEventToOutput          (RunNumber, EventNumber);
                     } else {
                         if(fdebug>3) {
                             if (Ne==0) std::cout << "no electrons in event " << EventNumber << std::endl;
@@ -250,7 +263,28 @@ void AssignPionsToEvents(Int_t NeventsMax){
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-void WriteEventToOutput(){
+void WriteEventToOutput(Int_t RunNumber, Int_t EventNumber){
+
+    for (int piIdx=0; piIdx<Npips; piIdx++){
+        auto Ppi = piplus.at(piIdx);
+        std::vector<Double_t> variables = { RunNumber,EventNumber,
+                                            Npips,Npims,Ne,
+                                            1.,
+                                            Zpips[piIdx], pipsPastSelectionCuts[pipsIdx],
+                                            Ppi.E(), Ppi.Px(), Ppi.Py(),Ppi.Pz()  };
+        StreamToCSVfile (observables);
+    }
+    for (int piIdx=0; piIdx<Npims; piIdx++){
+        auto Ppi = piminus.at(piIdx);
+        std::vector<Double_t> variables = { RunNumber,EventNumber,
+                                            Npips,Npims,Ne,
+                                            1.,
+                                            Zpips[piIdx], pimsPastSelectionCuts[pipsIdx],
+                                            Ppi.E(), Ppi.Px(), Ppi.Py(),Ppi.Pz()  };
+        StreamToCSVfile (observables);
+    }
+
+    
     
     if(fdebug>3){
         std::cout << std::endl << "WriteEventToOutput()" << std::endl ;
@@ -259,7 +293,8 @@ void WriteEventToOutput(){
             for (int piIdx=0; piIdx<Npips; piIdx++){
                 auto Ppi = piplus.at(piIdx);
                 std::cout
-                << "z = "  << Zpips[piIdx]          << ","
+                << "z = "           << Zpips[piIdx]          << ","
+                << "passed cuts: "  << pipsPastSelectionCuts[pipsIdx] << ","
                 << "E = "  << Ppi.E()   << " GeV, "
                 << "p = (" << Ppi.Px()  << ","      << Ppi.Py()  << "," << Ppi.Pz()  << ") GeV/c, "
                 << std::endl;
@@ -271,6 +306,7 @@ void WriteEventToOutput(){
                 auto Ppi = piminus.at(piIdx);
                 std::cout
                 << "z = "  << Zpims[piIdx]          << ","
+                << "passed cuts: "  << pimsPastSelectionCuts[pipsIdx] << ","
                 << "E = "  << Ppi.E()   << " GeV, "
                 << "p = (" << Ppi.Px()  << ","      << Ppi.Py()  << "," << Ppi.Pz()  << ") GeV/c, "
                 << std::endl;
