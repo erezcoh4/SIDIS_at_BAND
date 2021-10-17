@@ -200,13 +200,13 @@ void AssignPionsToEvents(Int_t NeventsMax){
         
         for (int evt_idx=0; evt_idx<(int)event_numbers.at(run_idx).size(); evt_idx++){
             auto EventNumber = event_numbers.at(run_idx).at(evt_idx);
-            if (fdebug>3) std::cout << "Grabbing event " << EventNumber << " from run " << RunNumber << std::endl;
+            if (fdebug>3) std::cout << "Looking for event " << EventNumber << " (run " << RunNumber << ")" << std::endl;
             // ToDo: Check if this loop forces event-ids in file to be sorted.
             // If yes, its wrong - as we know they are not sorted!
             InitializeVariables();
             while(c12.next()){
                 
-                if (fdebug>3) std::cout << "(c12.runconfig()->getEvent()==EventNumber): " << c12.runconfig()->getEvent() << std::endl;
+                if (fdebug>6) std::cout << "Event number " << c12.runconfig()->getEvent() << std::endl;
                 
                 if (c12.runconfig()->getEvent()==EventNumber){
                     FoundEvent = true;
@@ -241,7 +241,10 @@ void AssignPionsToEvents(Int_t NeventsMax){
             if(FoundEvent == false ){
                 if(fdebug>3) std::cout << "Did not find event " << EventNumber << " in run " << RunNumber << std::endl;
             }
-            if (fdebug>3)  std::cout << "-------------------------------------------------------------------" << std::endl;
+            if (fdebug>3) {
+                std::cout << "Done extracting pion info in event " << EventNumber << " (run " << RunNumber << ")" << std::endl;
+                std::cout << "-------------------------------------------------------------------" << std::endl;
+            }
         }
     }
 }
