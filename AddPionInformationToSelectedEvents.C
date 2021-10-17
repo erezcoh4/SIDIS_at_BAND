@@ -251,7 +251,32 @@ void AssignPionsToEvents(Int_t NeventsMax){
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void WriteEventToOutput(){
-
+    
+    if(fdebug>3){
+        std::cout << std::endl << "WriteEventToOutput()" << std::endl ;
+        std::cout << piplus.size() << " pi+ " << std::endl;
+        if (piplus.size()>0){
+            for (int piIdx=0; piIdx<(int)piplus.size(); piIdx++){
+                auto Ppi = piplus.at(piIdx);
+                std::cout
+                << "z = "  << Zpips[piIdx]          << ","
+                << "E = "  << Ppi.E()   << " GeV, "
+                << "p = (" << Ppi.Px()  << ","      << Ppi.Py()  << "," << Ppi.Pz()  << ") GeV/c, "
+                << std::endl;
+            }
+        }
+        std::cout << piminus.size() << " pi- " << std::endl;
+        if (piplus.size()>0){
+            for (int piIdx=0; piIdx<(int)piminus.size(); piIdx++){
+                auto Ppi = piminus.at(piIdx);
+                std::cout
+                << "z = "  << Zpims[piIdx]          << ","
+                << "E = "  << Ppi.E()   << " GeV, "
+                << "p = (" << Ppi.Px()  << ","      << Ppi.Py()  << "," << Ppi.Pz()  << ") GeV/c, "
+                << std::endl;
+            }
+        }
+    }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -305,14 +330,8 @@ void InitializeVariables(){
 }
 
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void SetParticle4Momentum (TLorentzVector &p4,clas12::region_part_ptr rp){
-    p4.SetXYZM(rp->par()->getPx(),
-               rp->par()->getPy(),
-               rp->par()->getPz(),
-               p4.M());
-}
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void ExtractElectronInformation(){
     if (fdebug>3) std::cout << "ExtractElectronInformation()" << std::endl;
     // ------------------------------------------------------------------------------------------------
@@ -321,7 +340,7 @@ void ExtractElectronInformation(){
     // ------------------------------------------------------------------------------------------------
     if (fdebug>3) std::cout << "electrons[0]->par()->getPx(): " << electrons[0]->par()->getPx() << " GeV/c" << std::endl;
     
-    SetParticle4Momentum( e , electrons[0] );
+    aux.SetParticle4Momentum( e , electrons[0] );
     if (fdebug>3) std::cout << "e.E(): " << e.E() << " GeV/c" << std::endl;
     q = Beam - e;
     if (fdebug>3) std::cout << "q.E(): " << q.E() << " GeV/c" << std::endl;
