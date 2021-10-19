@@ -190,7 +190,6 @@ void SIDISatBAND_auxiliary::StreamToCSVfile (std::ofstream csvfile, std::vector<
     
     if (fdebug>3) {
         std::cout << "StreamToEventCSVfile()" << std::endl;
-        std::cout << csvfile << std::endl;
         for (auto v:observables) std::cout << v << ",";
         std::cout << std::endl;
     }
