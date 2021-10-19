@@ -33,8 +33,11 @@ TString        EventListPath = "macros/eventlist/";
 TString        EventListName = "example_eventlist";
 TString          OutDataPath = ""; // or e.g. /Users/erezcohen/Desktop/Software/CLAS12/
 TString          OutFilename = "NonameOutputFile";
+TString     EventOutFilename = "EventOutputFile";
 TString      OutFullFilename = "";
-TString            csvheader = "run,event,Npips,Npims,Nelectrons,piCharge,Zpi,piPassedCuts,E_pi,Px_pi,Py_pi,Pz_pi";
+TString EventOutFullFilename = "";
+TString            csvheader = "run,event,Npips,Npims,Nelectrons,NGoodPips,NGoodPims,piCharge,Zpi,piPassedCuts,E_pi,Px_pi,Py_pi,Pz_pi";
+TString       eventcsvheader = "run,event,Npips,Npims,Nelectrons,NGoodPips,NGoodPims";
 
 bool                      FoundEvent;
 Int_t              NeventsInList = 0;
@@ -44,12 +47,14 @@ Int_t                     fdebug = 0;
 Int_t           NeventsProcessed = 0;
 Int_t                 Ne, Nn, Np, Nd;
 Int_t          Npips, Npims, Ngammas;
+Int_t           NGoodPips, NGoodPims;
 Double_t                Ebeam = 10.2;
 TLorentzVector            Beam, e, q;
 TVector3                          Ve;
 
 std::vector<event_id>      eventlist;
 std::ofstream             outcsvfile;
+std::ofstream        eventoutcsvfile;
 
 // a list of run numbers
 std::vector<int>                run_numbers;
@@ -122,7 +127,10 @@ std::vector<region_part_ptr>  neutrons, protons, gammas, deuterons;
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 // Setters
 void            SetDataPath (TString fDataPath)       { DataPath = fDataPath; };
-void     SetOutFullFilename ()                        { OutFullFilename = OutDataPath + OutFilename + ".csv"; };
+void     SetOutFullFilename ()                        {
+    OutFullFilename      = OutDataPath + OutFilename + ".csv";
+    EventOutFullFilename = OutDataPath + OutFilename + "_events.csv";
+};
 void           SetVerbosity (Int_t _fdebug_)          { fdebug = _fdebug_;    };
 void               SetEbeam (Double_t _Ebeam_)        { Ebeam = _Ebeam_;    Beam.SetPxPyPzE(0, 0, Ebeam, Ebeam );};
 void         SetOutDataPath (TString fOutDataPath)    {
@@ -147,7 +155,6 @@ void                     CloseOutputFiles ();
 void                        FinishProgram ();
 void                  InitializeVariables ();
 void                   WriteEventToOutput (Int_t RunNumber, Int_t EventNumber);
-void                      StreamToCSVfile (std::vector<Double_t> observables);
 void              ExtractPionsInformation ();
 void               ExtractPipsInformation (int pipsIdx);
 void               ExtractPimsInformation (int pimsIdx);
@@ -178,18 +185,7 @@ void AddPionInformationToSelectedEvents(Int_t      NeventsMax=-1,
 }
 
 
-// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-void StreamToCSVfile (std::vector<Double_t> observables){
-    for (auto v:observables) outcsvfile << v << ",";
-    outcsvfile << std::endl;
-    
-    if (fdebug>3) {
-        std::cout << "StreamToCSVfile()" << std::endl;
-        std::cout << csvheader << std::endl;
-        for (auto v:observables) std::cout << v << ",";
-        std::cout << std::endl;
-    }
-}
+
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void AssignPionsToEvents(Int_t NeventsMax){
@@ -265,26 +261,32 @@ void AssignPionsToEvents(Int_t NeventsMax){
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void WriteEventToOutput(Int_t RunNumber, Int_t EventNumber){
-    std::vector<Double_t> variables;
+    
     for (int piIdx=0; piIdx<Npips; piIdx++){
         auto Ppi = piplus.at(piIdx);
         std::vector<Double_t> variables = { (double)RunNumber, (double)EventNumber,
                                             (double)Npips, (double)Npims, (double)Ne,
+                                            (double)NGoodPips, (double)NGoodPims,
                                             1.,
                                             Zpips[piIdx], (double)pipsPastSelectionCuts[piIdx],
                                             Ppi.E(), Ppi.Px(), Ppi.Py(), Ppi.Pz()  };
-        StreamToCSVfile (variables);
+        aux.StreamToCSVfile ( outcsvfile , variables);
     }
     for (int piIdx=0; piIdx<Npims; piIdx++){
         auto Ppi = piminus.at(piIdx);
         std::vector<Double_t> variables = { (double)RunNumber, (double)EventNumber,
                                             (double)Npips, (double)Npims, (double)Ne,
+                                            (double)NGoodPips, (double)NGoodPims,
                                             -1.,
                                             Zpims[piIdx], (double)pimsPastSelectionCuts[piIdx],
                                             Ppi.E(), Ppi.Px(), Ppi.Py(), Ppi.Pz()  };
-        StreamToCSVfile (variables);
+        aux.StreamToCSVfile (outcsvfile, variables);
     }
-
+    
+    std::vector<Double_t> eventvariables = { (double)RunNumber, (double)EventNumber,
+                                        (double)Npips, (double)Npims, (double)Ne,
+                                        (double)NGoodPips, (double)NGoodPims};
+    aux.StreamToCSVfile ( eventoutcsvfile , eventvariables);
     
     
     if(fdebug>3){
@@ -364,6 +366,8 @@ void InitializeVariables(){
 
     }
     DC_layer                                        = -9999;
+    NGoodPips                                       = 0;
+    NGoodPims                                       = 0;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -462,6 +466,7 @@ void ExtractPipsInformation( int pipsIdx ){
                                                                     Ve,
                                                                     Vpiplus[pipsIdx]);
     if (pipsPastSelectionCuts[pipsIdx]) {
+        NGoodPips++;
         pipsPastCutsInEvent = true;
     }
 }
@@ -508,6 +513,7 @@ void ExtractPimsInformation( int pimsIdx ){
                                                                     Ve,
                                                                     Vpiminus[pimsIdx]);
     if (pimsPastSelectionCuts[pimsIdx]) {
+        NGoodPims++;
         pimsPastCutsInEvent = true;
     }
 }
@@ -686,11 +692,12 @@ void OpenOutputFiles (){
     if (fdebug>2) std::cout << "Opening output csvfile: " << OutFullFilename << std::endl;
 
     outcsvfile.open( OutFullFilename );
-    if (fdebug>2) std::cout << "Writing to output csvfile: " << OutFullFilename << std::endl;
-
     outcsvfile << csvheader << std::endl;
-
     if (fdebug>2) std::cout << "Opened output csvfile: " << OutFullFilename << std::endl;
+    
+    eventoutcsvfile.open( EventOutFullFilename );
+    eventoutcsvfile << eventcsvheader << std::endl;
+    if (fdebug>2) std::cout << "Opened output csvfile: " << EventOutFullFilename << std::endl;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

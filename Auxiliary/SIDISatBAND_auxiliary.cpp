@@ -162,7 +162,6 @@ Double_t SIDISatBAND_auxiliary::GetEbeamFromRunNumber ( Int_t RunNumber ){
     }
 }
 
-
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void SIDISatBAND_auxiliary::SetTorusBendingFromRunNumber ( Int_t RunNumber ){
     // -1 for In-bending, +1 for Out-bending
@@ -181,5 +180,18 @@ void SIDISatBAND_auxiliary::SetTorusBendingFromRunNumber ( Int_t RunNumber ){
     }
     else{
         this->torusBending = 0;
+    }
+}
+
+// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+void SIDISatBAND_auxiliary::StreamToCSVfile (std::ofstream csvfile, std::vector<Double_t> observables){
+    for (auto v:observables) csvfile << v << ",";
+    csvfile << std::endl;
+    
+    if (fdebug>3) {
+        std::cout << "StreamToEventCSVfile()" << std::endl;
+        std::cout << csvfile << std::endl;
+        for (auto v:observables) std::cout << v << ",";
+        std::cout << std::endl;
     }
 }
