@@ -11,10 +11,13 @@ This repository is responsible for
     
 ## Revisions
 
-Oct-15, 2021    
+Oct-19, 2021    
 -------------
 1. Added a python script that runs *MergeSIDISandBANDSkimmers.C*
+
 2. Moved **StreamToCSVfile** to Auxiliary
+
+3. Added a seperate csv file for event-data, that stores relevant information per event: The number of positive and negative pions, event number, Xb etc.
 
 Oct-6, 2021    
 -------------

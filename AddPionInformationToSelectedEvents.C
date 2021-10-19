@@ -36,8 +36,8 @@ TString          OutFilename = "NonameOutputFile";
 TString     EventOutFilename = "EventOutputFile";
 TString      OutFullFilename = "";
 TString EventOutFullFilename = "";
-TString            csvheader = "run,event,Npips,Npims,Nelectrons,NGoodPips,NGoodPims,piCharge,Zpi,piPassedCuts,E_pi,Px_pi,Py_pi,Pz_pi";
-TString       eventcsvheader = "run,event,Npips,Npims,Nelectrons,NGoodPips,NGoodPims";
+TString            csvheader = "run,event,Npips,Npims,Nelectrons,NGoodPips,NGoodPims,piCharge,Zpi,piPassedCuts,E_pi,Px_pi,Py_pi,Pz_pi,";
+TString       eventcsvheader = "run,event,Npips,Npims,Nelectrons,NGoodPips,NGoodPims,Xb,";
 
 bool                      FoundEvent;
 Int_t              NeventsInList = 0;
@@ -48,7 +48,9 @@ Int_t           NeventsProcessed = 0;
 Int_t                 Ne, Nn, Np, Nd;
 Int_t          Npips, Npims, Ngammas;
 Int_t           NGoodPips, NGoodPims;
+Double_t               Mp = 0.938272; // GeV/c2
 Double_t                Ebeam = 10.2;
+Double_t                          Xb;
 TLorentzVector            Beam, e, q;
 TVector3                          Ve;
 
@@ -283,9 +285,10 @@ void WriteEventToOutput(Int_t RunNumber, Int_t EventNumber){
         aux.StreamToCSVfile ( outcsvfile, variables);
     }
     
-    std::vector<Double_t> eventvariables = { (double)RunNumber, (double)EventNumber,
-                                        (double)Npips, (double)Npims, (double)Ne,
-                                        (double)NGoodPips, (double)NGoodPims};
+    std::vector<Double_t> eventvariables = {(double)RunNumber,  (double)EventNumber,
+                                            (double)Npips,      (double)Npims,      (double)Ne,
+                                            (double)NGoodPips,  (double)NGoodPims,
+                                            Xb};
     aux.StreamToCSVfile ( eventoutcsvfile , eventvariables);
     
     
@@ -323,7 +326,7 @@ void InitializeVariables(){
     FoundEvent = false;
     e  = TLorentzVector(0,0,0,db->GetParticle( 11 )->Mass());
     Ve = TVector3(-9999,-9999,-9999);
-
+    Xb = -9999;
     piplus      .clear();
     piminus     .clear();
     Vpiplus     .clear();
@@ -377,14 +380,11 @@ void ExtractElectronInformation(){
     // extract information from first electron
     // here only the reconstructed vertext position, as it affects the pion vertex cut position
     // ------------------------------------------------------------------------------------------------
-    if (fdebug>3) std::cout << "electrons[0]->par()->getPx(): " << electrons[0]->par()->getPx() << " GeV/c" << std::endl;
-    
+        
     aux.SetParticle4Momentum( e , electrons[0] );
-    if (fdebug>3) std::cout << "e.E(): " << e.E() << " GeV/c" << std::endl;
-    q = Beam - e;
-    if (fdebug>3) std::cout << "q.E(): " << q.E() << " GeV/c" << std::endl;
+    q  = Beam - e;
+    Xb = -q.Mag2()/(2. * Mp * q.E() );
     Ve = aux.GetParticleVertex( electrons[0] );
-    if (fdebug>3) std::cout << "Ve.X(): " << Ve.X() << " cm" << std::endl;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
