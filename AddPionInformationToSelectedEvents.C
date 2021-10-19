@@ -265,10 +265,10 @@ void AssignPionsToEvents(Int_t NeventsMax){
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void WriteEventToOutput(Int_t RunNumber, Int_t EventNumber){
-
+    std::vector<Double_t> variables;
     for (int piIdx=0; piIdx<Npips; piIdx++){
         auto Ppi = piplus.at(piIdx);
-        std::vector<Double_t> variables = { (double)RunNumber, (double)EventNumber,
+        variables = std::vector<Double_t> { (double)RunNumber, (double)EventNumber,
                                             (double)Npips, (double)Npims, (double)Ne,
                                             1.,
                                             Zpips[piIdx], (double)pipsPastSelectionCuts[piIdx],
@@ -277,7 +277,7 @@ void WriteEventToOutput(Int_t RunNumber, Int_t EventNumber){
     }
     for (int piIdx=0; piIdx<Npims; piIdx++){
         auto Ppi = piminus.at(piIdx);
-        std::vector<Double_t> variables = { (double)RunNumber, (double)EventNumber,
+        variables = std::vector<Double_t> { (double)RunNumber, (double)EventNumber,
                                             (double)Npips, (double)Npims, (double)Ne,
                                             -1.,
                                             Zpims[piIdx], (double)pimsPastSelectionCuts[piIdx],
@@ -603,10 +603,6 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
     return false;
 }
 
-
-
-
-
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 std::istream &operator >>(std::istream &ist, event_id &event) {
     char comma ;
@@ -615,7 +611,6 @@ std::istream &operator >>(std::istream &ist, event_id &event) {
     >> event.event_number >> comma;
     return ist ;
 }
-
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void ReadEventList(){
