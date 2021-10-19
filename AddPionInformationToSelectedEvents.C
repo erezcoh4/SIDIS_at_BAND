@@ -268,20 +268,20 @@ void WriteEventToOutput(Int_t RunNumber, Int_t EventNumber){
 
     for (int piIdx=0; piIdx<Npips; piIdx++){
         auto Ppi = piplus.at(piIdx);
-        std::vector<Double_t> variables = { RunNumber,EventNumber,
-                                            Npips,Npims,Ne,
+        std::vector<Double_t> variables = { (double)RunNumber, (double)EventNumber,
+                                            (double)Npips, (double)Npims, (double)Ne,
                                             1.,
                                             Zpips[piIdx], pipsPastSelectionCuts[piIdx],
-                                            Ppi.E(), Ppi.Px(), Ppi.Py(),Ppi.Pz()  };
+                                            Ppi.E(), Ppi.Px(), Ppi.Py(), Ppi.Pz()  };
         StreamToCSVfile (observables);
     }
     for (int piIdx=0; piIdx<Npims; piIdx++){
         auto Ppi = piminus.at(piIdx);
-        std::vector<Double_t> variables = { RunNumber,EventNumber,
-                                            Npips,Npims,Ne,
-                                            1.,
-                                            Zpips[piIdx], pimsPastSelectionCuts[piIdx],
-                                            Ppi.E(), Ppi.Px(), Ppi.Py(),Ppi.Pz()  };
+        std::vector<Double_t> variables = { (double)RunNumber, (double)EventNumber,
+                                            (double)Npips, (double)Npims, (double)Ne,
+                                            -1.,
+                                            Zpims[piIdx], pimsPastSelectionCuts[piIdx],
+                                            Ppi.E(), Ppi.Px(), Ppi.Py(), Ppi.Pz()  };
         StreamToCSVfile (observables);
     }
 
