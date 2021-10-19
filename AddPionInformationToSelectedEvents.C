@@ -271,7 +271,7 @@ void WriteEventToOutput(Int_t RunNumber, Int_t EventNumber){
         std::vector<Double_t> variables = { (double)RunNumber, (double)EventNumber,
                                             (double)Npips, (double)Npims, (double)Ne,
                                             1.,
-                                            Zpips[piIdx], pipsPastSelectionCuts[piIdx],
+                                            Zpips[piIdx], (double)pipsPastSelectionCuts[piIdx],
                                             Ppi.E(), Ppi.Px(), Ppi.Py(), Ppi.Pz()  };
         StreamToCSVfile (observables);
     }
@@ -280,7 +280,7 @@ void WriteEventToOutput(Int_t RunNumber, Int_t EventNumber){
         std::vector<Double_t> variables = { (double)RunNumber, (double)EventNumber,
                                             (double)Npips, (double)Npims, (double)Ne,
                                             -1.,
-                                            Zpims[piIdx], pimsPastSelectionCuts[piIdx],
+                                            Zpims[piIdx], (double)pimsPastSelectionCuts[piIdx],
                                             Ppi.E(), Ppi.Px(), Ppi.Py(), Ppi.Pz()  };
         StreamToCSVfile (observables);
     }
