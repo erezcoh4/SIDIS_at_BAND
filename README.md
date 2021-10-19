@@ -14,6 +14,7 @@ This repository is responsible for
 Oct-15, 2021    
 -------------
 1. Added a python script that runs *MergeSIDISandBANDSkimmers.C*
+2. Moved **StreamToCSVfile** to Auxiliary
 
 Oct-6, 2021    
 -------------
