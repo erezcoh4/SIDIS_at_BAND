@@ -28,7 +28,7 @@ public:
     TString           GetRunNumberSTR ( int RunNumber );
     Double_t    GetEbeamFromRunNumber ( Int_t RunNumber );
     void SetTorusBendingFromRunNumber ( Int_t RunNumber );
-    void              StreamToCSVfile (std::ofstream csvfile, std::vector<Double_t> observables);
+    void              StreamToCSVfile (std::ofstream& csvfile, std::vector<Double_t> observables);
     
     int                           fdebug;
     int                     torusBending; // -1 for In-bending, +1 for Out-bending

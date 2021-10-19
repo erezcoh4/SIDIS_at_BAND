@@ -280,7 +280,7 @@ void WriteEventToOutput(Int_t RunNumber, Int_t EventNumber){
                                             -1.,
                                             Zpims[piIdx], (double)pimsPastSelectionCuts[piIdx],
                                             Ppi.E(), Ppi.Px(), Ppi.Py(), Ppi.Pz()  };
-        aux.StreamToCSVfile (outcsvfile, variables);
+        aux.StreamToCSVfile ( outcsvfile, variables);
     }
     
     std::vector<Double_t> eventvariables = { (double)RunNumber, (double)EventNumber,
