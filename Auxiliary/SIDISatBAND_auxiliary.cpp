@@ -184,7 +184,7 @@ void SIDISatBAND_auxiliary::SetTorusBendingFromRunNumber ( Int_t RunNumber ){
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-void SIDISatBAND_auxiliary::StreamToCSVfile (std::ofstream csvfile&, std::vector<Double_t> observables){
+void SIDISatBAND_auxiliary::StreamToCSVfile (std::ofstream& csvfile, std::vector<Double_t> observables){
     for (auto v:observables) csvfile << v << ",";
     csvfile << std::endl;
     
