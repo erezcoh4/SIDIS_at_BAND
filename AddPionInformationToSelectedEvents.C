@@ -268,21 +268,21 @@ void WriteEventToOutput(Int_t RunNumber, Int_t EventNumber){
     std::vector<Double_t> variables;
     for (int piIdx=0; piIdx<Npips; piIdx++){
         auto Ppi = piplus.at(piIdx);
-        variables = std::vector<Double_t> { (double)RunNumber, (double)EventNumber,
+        std::vector<Double_t> variables = { (double)RunNumber, (double)EventNumber,
                                             (double)Npips, (double)Npims, (double)Ne,
                                             1.,
                                             Zpips[piIdx], (double)pipsPastSelectionCuts[piIdx],
                                             Ppi.E(), Ppi.Px(), Ppi.Py(), Ppi.Pz()  };
-        StreamToCSVfile (observables);
+        StreamToCSVfile (variables);
     }
     for (int piIdx=0; piIdx<Npims; piIdx++){
         auto Ppi = piminus.at(piIdx);
-        variables = std::vector<Double_t> { (double)RunNumber, (double)EventNumber,
+        std::vector<Double_t> variables = { (double)RunNumber, (double)EventNumber,
                                             (double)Npips, (double)Npims, (double)Ne,
                                             -1.,
                                             Zpims[piIdx], (double)pimsPastSelectionCuts[piIdx],
                                             Ppi.E(), Ppi.Px(), Ppi.Py(), Ppi.Pz()  };
-        StreamToCSVfile (observables);
+        StreamToCSVfile (variables);
     }
 
     
