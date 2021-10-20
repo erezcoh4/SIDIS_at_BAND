@@ -558,7 +558,7 @@ std::pair<double, double> DCfid_SIDIS::cal_th_ph(double x, double y, double z,
   double phi_DCr = 5000;
   double phi_DCr_raw = 5000;
 
-  theta_DCr = 180 / 3.14 * acos(x / sqrt(x * x + y * y * z * z));
+  theta_DCr = 180 / 3.14 * acos(z / sqrt(x * x + y * y + z * z));
   phi_DCr_raw =
       180 / 3.14 *
       atan2(y / sqrt(x * x + y * y + z * z), x / sqrt(x * x + y * y + z * z));

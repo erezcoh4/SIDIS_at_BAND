@@ -14,13 +14,14 @@
 #include <TDatabasePDG.h>
 #include <TLorentzVector.h>
 #include <TVector3.h>
+#include <TClonesArray.h>
 #include <TH1.h>
 #include <TChain.h>
 #include <TCanvas.h>
 #include <TBenchmark.h>
 #include "clas12reader.h"
-#include "/u/home/cohen/SIDIS_at_BAND/Auxiliary/DCfid_SIDIS.cpp"
-#include "/u/home/cohen/SIDIS_at_BAND/Auxiliary/csv_reader.h"
+#include "Auxiliary/DCfid_SIDIS.cpp"
+#include "Auxiliary/csv_reader.h"
 #define NMAXPIONS 20 // maximal allowed number of pions
 #define r2d 180./3.1415 // radians to degrees
 using namespace clas12;
@@ -208,10 +209,14 @@ std::ofstream   CSVfile_e_piminus, SelectedEventsCSVfile_e_piminus, SelectedEven
 TLorentzVector          Beam, target, e, q;
 std::vector<TLorentzVector>         piplus; // positive pions
 std::vector<TLorentzVector>        piminus; // negative pions
+TClonesArray *                     piplusArray; // positive pions
+TClonesArray *                     piminusArray; // negative pions
 // reconstructed vertex position
 TVector3                                Ve;
 std::vector<TVector3>              Vpiplus;
 std::vector<TVector3>             Vpiminus;
+TClonesArray *                    VpiplusArray;
+TClonesArray *                    VpiminusArray;
 
 // kinematics
 Double_t     Ebeam, xB, Q2, omega, W, W2, xF, y, M_X;
@@ -238,12 +243,17 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
     TString RunNumberStr = GetRunNumberSTR(RunNumber,fdebug);
     // read cut values
     loadCutValues("cutValues.csv",fdebug);
-    
+
+    piplusArray     = new TClonesArray("TLorentzVector", 20);
+    piminusArray    = new TClonesArray("TLorentzVector", 20);
+    VpiplusArray    = new TClonesArray("TVector3", 20);
+    VpiminusArray   = new TClonesArray("TVector3", 20);
+
     // open result files
-    TString outfilepath = "/volatile/clas12/users/ecohen/BAND/SIDIS_skimming/";
+    TString outfilepath = "/volatile/clas12/users/akiral/BAND/SIDIS_skimming/";
     TString outfilename = "skimmed_SIDIS_inc_" + RunNumberStr;
     OpenResultFiles( outfilepath, outfilename );
-    
+
     TString inputFile = DataPath + "inc_" + RunNumberStr + ".hipo";
     TChain fake("hipo");
     fake.Add(inputFile.Data());
@@ -421,6 +431,7 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
         std::cout << "pion charge is not defined in CheckIfPionPassedSelectionCuts(), returning false" << std::endl;
         return false;
     }
+
     
     for (int regionIdx=0; regionIdx<3; regionIdx++) {
         // DC_e_fid:
@@ -450,7 +461,7 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
         if (DC_fid == false) {
             return false;
         }
-    }
+//    return true;
     
     if (fdebug>3) {
         std::cout << "in CheckIfPionPassedSelectionCuts()"<< std::endl
@@ -470,7 +481,9 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
        &&  ( fabs((Ve-Vpi).Z()) < cutValue_Ve_Vpi_dz_max )
        ) {
         if (fdebug>3) { std::cout << "succesfully passed CheckIfPionPassedSelectionCuts(), return true" << std::endl; }
-        
+    }
+	auto [theta_DCr, phi_DCr] = dcfid.cal_th_ph(DC_x[regionIdx], DC_y[regionIdx], DC_z[regionIdx], DC_sector);
+        if (DC_sector == 2 && regionIdx == 0) std::cout << theta_DCr << " " << phi_DCr << endl;
         return true;
     }
     return false;
@@ -820,9 +833,9 @@ void SetOutputTTrees(){
     outTree_e_piplus->Branch("pi_E_ECOUT"           ,&pips_E_ECOUT          , "pi_E_ECOUT[20]/D"    );
     outTree_e_piplus->Branch("DC_layers"            ,&DC_layers             , "DC_layers[3]/I"      );
     outTree_e_piplus->Branch("e"                    ,&e                     );
-    outTree_e_piplus->Branch("pi"                   ,&piplus                );
+    outTree_e_piplus->Branch("pi"                   ,&piplusArray           );
     outTree_e_piplus->Branch("Ve"                   ,&Ve                    );
-    outTree_e_piplus->Branch("Vpi"                  ,&Vpiplus               );
+    outTree_e_piplus->Branch("Vpi"                  ,&VpiplusArray          );
     outTree_e_piplus->Branch("Beam"                 ,&Beam                  );
     outTree_e_piplus->Branch("beam_helicity"        ,&beam_helicity         );
     outTree_e_piplus->Branch("q"                    ,&q                     );
@@ -879,9 +892,9 @@ void SetOutputTTrees(){
     outTree_e_piminus->Branch("pi_E_ECOUT"           ,&pims_E_ECOUT          , "pi_E_ECOUT[20]/D"       );
     outTree_e_piminus->Branch("DC_layers"            ,&DC_layers             , "DC_layers[3]"           );
     outTree_e_piminus->Branch("e"                   ,&e                     );
-    outTree_e_piminus->Branch("pi"                  ,&piminus               );
+    outTree_e_piminus->Branch("pi"                  ,&piminusArray          );
     outTree_e_piminus->Branch("Ve"                  ,&Ve                    );
-    outTree_e_piminus->Branch("Vpi"                 ,&Vpiminus              );
+    outTree_e_piminus->Branch("Vpi"                 ,&VpiminusArray         );
     outTree_e_piminus->Branch("Beam"                ,&Beam                  );
     outTree_e_piminus->Branch("beam_helicity"       ,&beam_helicity         );
     outTree_e_piminus->Branch("q"                   ,&q                     );
@@ -1036,17 +1049,22 @@ void InitializeVariables(){
     }
     Ve                                  = TVector3();
     ePastCutsInEvent                    = false;
-    
-    piplus      .clear();
-    piminus     .clear();
-    Vpiplus     .clear();
-    Vpiminus    .clear();
-    pipluses    .clear();
-    piminuses   .clear();
-    electrons   .clear();
-    neutrons    .clear();
-    protons     .clear();
-    gammas      .clear();
+
+    piplus          .clear();
+    piminus         .clear();
+    Vpiplus         .clear();
+    Vpiminus        .clear();
+    piplusArray     ->Clear();
+    piminusArray    ->Clear();
+    VpiplusArray    ->Clear();
+    VpiminusArray   ->Clear();
+    pipluses        .clear();
+    pipluses        .clear();
+    piminuses       .clear();
+    electrons       .clear();
+    neutrons        .clear();
+    protons         .clear();
+    gammas          .clear();
     for (int piIdx=0; piIdx<NMAXPIONS; piIdx++) {
         pips_chi2PID[piIdx]                         = -9999;
         pips_DC_sector[piIdx]                       = -9999;
@@ -1195,8 +1213,22 @@ void ExtractPionsInformation(int fdebug){
 void WriteEventToOutput(int fdebug){
     // (Maybe) write this event to "selected events csv-file"
     bool            IsSelected_eepi = false;
+
+    // Transfer pi vector data to TClonesArrays
+    for (int i = 0; i < 20; i++) {
+        new ((*piplusArray)[i]) TLorentzVector;
+        (*piplusArray)[i] = &piplus[i];
+
+        new ((*VpiplusArray)[i]) TVector3;
+        (*VpiplusArray)[i] = &Vpiplus[i];
+
+        new ((*piminusArray)[i]) TLorentzVector;
+        (*piminusArray)[i] = &piminus[i];
+
+        new ((*VpiminusArray)[i]) TVector3;
+        (*VpiminusArray)[i] = &Vpiminus[i];
+    }
     
-        
     if (ePastCutsInEvent && pipsPastCutsInEvent) {
         IsSelected_eepi = true;
         outTree_e_piplus -> Fill();
@@ -1204,7 +1236,6 @@ void WriteEventToOutput(int fdebug){
         
         Nevents_passed_e_pips_cuts ++ ;
         if (eepipsPastCutsInEvent) Nevents_passed_e_pips_kinematics_cuts ++;
-
         
         for (int pipsIdx=0; pipsIdx<Npips; pipsIdx++) {
             Stream_e_pi_line_to_CSV( "pi+", pipsIdx,
