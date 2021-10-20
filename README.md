@@ -1,16 +1,76 @@
 
 
-# Skimming for Semi Inclusive DIS (SIDIS) on a deuteron target with $pi^+$ and $pi^-$ tagging
+# Semi Inclusive DIS (SIDIS) on a deuteron target with $pi^+$ and $pi^-$ tagging and a fast neutron recoiling from a SRC pair breakup 
 
-    Main open ToDo items:
-    (1) Validate pion DC fiducial cuts
+This repository is responsible for 
+(A) skimming for (e,e'$\pi^{\pm}$) events
+(B) merging (e,e'$\pi^{\pm}$) events with fast neutron recoiling from BAND data
+(C) adding pion information to an arbitrary event list    
     
     
     
+## Revisions
+
+Oct-19, 2021    
+-------------
+1. Added a python script that runs *MergeSIDISandBANDSkimmers.C*
+
+2. Moved **StreamToCSVfile** to Auxiliary
+
+3. Added a seperate csv file for event-data, that stores relevant information per event: The number of positive and negative pions, event number, Xb etc.
+
+Oct-6, 2021    
+-------------
+1. Added a clas12root script to add pion information to selected list of events *MergeSIDISandBANDSkimmers.C* 
+
+Oct-3, 2021    
+-------------
+1. removed Vn variable from "merging" script, as there is no information about neutron track and thus none about the neutron vertex
+
+2. replaced std::vector<TLorentzVector> variable "piplus" and "piminus" in output TTree with float array branches, as it just cauases too much hustle in ROOT structure
+
+3. Added requirement for "goodneutron", and "eepiPastCutsInEvent" to speed up CreateListOfEventsToMerge() by reducing the number of events we need to go through in the merging stage  
+
+
+ 
+Sep-30, 2021    
+-------------
+1. Added float array branches to sidis skimming TTree, that will allow easier reading in the sidis-neutron merging stage
+    piminus_Px[NMAXPIONS]
+    piminus_Py[NMAXPIONS]
+    piminus_Pz[NMAXPIONS]
+    piminus_E[NMAXPIONS] 
+    Vpiminus_X[NMAXPIONS]
+    Vpiminus_Y[NMAXPIONS]
+    Vpiminus_Z[NMAXPIONS]
+
+
+Sep-22, 2021    
+-------------
+1. Continue polishing neutron and SIDIS merging
+    1. Added a Python scipt to control neutron and SIDIS merging
+    2. Updated neutron TTree name to "calib", for "ncalibration_newclass" skimmer     
     
-    
-    
-# Revisions
+2. Updated auxilary BAND classes from *bandsoft_tools* commit "cfb8879..3f0c9c8"
+
+3. Added "y" variable to SIDIS TTree
+
+4. Updated the name of the python script used for plotting the kinematical distributions from SIDIS data to *SIDISKinematicalDistributions.ipynb*
+
+ 
+
+
+Sep-19, 2021    
+-------------
+1. Refreshed SIDIS and BAND Skimmers merging:
+    1. Update MergeSIDISandBANDSkimmers.C script
+        1. Deleted all unnecessary and masive detector features like DC position etc. for electrons and pions
+        2. Updated pion momentum to an array of size [NMAXPIONS] (similarly for pion vertex, Z,...)
+        
+2. added eepipsPastKinematicalCuts and eepimsPastKinematicalCuts variables to SIDISc12rSkimmer.C output TTrees
+
+3. updated python script file names and added a script for neutron skimming:
+skim_sidis_multiple_runs, skim_neutron_multiple_runs
 
 Sep-12, 2021    
 -------------
@@ -122,7 +182,6 @@ Aug-22, 2021
     
     ## ToDo list:
     ---------------------    
-    (1) add fiducial cuts for pions in the DC
     (2) Compare electron-only with BAND analysis results or RGA results (e.g. single-spin assymetries)
     (3) Verify that event matching between SIDIS and BAND skimming  is done correctly
     (4) Add neuton fiducial cuts
@@ -146,6 +205,10 @@ Aug-22, 2021
 
 
 
+# Merge SIDIS and BAND Skimmers
+
+    This script assumes that the input trees from SIDISc12rSkimmer.C,
+    have a boolean flag "eepipsPastCutsInEvent/O" that states if event passed (e,e'\pi) event selection criteria
 
 
  ---------------------------------------------
@@ -161,6 +224,8 @@ Merge SIDIS skimming (based on SIDISc12rSkimmer.C) with BAND skimming (based on 
 -----------------
 
     root -l MergeSIDISandBANDSkimmers.C
+    root -l -q 'MergeSIDISandBANDSkimmers.C(6420,"pi+",3,3)'
+    root -l -q 'MergeSIDISandBANDSkimmers.C(6420,"pi+",10,3,1000,"/Users/erezcohen/Desktop/data/BAND")'
     root -l -q "MergeSIDISandBANDSkimmers.C(6420,-1)"
 
 
@@ -212,13 +277,47 @@ execute:
         
  
  
+ ## Using BAND skimmer
+
+ ./code [outputFile] [MC/DATA] [time sifts] [inputFile]
+
+ /u/home/cohen/BAND_analysis/bandsoft_tools/bin/neutrons  /volatile/clas12/users/ecohen/BAND/neutron_skimming/skimmed_neutrons_inc_006420.root 1 1 /volatile/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train_20200610/inc/inc_006420.hipo
+
+ (For SIDIS train /u/home/cohen/BAND_analysis/bandsoft_tools/bin/neutrons  /volatile/clas12/users/ecohen/BAND/BAND_skimmed_neutrons_sidisdvcs_run6420.root DATA 1 /cache/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train/sidisdvcs/sidisdvcs_006420.hipo)
+ 
  
  comments:
  -----------------
- DVCS train recommended by Florian for SIDIS skimming:
+1. DVCS train recommended by Florian for SIDIS skimming:
 	"/cache/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train/sidisdvcs/"
- Tyler: There is a semi-exclusive filter to the DVCS train, so use RGM data trains:
+2. Tyler: There is a semi-exclusive filter to the DVCS train, so use RGM data trains:
 	"/volatile/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train_20200610/"
+3. The following objects are taken from *bandsoft_tools* for Auxiliary:
+
+genpart/genpart.cpp
+hipolib/dictionary.h
+hipolib/dictionary.cpp
+include/constants.h
+clashit/clashit.cpp
+hipolib/bank.h
+hipolib/bank.cpp
+include/bandhit.h
+bandhit/bandhit.cpp
+include/BScintillator.h
+banklib/BScintillator.cpp
+include/BScaler.h
+banklib/BScaler.cpp
+include/BParticle.h
+banklib/BParticle.cpp
+include/BEvent.h
+banklib/BEvent.cpp
+include/BConfig.h
+banklib/BConfig.cpp
+include/BCalorimeter.h
+banklib/BCalorimeter.cpp
+include/BBand.h
+banklib/BBand.cpp
+
 
 
  [Originally based on Ex1_CLAS12Reader.C]

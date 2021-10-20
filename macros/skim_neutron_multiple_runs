@@ -1,0 +1,66 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+# continously take data and print the rate every few seconds
+# last edit Sep-19, 2021 (EOC)
+#
+# Skimmer: ncalibration_newbandclass
+# 
+import sys, os, linecache
+import argparse
+
+parser = argparse.ArgumentParser(description='SIDIS skimming of multiple runs')
+parser.add_argument("--Nruns",        type=int, default=1,
+                    required=False, help="number of runs to process ('-1' for all runs)")
+parser.add_argument("--FirstRun",     type=int, default=0,
+                    required=False, help="first run to start from")
+parser.add_argument("--fdebug",       type=int, default=1,
+                    required=False, help="verbosity")
+parser.add_argument("--PrintProgress",type=int, default=50000,
+                    required=False, help="print progress (every N events)")
+args = parser.parse_args()
+
+Nruns         = args.Nruns
+fdebug        = args.fdebug
+PrintProgress = args.PrintProgress
+FirstRun      = args.FirstRun
+runs_filename = "macros/runlists/good_runs_10-2.txt"
+outdir        = "/volatile/clas12/users/ecohen/BAND/neutron_skimming"
+indir         = "/volatile/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train_20200610/inc/"
+skimmer       = "/u/home/cohen/BAND_analysis/bandsoft_tools/bin/ncalibration_newbandclass"
+
+# Using readlines()
+runs_file = open(runs_filename, 'r')
+run_fileLines = runs_file.readlines()
+if Nruns<0: Nruns = len(run_fileLines)
+if fdebug>1:#{
+    print('good runs:')
+    print(run_fileLines)
+    print('processing %d runs, starting from run %d'%(Nruns-FirstRun,FirstRun))
+#}
+
+runIdx = 0
+for line in run_fileLines[FirstRun:]:#{
+    runIdx += 1
+    run = int(line.strip())
+    
+    # from bandsoft_tools: ./code [outputFile] [load shifts] [inputFile]
+    # <load shifts N,Y> = <0, 1>
+    # for ncalibration: /work/clas12/users/hauenst/bandsoft_tools/bin/ncalibration_newbandclass $output 1 $filetoget
+    # for neutrons at 10,2 runs: /work/clas12/users/hauenst/bandsoft_tools/bin/neutrons $output 1 1 1 $filetoget
+    commandline = ("%s %s/skimmed_neutrons_inc_00%d.root 1 %s/inc_00%d.hipo"%(skimmer,outdir,run,indir,run))
+    print('')
+    print("neutron skimming for run %d (%d/%d):"%(run,runIdx,Nruns))
+    print('')
+    print(commandline)
+    print('')
+    
+    os.system( commandline )
+    if (runIdx >= Nruns): break;
+#}
+
+print('')
+print('done.')
+print('')
+
+os.system('mail -s "done processing skim_neutron_multiple_runs on ifarm" cohen.erez7@gmail.com < /dev/null')

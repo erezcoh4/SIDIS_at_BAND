@@ -32,8 +32,11 @@ runs_file = open(runs_filename, 'r')
 run_fileLines = runs_file.readlines()
 if Nruns<0: Nruns = len(run_fileLines)
 if fdebug>1:#{
-    print('good runs:')
-    print(run_fileLines)
+    print('good runs to process:')
+    for line in run_fileLines[FirstRun:]:#{
+        print(int(line.strip()), end =" ")
+    #}
+    print('')
     print('processing %d runs, starting from run %d'%(Nruns-FirstRun,FirstRun))
 #}
 
