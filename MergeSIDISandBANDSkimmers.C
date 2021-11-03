@@ -659,6 +659,9 @@ void GetBANDData(int BANDeventID, int MergedEvtId){
     Band_e_Vect.SetMagThetaPhi ( this_eHit->getMomentum(), this_eHit->getTheta(), this_eHit->getPhi() );
     Band_data_e.SetVectM( Band_e_Vect , Me );
 
+    if (fdebug>1) {
+        std::cout << "p(n): " << Pn.P() << std::endl;
+    }
     if (fdebug>3) {
         std::cout << "BANDTree->GetEntry("<<BANDEventIndicesToMerge[MergedEvtId]<<")" << std::endl;
         
