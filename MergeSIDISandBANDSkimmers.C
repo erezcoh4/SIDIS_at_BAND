@@ -281,7 +281,9 @@ void MergeSIDISandBANDevents (int NMAXeventsToMerge=10,
 void OpenInputFiles (TString RunStr){
     
     skimmedBANDFilename = (DataPath + "neutron_skimming/"
-                           + "skimmed_neutrons_inc_"  + RunStr + ".root");
+                           + "ncalibration_shiftedskim_"  + RunStr + ".root"); // Efrain' file
+    //    + "ncalibrationtest_0option_"  + RunStr + ".root"); // Florian' file
+    //    + "skimmed_neutrons_inc_"  + RunStr + ".root"); // My file (global time shifts not working...)
     if (fdebug>2) std::cout << "Opening " << skimmedBANDFilename << std::endl;
     BANDFile                      = new TFile( skimmedBANDFilename );
     // Sep-21, "ncalibration_newclass" skimmer Tree name is "calib"
