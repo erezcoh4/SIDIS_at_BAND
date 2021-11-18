@@ -281,7 +281,9 @@ void MergeSIDISandBANDevents (int NMAXeventsToMerge=10,
 void OpenInputFiles (TString RunStr){
     
     skimmedBANDFilename = (DataPath + "neutron_skimming/"
-                           + "skimmed_neutrons_inc_"  + RunStr + ".root");
+                           + "ncalibration_shiftedskim_"  + RunStr + ".root"); // Efrain' file
+    //    + "ncalibrationtest_0option_"  + RunStr + ".root"); // Florian' file
+    //    + "skimmed_neutrons_inc_"  + RunStr + ".root"); // My file (global time shifts not working...)
     if (fdebug>2) std::cout << "Opening " << skimmedBANDFilename << std::endl;
     BANDFile                      = new TFile( skimmedBANDFilename );
     // Sep-21, "ncalibration_newclass" skimmer Tree name is "calib"
@@ -659,6 +661,9 @@ void GetBANDData(int BANDeventID, int MergedEvtId){
     Band_e_Vect.SetMagThetaPhi ( this_eHit->getMomentum(), this_eHit->getTheta(), this_eHit->getPhi() );
     Band_data_e.SetVectM( Band_e_Vect , Me );
 
+    if (fdebug>1) {
+        std::cout << "p(n): " << Pn.P() << std::endl;
+    }
     if (fdebug>3) {
         std::cout << "BANDTree->GetEntry("<<BANDEventIndicesToMerge[MergedEvtId]<<")" << std::endl;
         
