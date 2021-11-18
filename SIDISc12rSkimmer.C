@@ -389,10 +389,10 @@ bool CheckIfElectronPassedSelectionCuts(Double_t e_PCAL_x, Double_t e_PCAL_y,
     }
     
     
-    if(
+    if(!(true
        // fiducial cuts on PCAL
-       fabs(e_PCAL_x)>0
-       &&  fabs(e_PCAL_y)>0
+       //fabs(e_PCAL_x)>0
+       //&&  fabs(e_PCAL_y)>0
        &&  e_PCAL_W > cutValue_e_PCAL_W
        &&  e_PCAL_V > cutValue_e_PCAL_V
        
@@ -407,9 +407,9 @@ bool CheckIfElectronPassedSelectionCuts(Double_t e_PCAL_x, Double_t e_PCAL_y,
        // Spring 19 and Spring 2020 in-bending.
        // Fall 2019 (without low-energy-run) was out-bending.
        &&  ((cutValue_Vz_min < Ve.Z()) && (Ve.Z() < cutValue_Vz_max))
-       ) return true;
+       )) return false;
     
-    return false;
+    return true;
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
@@ -479,6 +479,7 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
         if (DC_fid == false) {
             return false;
         }
+    }
 //    return true;
     
     if (fdebug>3) {
@@ -500,11 +501,7 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
        ) {
         if (fdebug>3) { std::cout << "succesfully passed CheckIfPionPassedSelectionCuts(), return true" << std::endl; }
     }
-	auto [theta_DCr, phi_DCr] = dcfid.cal_th_ph(DC_x[regionIdx], DC_y[regionIdx], DC_z[regionIdx], DC_sector);
-        if (DC_sector == 2 && regionIdx == 0) std::cout << theta_DCr << " " << phi_DCr << endl;
-        return true;
-    }
-    return false;
+    return true;
 }
 
 
@@ -1272,6 +1269,10 @@ void WriteEventToOutput(int fdebug){
         new ((*VpiminusArray)[i]) TVector3;
         (*VpiminusArray)[i] = &Vpiminus[i];
     }
+
+    //ePastCutsInEvent = true;
+    //pipsPastCutsInEvent = true;
+    //pimsPastCutsInEvent = true;
     
     if (ePastCutsInEvent && pipsPastCutsInEvent) {
         IsSelected_eepi = true;
