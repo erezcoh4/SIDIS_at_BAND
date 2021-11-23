@@ -540,7 +540,7 @@ void SetInputAndOutputTTrees (){
     SIDISTree  -> SetBranchAddress("beam_helicity"              ,&beam_helicity         );
     SIDISTree  -> SetBranchAddress("q"                          ,&q                     );
     SIDISTree  -> SetBranchAddress("omega"                     ,&omega                  );
-    SIDISTree  -> SetBranchAddress("Z"                         ,&Zpips                  );
+    // SIDISTree  -> SetBranchAddress("Z"                         ,&Zpips                  );
     SIDISTree  -> SetBranchAddress("Nelectrons"                ,&Ne                     );
     SIDISTree  -> SetBranchAddress("Ngammas"                   ,&Ngammas                );
     SIDISTree  -> SetBranchAddress("Nprotons"                  ,&Np                     );
