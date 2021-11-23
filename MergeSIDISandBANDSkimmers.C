@@ -288,16 +288,18 @@ void OpenInputFiles (TString RunStr){
     // /volatile/clas12/users/segarrae/BAND/v3.1/10.2/final/tagged
     skimmedBANDFilename = (DataPath + "neutron_skimming/"
                            + "final_tagged_5MeV_250mevc_fiducial_thetaCut_allBars_"
-                           + RunStr + ".root"); 
+                           + RunStr + ".root");
     
     // previous:
     //  + "ncalibration_shiftedskim_"  + RunStr + ".root"); // Efrain' file
     //    + "ncalibrationtest_0option_"  + RunStr + ".root"); // Florian' file
     //    + "skimmed_neutrons_inc_"  + RunStr + ".root"); // My file (global time shifts not working...)
+    // Sep-21, "ncalibration_newclass" skimmer Tree name is "calib"
+    //    BANDTree                      = (TTree*)BANDFile->Get("calib");
     if (fdebug>2) std::cout << "Opening " << skimmedBANDFilename << std::endl;
     BANDFile                      = new TFile( skimmedBANDFilename );
-    // Sep-21, "ncalibration_newclass" skimmer Tree name is "calib"
-    BANDTree                      = (TTree*)BANDFile->Get("calib");
+    // Nov-23, "final_tagged" skimmer Tree name is "tagged"
+    BANDTree                      = (TTree*)BANDFile->Get("tagged");
     
     skimmedSIDISFilename = (DataPath + "SIDIS_skimming/"
                             + "skimmed_SIDIS_inc_"  + RunStr + pionStr + ".root");
