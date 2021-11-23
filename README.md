@@ -11,6 +11,20 @@ This repository is responsible for
     
 ## Revisions
 
+Nov-23, 2021    
+-------------
+1. Moved to merging BAND events with SIDIS, such that these files are from neutron-BAND files of final skims, from */volatile/clas12/users/segarrae/BAND/v3.1/10.2/final/tagged*
+
+
+
+Nov-11, 2021    
+-------------
+1. Expanded the definition of x' for a moving proton
+    xPrime1 = Q2 / (2. x ((Md - Es) x omega + Pn_Vect x q->Vect() ));
+    xPrime2 = Q2 / (W2prime - Mp2 + Q2);
+    
+
+
 Oct-19, 2021    
 -------------
 1. Added a python script that runs *MergeSIDISandBANDSkimmers.C*
