@@ -395,7 +395,8 @@ Int_t CreateListOfEventsToMerge(TTree * BANDTree,
     // First, define two vectors that containt the event IDs in each TTree
     if (DefineEventIDvectors){
         
-        TTreeReader BANDReader("calib", BANDFile);
+        //        TTreeReader BANDReader("calib", BANDFile); // for ncalibration skimming
+        TTreeReader BANDReader("tagged", BANDFile); // for tagged skimming
         TTreeReaderValue<Int_t>     fBANDeventID(BANDReader, "eventnumber");
         TTreeReaderValue<bool>  fBANDgoodneutron(BANDReader, "goodneutron");
         int BANDeventIndex = 0;
