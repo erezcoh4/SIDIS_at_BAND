@@ -133,6 +133,7 @@ int Nevents_passed_e_pips_kinematics_cuts;
 int    Nevents_passed_pims_cuts;
 int  Nevents_passed_e_pims_cuts;
 int Nevents_passed_e_pims_kinematics_cuts;
+int                   inclusive; // tag to look at inclusive run
 
 // number of particles per event
 int         Ne, Nn, Np, Npips, Npims, Ngammas;
@@ -257,10 +258,14 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
                       int  fdebug=1,
                       int  PrintProgress=50000,
                       int NpipsMin=1, // minimal number of pi+
-                      TString DataPath = "/volatile/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train_20200610/inc/" ){
+                      TString DataPath = "/volatile/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train_20200610/inc/",
+                      int setInclusive=1 ){
     TString RunNumberStr = GetRunNumberSTR(RunNumber,fdebug);
     // read cut values
     loadCutValues("cutValues.csv",fdebug);
+
+    inclusive = setInclusive;
+    if (inclusive == 1) std::cout << "Running as inclusive" << std::endl;
 
     piplusArray     = new TClonesArray("TLorentzVector", 20);
     piminusArray    = new TClonesArray("TLorentzVector", 20);
@@ -312,7 +317,7 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
             // we keep only d(e,e’pi+)X and d(e,e’pi-)X events
             if(  0 < Ne // after studying some MC and data, we need to kill events with more than 1 electron
                &&
-               ((0 < Npips && Npips < NMAXPIONS) || (0 < Npims && Npims < NMAXPIONS)) ){
+               (inclusive == 1 || (0 < Npips && Npips < NMAXPIONS) || (0 < Npims && Npims < NMAXPIONS)) ){
                    
                 ExtractElectronInformation  (fdebug);
                 ComputeKinematics           ();
@@ -492,15 +497,16 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
         << "fabs((Ve-Vpi).Z()): "   << fabs((Ve-Vpi).Z())       << ","
         << std::endl;
     }
-    if(
+    if(!
        // pi+ Identification Refinement - chi2PID vs. momentum
-       ( Chi2PID_pion_lowerBound( p, C ) < chi2PID && chi2PID < Chi2PID_pion_upperBound( p , C ) )
+       (( Chi2PID_pion_lowerBound( p, C ) < chi2PID && chi2PID < Chi2PID_pion_upperBound( p , C ) )
        
        // Cut on the z-Vertex Difference Between Electrons and Hadrons.
        &&  ( fabs((Ve-Vpi).Z()) < cutValue_Ve_Vpi_dz_max )
-       ) {
-        if (fdebug>3) { std::cout << "succesfully passed CheckIfPionPassedSelectionCuts(), return true" << std::endl; }
+       )) {
+        return false;
     }
+    if (fdebug>3) { std::cout << "succesfully passed CheckIfPionPassedSelectionCuts(), return true" << std::endl; }
     return true;
 }
 
@@ -818,6 +824,7 @@ void SetOutputTTrees(){
     // pi+
     outTree_e_piplus->Branch("eventnumber"          ,&evnum                 );
     outTree_e_piplus->Branch("runnum"               ,&runnum                );
+    outTree_e_piplus->Branch("inclusive"            ,&inclusive             );
     outTree_e_piplus->Branch("e_E_PCAL"             ,&e_E_PCAL              );
     outTree_e_piplus->Branch("e_E_ECIN"             ,&e_E_ECIN              );
     outTree_e_piplus->Branch("e_E_ECOUT"            ,&e_E_ECOUT             );
@@ -887,6 +894,7 @@ void SetOutputTTrees(){
     // pi-
     outTree_e_piminus->Branch("eventnumber"          ,&evnum                 );
     outTree_e_piminus->Branch("runnum"               ,&runnum                );
+    outTree_e_piminus->Branch("inclusive"            ,&inclusive             );
     outTree_e_piminus->Branch("e_E_PCAL"             ,&e_E_PCAL              );
     outTree_e_piminus->Branch("e_E_ECIN"             ,&e_E_ECIN              );
     outTree_e_piminus->Branch("e_E_ECOUT"            ,&e_E_ECOUT             );
@@ -1271,8 +1279,10 @@ void WriteEventToOutput(int fdebug){
     }
 
     //ePastCutsInEvent = true;
-    //pipsPastCutsInEvent = true;
-    //pimsPastCutsInEvent = true;
+    if (inclusive == 1) {
+        pipsPastCutsInEvent = true;
+        pimsPastCutsInEvent = true;
+    }
     
     if (ePastCutsInEvent && pipsPastCutsInEvent) {
         IsSelected_eepi = true;
