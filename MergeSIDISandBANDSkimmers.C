@@ -43,7 +43,7 @@ TString            csvheader = ((TString)"status,runnum,evnum,beam_helicity,"
                                 +(TString)"n_P,n_Theta,n_Phi,n_Vz,"
                                 +(TString)"Q2,W,xB,Zpi,"
                                 +(TString)"omega,xF,y,"
-                                +(TString)"M_X_ee_pi,M_X_ee_pi_n,xPrime,"
+                                +(TString)"M_X_ee_pi,M_X_ee_pi_n,xPrime1,xPrime2,"
                                 +(TString)"theta_sq,WPrime,");
 
 // Input root files and trees
@@ -78,7 +78,11 @@ Double_t          Zpims[NMAXPIONS]; // energy fraction rest frame
 Double_t                     W, W2; // energy of the hadronic system
 Double_t                   alpha_s; // light cone fraction of momentum of the recoil neutron
 Double_t           WPrime, W2prime;  // moving proton
-Double_t                    xPrime; // moving proton
+Double_t                   xPrime1; // moving proton defined as
+// x' = Q2 / (2. * ((Md - Es) * omega + Pn_Vect*q->Vect() ));
+Double_t                   xPrime2; // moving proton defined as
+// x' = Q2 / (W'^2 - mN^2 + Q2)
+
 Double_t                        Es; // spectator energy
 Double_t                        Ps; // spectator momentum
 Double_t                  theta_sq; // spectator angle with respect to momentum transfer
@@ -280,8 +284,13 @@ void MergeSIDISandBANDevents (int NMAXeventsToMerge=10,
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void OpenInputFiles (TString RunStr){
     
+    // Skimmed neutron-BAND files and "Final skim files" from
+    // /volatile/clas12/users/segarrae/BAND/v3.1/10.2/final/tagged
     skimmedBANDFilename = (DataPath + "neutron_skimming/"
                            + "ncalibration_shiftedskim_"  + RunStr + ".root"); // Efrain' file
+    
+    // previous:
+    //  + "ncalibration_shiftedskim_"  + RunStr + ".root"); // Efrain' file
     //    + "ncalibrationtest_0option_"  + RunStr + ".root"); // Florian' file
     //    + "skimmed_neutrons_inc_"  + RunStr + ".root"); // My file (global time shifts not working...)
     if (fdebug>2) std::cout << "Opening " << skimmedBANDFilename << std::endl;
@@ -752,14 +761,17 @@ void ComputeKinematics(){
     Q2      = -q->Mag2();
     omega   = q->E();
     
-    xB      = Q2 / (2. * Mp * omega);
-    xPrime  = Q2 / (2. * ((Md - Es) * omega + Pn_Vect*q->Vect() ));
-    
     W2      = Mp2 - Q2 + 2. * omega * Mp;
     W       = sqrt(W2);
     
+    // W' from [E12-11-003A proposal, p. 13]
     W2prime = Mp2 - Q2 + 2. * omega * (Md - Es) + 2. * Ps * sqrt(Q2 + w2) * cos( theta_sq );
     WPrime  = sqrt(W2prime);
+
+    xB      = Q2 / (2. * Mp * omega);
+    xPrime1 = Q2 / (2. * ((Md - Es) * omega + Pn_Vect*q->Vect() ));
+    xPrime2 = Q2 / (W2prime - Mp2 + Q2);
+    
     // move to q-frame
     // compute light-cone fraction of momentum
     // alpha_s = ComputeLightConeFraction( Pn_qFrame );
@@ -771,7 +783,8 @@ void ComputeKinematics(){
         << std::endl
         << "Pe: "       << e->P()   << " GeV/c,"
         << "x: "        << xB       << ","
-        << "x': "       << xPrime   << ","
+        << "x'(1): "       << xPrime1   << ","
+        << "x'(2): "       << xPrime2   << ","
         << std::endl;
     }
     
@@ -852,7 +865,7 @@ void Stream_e_pi_n_line_to_CSV(int piIdx,
         Pn.P(),         Pn.Theta(),         Pn.Phi(),             Ve->Z(),
         Q2,             W,                  xB,                   Zpi,
         omega,          xF,                 y,
-        M_X_ee_pi,      M_X_ee_pi_n,        xPrime,
+        M_X_ee_pi,      M_X_ee_pi_n,        xPrime1,              xPrime2,
         theta_sq,
         WPrime,
     };
