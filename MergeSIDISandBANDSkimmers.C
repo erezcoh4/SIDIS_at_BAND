@@ -287,7 +287,8 @@ void OpenInputFiles (TString RunStr){
     // Skimmed neutron-BAND files and "Final skim files" from
     // /volatile/clas12/users/segarrae/BAND/v3.1/10.2/final/tagged
     skimmedBANDFilename = (DataPath + "neutron_skimming/"
-                           + "ncalibration_shiftedskim_"  + RunStr + ".root"); // Efrain' file
+                           + "final_tagged_5MeV_250mevc_fiducial_thetaCut_allBars_"
+                           + RunStr + ".root"); 
     
     // previous:
     //  + "ncalibration_shiftedskim_"  + RunStr + ".root"); // Efrain' file
