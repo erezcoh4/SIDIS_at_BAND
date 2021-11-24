@@ -1282,6 +1282,8 @@ void WriteEventToOutput(int fdebug){
     if (inclusive == 1) {
         pipsPastCutsInEvent = true;
         pimsPastCutsInEvent = true;
+        eepipsPastCutsInEvent = true;
+        eepimsPastCutsInEvent = true;
     }
     
     if (ePastCutsInEvent && pipsPastCutsInEvent) {
