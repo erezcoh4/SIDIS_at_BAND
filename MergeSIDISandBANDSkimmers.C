@@ -259,16 +259,13 @@ void MergeSIDISandBANDevents (int NMAXeventsToMerge=10,
     // step over list of events-to-merge and merge them...
     for (int MergedEvtId=0; MergedEvtId < NeventsToMerge; MergedEvtId++) {
 
-        std::cout << "// initialize, MergedEvtId: " << MergedEvtId << ", SIDISeventID: " << SIDISeventID << ", BANDeventID: " << BANDeventID << std::endl;
         // initialize
         InitializeVariables ();
 
 
-        std::cout << "// grab electron and pion information from SIDIS TTree, MergedEvtId: " << MergedEvtId << ", SIDIS event index to merge: " << SIDISEventIndicesToMerge[MergedEvtId] << std::endl;
         // grab electron and pion information from SIDIS TTree
         GetSIDISData( MergedEvtId );
         
-        std::cout << "// grab neturon information from BAND, MergedEvtId: " << MergedEvtId << ", BAND event index to merge: " << BANDEventIndicesToMerge[MergedEvtId] << std::endl;
         // grab neturon information from BAND
         GetBANDData( MergedEvtId );
         
