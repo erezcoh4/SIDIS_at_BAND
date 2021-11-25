@@ -733,18 +733,23 @@ void GetSIDISData( int SIDISeventID, int MergedEvtId ){
         << std::endl
         << "SIDISEventIndicesToMerge["<<MergedEvtId<<"]: "  << SIDISEventIndicesToMerge[MergedEvtId] << ","
         << "SIDISeventID: "                                 << SIDISeventID << ","
-        << "E(electron): "                                  << e->E() << " GeV,"
+        << std::endl
         << "eepipsPastCutsInEvent: "                        << eepipsPastCutsInEvent << ","
+        << "Nelectrons: "                                   << Nelectrons   << ","
         << "Npions: "                                       << Npions   << ","
         << "Npips: "                                        << Npips    << ","
+        << "Npims: "                                        << Npims    << ","
         << std::endl
         << "Pe: "                                           << e->P() << " GeV/c,"
-        << "E(e): "                                         << e->E() << " GeV,"
         << "q: "                                            << q->P() << " GeV/c,"
         << "omega: "                                        << q->E() << " GeV,"
         << std::endl;
-        if (Npips>0 && pionCharge=="pi+"){
-            std::cout << "piplus_Px[0]: "                   << piplus_Px[0] <<  " GeV/c,"
+        if (Npips>0){
+            std::cout << "1st pi+: Ppi: "                  << piplus[0].P() <<  " GeV/c,"
+            << std::endl;
+        }
+        if (Npims>0){
+            std::cout << "1st pi-: Ppi: "                  << piminus[0].P() <<  " GeV/c,"
             << std::endl;
         }
     }
@@ -934,7 +939,7 @@ void MergeEventData(){
             Stream_e_pi_n_line_to_CSV(piIdx,
                                       eepiPastKinematicalCuts, goodneutron);
             
-            // fill output TTree and CSV file only if (e,e'pi) pass event selection cuts and the neutron is a "good-neutron"            
+            // fill output TTree and CSV file only if (e,e'pi) pass event selection cuts and the neutron is a "good-neutron"
             MergedTree  -> Fill();
         }
     }
