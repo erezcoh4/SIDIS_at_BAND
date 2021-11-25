@@ -355,9 +355,11 @@ void CloseOutputFiles (TString OutDataPath){
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void StreamToCSVfile (std::vector<Double_t> observables){
+    
     for (auto v:observables) CSVfile_e_pi_n << v << ",";
-    CSVfile_e_pi_n << std::endl;
+    CSVfile_e_pi_n << std::fixed << std::endl;
     if (fdebug>3) {
+        std::cout << std::fixed;
         std::cout << "StreamToCSVfile()" << std::endl;
         std::cout << csvheader << std::endl;
         for (auto v:observables) std::cout << v << ",";
@@ -919,8 +921,6 @@ void MergeEventData(){
         << std::endl        << std::endl;
     }
 
-    // fill output TTree and CSV file
-    MergedTree  -> Fill();
     
     for (int piIdx=0; piIdx<Npions; piIdx++) {
         bool eepiPastKinematicalCuts = false;
@@ -933,6 +933,9 @@ void MergeEventData(){
         if (goodneutron){
             Stream_e_pi_n_line_to_CSV(piIdx,
                                       eepiPastKinematicalCuts, goodneutron);
+            
+            // fill output TTree and CSV file only if (e,e'pi) pass event selection cuts and the neutron is a "good-neutron"            
+            MergedTree  -> Fill();
         }
     }
     if (fdebug>3) { std::cout << "------------------------------------" << std::endl; }
