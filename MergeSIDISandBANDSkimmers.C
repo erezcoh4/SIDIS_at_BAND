@@ -713,9 +713,8 @@ void GetSIDISData( int SIDISeventID, int MergedEvtId ){
         Npions = Npims;
     }
     for (int pipsIdx=0; pipsIdx<Npips; pipsIdx++){
-        if (fdebug>2) {
+        if (fdebug>4) {
             std::cout
-//            << "piplus.push_back( TLorentzVector("
             << "piplus.at(pipsIdx) = TLorentzVector("
             << piplus_Px[pipsIdx]   <<","
             << piplus_Py[pipsIdx]   <<","
@@ -723,16 +722,12 @@ void GetSIDISData( int SIDISeventID, int MergedEvtId ){
             << piplus_E[pipsIdx]    <<")); "
             << std::endl;
         }
-//        piplus.push_back( TLorentzVector(piplus_Px[pipsIdx], piplus_Py[pipsIdx], piplus_Pz[pipsIdx],
-//                                         piplus_E[pipsIdx]) );
-        piplus.at(pipsIdx) = TLorentzVector(piplus_Px[pipsIdx], piplus_Py[pipsIdx], piplus_Pz[pipsIdx],
-                                         piplus_E[pipsIdx]) ;
-        Vpiplus.push_back( TVector3(Vpiplus_X[pipsIdx], Vpiplus_Y[pipsIdx], Vpiplus_Z[pipsIdx]) );
+        piplus.at(pipsIdx)   = TLorentzVector(piplus_Px[pipsIdx], piplus_Py[pipsIdx], piplus_Pz[pipsIdx], piplus_E[pipsIdx] ;
+        Vpiplus.at(pipsIdx)  = TVector3(Vpiplus_X[pipsIdx], Vpiplus_Y[pipsIdx], Vpiplus_Z[pipsIdx]) ;
     }
     for (int pimsIdx=0; pimsIdx<Npims; pimsIdx++){
-        piminus.push_back( TLorentzVector(piminus_Px[pimsIdx], piminus_Py[pimsIdx], piminus_Pz[pimsIdx],
-                                         piminus_E[pimsIdx]) );
-        Vpiminus.push_back( TVector3(Vpiminus_X[pimsIdx], Vpiminus_Y[pimsIdx], Vpiminus_Z[pimsIdx]) );
+        piminus.at(pimsIdx)  = TLorentzVector(piminus_Px[pimsIdx], piminus_Py[pimsIdx], piminus_Pz[pimsIdx], piminus_E[pimsIdx]) ;
+        Vpiminus.at(pimsIdx) = TVector3(Vpiminus_X[pimsIdx], Vpiminus_Y[pimsIdx], Vpiminus_Z[pimsIdx]) ;
     }
     if (fdebug>2) {
         std::cout
@@ -757,7 +752,6 @@ void GetSIDISData( int SIDISeventID, int MergedEvtId ){
         << std::endl;
         if (Npips>0){
             std::cout << "1st pi+: Ppi: "                  << piplus[0].P() << " GeV/c,"
-            << "piplus_Px[0]:"                             << piplus_Px[0]  << " GeV/c"
             << std::endl;
         }
         if (Npims>0){

@@ -13,7 +13,12 @@ This repository is responsible for
 
 Nov-25, 2021    
 -------------
-1. Fixed a bug in writing a long event number to the SIDIS-BAND merged CSV file by using std::fixed 
+1. Fixed a bug in writing a long event number to the SIDIS-BAND merged CSV file by using std::fixed
+
+2. Fixed a bug in pion information streamline: 
+Replaced *piplus.push_back(TLorentzVector(piplus_Px[pipsIdx], piplus_Py[pipsIdx], piplus_Pz[pipsIdx], piplus_E[pipsIdx]))*
+By *piplus.at(pipsIdx) = TLorentzVector(piplus_Px[pipsIdx], piplus_Py[pipsIdx], piplus_Pz[pipsIdx],piplus_E[pipsIdx]) ;*
+And similarly for Vpiplus, piminus, Vpiminus
 
 
 Nov-23, 2021    
