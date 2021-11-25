@@ -362,7 +362,7 @@ void CloseOutputFiles (TString OutDataPath){
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void StreamToCSVfile (std::vector<Double_t> observables){
     
-    for (auto v:observables) CSVfile_e_pi_n << std::fixed << v << ",";
+    for (auto v:observables) CSVfile_e_pi_n << std::setprecision(9) << std::fixed << v << ",";
     CSVfile_e_pi_n << std::endl;
     
     if (fdebug>3) {
