@@ -72,7 +72,7 @@ for line in run_fileLines[FirstRun:]:#{
     for pi_charge in pi_charges:#{
         commandline = ("root -l -q 'MergeSIDISandBANDSkimmers.C(%d,\"%s\",%d,%d,%d,\"%s\")'"%
                         (run,pi_charge,NeventsMax,fdebug,PrintProgress,data_path))
-        print("merge neutron and sidis %s skimming for run %d (%d/%d):"%(pi_charge,run,runIdx,Nruns))
+        print(colored("merge neutron and sidis %s skimming for run %d (%d/%d):"%(pi_charge,run,runIdx,Nruns),'red'))
         print(commandline)
         os.system( commandline )
     #}
