@@ -20,6 +20,8 @@ Replaced *piplus.push_back(TLorentzVector(piplus_Px[pipsIdx], piplus_Py[pipsIdx]
 By *piplus.at(pipsIdx) = TLorentzVector(piplus_Px[pipsIdx], piplus_Py[pipsIdx], piplus_Pz[pipsIdx],piplus_E[pipsIdx]) ;*
 And similarly for Vpiplus, piminus, Vpiminus
 
+3. Fixed a bug in merging event indices: The first rown in the CSV file was always evnum=0, which resulted from a bug in SIDISeventID assignment in *MergeSIDISandBANDevents()*
+
 
 Nov-23, 2021    
 -------------

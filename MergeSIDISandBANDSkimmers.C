@@ -250,7 +250,7 @@ void MergeSIDISandBANDevents (int NMAXeventsToMerge=10,
         
     if (fdebug>2){
         PrintTime((TString)"Created list of (" + (TString)std::to_string(NeventsToMerge) + (TString)") events to merge");
-        std << cout << "................................................................" << std::endl;
+        std::cout << "................................................................" << std::endl;
     }
     
     // assign TTree branches to variables
