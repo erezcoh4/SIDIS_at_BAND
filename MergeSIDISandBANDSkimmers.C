@@ -732,7 +732,7 @@ void GetSIDISData( int SIDISeventID, int MergedEvtId ){
     if (fdebug>2) {
         std::cout
         << "Merging event " << EventNumbersToMerge[MergedEvtId]
-        << " ("  << MergedEvtId+1 << "/" << NeventsToMerge << ")" << std::endl;
+        << " ("  << MergedEvtId << "/" << NeventsToMerge << ")" << std::endl;
         
         std::cout
         << "GetSIDISData(" << SIDISeventID << "," << MergedEvtId  << ")"
@@ -926,9 +926,7 @@ void InitializeVariables(){
 void MergeEventData(){
     if (fdebug>2){
         std::cout
-        << "MergeEventData()"
-        << std::endl
-        << "Merging event " << BANDeventID << " from run " << BANDrunID
+        << "MergeEventData( event " << BANDeventID << " from run " << BANDrunID << ")"
         << std::endl        << std::endl;
     }
 
