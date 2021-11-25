@@ -22,6 +22,8 @@ And similarly for Vpiplus, piminus, Vpiminus
 
 3. Fixed a bug in merging event indices: The first rown in the CSV file was always evnum=0, which resulted from a bug in SIDISeventID assignment in *MergeSIDISandBANDevents()*
 
+4. Fixed a bug that did not write z(π) correctly to the CSV file
+
 
 Nov-23, 2021    
 -------------
