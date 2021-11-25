@@ -935,6 +935,11 @@ void MergeEventData(){
     }
 
     
+    // fill output TTree and CSV file only if the neutron is a "good-neutron"
+    // Note, that we want to fill the ROOT TTree once,
+    // and not multiple times as we do for the CSV file (for each pi-index)
+    if (goodneutron){ MergedTree  -> Fill();}
+    
     for (int piIdx=0; piIdx<Npions; piIdx++) {
         bool eepiPastKinematicalCuts = false;
         if (pionCharge=="pi+") {
@@ -947,8 +952,6 @@ void MergeEventData(){
             Stream_e_pi_n_line_to_CSV(piIdx,
                                       eepiPastKinematicalCuts, goodneutron);
             
-            // fill output TTree and CSV file only if (e,e'pi) pass event selection cuts and the neutron is a "good-neutron"
-            MergedTree  -> Fill();
         }
     }
     if (fdebug>2) { std::cout << "-----------------------------------------------------------------" << std::endl; }
