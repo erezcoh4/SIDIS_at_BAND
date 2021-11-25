@@ -186,8 +186,8 @@ void  Stream_e_pi_n_line_to_CSV (int piIdx,
 
 
 void        InitializeVariables ();
-void               GetSIDISData ( int SIDISeventID, int MergedEvtId );
-void                GetBANDData ( int BANDeventID, int MergedEvtId );
+void               GetSIDISData ( int MergedEvtId );
+void                GetBANDData ( int MergedEvtId );
 void             MergeEventData ();
 void    SetInputAndOutputTTrees ();
 void          ComputeKinematics ();
@@ -258,21 +258,19 @@ void MergeSIDISandBANDevents (int NMAXeventsToMerge=10,
         
     // step over list of events-to-merge and merge them...
     for (int MergedEvtId=0; MergedEvtId < NeventsToMerge; MergedEvtId++) {
-        
+
         std::cout << "// initialize, MergedEvtId: " << MergedEvtId << ", SIDISeventID: " << SIDISeventID << ", BANDeventID: " << BANDeventID << std::endl;
         // initialize
         InitializeVariables ();
 
 
-        SIDISeventID = SIDISEventIndicesToMerge[MergedEvtId];
-        std::cout << "// grab electron and pion information from SIDIS TTree, MergedEvtId: " << MergedEvtId << ", SIDISeventID: " << SIDISeventID << ", BANDeventID: " << BANDeventID << std::endl;
+        std::cout << "// grab electron and pion information from SIDIS TTree, MergedEvtId: " << MergedEvtId << ", SIDIS event index to merge: " << SIDISEventIndicesToMerge[MergedEvtId] << std::endl;
         // grab electron and pion information from SIDIS TTree
-        GetSIDISData( SIDISeventID, MergedEvtId );
+        GetSIDISData( MergedEvtId );
         
-        BANDeventID = BANDEventIndicesToMerge[MergedEvtId];
-        std::cout << "// grab neturon information from BAND, MergedEvtId: " << MergedEvtId << ", SIDISeventID: " << SIDISeventID << ", BANDeventID: " << BANDeventID << std::endl;
+        std::cout << "// grab neturon information from BAND, MergedEvtId: " << MergedEvtId << ", BAND event index to merge: " << BANDEventIndicesToMerge[MergedEvtId] << std::endl;
         // grab neturon information from BAND
-        GetBANDData( BANDeventID, MergedEvtId );
+        GetBANDData( MergedEvtId );
         
         // compute kinematical variables, also for the neutron
         ComputeKinematics   ();
@@ -671,7 +669,7 @@ void PrintMonitorHello(){
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-void GetBANDData(int BANDeventID, int MergedEvtId){
+void GetBANDData(int MergedEvtId){
     BANDTree -> GetEntry( BANDEventIndicesToMerge[MergedEvtId] );
     
     bandhit* this_nHit = (bandhit*)nHits->At(nleadindex);
@@ -706,8 +704,8 @@ void GetBANDData(int BANDeventID, int MergedEvtId){
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-void GetSIDISData( int SIDISeventID, int MergedEvtId ){
-    if (fdebug>2) { std::cout << "GetSIDISData(" << SIDISeventID << "," << MergedEvtId  << ")" << std::endl;}
+void GetSIDISData( int MergedEvtId ){
+    if (fdebug>2) { std::cout << "GetSIDISData(" << MergedEvtId  << ")" << std::endl;}
     
     SIDISTree -> GetEntry( SIDISEventIndicesToMerge[MergedEvtId] );
     
