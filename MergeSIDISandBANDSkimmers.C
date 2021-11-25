@@ -715,15 +715,18 @@ void GetSIDISData( int SIDISeventID, int MergedEvtId ){
     for (int pipsIdx=0; pipsIdx<Npips; pipsIdx++){
         if (fdebug>2) {
             std::cout
-            << "piplus.push_back( TLorentzVector("
+//            << "piplus.push_back( TLorentzVector("
+            << "piplus.at(pipsIdx) = TLorentzVector("
             << piplus_Px[pipsIdx]   <<","
             << piplus_Py[pipsIdx]   <<","
             << piplus_Pz[pipsIdx]   <<","
             << piplus_E[pipsIdx]    <<")); "
             << std::endl;
         }
-        piplus.push_back( TLorentzVector(piplus_Px[pipsIdx], piplus_Py[pipsIdx], piplus_Pz[pipsIdx],
-                                         piplus_E[pipsIdx]) );
+//        piplus.push_back( TLorentzVector(piplus_Px[pipsIdx], piplus_Py[pipsIdx], piplus_Pz[pipsIdx],
+//                                         piplus_E[pipsIdx]) );
+        piplus.at(pipsIdx) = TLorentzVector(piplus_Px[pipsIdx], piplus_Py[pipsIdx], piplus_Pz[pipsIdx],
+                                         piplus_E[pipsIdx]) ;
         Vpiplus.push_back( TVector3(Vpiplus_X[pipsIdx], Vpiplus_Y[pipsIdx], Vpiplus_Z[pipsIdx]) );
     }
     for (int pimsIdx=0; pimsIdx<Npims; pimsIdx++){
@@ -952,5 +955,5 @@ void MergeEventData(){
             MergedTree  -> Fill();
         }
     }
-    if (fdebug>3) { std::cout << "------------------------------------" << std::endl; }
+    if (fdebug>2) { std::cout << "-----------------------------------------------------------------" << std::endl; }
 }
