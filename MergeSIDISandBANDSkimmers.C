@@ -722,7 +722,7 @@ void GetSIDISData( int SIDISeventID, int MergedEvtId ){
             << piplus_E[pipsIdx]    <<")); "
             << std::endl;
         }
-        piplus.at(pipsIdx)   = TLorentzVector(piplus_Px[pipsIdx], piplus_Py[pipsIdx], piplus_Pz[pipsIdx], piplus_E[pipsIdx] ;
+        piplus.at(pipsIdx)   = TLorentzVector(piplus_Px[pipsIdx], piplus_Py[pipsIdx], piplus_Pz[pipsIdx], piplus_E[pipsIdx]) ;
         Vpiplus.at(pipsIdx)  = TVector3(Vpiplus_X[pipsIdx], Vpiplus_Y[pipsIdx], Vpiplus_Z[pipsIdx]) ;
     }
     for (int pimsIdx=0; pimsIdx<Npims; pimsIdx++){
