@@ -11,6 +11,11 @@ This repository is responsible for
     
 ## Revisions
 
+Nov-25, 2021    
+-------------
+1. Fixed a bug in writing a long event number to the SIDIS-BAND merged CSV file by using std::fixed 
+
+
 Nov-23, 2021    
 -------------
 1. Moved to merging BAND events with SIDIS, such that these files are from neutron-BAND files of final skims, from */volatile/clas12/users/segarrae/BAND/v3.1/10.2/final/tagged*
