@@ -517,7 +517,6 @@ Int_t CreateListOfEventsToMerge(TTree * BANDTree,
 }
 
 
-
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 Double_t ComputeLightConeFraction( TLorentzVector p ){
     // compute light-cone momentum fraction
@@ -723,7 +722,7 @@ void GetSIDISData( int SIDISeventID, int MergedEvtId ){
                                          piminus_E[pimsIdx]) );
         Vpiminus.push_back( TVector3(Vpiminus_X[pimsIdx], Vpiminus_Y[pimsIdx], Vpiminus_Z[pimsIdx]) );
     }
-    if (fdebug>3) {
+    if (fdebug>2) {
         std::cout
         << "Merging event " << EventNumbersToMerge[MergedEvtId]
         << " ("  << MergedEvtId+1 << "/" << NeventsToMerge << ")" << std::endl;
@@ -745,11 +744,12 @@ void GetSIDISData( int SIDISeventID, int MergedEvtId ){
         << "omega: "                                        << q->E() << " GeV,"
         << std::endl;
         if (Npips>0){
-            std::cout << "1st pi+: Ppi: "                  << piplus[0].P() <<  " GeV/c,"
+            std::cout << "1st pi+: Ppi: "                  << piplus[0].P() << " GeV/c,"
+            << "piplus_Px[0]:"                             << piplus_Px[0]  << " GeV/c"
             << std::endl;
         }
         if (Npims>0){
-            std::cout << "1st pi-: Ppi: "                  << piminus[0].P() <<  " GeV/c,"
+            std::cout << "1st pi-: Ppi: "                  << piminus[0].P() << " GeV/c,"
             << std::endl;
         }
     }
