@@ -735,7 +735,7 @@ void GetSIDISData( int SIDISeventID, int MergedEvtId ){
         << "SIDISeventID: "                                 << SIDISeventID << ","
         << std::endl
         << "eepipsPastCutsInEvent: "                        << eepipsPastCutsInEvent << ","
-        << "Nelectrons: "                                   << Nelectrons   << ","
+        << "Nelectrons: "                                   << Ne       << ","
         << "Npions: "                                       << Npions   << ","
         << "Npips: "                                        << Npips    << ","
         << "Npims: "                                        << Npims    << ","
