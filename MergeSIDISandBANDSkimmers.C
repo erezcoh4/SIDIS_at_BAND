@@ -248,8 +248,10 @@ void MergeSIDISandBANDevents (int NMAXeventsToMerge=10,
     NeventsToMerge = CreateListOfEventsToMerge(BANDTree, SIDISTree, NMAXeventsToMerge);
     if ((NMAXeventsToMerge>0) && (NeventsToMerge>NMAXeventsToMerge)) NeventsToMerge = NMAXeventsToMerge;
         
-    if (fdebug>2)
+    if (fdebug>2){
         PrintTime((TString)"Created list of (" + (TString)std::to_string(NeventsToMerge) + (TString)") events to merge");
+        std << cout << "................................................................" << std::endl;
+    }
     
     // assign TTree branches to variables
     SetInputAndOutputTTrees ();
@@ -257,12 +259,18 @@ void MergeSIDISandBANDevents (int NMAXeventsToMerge=10,
     // step over list of events-to-merge and merge them...
     for (int MergedEvtId=0; MergedEvtId < NeventsToMerge; MergedEvtId++) {
         
+        std::cout << "// initialize, MergedEvtId: " << MergedEvtId << ", SIDISeventID: " << SIDISeventID << ", BANDeventID: " << BANDeventID << std::endl;
         // initialize
         InitializeVariables ();
 
+
+        SIDISeventID = SIDISEventIndicesToMerge[MergedEvtId];
+        std::cout << "// grab electron and pion information from SIDIS TTree, MergedEvtId: " << MergedEvtId << ", SIDISeventID: " << SIDISeventID << ", BANDeventID: " << BANDeventID << std::endl;
         // grab electron and pion information from SIDIS TTree
         GetSIDISData( SIDISeventID, MergedEvtId );
         
+        BANDeventID = BANDEventIndicesToMerge[MergedEvtId];
+        std::cout << "// grab neturon information from BAND, MergedEvtId: " << MergedEvtId << ", SIDISeventID: " << SIDISeventID << ", BANDeventID: " << BANDeventID << std::endl;
         // grab neturon information from BAND
         GetBANDData( BANDeventID, MergedEvtId );
         
@@ -699,6 +707,8 @@ void GetBANDData(int BANDeventID, int MergedEvtId){
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void GetSIDISData( int SIDISeventID, int MergedEvtId ){
+    if (fdebug>2) { std::cout << "GetSIDISData(" << SIDISeventID << "," << MergedEvtId  << ")" << std::endl;}
+    
     SIDISTree -> GetEntry( SIDISEventIndicesToMerge[MergedEvtId] );
     
     eepiPastCutsInEvent = false;
@@ -735,8 +745,6 @@ void GetSIDISData( int SIDISeventID, int MergedEvtId ){
         << " ("  << MergedEvtId << "/" << NeventsToMerge << ")" << std::endl;
         
         std::cout
-        << "GetSIDISData(" << SIDISeventID << "," << MergedEvtId  << ")"
-        << std::endl
         << "SIDISEventIndicesToMerge["<<MergedEvtId<<"]: "  << SIDISEventIndicesToMerge[MergedEvtId] << ","
         << "SIDISeventID: "                                 << SIDISeventID << ","
         << std::endl
