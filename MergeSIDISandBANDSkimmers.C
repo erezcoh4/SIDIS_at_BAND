@@ -716,10 +716,10 @@ void GetSIDISData( int SIDISeventID, int MergedEvtId ){
         if (fdebug>2) {
             std::cout
             << "piplus.push_back( TLorentzVector("
-            << piplus_Px[pipsIdx]    <<","
+            << piplus_Px[pipsIdx]   <<","
             << piplus_Py[pipsIdx]   <<","
             << piplus_Pz[pipsIdx]   <<","
-            << piplus_E[pipsIdx])   <<"); "
+            << piplus_E[pipsIdx]    <<")); "
             << std::endl;
         }
         piplus.push_back( TLorentzVector(piplus_Px[pipsIdx], piplus_Py[pipsIdx], piplus_Pz[pipsIdx],
