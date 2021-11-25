@@ -10,6 +10,7 @@
 import sys, os, linecache, pandas as pd
 import glob
 import argparse
+from termcolor import colored
 
 parser = argparse.ArgumentParser(description='merge SIDIS skimming of multiple runs')
 parser.add_argument("--Nruns",        type=int, default=1,
@@ -60,7 +61,7 @@ if fdebug>3:#{
         print(int(line.strip()), end =" ")
     #}
     print('')
-    print('processing %d runs, starting from run %d'%(Nruns-FirstRun,FirstRun))
+    print(colored('processing %d runs, starting from run %d'%(Nruns-FirstRun,FirstRun),'red'))
 #}
 
 runIdx = 0
