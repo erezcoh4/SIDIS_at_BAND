@@ -11,6 +11,20 @@ This repository is responsible for
     
 ## Revisions
 
+Nov-25, 2021    
+-------------
+1. Fixed a bug in writing a long event number to the SIDIS-BAND merged CSV file by using std::fixed
+
+2. Fixed a bug in pion information streamline: 
+Replaced *piplus.push_back(TLorentzVector(piplus_Px[pipsIdx], piplus_Py[pipsIdx], piplus_Pz[pipsIdx], piplus_E[pipsIdx]))*
+By *piplus.at(pipsIdx) = TLorentzVector(piplus_Px[pipsIdx], piplus_Py[pipsIdx], piplus_Pz[pipsIdx],piplus_E[pipsIdx]) ;*
+And similarly for Vpiplus, piminus, Vpiminus
+
+3. Fixed a bug in merging event indices: The first rown in the CSV file was always evnum=0, which resulted from a bug in SIDISeventID assignment in *MergeSIDISandBANDevents()*
+
+4. Fixed a bug that did not write z(π) correctly to the CSV file
+
+
 Nov-23, 2021    
 -------------
 1. Moved to merging BAND events with SIDIS, such that these files are from neutron-BAND files of final skims, from */volatile/clas12/users/segarrae/BAND/v3.1/10.2/final/tagged*

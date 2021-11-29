@@ -186,8 +186,8 @@ void  Stream_e_pi_n_line_to_CSV (int piIdx,
 
 
 void        InitializeVariables ();
-void               GetSIDISData ( int SIDISeventID, int MergedEvtId );
-void                GetBANDData ( int BANDeventID, int MergedEvtId );
+void               GetSIDISData ( int MergedEvtId );
+void                GetBANDData ( int MergedEvtId );
 void             MergeEventData ();
 void    SetInputAndOutputTTrees ();
 void          ComputeKinematics ();
@@ -248,23 +248,26 @@ void MergeSIDISandBANDevents (int NMAXeventsToMerge=10,
     NeventsToMerge = CreateListOfEventsToMerge(BANDTree, SIDISTree, NMAXeventsToMerge);
     if ((NMAXeventsToMerge>0) && (NeventsToMerge>NMAXeventsToMerge)) NeventsToMerge = NMAXeventsToMerge;
         
-    if (fdebug>2)
+    if (fdebug>2){
         PrintTime((TString)"Created list of (" + (TString)std::to_string(NeventsToMerge) + (TString)") events to merge");
+        std::cout << "................................................................" << std::endl;
+    }
     
     // assign TTree branches to variables
     SetInputAndOutputTTrees ();
         
     // step over list of events-to-merge and merge them...
     for (int MergedEvtId=0; MergedEvtId < NeventsToMerge; MergedEvtId++) {
-        
+
         // initialize
         InitializeVariables ();
 
+
         // grab electron and pion information from SIDIS TTree
-        GetSIDISData( SIDISeventID, MergedEvtId );
+        GetSIDISData( MergedEvtId );
         
         // grab neturon information from BAND
-        GetBANDData( BANDeventID, MergedEvtId );
+        GetBANDData( MergedEvtId );
         
         // compute kinematical variables, also for the neutron
         ComputeKinematics   ();
@@ -355,9 +358,11 @@ void CloseOutputFiles (TString OutDataPath){
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void StreamToCSVfile (std::vector<Double_t> observables){
-    for (auto v:observables) CSVfile_e_pi_n << std::fixed << v << ",";
+    for (auto v:observables) CSVfile_e_pi_n << std::setprecision(9) << std::fixed << v << ",";
     CSVfile_e_pi_n << std::endl;
+    
     if (fdebug>3) {
+        std::cout << std::fixed;
         std::cout << "StreamToCSVfile()" << std::endl;
         std::cout << csvheader << std::endl;
         for (auto v:observables) std::cout << std::fixed << v << ",";
@@ -515,7 +520,6 @@ Int_t CreateListOfEventsToMerge(TTree * BANDTree,
 }
 
 
-
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 Double_t ComputeLightConeFraction( TLorentzVector p ){
     // compute light-cone momentum fraction
@@ -662,7 +666,7 @@ void PrintMonitorHello(){
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-void GetBANDData(int BANDeventID, int MergedEvtId){
+void GetBANDData(int MergedEvtId){
     BANDTree -> GetEntry( BANDEventIndicesToMerge[MergedEvtId] );
     
     bandhit* this_nHit = (bandhit*)nHits->At(nleadindex);
@@ -697,7 +701,9 @@ void GetBANDData(int BANDeventID, int MergedEvtId){
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-void GetSIDISData( int SIDISeventID, int MergedEvtId ){
+void GetSIDISData( int MergedEvtId ){
+    if (fdebug>2) { std::cout << "GetSIDISData(" << MergedEvtId  << ")" << std::endl;}
+    
     SIDISTree -> GetEntry( SIDISEventIndicesToMerge[MergedEvtId] );
     
     eepiPastCutsInEvent = false;
@@ -712,37 +718,47 @@ void GetSIDISData( int SIDISeventID, int MergedEvtId ){
         Npions = Npims;
     }
     for (int pipsIdx=0; pipsIdx<Npips; pipsIdx++){
-        piplus.push_back( TLorentzVector(piplus_Px[pipsIdx], piplus_Py[pipsIdx], piplus_Pz[pipsIdx],
-                                         piplus_E[pipsIdx]) );
-        Vpiplus.push_back( TVector3(Vpiplus_X[pipsIdx], Vpiplus_Y[pipsIdx], Vpiplus_Z[pipsIdx]) );
+        if (fdebug>4) {
+            std::cout
+            << "piplus.at(pipsIdx) = TLorentzVector("
+            << piplus_Px[pipsIdx]   <<","
+            << piplus_Py[pipsIdx]   <<","
+            << piplus_Pz[pipsIdx]   <<","
+            << piplus_E[pipsIdx]    <<")); "
+            << std::endl;
+        }
+        piplus.at(pipsIdx)   = TLorentzVector(piplus_Px[pipsIdx], piplus_Py[pipsIdx], piplus_Pz[pipsIdx], piplus_E[pipsIdx]) ;
+        Vpiplus.at(pipsIdx)  = TVector3(Vpiplus_X[pipsIdx], Vpiplus_Y[pipsIdx], Vpiplus_Z[pipsIdx]) ;
     }
     for (int pimsIdx=0; pimsIdx<Npims; pimsIdx++){
-        piminus.push_back( TLorentzVector(piminus_Px[pimsIdx], piminus_Py[pimsIdx], piminus_Pz[pimsIdx],
-                                         piminus_E[pimsIdx]) );
-        Vpiminus.push_back( TVector3(Vpiminus_X[pimsIdx], Vpiminus_Y[pimsIdx], Vpiminus_Z[pimsIdx]) );
+        piminus.at(pimsIdx)  = TLorentzVector(piminus_Px[pimsIdx], piminus_Py[pimsIdx], piminus_Pz[pimsIdx], piminus_E[pimsIdx]) ;
+        Vpiminus.at(pimsIdx) = TVector3(Vpiminus_X[pimsIdx], Vpiminus_Y[pimsIdx], Vpiminus_Z[pimsIdx]) ;
     }
-    if (fdebug>3) {
+    if (fdebug>2) {
         std::cout
         << "Merging event " << EventNumbersToMerge[MergedEvtId]
-        << " ("  << MergedEvtId+1 << "/" << NeventsToMerge << ")" << std::endl;
+        << " ("  << MergedEvtId << "/" << NeventsToMerge << ")" << std::endl;
         
         std::cout
-        << "GetSIDISData(" << SIDISeventID << "," << MergedEvtId  << ")"
-        << std::endl
         << "SIDISEventIndicesToMerge["<<MergedEvtId<<"]: "  << SIDISEventIndicesToMerge[MergedEvtId] << ","
         << "SIDISeventID: "                                 << SIDISeventID << ","
-        << "E(electron): "                                  << e->E() << " GeV,"
+        << std::endl
         << "eepipsPastCutsInEvent: "                        << eepipsPastCutsInEvent << ","
+        << "Nelectrons: "                                   << Ne       << ","
         << "Npions: "                                       << Npions   << ","
         << "Npips: "                                        << Npips    << ","
+        << "Npims: "                                        << Npims    << ","
         << std::endl
         << "Pe: "                                           << e->P() << " GeV/c,"
-        << "E(e): "                                         << e->E() << " GeV,"
         << "q: "                                            << q->P() << " GeV/c,"
         << "omega: "                                        << q->E() << " GeV,"
         << std::endl;
-        if (Npips>0 && pionCharge=="pi+"){
-            std::cout << "piplus_Px[0]: "                   << piplus_Px[0] <<  " GeV/c,"
+        if (Npips>0){
+            std::cout << "1st pi+: Ppi: "                  << piplus[0].P() << " GeV/c,"
+            << std::endl;
+        }
+        if (Npims>0){
+            std::cout << "1st pi-: Ppi: "                  << piminus[0].P() << " GeV/c,"
             << std::endl;
         }
     }
@@ -812,22 +828,22 @@ void Stream_e_pi_n_line_to_CSV(int piIdx,
     if (pionCharge=="pi+") {
         pi  = &piplus[piIdx];
         Vpi = &Vpiplus[piIdx];
-        Zpi = Zpips  [piIdx];
     }
     else if (pionCharge=="pi-") {
         pi  = &piminus[piIdx];
         Vpi = &Vpiminus[piIdx];
-        Zpi = Zpims   [piIdx];
     }
     else {
         std::cout << "pion charge ill defined at Stream_e_pi_line_to_CSV(), returning " << std::endl;
         return;
     }
+    Zpi = pi->E()/omega;
     if (fdebug>3) {
         std::cout
         << "Stream_e_pi_n_line_to_CSV(" << piIdx  << "," << passed_cuts_e_pi_kinematics << "," << passed_cuts_n << ")"
         << std::endl
         << "piIdx: "    << piIdx << ","
+        << "Zpi: "      << Zpi   << ","
         << "passed_cuts_e_pi_kinematics: " << passed_cuts_e_pi_kinematics << ","
         << "passed_cuts_n: " << passed_cuts_n << ","
         << std::endl;
@@ -913,14 +929,15 @@ void InitializeVariables(){
 void MergeEventData(){
     if (fdebug>2){
         std::cout
-        << "MergeEventData()"
-        << std::endl
-        << "Merging event " << BANDeventID << " from run " << BANDrunID
+        << "MergeEventData( event " << BANDeventID << " from run " << BANDrunID << ")"
         << std::endl        << std::endl;
     }
 
-    // fill output TTree and CSV file
-    MergedTree  -> Fill();
+    
+    // fill output TTree and CSV file only if the neutron is a "good-neutron"
+    // Note, that we want to fill the ROOT TTree once,
+    // and not multiple times as we do for the CSV file (for each pi-index)
+    if (goodneutron){ MergedTree  -> Fill();}
     
     for (int piIdx=0; piIdx<Npions; piIdx++) {
         bool eepiPastKinematicalCuts = false;
@@ -933,7 +950,8 @@ void MergeEventData(){
         if (goodneutron){
             Stream_e_pi_n_line_to_CSV(piIdx,
                                       eepiPastKinematicalCuts, goodneutron);
+            
         }
     }
-    if (fdebug>3) { std::cout << "------------------------------------" << std::endl; }
+    if (fdebug>2) { std::cout << "-----------------------------------------------------------------" << std::endl; }
 }
