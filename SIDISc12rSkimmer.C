@@ -42,7 +42,7 @@ void                      StreamToCSVfile (TString pionCharge, // "pi+" or "pi-"
                                            bool passed_cuts_e_pi_kinematics,
                                            int fdebug);
 void                       printCutValues ();
-void                        loadCutValues (TString cutValuesFilename = "cutValues.csv", int fdebug=0);
+void                        loadCutValues (TString cutValuesFilename = "BANDcutValues.csv", int fdebug=0);
 void                      SetOutputTTrees ();
 double                       FindCutValue ( std::string cutName );
 bool      CheckIfElectronPassedSelectionCuts (Double_t e_PCAL_x, Double_t e_PCAL_y,
@@ -96,6 +96,7 @@ double             cutValue_e_PCAL_W;
 double             cutValue_e_PCAL_V;
 double             cutValue_e_E_PCAL;
 double cutValue_SamplingFraction_min;
+double     cutValue_PCAL_ECIN_SF_min;
 double        cutValue_Ve_Vpi_dz_max;
 double               cutValue_Q2_min;
 double                cutValue_W_min;
@@ -259,10 +260,10 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
                       int  PrintProgress=50000,
                       int NpipsMin=1, // minimal number of pi+
                       TString DataPath = "/volatile/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train_20200610/inc/",
-                      int setInclusive=1 ){
+                      int setInclusive=0 ){
     TString RunNumberStr = GetRunNumberSTR(RunNumber,fdebug);
     // read cut values
-    loadCutValues("cutValues.csv",fdebug);
+    loadCutValues("BANDcutValues.csv",fdebug);
 
     inclusive = setInclusive;
     if (inclusive == 1) std::cout << "Running as inclusive" << std::endl;
@@ -374,7 +375,7 @@ bool CheckIfElectronPassedSelectionCuts(Double_t e_PCAL_x, Double_t e_PCAL_y,
     // sometimes the readout-sector is 0. This is funny
     // Justin B. Estee (June-21): I also had this issue. I am throwing away sector 0. The way you check is plot the (x,y) coordinates of the sector and you will not see any thing. Double check me but I think it is 0.
     if (e_DC_sector == 0) return false;
-    
+
     for (int regionIdx=0; regionIdx<3; regionIdx++) {
         // DC_e_fid:
         // sector:  1-6
@@ -406,7 +407,7 @@ bool CheckIfElectronPassedSelectionCuts(Double_t e_PCAL_x, Double_t e_PCAL_y,
        
        // Sampling fraction cut
        && ((e_E_PCAL + e_E_ECIN + e_E_ECOUT)/e.P()) > cutValue_SamplingFraction_min
-       && (e_E_ECIN/e.P() > 0.2 - e_E_PCAL/e.P()) // RGA AN puts "<" here mistakenly
+       && (e_E_ECIN/e.P() > cutValue_PCAL_ECIN_SF_min - e_E_PCAL/e.P()) // RGA AN puts "<" here mistakenly
        
        // Cut on z-vertex position: in-bending torus field -13.0 cm < Vz < +12.0 cm
        // Spring 19 and Spring 2020 in-bending.
@@ -682,15 +683,15 @@ void StreamToCSVfile (TString pionCharge, // "pi+" or "pi-"
     }
     // decide which file to write...
     if (pionCharge=="pi+") {
-        for (auto v:observables) CSVfile_e_piplus << v << ",";
+        for (auto v:observables) CSVfile_e_piplus << std::fixed << v << ",";
         CSVfile_e_piplus << std::endl;
         
         if (passed_cuts_e_pi) {
-            for (auto v:observables) SelectedEventsCSVfile_e_piplus << v << ",";
+            for (auto v:observables) SelectedEventsCSVfile_e_piplus << std::fixed << v << ",";
             SelectedEventsCSVfile_e_piplus << std::endl;
             
             if (passed_cuts_e_pi_kinematics){
-                for (auto v:observables) SelectedEventsCSVfile_e_piplus_kinematics << v << ",";
+                for (auto v:observables) SelectedEventsCSVfile_e_piplus_kinematics << std::fixed << v << ",";
                 SelectedEventsCSVfile_e_piplus_kinematics << std::endl;
             }
         }
@@ -721,7 +722,7 @@ void loadCutValues(TString cutValuesFilename, int fdebug){
     
     // read cut values csv file
     csv_reader csvr;
-    cutValues = csvr.read_csv("cutValues.csv");
+    cutValues = csvr.read_csv("BANDcutValues.csv");
     if (fdebug>2) { printCutValues(); }
     
     // assign specific cut values - to speed things up
@@ -751,6 +752,7 @@ void loadCutValues(TString cutValuesFilename, int fdebug){
     cutValue_e_PCAL_V               = FindCutValue("e_PCAL_V_min");
     cutValue_e_E_PCAL               = FindCutValue("e_E_PCAL_min");
     cutValue_SamplingFraction_min   = FindCutValue("SamplingFraction_min");
+    cutValue_PCAL_ECIN_SF_min       = FindCutValue("PCAL_ECIN_SF_min");
     cutValue_Ve_Vpi_dz_max          = FindCutValue("(Ve-Vpi)_z_max");
     cutValue_Q2_min                 = FindCutValue("Q2_min");
     cutValue_W_min                  = FindCutValue("W_min");

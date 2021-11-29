@@ -48,16 +48,16 @@ runIdx = 0
 for line in run_fileLines[FirstRun:]:#{
     runIdx += 1
     run = int(line.strip())
-    #commandline = ("clas12root -q 'SIDISc12rSkimmer.C+(%d,%d,%d,%d)'"%
-    #                (run,NeventsMax,fdebug,PrintProgress))
-    commandline = """"#!/bin/sh
+    commandline = ("clas12root -q 'SIDISc12rSkimmer.C+(%d,%d,%d,%d)'"%
+                    (run,NeventsMax,fdebug,PrintProgress))
+#    commandline = """"#!/bin/sh
 #SBATCH --job-name=s{1}
 #SBATCH --account=clas12
 #SBATCH --constraint=centos77
 #SBATCH --mem-per-cpu=2500
 #SBATCH --output={5}/sidis_{1}.txt
-clas12root -q '{6}+({1},{2},{3},{4})'"%
-""".format(run,NeventsMax,fdebug,PrintProgress), txt_dir, skimmer)
+#clas12root -q '{6}+({1},{2},{3},{4})'"%
+#""".format(run,NeventsMax,fdebug,PrintProgress), txt_dir, skimmer)
     print('')
     print("processing run %d/%d"%(runIdx,Nruns))
     print('')

@@ -355,12 +355,12 @@ void CloseOutputFiles (TString OutDataPath){
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void StreamToCSVfile (std::vector<Double_t> observables){
-    for (auto v:observables) CSVfile_e_pi_n << v << ",";
+    for (auto v:observables) CSVfile_e_pi_n << std::fixed << v << ",";
     CSVfile_e_pi_n << std::endl;
     if (fdebug>3) {
         std::cout << "StreamToCSVfile()" << std::endl;
         std::cout << csvheader << std::endl;
-        for (auto v:observables) std::cout << v << ",";
+        for (auto v:observables) std::cout << std::fixed << v << ",";
         std::cout << std::endl;
     }
 }
@@ -392,7 +392,7 @@ Int_t CreateListOfEventsToMerge(TTree * BANDTree,
     EventNumbersToMerge         .clear();
     
     
-    // First, define two vectors that containt the event IDs in each TTree
+    // First, define two vectors that contain the event IDs in each TTree
     if (DefineEventIDvectors){
         
         //        TTreeReader BANDReader("calib", BANDFile); // for ncalibration skimming
