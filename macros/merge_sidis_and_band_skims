@@ -21,7 +21,7 @@ parser.add_argument("--NeventsMax",   type=int, default=-1,
                     required=False, help="maximal number of events to process")
 parser.add_argument("--fdebug",       type=int, default=1,
                     required=False, help="verbosity")
-parser.add_argument("--worker",       type=str, default="Alex-ifarm",
+parser.add_argument("--worker",       type=str, default="Erez-ifarm",
                     required=False, help="verbosity")
 parser.add_argument("--PrintProgress",type=int, default=50000,
                     required=False, help="print progress (every N events)")
@@ -42,8 +42,11 @@ if args.only_pips: #{
 #}
 
 path          = "";
-if args.worker == "Alex-ifarm": #{
-        data_path = r'/volatile/clas12/users/akiral/BAND'
+if args.worker == "Erez-ifarm": #{
+        data_path = r'/volatile/clas12/users/ecohen/BAND'
+#}
+elif args.worker == "ErezMBP": #{
+    data_path = r'/Users/erezcohen/Desktop/data/BAND'
 #}
 
 
@@ -79,3 +82,4 @@ for line in run_fileLines[FirstRun:]:#{
 print('')
 print('Done processing merge_sidis_and_band_skims.')
 
+os.system('date | mail -s "Done processing merge_sidis_and_band_skims on ifarm" cohen.erez7@gmail.com')

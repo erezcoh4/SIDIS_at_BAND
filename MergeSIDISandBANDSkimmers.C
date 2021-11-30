@@ -32,7 +32,7 @@
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 // Globals
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-TString DataPath = "/volatile/clas12/users/akiral/BAND/";
+TString DataPath = "/volatile/clas12/users/ecohen/BAND/";
 TString   skimmedBANDFilename;
 TString  skimmedSIDISFilename;
 TString            pionCharge; // "pi+" or "pi-"
@@ -221,7 +221,7 @@ void MergeSIDISandBANDSkimmers(int RunNumber=6420,
                                int NMAXeventsToMerge=-1,
                                int ffdebug=1,
                                int PrintProgress=1000,
-                               TString fDataPath="/volatile/clas12/users/akiral/BAND/"){
+                               TString fDataPath="/volatile/clas12/users/ecohen/BAND/"){
     
     SetPionCharge    ( fpionCharge );
     SetVerbosity     ( ffdebug );
@@ -290,7 +290,7 @@ void OpenInputFiles (TString RunStr){
     // Skimmed neutron-BAND files and "Final skim files" from
     // /volatile/clas12/users/segarrae/BAND/v3.1/10.2/final/tagged
     skimmedBANDFilename = (DataPath + "neutron_skimming/"
-                           + "final_tagged_10MeV_250mevc_fiducial_thetaCut_allBars_"
+                           + "final_tagged_5MeV_250mevc_fiducial_thetaCut_allBars_"
                            + RunStr + ".root");
     
     // previous:

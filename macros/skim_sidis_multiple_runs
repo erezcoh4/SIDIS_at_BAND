@@ -8,15 +8,15 @@ import sys, os, linecache
 import argparse
 
 parser = argparse.ArgumentParser(description='SIDIS skimming of multiple runs')
-parser.add_argument("--Nruns",        type=int, default=-1,
+parser.add_argument("--Nruns",        type=int, default=1,
                     required=False, help="number of runs to process ('-1' for all runs)")
 parser.add_argument("--FirstRun",     type=int, default=0,
                     required=False, help="first run to start from")
 parser.add_argument("--NeventsMax",   type=int, default=-1,
                     required=False, help="maximal number of events to process")
-parser.add_argument("--fdebug",       type=int, default=0,
+parser.add_argument("--fdebug",       type=int, default=1,
                     required=False, help="verbosity")
-parser.add_argument("--PrintProgress",type=int, default=500000,
+parser.add_argument("--PrintProgress",type=int, default=50000,
                     required=False, help="print progress (every N events)")
 args = parser.parse_args()
 
@@ -25,10 +25,7 @@ NeventsMax    = args.NeventsMax
 fdebug        = args.fdebug
 PrintProgress = args.PrintProgress
 FirstRun      = args.FirstRun
-runs_filename = "/work/clas12/users/akiral/SIDIS_at_BAND/macros/runlists/good_runs_10-2.txt"
-txt_dir       = "/volatile/clas12/users/akiral/BAND/txt_files"
-skimmer       = "/work/clas12/users/akiral/SIDIS_at_BAND/SIDISc12rSkimmer.C"
-
+runs_filename = "macros/runlists/good_runs_10-2.txt"
 
 # Using readlines()
 runs_file = open(runs_filename, 'r')
@@ -43,21 +40,12 @@ if fdebug>1:#{
     print('processing %d runs, starting from run %d'%(Nruns-FirstRun,FirstRun))
 #}
 
-
 runIdx = 0
 for line in run_fileLines[FirstRun:]:#{
     runIdx += 1
     run = int(line.strip())
     commandline = ("clas12root -q 'SIDISc12rSkimmer.C+(%d,%d,%d,%d)'"%
                     (run,NeventsMax,fdebug,PrintProgress))
-#    commandline = """"#!/bin/sh
-#SBATCH --job-name=s{1}
-#SBATCH --account=clas12
-#SBATCH --constraint=centos77
-#SBATCH --mem-per-cpu=2500
-#SBATCH --output={5}/sidis_{1}.txt
-#clas12root -q '{6}+({1},{2},{3},{4})'"%
-#""".format(run,NeventsMax,fdebug,PrintProgress), txt_dir, skimmer)
     print('')
     print("processing run %d/%d"%(runIdx,Nruns))
     print('')
@@ -72,3 +60,4 @@ print('')
 print('done.')
 print('')
 
+os.system('date | mail -s "Done processing skim_sidis_multiple_runs on ifarm" cohen.erez7@gmail.com')
