@@ -54,11 +54,10 @@ using namespace std;
 void   InitializeHists();
 double sq(double x) {return x*x;}
 
-void PionRatios(Int_t pionCode, Int_t Nruns=-1, Int_t NeventsMax=-1) {
+void PionRatios(Int_t RunNumber=6420, Int_t NeventsMax=-1, Int_t pionCode) {
     InitializeHists();
 
     string pionType;
-
     if (pionCode == 211) {
         pionType = "plus";
     }
@@ -70,145 +69,130 @@ void PionRatios(Int_t pionCode, Int_t Nruns=-1, Int_t NeventsMax=-1) {
         return;
     }
 
-    ifstream goodRunsFile;
-    goodRunsFile.open(GoodRunsFilename, ios::in);
-    
-    if (!goodRunsFile.is_open()) {
-        cout << "Filed to open good runs file: " << GoodRunsFilename << endl;
-        return;
+    char RunNumberStr[20];
+    sprintf( RunNumberStr, "00%d", RunNumber );
+
+    TString SIDISFilename  = DataPath + "SIDIS_skimming/skimmed_SIDIS_inc_" + RunNumberStr + "_e_pi" + pionType + ".root";
+    TString MergeFilename  = DataPath + "merged_SIDIS_and_BAND_skimming/skimmed_SIDIS_and_BAND_inc_" + RunNumberStr + "_e_pi" + pionType + "_n.root";
+    TString outfileName    = DataPath + "histograms/pion_ratio_" + RunNumberStr + "_" + pionType + ".root";
+
+    TFile *outfile = new TFile(outfileName, "RECREATE");
+    TFile *SIDISFile = new TFile(SIDISFilename);
+    TFile *MergeFile = new TFile(MergeFilename);
+    TTree *SIDISTree = (TTree*)SIDISFile->Get("tree");
+    TTree *MergeTree = (TTree*)MergeFile->Get("T");
+
+    TLorentzVector* e = 0;
+    TVector3* Ve = 0;
+    TClonesArray* pi = new TClonesArray("TLorentzVector");
+    TClonesArray* Vpi = new TClonesArray("TVector3");
+    Double_t Ebeam, xB, Q2, omega, W;
+    Int_t Npis;
+
+    SIDISTree->SetBranchAddress("Ebeam", &Ebeam);
+    SIDISTree->SetBranchAddress("xB", &xB);
+    SIDISTree->SetBranchAddress("Q2", &Q2);
+    SIDISTree->SetBranchAddress("omega", &omega);
+    SIDISTree->SetBranchAddress("W", &W);
+
+    SIDISTree->SetBranchAddress("e", &e);
+    SIDISTree->SetBranchAddress("Ve", &Ve);
+    SIDISTree->SetBranchAddress("pi", &pi);
+    SIDISTree->SetBranchAddress("Vpi", &Vpi);
+
+    if (pionCode == 211) {
+        SIDISTree->SetBranchAddress("Npips", &Npis);
+    }
+    else {
+        SIDISTree->SetBranchAddress("Npims", &Npis);
     }
 
-    TFile *outfile = new TFile(OutputFilename, "RECREATE");
+    const TVector3 l(0, 0, 10.2);
 
-    string runNo;
-    Int_t runIdx = 0;
-    while (getline(goodRunsFile, runNo)) {
-        if (runIdx == Nruns) break;
+    double y;
+    TLorentzVector* ppi;
+    TVector3* Vxpi;
 
-        cout << "Run #" << runNo << endl;
+    for (int sEvent = 0; sEvent < SIDISTree->GetEntries(); sEvent++) {
+        if (sEvent == NeventsMax) break;
 
-        TString SIDISFilename  = DataPath + "SIDIS_skimming/skimmed_SIDIS_inc_" + runNo + "_e_pi" + pionType + ".root";
-        TString MergeFilename  = DataPath + "merged_SIDIS_and_BAND_skimming/skimmed_SIDIS_and_BAND_inc_" + runNo + "_e_pi" + pionType + "_n.root";
+        SIDISTree->GetEntry(sEvent);
+        Ebeam = 0;
+        xB = 0;
+        Q2 = 0;
+        omega = 0;
+        W = 0;
+        y = 0;
 
-        TFile *SIDISFile = new TFile(SIDISFilename);
-        TFile *MergeFile = new TFile(MergeFilename);
-        TTree *SIDISTree = (TTree*)SIDISFile->Get("tree");
-        TTree *MergeTree = (TTree*)MergeFile->Get("T");
+        SIDISTree->GetEntry(sEvent);
 
-        TLorentzVector* e = 0;
-        TVector3* Ve = 0;
-        TClonesArray* pi = new TClonesArray("TLorentzVector");
-        TClonesArray* Vpi = new TClonesArray("TVector3");
-        Double_t Ebeam, xB, Q2, omega, W;
-        Int_t Npis;
+        TVector3 pbeam(0, 0, Ebeam);
+        TVector3 lp = e->Vect();
+        y = omega/Ebeam;
+        
+        if (Q2 <= 1 || W <= 2 || y >= 0.75 || e->Theta() <= 0.0872665 || e->Theta() >= 0.610865) continue;
 
-        SIDISTree->SetBranchAddress("Ebeam", &Ebeam);
-        SIDISTree->SetBranchAddress("xB", &xB);
-        SIDISTree->SetBranchAddress("Q2", &Q2);
-        SIDISTree->SetBranchAddress("omega", &omega);
-        SIDISTree->SetBranchAddress("W", &W);
+        for (int piNo = 0; piNo < Npis; piNo++) {
+            ppi = (TLorentzVector*)pi->ConstructedAt(piNo);
+            Vxpi = (TVector3*)Vpi->ConstructedAt(piNo);
 
-        SIDISTree->SetBranchAddress("e", &e);
-        SIDISTree->SetBranchAddress("Ve", &Ve);
-        SIDISTree->SetBranchAddress("pi", &pi);
-        SIDISTree->SetBranchAddress("Vpi", &Vpi);
+            TVector3 q = l - lp;
+            TVector3 Ph = ppi->Vect();
+            double mmiss = sqrt(sq(omega + mN - ppi->E()) - (q - Ph).Mag2());
 
-        if (pionCode == 211) {
-            SIDISTree->SetBranchAddress("Npips", &Npis);
+            // if (Vxpi->z() == 0) continue;
+            if (ppi->P() < 1.25 || ppi->P() > 5 || ppi->Theta() <= 0.0872665 || ppi->Theta() >= 0.610865) continue;
+            // if (ppi->E() / omega <= 0.3) continue;
+
+            mmiss_hist->Fill(mmiss);
+
+            if (mmiss <= 1.5) continue;
+
+            TVector3 qu = q.Unit();
+
+            TVector3 quxl = qu.Cross(l);
+            TVector3 quxPh = qu.Cross(Ph);
+            TVector3 lxPh = l.Cross(Ph);
+
+            double phi_tr_y = lxPh.Dot(qu) / (quxl.Mag() * quxPh.Mag());
+            double phi_tr_x = quxl.Unit().Dot(quxPh.Unit());
+            double phi_tr_tan = atan2(phi_tr_y, phi_tr_x);
+            phi_tr_tan *= 180 / M_PI;
+            if (phi_tr_tan < 0) phi_tr_tan += 360;
+            double phi_tr = ((q.Cross(l).Dot(Ph)) / abs(q.Cross(l).Dot(Ph))) * (q.Cross(l).Dot(q.Cross(Ph)) / q.Cross(l).Mag() * q.Cross(Ph).Mag());
+
+            double pt = ppi->Perp(q);
+
+            theta_p_e_hist->Fill(e->P(), e->Theta() * 180 / M_PI);
+
+            Q2_hist->Fill(Q2);
+            xB_hist->Fill(xB);
+            Y_hist->Fill(y);
+            W_hist->Fill(W);
+            Vez_hist->Fill(Ve->z());
+            eP_hist->Fill(e->P());
+            theta_e_hist->Fill(e->Theta()*180/3.14);
+            phi_e_hist->Fill(e->Phi()*180/3.14);
+
+            Q2_xb_hist->Fill(xB, Q2);
+            Q2_W_hist->Fill(W, Q2);
+            xb_W_hist->Fill(W, xB);
+            E_theta_e_hist->Fill(e->Theta()*180/3.14, e->E());
+            E_phi_e_hist->Fill(e->Phi()*180/3.14, e->E());
+            theta_phi_e_hist->Fill(e->Phi()*180/3.14, e->Theta()*180/3.14);
+
+            theta_p_pi_hist->Fill(ppi->P(), ppi->Theta() * 180 / M_PI);
+            p_pi_hist->Fill(ppi->P());
+            theta_pi_hist->Fill(ppi->Theta() * 180 / M_PI);
+            phi_pi_hist->Fill(ppi->Phi() * 180 / M_PI);
+            pt_hist->Fill(pt);
+            z_hist->Fill(ppi->E() / omega);
+            z_pt_hist->Fill(pt, ppi->E() / omega);
+            pt_x_hist->Fill(xB, pt);
+
+            phi_trento_hist->Fill(phi_tr_tan);
         }
-        else {
-            SIDISTree->SetBranchAddress("Npims", &Npis);
-        }
-
-        const TVector3 l(0, 0, 10.2);
-
-        double y;
-        TLorentzVector* ppi;
-        TVector3* Vxpi;
-
-        for (int sEvent = 0; sEvent < SIDISTree->GetEntries(); sEvent++) {
-            if (sEvent == NeventsMax) break;
-
-            SIDISTree->GetEntry(sEvent);
-            Ebeam = 0;
-            xB = 0;
-            Q2 = 0;
-            omega = 0;
-            W = 0;
-            y = 0;
-
-            SIDISTree->GetEntry(sEvent);
-
-            TVector3 pbeam(0, 0, Ebeam);
-            TVector3 lp = e->Vect();
-            y = omega/Ebeam;
-            
-            if (Q2 <= 1 || W <= 2 || y >= 0.75 || e->Theta() <= 0.0872665 || e->Theta() >= 0.610865) continue;
-
-            for (int piNo = 0; piNo < Npis; piNo++) {
-                ppi = (TLorentzVector*)pi->ConstructedAt(piNo);
-                Vxpi = (TVector3*)Vpi->ConstructedAt(piNo);
-
-                TVector3 q = l - lp;
-                TVector3 Ph = ppi->Vect();
-                double mmiss = sqrt(sq(omega + mN - ppi->E()) - (q - Ph).Mag2());
-
-                // if (Vxpi->z() == 0) continue;
-                if (ppi->P() < 1.25 || ppi->P() > 5 || ppi->Theta() <= 0.0872665 || ppi->Theta() >= 0.610865) continue;
-                // if (ppi->E() / omega <= 0.3) continue;
-
-                mmiss_hist->Fill(mmiss);
-
-                if (mmiss <= 1.5) continue;
-
-                TVector3 qu = q.Unit();
-
-                TVector3 quxl = qu.Cross(l);
-                TVector3 quxPh = qu.Cross(Ph);
-                TVector3 lxPh = l.Cross(Ph);
-
-                double phi_tr_y = lxPh.Dot(qu) / (quxl.Mag() * quxPh.Mag());
-                double phi_tr_x = quxl.Unit().Dot(quxPh.Unit());
-                double phi_tr_tan = atan2(phi_tr_y, phi_tr_x);
-                phi_tr_tan *= 180 / M_PI;
-                if (phi_tr_tan < 0) phi_tr_tan += 360;
-                double phi_tr = ((q.Cross(l).Dot(Ph)) / abs(q.Cross(l).Dot(Ph))) * (q.Cross(l).Dot(q.Cross(Ph)) / q.Cross(l).Mag() * q.Cross(Ph).Mag());
-
-                double pt = ppi->Perp(q);
-
-                theta_p_e_hist->Fill(e->P(), e->Theta() * 180 / M_PI);
-
-                Q2_hist->Fill(Q2);
-                xB_hist->Fill(xB);
-                Y_hist->Fill(y);
-                W_hist->Fill(W);
-                Vez_hist->Fill(Ve->z());
-                eP_hist->Fill(e->P());
-                theta_e_hist->Fill(e->Theta()*180/3.14);
-                phi_e_hist->Fill(e->Phi()*180/3.14);
-
-                Q2_xb_hist->Fill(xB, Q2);
-                Q2_W_hist->Fill(W, Q2);
-                xb_W_hist->Fill(W, xB);
-                E_theta_e_hist->Fill(e->Theta()*180/3.14, e->E());
-                E_phi_e_hist->Fill(e->Phi()*180/3.14, e->E());
-                theta_phi_e_hist->Fill(e->Phi()*180/3.14, e->Theta()*180/3.14);
-
-                theta_p_pi_hist->Fill(ppi->P(), ppi->Theta() * 180 / M_PI);
-                p_pi_hist->Fill(ppi->P());
-                theta_pi_hist->Fill(ppi->Theta() * 180 / M_PI);
-                phi_pi_hist->Fill(ppi->Phi() * 180 / M_PI);
-                pt_hist->Fill(pt);
-                z_hist->Fill(ppi->E() / omega);
-                z_pt_hist->Fill(pt, ppi->E() / omega);
-                pt_x_hist->Fill(xB, pt);
-
-                phi_trento_hist->Fill(phi_tr_tan);
-            }
-        }
-        runIdx++;
     }
-    goodRunsFile.close();
 
     outfile->cd();
 
