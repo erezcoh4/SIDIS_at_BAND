@@ -6,6 +6,7 @@
 #
 import sys, os, linecache
 import argparse
+from subprocess import Popen, PIPE
 
 parser = argparse.ArgumentParser(description='SIDIS skimming of multiple runs')
 parser.add_argument("--Nruns",        type=int, default=-1,
@@ -48,23 +49,28 @@ runIdx = 0
 for line in run_fileLines[FirstRun:]:#{
     runIdx += 1
     run = int(line.strip())
-    commandline = ("clas12root -q 'SIDISc12rSkimmer.C+(%d,%d,%d,%d)'"%
-                    (run,NeventsMax,fdebug,PrintProgress))
-#    commandline = """"#!/bin/sh
-#SBATCH --job-name=s{1}
+#    commandline = ("clas12root -q 'SIDISc12rSkimmer.C+(%d,%d,%d,%d)'"%
+#                    (run,NeventsMax,fdebug,PrintProgress))
+    commandline = """#!/bin/sh
+#SBATCH --job-name=s{0}
+#SBATCH -p production
 #SBATCH --account=clas12
+#SBATCH --time=60
 #SBATCH --constraint=centos77
-#SBATCH --mem-per-cpu=2500
-#SBATCH --output={5}/sidis_{1}.txt
-#clas12root -q '{6}+({1},{2},{3},{4})'"%
-#""".format(run,NeventsMax,fdebug,PrintProgress), txt_dir, skimmer)
+#SBATCH --mem-per-cpu=1000
+#SBATCH --output={4}/sidis_{0}.txt
+clas12root -q '{5}+({0},{1},{2},{3})'
+""".format(run,NeventsMax,fdebug,PrintProgress, txt_dir, skimmer)
     print('')
     print("processing run %d/%d"%(runIdx,Nruns))
     print('')
     print(commandline)
     print('')
     
-    os.system( commandline )
+    p=Popen(args=["sbatch"],stdin=PIPE)
+    p.communicate(commandline.encode())
+    
+#    os.system( commandline )
     if (runIdx >= Nruns): break;
 #}
 
