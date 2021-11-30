@@ -3,20 +3,19 @@
 #include <fstream>
 #include <string>
 
+#include <TFile.h>
+#include <TTree.h>
 #include <TH1.h>
+#include <TClonesArray.h>
+#include <TLorentzVector.h>
+#include <TVector3.h>
 
 #include "../Auxiliary/bandhit.cpp"
 #include "../Auxiliary/clashit.cpp"
 
 TString DataPath             = "/volatile/clas12/users/akiral/BAND/";
 std::string GoodRunsFilename = "/work/clas12/users/akiral/SIDIS_at_BAND/macros/runlists/good_runs_10-2.txt";
-std::string OutputFilename   = "/u/home/akiral/plots/pion_ratio.root";
-
-TString SIDISFilename;
-TString mergeFilename;
-
-TFile * SIDISFile, * MergeFile;
-TTree * SIDISTree, * MergeTree;
+TString OutputFilename       = "/u/home/akiral/plots/pion_ratio.root";
 
 TH1D* mmiss_hist;
 TH1D* Q2_hist;
@@ -33,7 +32,6 @@ TH1D* theta_pi_hist;
 TH1D* phi_pi_hist;
 TH1D* phi_trento_hist;
 TH1D* pt_hist;
-TH1D* mmiss_hist;
 TH1D* z_hist;
 
 TH1D* theta_pi_root_hist;
@@ -53,7 +51,10 @@ TH2D* pt_x_hist;
 
 using namespace std;
 
-void PionRatio(TString pionCode) {
+void   InitializeHists();
+double sq(double x) {return x*x;}
+
+void PionRatios(Int_t pionCode, Int_t Nruns=-1, Int_t NeventsMax=-1) {
     InitializeHists();
 
     string pionType;
@@ -61,7 +62,7 @@ void PionRatio(TString pionCode) {
     if (pionCode == 211) {
         pionType = "plus";
     }
-    elif (pionCode == -211) {
+    else if (pionCode == -211) {
         pionType = "minus";
     }
     else {
@@ -69,7 +70,7 @@ void PionRatio(TString pionCode) {
         return;
     }
 
-    ofstream goodRunsFile;
+    ifstream goodRunsFile;
     goodRunsFile.open(GoodRunsFilename, ios::in);
     
     if (!goodRunsFile.is_open()) {
@@ -77,19 +78,22 @@ void PionRatio(TString pionCode) {
         return;
     }
 
-    TFile *outfile = new TFile(OutputFilename);
+    TFile *outfile = new TFile(OutputFilename, "RECREATE");
 
     string runNo;
+    Int_t runIdx = 0;
     while (getline(goodRunsFile, runNo)) {
+        if (runIdx == Nruns) break;
+
+        cout << "Run #" << runNo << endl;
+
         TString SIDISFilename  = DataPath + "SIDIS_skimming/skimmed_SIDIS_inc_" + runNo + "_e_pi" + pionType + ".root";
         TString MergeFilename  = DataPath + "merged_SIDIS_and_BAND_skimming/skimmed_SIDIS_and_BAND_inc_" + runNo + "_e_pi" + pionType + "_n.root";
 
         TFile *SIDISFile = new TFile(SIDISFilename);
         TFile *MergeFile = new TFile(MergeFilename);
-        TTree *SIDISTree = SIDISFile->Get("tree");
-        TTree *MergeTree = MergeFile->Get("T");
-
-        TFile *Out
+        TTree *SIDISTree = (TTree*)SIDISFile->Get("tree");
+        TTree *MergeTree = (TTree*)MergeFile->Get("T");
 
         TLorentzVector* e = 0;
         TVector3* Ve = 0;
@@ -116,16 +120,24 @@ void PionRatio(TString pionCode) {
             SIDISTree->SetBranchAddress("Npims", &Npis);
         }
 
-        for (int sEvent = 0; sEvent < SIDISFile->GetEntries(); sEvent++) {
-            SIDISFile->GetEntry(sEvent);
-            beam = 0;
+        const TVector3 l(0, 0, 10.2);
+
+        double y;
+        TLorentzVector* ppi;
+        TVector3* Vxpi;
+
+        for (int sEvent = 0; sEvent < SIDISTree->GetEntries(); sEvent++) {
+            if (sEvent == NeventsMax) break;
+
+            SIDISTree->GetEntry(sEvent);
+            Ebeam = 0;
             xB = 0;
             Q2 = 0;
             omega = 0;
             W = 0;
             y = 0;
 
-            tree->GetEntry(i);
+            SIDISTree->GetEntry(sEvent);
 
             TVector3 pbeam(0, 0, Ebeam);
             TVector3 lp = e->Vect();
@@ -133,9 +145,9 @@ void PionRatio(TString pionCode) {
             
             if (Q2 <= 1 || W <= 2 || y >= 0.75 || e->Theta() <= 0.0872665 || e->Theta() >= 0.610865) continue;
 
-            for (int j = 0; j < Npis; j++) {
-                ppi = (TLorentzVector*)pi->ConstructedAt(j);
-                Vxpi = (TVector3*)Vpi->ConstructedAt(j);
+            for (int piNo = 0; piNo < Npis; piNo++) {
+                ppi = (TLorentzVector*)pi->ConstructedAt(piNo);
+                Vxpi = (TVector3*)Vpi->ConstructedAt(piNo);
 
                 TVector3 q = l - lp;
                 TVector3 Ph = ppi->Vect();
@@ -192,13 +204,9 @@ void PionRatio(TString pionCode) {
                 pt_x_hist->Fill(xB, pt);
 
                 phi_trento_hist->Fill(phi_tr_tan);
-
-                int xb_Q2_bin = find_xb_Q2_bin(xB, Q2);
-                if (xb_Q2_bin != -1) {
-                    z_pt_hist_list[xb_Q2_bin]->Fill(pt, ppi->E() / omega);
-                }
             }
         }
+        runIdx++;
     }
     goodRunsFile.close();
 
@@ -232,38 +240,39 @@ void PionRatio(TString pionCode) {
     z_pt_hist->Write();
     pt_x_hist->Write();
 
+    outfile->Close();
 }
 
 void InitializeHists() {
-    TH1D* Q2_hist = new TH1D("Q2", "Q2; Q2 [GeV^2]", 100, 0, 12);
-    TH1D* xB_hist = new TH1D("xB", "xB; xB", 100, 0, 0.8);
-    TH1D* Y_hist = new TH1D("Y", "Y; Y", 100, 0, 1);
-    TH1D* W_hist = new TH1D("W", "W; W[GeV]", 100, 1, 5);
-    TH1D* Vez_hist = new TH1D("VeZ", "Electron Longitudinal Vertex; Ve_z", 100, -20, 20);
-    TH1D* eP_hist = new TH1D("eP", "Electron Momentum; Momentum [GeV/c]", 100, 0, 10);
-    TH1D* theta_e_hist = new TH1D("theta_e", "Electron Theta; Theta [degrees]", 180, 0, 40);
-    TH1D* phi_e_hist = new TH1D("phi_e", "Electron Phi; Phi [degrees]", 360, -180, 180);
+    Q2_hist = new TH1D("Q2", "Q2; Q2 [GeV^2]", 100, 0, 12);
+    xB_hist = new TH1D("xB", "xB; xB", 100, 0, 0.8);
+    Y_hist = new TH1D("Y", "Y; Y", 100, 0, 1);
+    W_hist = new TH1D("W", "W; W[GeV]", 100, 1, 5);
+    Vez_hist = new TH1D("VeZ", "Electron Longitudinal Vertex; Ve_z", 100, -20, 20);
+    eP_hist = new TH1D("eP", "Electron Momentum; Momentum [GeV/c]", 100, 0, 10);
+    theta_e_hist = new TH1D("theta_e", "Electron Theta; Theta [degrees]", 180, 0, 40);
+    phi_e_hist = new TH1D("phi_e", "Electron Phi; Phi [degrees]", 360, -180, 180);
 
-    TH1D* p_pi_hist = new TH1D("p", "Pion Momentum; p [GeV]", 100, 0, 6);
-    TH1D* theta_pi_hist = new TH1D("theta", "Pion angle; theta [deg]", 160, 0, 40);
-    TH1D* phi_pi_hist = new TH1D("phi", "Pion azimuthal angle; phi [deg]", 360, -180, -180);
-    TH1D* phi_trento_hist = new TH1D("phi_t", "Pion Phi Trento; phi trento [deg]", 360, 0, 360);
-    TH1D* pt_hist = new TH1D("pt", "Pion Transverse Momentum; Momentum [GeV/c]", 100, 0, 1.4);
-    TH1D* mmiss_hist = new TH1D("mmiss", "Missing mass; M_miss [GeV]", 200, 0, 4);
-    TH1D* z_hist = new TH1D("z", "z; z", 100, 0, 1);
+    p_pi_hist = new TH1D("p", "Pion Momentum; p [GeV]", 100, 0, 6);
+    theta_pi_hist = new TH1D("theta", "Pion angle; theta [deg]", 160, 0, 40);
+    phi_pi_hist = new TH1D("phi", "Pion azimuthal angle; phi [deg]", 360, -180, -180);
+    phi_trento_hist = new TH1D("phi_t", "Pion Phi Trento; phi trento [deg]", 360, 0, 360);
+    pt_hist = new TH1D("pt", "Pion Transverse Momentum; Momentum [GeV/c]", 100, 0, 1.4);
+    mmiss_hist = new TH1D("mmiss", "Missing mass; M_miss [GeV]", 200, 0, 4);
+    z_hist = new TH1D("z", "z; z", 100, 0, 1);
 
-    TH1D* theta_pi_root_hist = new TH1D("theta_root", "Pion angle; theta [deg]", 101, -10000, 100);
-    TH1D* phi_pi_root_hist = new TH1D("phi_root", "Pion azimuthal angle; phi [deg]", 101, -10000, 100);
+    theta_pi_root_hist = new TH1D("theta_root", "Pion angle; theta [deg]", 101, -10000, 100);
+    phi_pi_root_hist = new TH1D("phi_root", "Pion azimuthal angle; phi [deg]", 101, -10000, 100);
 
-    TH2D* Q2_xb_hist = new TH2D("Q2_xb", "Q2 vs xB; xB; Q2 [GeV^2]", 100, 0, 1, 100, 0, 10);
-    TH2D* Q2_W_hist = new TH2D("Q2_W", "Q2 vs W; W [GeV]; Q2 [GeV^2]", 100, 0, 5, 100, 0, 15);
-    TH2D* xb_W_hist = new TH2D("xb_W", "xB vs W; W [GeV]; xB", 100, 0, 5, 100, 0, 1);
-    TH2D* E_theta_e_hist = new TH2D("E_theta", "E vs theta; theta [deg]; E [GeV]", 50, 0, 50, 100, 0, 10);
-    TH2D* E_phi_e_hist = new TH2D("E_phi", "E vs phi; phi [deg]; E [GeV]", 360, -180, 180, 100, 0, 10);
-    TH2D* theta_phi_e_hist = new TH2D("theta_phi", "theta vs phi; phi [deg]; theta [deg]", 360, -180, 180, 50, 0, 50);
+    Q2_xb_hist = new TH2D("Q2_xb", "Q2 vs xB; xB; Q2 [GeV^2]", 100, 0, 1, 100, 0, 10);
+    Q2_W_hist = new TH2D("Q2_W", "Q2 vs W; W [GeV]; Q2 [GeV^2]", 100, 0, 5, 100, 0, 15);
+    xb_W_hist = new TH2D("xb_W", "xB vs W; W [GeV]; xB", 100, 0, 5, 100, 0, 1);
+    E_theta_e_hist = new TH2D("E_theta", "E vs theta; theta [deg]; E [GeV]", 50, 0, 50, 100, 0, 10);
+    E_phi_e_hist = new TH2D("E_phi", "E vs phi; phi [deg]; E [GeV]", 360, -180, 180, 100, 0, 10);
+    theta_phi_e_hist = new TH2D("theta_phi", "theta vs phi; phi [deg]; theta [deg]", 360, -180, 180, 50, 0, 50);
 
-    TH2D* theta_p_e_hist = new TH2D("theta_p_e", "Theta vs momentum - electron; p_e [GeV]; theta_e [deg]", 100, 2, 9, 30, 5, 35);
-    TH2D* theta_p_pi_hist = new TH2D("theta_p_pi", "Theta vs momentum - pion; p_pi [GeV]; theta_pi [deg]", 100, 1, 5, 30, 5, 35);
-    TH2D* z_pt_hist = new TH2D("z_pi", "Z vs Pt; Pt [GeV]; z", 100, 0, 1.6, 100, 0, 1);
-    TH2D* pt_x_hist = new TH2D("pt_x", "Pt vs x; x; Pt[GeV]", 100, 0, 1, 100, 0, 1.6);
+    theta_p_e_hist = new TH2D("theta_p_e", "Theta vs momentum - electron; p_e [GeV]; theta_e [deg]", 100, 2, 9, 30, 5, 35);
+    theta_p_pi_hist = new TH2D("theta_p_pi", "Theta vs momentum - pion; p_pi [GeV]; theta_pi [deg]", 100, 1, 5, 30, 5, 35);
+    z_pt_hist = new TH2D("z_pi", "Z vs Pt; Pt [GeV]; z", 100, 0, 1.6, 100, 0, 1);
+    pt_x_hist = new TH2D("pt_x", "Pt vs x; x; Pt[GeV]", 100, 0, 1, 100, 0, 1.6);
 }
