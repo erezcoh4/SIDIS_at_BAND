@@ -19,8 +19,8 @@
 #include <TCanvas.h>
 #include <TBenchmark.h>
 #include "clas12reader.h"
-#include "/u/home/cohen/SIDIS_at_BAND/Auxiliary/DCfid_SIDIS.cpp"
-#include "/u/home/cohen/SIDIS_at_BAND/Auxiliary/csv_reader.h"
+#include "Auxiliary/DCfid_SIDIS.cpp"
+#include "Auxiliary/csv_reader.h"
 #define NMAXPIONS 20 // maximal allowed number of pions
 #define r2d 180./3.1415 // radians to degrees
 using namespace clas12;
@@ -95,6 +95,7 @@ double             cutValue_e_PCAL_W;
 double             cutValue_e_PCAL_V;
 double             cutValue_e_E_PCAL;
 double cutValue_SamplingFraction_min;
+double     cutValue_PCAL_ECIN_SF_min;
 double        cutValue_Ve_Vpi_dz_max;
 double               cutValue_Q2_min;
 double                cutValue_W_min;
@@ -132,6 +133,7 @@ int Nevents_passed_e_pips_kinematics_cuts;
 int    Nevents_passed_pims_cuts;
 int  Nevents_passed_e_pims_cuts;
 int Nevents_passed_e_pims_kinematics_cuts;
+int                   inclusive; // tag to look at inclusive run
 
 // number of particles per event
 int         Ne, Nn, Np, Npips, Npims, Ngammas;
@@ -252,16 +254,20 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
                       int  fdebug=1,
                       int  PrintProgress=50000,
                       int NpipsMin=1, // minimal number of pi+
-                      TString DataPath = "/volatile/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train_20200610/inc/" ){
+                      TString DataPath = "/volatile/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train_20200610/inc/",
+                      int setInclusive=0 ){
     TString RunNumberStr = GetRunNumberSTR(RunNumber,fdebug);
     // read cut values
     loadCutValues("cutValues.csv",fdebug);
-    
+
+    inclusive = setInclusive;
+    if (inclusive == 1) std::cout << "Running as inclusive" << std::endl;
+
     // open result files
     TString outfilepath = "/volatile/clas12/users/ecohen/BAND/SIDIS_skimming/";
     TString outfilename = "skimmed_SIDIS_inc_" + RunNumberStr;
     OpenResultFiles( outfilepath, outfilename );
-    
+
     TString inputFile = DataPath + "inc_" + RunNumberStr + ".hipo";
     TChain fake("hipo");
     fake.Add(inputFile.Data());
@@ -302,7 +308,7 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
             // we keep only d(e,e’pi+)X and d(e,e’pi-)X events
             if(  0 < Ne // after studying some MC and data, we need to kill events with more than 1 electron
                &&
-               ((0 < Npips && Npips < NMAXPIONS) || (0 < Npims && Npims < NMAXPIONS)) ){
+               (inclusive == 1 || (0 < Npips && Npips < NMAXPIONS) || (0 < Npims && Npims < NMAXPIONS)) ){
                    
                 ExtractElectronInformation  (fdebug);
                 ComputeKinematics           ();
@@ -359,7 +365,7 @@ bool CheckIfElectronPassedSelectionCuts(Double_t e_PCAL_x, Double_t e_PCAL_y,
     // sometimes the readout-sector is 0. This is funny
     // Justin B. Estee (June-21): I also had this issue. I am throwing away sector 0. The way you check is plot the (x,y) coordinates of the sector and you will not see any thing. Double check me but I think it is 0.
     if (e_DC_sector == 0) return false;
-    
+
     for (int regionIdx=0; regionIdx<3; regionIdx++) {
         // DC_e_fid:
         // sector:  1-6
@@ -379,10 +385,10 @@ bool CheckIfElectronPassedSelectionCuts(Double_t e_PCAL_x, Double_t e_PCAL_y,
     }
     
     
-    if(
+    if(!(true
        // fiducial cuts on PCAL
-       fabs(e_PCAL_x)>0
-       &&  fabs(e_PCAL_y)>0
+       //fabs(e_PCAL_x)>0
+       //&&  fabs(e_PCAL_y)>0
        &&  e_PCAL_W > cutValue_e_PCAL_W
        &&  e_PCAL_V > cutValue_e_PCAL_V
        
@@ -391,15 +397,15 @@ bool CheckIfElectronPassedSelectionCuts(Double_t e_PCAL_x, Double_t e_PCAL_y,
        
        // Sampling fraction cut
        && ((e_E_PCAL + e_E_ECIN + e_E_ECOUT)/e.P()) > cutValue_SamplingFraction_min
-       && (e_E_ECIN/e.P() > 0.2 - e_E_PCAL/e.P()) // RGA AN puts "<" here mistakenly
+       && (e_E_ECIN/e.P() > cutValue_PCAL_ECIN_SF_min - e_E_PCAL/e.P()) // RGA AN puts "<" here mistakenly
        
        // Cut on z-vertex position: in-bending torus field -13.0 cm < Vz < +12.0 cm
        // Spring 19 and Spring 2020 in-bending.
        // Fall 2019 (without low-energy-run) was out-bending.
        &&  ((cutValue_Vz_min < Ve.Z()) && (Ve.Z() < cutValue_Vz_max))
-       ) return true;
+       )) return false;
     
-    return false;
+    return true;
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
@@ -439,7 +445,7 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
         std::cout << "pion charge is not defined in CheckIfPionPassedSelectionCuts(), returning false" << std::endl;
         return false;
     }
-    
+
     for (int regionIdx=0; regionIdx<3; regionIdx++) {
         // DC_e_fid:
         // sector:  1-6
@@ -480,18 +486,17 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
         << "fabs((Ve-Vpi).Z()): "   << fabs((Ve-Vpi).Z())       << ","
         << std::endl;
     }
-    if(
+    if(!
        // pi+ Identification Refinement - chi2PID vs. momentum
-       ( Chi2PID_pion_lowerBound( p, C ) < chi2PID && chi2PID < Chi2PID_pion_upperBound( p , C ) )
+       (( Chi2PID_pion_lowerBound( p, C ) < chi2PID && chi2PID < Chi2PID_pion_upperBound( p , C ) )
        
        // Cut on the z-Vertex Difference Between Electrons and Hadrons.
        &&  ( fabs((Ve-Vpi).Z()) < cutValue_Ve_Vpi_dz_max )
-       ) {
-        if (fdebug>3) { std::cout << "succesfully passed CheckIfPionPassedSelectionCuts(), return true" << std::endl; }
-        
-        return true;
+       )) {
+        return false;
     }
-    return false;
+    if (fdebug>3) { std::cout << "succesfully passed CheckIfPionPassedSelectionCuts(), return true" << std::endl; }
+    return true;
 }
 
 
@@ -666,15 +671,15 @@ void StreamToCSVfile (TString pionCharge, // "pi+" or "pi-"
     }
     // decide which file to write...
     if (pionCharge=="pi+") {
-        for (auto v:observables) CSVfile_e_piplus << v << ",";
+        for (auto v:observables) CSVfile_e_piplus << std::fixed << v << ",";
         CSVfile_e_piplus << std::endl;
         
         if (passed_cuts_e_pi) {
-            for (auto v:observables) SelectedEventsCSVfile_e_piplus << v << ",";
+            for (auto v:observables) SelectedEventsCSVfile_e_piplus << std::fixed << v << ",";
             SelectedEventsCSVfile_e_piplus << std::endl;
             
             if (passed_cuts_e_pi_kinematics){
-                for (auto v:observables) SelectedEventsCSVfile_e_piplus_kinematics << v << ",";
+                for (auto v:observables) SelectedEventsCSVfile_e_piplus_kinematics << std::fixed << v << ",";
                 SelectedEventsCSVfile_e_piplus_kinematics << std::endl;
             }
         }
@@ -735,6 +740,7 @@ void loadCutValues(TString cutValuesFilename, int fdebug){
     cutValue_e_PCAL_V               = FindCutValue("e_PCAL_V_min");
     cutValue_e_E_PCAL               = FindCutValue("e_E_PCAL_min");
     cutValue_SamplingFraction_min   = FindCutValue("SamplingFraction_min");
+    cutValue_PCAL_ECIN_SF_min       = FindCutValue("PCAL_ECIN_SF_min");
     cutValue_Ve_Vpi_dz_max          = FindCutValue("(Ve-Vpi)_z_max");
     cutValue_Q2_min                 = FindCutValue("Q2_min");
     cutValue_W_min                  = FindCutValue("W_min");
@@ -808,6 +814,7 @@ void SetOutputTTrees(){
     // pi+
     outTree_e_piplus->Branch("eventnumber"          ,&evnum                 );
     outTree_e_piplus->Branch("runnum"               ,&runnum                );
+    outTree_e_piplus->Branch("inclusive"            ,&inclusive             );
     outTree_e_piplus->Branch("e_E_PCAL"             ,&e_E_PCAL              );
     outTree_e_piplus->Branch("e_E_ECIN"             ,&e_E_ECIN              );
     outTree_e_piplus->Branch("e_E_ECOUT"            ,&e_E_ECOUT             );
@@ -877,6 +884,7 @@ void SetOutputTTrees(){
     // pi-
     outTree_e_piminus->Branch("eventnumber"          ,&evnum                 );
     outTree_e_piminus->Branch("runnum"               ,&runnum                );
+    outTree_e_piminus->Branch("inclusive"            ,&inclusive             );
     outTree_e_piminus->Branch("e_E_PCAL"             ,&e_E_PCAL              );
     outTree_e_piminus->Branch("e_E_ECIN"             ,&e_E_ECIN              );
     outTree_e_piminus->Branch("e_E_ECOUT"            ,&e_E_ECOUT             );
@@ -1074,7 +1082,7 @@ void InitializeVariables(){
     }
     Ve                                  = TVector3();
     ePastCutsInEvent                    = false;
-    
+
     piplus      .clear();
     piminus     .clear();
     Vpiplus     .clear();
@@ -1239,8 +1247,15 @@ void ExtractPionsInformation(int fdebug){
 void WriteEventToOutput(int fdebug){
     // (Maybe) write this event to "selected events csv-file"
     bool            IsSelected_eepi = false;
+
+    //ePastCutsInEvent = true;
+    if (inclusive == 1) {
+        pipsPastCutsInEvent = true;
+        pimsPastCutsInEvent = true;
+        eepipsPastCutsInEvent = true;
+        eepimsPastCutsInEvent = true;
+    }
     
-        
     if (ePastCutsInEvent && pipsPastCutsInEvent) {
         IsSelected_eepi = true;
         outTree_e_piplus -> Fill();
@@ -1248,7 +1263,6 @@ void WriteEventToOutput(int fdebug){
         
         Nevents_passed_e_pips_cuts ++ ;
         if (eepipsPastCutsInEvent) Nevents_passed_e_pips_kinematics_cuts ++;
-
         
         for (int pipsIdx=0; pipsIdx<Npips; pipsIdx++) {
             Stream_e_pi_line_to_CSV( "pi+", pipsIdx,
