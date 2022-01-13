@@ -389,6 +389,7 @@ bool CheckIfElectronPassedSelectionCuts(Double_t e_PCAL_x, Double_t e_PCAL_y,
                                              e_DC_sector,        // sector
                                              regionIdx+1,        // layer
                                              bending);           // torus bending
+        cout << regionIdx << " " << e_DC_x[regionIdx] << " " << e_DC_y[regionIdx] << " " << e_DC_sector << " " DC_fid << endl;
         if (DC_fid == false) {
             return false;
         }

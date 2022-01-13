@@ -16,6 +16,8 @@ parser.add_argument("--fdebug",       type=int, default=0,
                     required=False, help="verbosity")
 parser.add_argument("--PrintProgress",type=int, default=500000,
                     required=False, help="print progress (every N events)")
+parser.add_argument("--Neutrons",     type=int, default=0,
+                    required=False, help="tagged (1) or untagged (0)")
 args = parser.parse_args()
 
 Nruns         = args.Nruns
@@ -23,10 +25,14 @@ NeventsMax    = args.NeventsMax
 fdebug        = args.fdebug
 PrintProgress = args.PrintProgress
 FirstRun      = args.FirstRun
+Neutrons      = args.Neutrons
 runs_filename = "/work/clas12/users/akiral/SIDIS_at_BAND/macros/runlists/good_runs_10-2.txt"
 txt_dir       = "/volatile/clas12/users/akiral/BAND/txt_files"
 skimmer       = "/work/clas12/users/akiral/SIDIS_at_BAND/CppAnalysis/PionRatios.C"
 pion_codes    = [211, -211]
+
+if Neutrons:
+    skimmer = "/work/clas12/users/akiral/SIDIS_at_BAND/CppAnalysis/TaggedRatios.C"
 
 
 # Using readlines()
@@ -35,8 +41,8 @@ run_fileLines = runs_file.readlines()
 if Nruns<0: Nruns = len(run_fileLines)
 if fdebug>1:#{
     print('good runs to process:')
-    for line in run_fileLines[FirstRun:]:#{
-        print(int(line.strip()), end =" ")
+    #for line in run_fileLines[FirstRun:]:#{
+    #    print(int(line.strip()), end =" ")
     #}
     print('')
     print('processing %d runs, starting from run %d'%(Nruns-FirstRun,FirstRun))
@@ -57,9 +63,10 @@ for line in run_fileLines[FirstRun:]:#{
     #SBATCH --time=60
     #SBATCH --constraint=centos77
     #SBATCH --mem-per-cpu=1000
-    #SBATCH --output={3}/hist_{0}.txt
-    clas12root -q '{4}+({0},{1},{2})'
-    """.format(run, NeventsMax, pion_code, txt_dir, skimmer)
+    #SBATCH --error={4}/hist_err_{0}.txt
+    #SBATCH --output={4}/hist_{0}.txt
+    root -l -q '{5}({0},{1},{2},{3})'
+    """.format(run, NeventsMax, pion_code, Neutrons, txt_dir, skimmer)
         print('')
         print("processing run %d/%d/%d"%(runIdx,Nruns,pion_code))
         print('')
