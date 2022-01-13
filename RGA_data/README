@@ -1,0 +1,28 @@
+"Hayward, Timothy" <timothy.hayward@uconn.edu>: Jan-11, 2022
+------------------------------------------------------------
+
+We used the files here, /cache/clas12/rg-a/production/recon/fall2018/torus-1/pass1/v0/dst/train/skim4/, of which an updated (but still compatible with our analysis) skim that you should use now would be /cache/clas12/rg-a//production/recon/fall2018/torus-1/pass1/v1/dst/train/nSidis/.
+
+
+
+Dien Nguyen <dien@jlab.org>: Jan-11, 2022
+------------------------------------------------------------
+Do these DST files include your analysis selection cuts (The cuts listed in the RGA analysis note) yet?
+
+Just curious what is the "n" in "nSIDIS" for?
+
+
+
+"Hayward, Timothy" <timothy.hayward@uconn.edu>: Jan-11, 2022
+------------------------------------------------------------
+
+The modern “nSIDIS” skim has e- in FD, Q2 > 1, W > 2, p_e > 2, -25 < v_z < 20, c.f.
+
+https://clas12-docdb.jlab.org/DocDB/0009/000958/003/Fa18%20and%20Sp19%20Skim%20Description.pdf
+
+https://clasweb.jlab.org/wiki/index.php/Run_Group_A#tab=Trains
+
+So not all of our cuts yet (xF, etc.).
+
+Curious what is the "n" in "nSIDIS" for?
+Yeah, uh, I’ve never really thought about it too much. I think it was meant to signify any number of particles… I’m not really sure.
