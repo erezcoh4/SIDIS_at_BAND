@@ -1,0 +1,21 @@
+Hi Alex and Erez,
+
+Please find the simulation file RGB people use to compare to data in the Link Harut provided in his email.
+
+These simulation files are for SIDIS reaction on free proton and Neutron. So when they want to have Deuteron sample they just mix proton and neutron sample corresponding to its cross-section.
+
+Generated event -> Pass-through full GEMC (Geant4) simulation, the output is the hipo files that include both MC information also reconstructed information. So I think that you need to use your SIDIS skim to create the root files from these MC hipo files in order to do analysis and comparison. Also, you need to modify the SIDIS skim to get MC information out for the acceptance study. I believe that the SIDIS skim is converting data's hipo file so it only include the reconstructed bank information (REC::Particle) but generated information is stored in MC bank (MC::Particle) in the hipo file.
+
+Please let me know if you have more questions for me.
+
+
+
+
+RGB test runs for proton and neutron ~10M events with 10.6 GeV inbending
+full cooked files
+/work/clas12/avakian/mc/mcfeb2021/T-1.00_S-1.0/clasdisprot-parj2.0.3parj30.4parj120.75/cooked/*hipo
+/work/clas12/avakian/mc/mcfeb2021/T-1.00_S-1.0/clasdisneutr-parj2.0.3parj30.4parj120.75/cooked/*hipo
+
+the dsts I copied to
+/work/clas12/avakian/mc/he3/MC_clasdis.neutron.hipo
+/work/clas12/avakian/mc/he3/MC_clasdis.proton.hipo
