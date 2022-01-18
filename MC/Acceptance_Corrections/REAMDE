@@ -1,0 +1,61 @@
+
+--------------------------------------------------
+Simulation using GEMC
+--------------------------------------------------
+
+Simulation of tagged (e,e'\pi) events - by Tyler K.
+-------------------------
+(1) set environement
+
+> source set_gemc_env.csh
+
+(2) simulate
+
+/u/home/cohen/clas12Tags/4.4.1/source/gemc /u/home/cohen/clas12Tags/gcards/band-clas12.gcard -USE_GUI=0 -N=10000 -INPUT_GEN_
+FILE="LUND, /volatile/clas12/users/ecohen/GEMC/LUND/10.2/AcceptanceCorrection/pips/eepips_p_uniform_distribution.dat" -OUTPUT="evio, /volatile/clas12/users/ecohen/GEMC/evio/10.2/AcceptanceCorrection/pips/eepips_p_uniform_distribution.ev"
+
+/u/home/cohen/clas12Tags/4.4.1/source/gemc /u/home/cohen/clas12Tags/gcards/band-clas12.gcard -USE_GUI=0 -N=10000 -INPUT_GEN_
+FILE="LUND, /volatile/clas12/users/ecohen/GEMC/LUND/10.2/AcceptanceCorrection/pims/eepims_p_uniform_distribution.dat" -OUTPUT="evio, /volatile/clas12/users/ecohen/GEMC/evio/10.2/AcceptanceCorrection/pims/eepims_p_uniform_distribution.ev"
+
+
+(3) cook
+
+    > open different environement for cooking
+    > source set_cook_env.csh
+    > cd clas12-offline-software/
+    > ./build-coatjava.sh
+    
+    then convert EVIO to HIPO:
+    > /u/home/cohen/clas12-offline-software/coatjava/bin/evio2hipo -t -1 -s -1 -r 11 -i /volatile/clas12/users/ecohen/GEMC/evio/10.2/AcceptanceCorrection/pips/eepips_p_uniform_distribution.ev -o /volatile/clas12/users/ecohen/GEMC/hipo/10.2/AcceptanceCorrection/pips/eepips_p_uniform_distribution.hipo
+    
+(4) read output hipo file
+
+    > read_gemc_pion_acceptance
+    
+
+
+
+Using a shell script:
+------------------------
+./run_gemc_for_pi_acceptance_map.sh <pi charge> <Nevents>
+./run_gemc_for_pi_acceptance_map.sh pips 100
+
+
+Simulation of tagged (e,e') events - by Tyler K.
+-------------------------
+(0) set environement
+
+> source set_gemc_env.csh
+
+(1) simulate
+
+/u/home/cohen/clas12Tags/4.4.1/source/gemc /u/home/cohen/clas12Tags/gcards/band-clas12.gcard -USE_GUI=0 -N=10 -INPUT_GEN_
+FILE="LUND, /volatile/clas12/users/ecohen/GEMC/LUND/10.2/tagged/WP/lund_tagged_WP_00001.dat" -OUTPUT="evio, /volatile/cla
+s12/users/ecohen/GEMC/evio/10.2/tagged/WP/gemc_tagged_WP_00001.ev"
+
+
+(2) cook
+
+ > open different environement for cooking
+
+

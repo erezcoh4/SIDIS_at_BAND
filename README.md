@@ -11,6 +11,24 @@ This repository is responsible for
     
 ## Revisions
 
+
+Jan-18, 2022    
+-------------
+1. Commence working on pion acceptance corrections 
+
+    A. In order to produce pion acceptance maps, a python script was compiled in:
+    
+    MC/Acceptance_Corrections/produce_LUND_file_for_GEMC.py
+    
+    This script generates multiple d(e,e'pi) events with the same electron, and a pion with momentum in which (p,cos\theta,\phi) are distributed uniformly
+    The output of this script are LUND files for pi+ and pi-, that are processed on the ifarm with dedicated GEMC running commands
+    
+    B. Another script based on .C was compiled to read the GEMC result hipo files (after cooking), in 
+    
+        MC/Acceptance_Corrections/Read_PiAcceptance_GEMCimulations.C
+        macros/read_gemc_pion_acceptance      
+
+
 Nov-25, 2021    
 -------------
 1. Fixed a bug in writing a long event number to the SIDIS-BAND merged CSV file by using std::fixed

@@ -1,0 +1,42 @@
+
+LUND format is used as a possile input to GEMC
+(-INPUT_GEN_FILE="LUND, input.dat")
+
+LUND format: [https://gemc.jlab.org/gemc/html/documentation/generator/lund.html]
+---------------------------------------------------------------------------------------------------------
+After the header there are N lines (one per particle) describing each particle property as described in the tables below.
+A bold indicates quantities used by GEMC. The other variables are labelled UD (for used designed). The UD variables are not used by GEMC but are kept in the output stream. In the table below the UD variables are an example from the JLab CLAS12 conventions, but users can assign any meaning to them.
+
+
+NParticles, targA, targZ, targP, beamP, beamType, beamE, interactN, i, weight
+j, 0.0, 1, particleID[j], 0, 0, px, py, pz, E, particleMass[j], vx, vy, vz
+LUND Header
+column
+Number of particles ,Mass number of the target (UD) ,Atomic number oif the target (UD) ,Target polarization (UD) ,Beam Polarization ,Beam type, electron=11, photon=22” (UD) ,Beam energy (GeV) (UD) ,Interacted nucleon ID (2212 or 2112) (UD) ,Process ID (UD) ,Event weight (UD)
+
+LUND Particles
+index ,Lifetime [nanoseconds] (UD) ,type (1 is active) ,particle ID ,Index of the parent (UD) ,Index of the first daughter (UD) ,momentum x [GeV] ,momentum y [GeV] ,momentum z [GeV] ,Energy of the particle [GeV] (UD) ,Mass of the particle [GeV] (UD) ,vertex x [cm] ,vertex y [cm] ,vertex z [cm]
+
+Example: 1 DVCS events (eP𝜋0𝛾):
+------------------------------
+4   1   1    0.0   0.0 11   10.600   1       1      0.2373006E-02
+1  -1.  1     11   0    0  -0.9830   0.0981  9.6502  9.7007  0.0005  0.0000 0.0000  -0.8072
+2   1.  1   2212   0    0   0.7333   0.1126  0.6391  1.3560  0.9380  0.0000 0.0000  -0.8072
+3   0.  1    111   0    0   0.2498  -0.2107  0.2808  0.4515  0.1349  0.0000 0.0000  -0.8072
+4   0.  1     22   0    0  -0.0001  -0.0000  0.0299  0.0299  0.0000  0.0000 0.0000  -0.8072
+
+Example: one d(e,e'n) event
+------------------------------
+NParticles=2, targA=2, targZ=1, targP=0, beamP=0, beamType=11, beamE=10.2, interactN=1, i=nEvent, weight=1.
+
+2, 2, 1, 0.0, 0.0, 11, 10.2, 1, 0, 1.
+1, 0.0, 1, 11, 0, 0, 0.4, 0.2, 5.2, 5.2, 0.511e-3, 0, 0, 1.2
+2, 0.0, 1, 2112, 0, 0, -0.7, 0.12, -1.8, 2.1, 0.93957, 0, 0, -0.3
+
+
+
+
+The C scripts were originally copied from Tyler, June 2021
+
+/w/hallb-scifs17exp/clas12/users/tkutz/gemc/LUND/LUND_tagged_loop.C
+/w/hallb-scifs17exp/clas12/users/tkutz/gemc/LUND/LUND_tagged.C
