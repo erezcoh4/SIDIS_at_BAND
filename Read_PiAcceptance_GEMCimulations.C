@@ -40,7 +40,7 @@ auto start = std::chrono::high_resolution_clock::now();
 TVector3                GetParticleVertex (clas12::region_part_ptr rp);
 void                     SetLorentzVector (TLorentzVector &p4, clas12::region_part_ptr rp);
 void                      OpenOutputFiles (TString filelabel, TString header);
-void                     CloseOutputFiles (TString OutDataPath, TString outfilename);
+void                     CloseOutputFiles ();
 void                      StreamToCSVfile (std::vector<Double_t> observables,
                                            int fdebug);
 void                InitializeFileReading (int NeventsMax,int c12Nentries, int fdebug);
@@ -52,7 +52,7 @@ void               ExtractPipsInformation (int pipsIdx, int fdebug );
 void               ExtractPimsInformation (int pimsIdx, int fdebug );
 void                    ComputeKinematics ();
 void                   WriteEventToOutput (int fdebug);
-void                        FinishProgram (TString outfilepath, TString outfilename);
+void                        FinishProgram ();
 void                   GetParticlesByType (int evnum, int fdebug );
 void              Stream_e_pi_line_to_CSV (int fdebug );
 void                          SetDataPath ( TString fDataPath )  {DataPath = fDataPath;}
@@ -270,7 +270,7 @@ void Read_PiAcceptance_GEMCimulations(int  NeventsMax=-1,
     } // end file loop
     
     
-    FinishProgram( outfilepath, outfilename);
+    FinishProgram();
 }
 
 
@@ -300,58 +300,20 @@ void OpenOutputFiles (TString header){
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-void CloseOutputFiles (TString OutDataPath, TString outfilename){
+void CloseOutputFiles (){
     // close output CSV
-    CSVfile_e_piplus                .close();
-    SelectedEventsCSVfile_e_piplus  .close();
-    SelectedEventsCSVfile_e_piplus_kinematics  .close();
-    CSVfile_e_piminus               .close();
-    SelectedEventsCSVfile_e_piminus .close();
-    SelectedEventsCSVfile_e_piminus_kinematics .close();
-
-    int Nentires_e_piplus  = outTree_e_piplus  -> GetEntries();
-    int Nentires_e_piminus = outTree_e_piminus -> GetEntries();
-    
-    // close output ROOT
-    outFile_e_piplus->cd();
-    outTree_e_piplus->Write();
-    outFile_e_piplus->Close();
-    
-    outFile_e_piminus->cd();
-    outTree_e_piminus->Write();
-    outFile_e_piminus->Close();
+    CSVfile.close();
     
     
     std::cout
     << "Done processesing "  <<  Nevents_processed          << " events,"
-    << std::endl
-    << std::setprecision(3)
-    << (float)Nevents_passed_e_cuts/Nevents_processed       << " events passed e cuts,"
-    << std::endl
-    << (float)Nevents_passed_pips_cuts/Nevents_processed    << " events passed pi+ cuts,"
-    << std::endl
-    << "\t" << (float)Nevents_passed_e_pips_cuts/Nevents_processed  << " passed (e,e'pi+) cuts,"
-    << std::endl
-    << "\t\t" << (float)Nevents_passed_e_pips_kinematics_cuts/Nevents_processed  << " also passed kinematical cuts,"
-    << std::endl
-    << (float)Nevents_passed_pims_cuts/Nevents_processed    << " events passed pi- cuts,"
-    << std::endl
-    << "\t" << (float)Nevents_passed_e_pims_cuts/Nevents_processed  << " passed (e,e'pi-) cuts,"
-    << std::endl
-    <<  "\t\t" << (float)Nevents_passed_e_pims_kinematics_cuts/Nevents_processed  << " also passed kinematical cuts,"
     << std::endl;
     
     
     
-    std::cout << "output files ready in root/csv formats in " << std::endl
+    std::cout << "output files ready in csv formats in " << std::endl
     << std::endl
-    << "wrote "  << Nentires_e_piplus  << " to (e,e'pi+) root file, "
-    << std::endl << outFile_e_piplus -> GetName()
-    << std::endl << OutDataPath + outfilename + "_e_piplus_selected_*.csv"
-    << std::endl
-    << "and "    << Nentires_e_piminus << " to (e,e'pi-) root file. "
-    << std::endl << outFile_e_piminus -> GetName()
-    << std::endl << OutDataPath + outfilename + "_e_piminus_selected_*.csv"
+    < std::endl << DataPath + "/" + PiCharge + "/" + "ee" + piCharge + "_" + FileLabel + ".csv"
     << std::endl;
 }
 
@@ -696,12 +658,12 @@ void WriteEventToOutput(int fdebug){
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-void FinishProgram(TString outfilepath, TString outfilename){
+void FinishProgram(){
     auto finish = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed = finish - start;
     
     std::cout << "Done. Elapsed time: " << elapsed.count() << std::endl;
-    CloseOutputFiles( outfilepath, outfilename );
+    CloseOutputFiles();
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
