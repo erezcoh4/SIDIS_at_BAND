@@ -1,4 +1,6 @@
 
+// clas12root Read_PiAcceptance_GEMCimulations.C\(\10, 1\)
+
 #ifdef __CINT__
 #pragma link C++ class std::vector<TVector3>+;
 #pragma link C++ class std::vector<TLorentzVector>+;
@@ -179,8 +181,7 @@ std::vector<region_part_ptr>  electrons, neutrons, protons, pipluses, piminuses,
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 // Main functionality
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-void Read_PiAcceptance_GEMCimulations(int  RunNumber=6420,
-                                      int  NeventsMax=-1,
+void Read_PiAcceptance_GEMCimulations(int  NeventsMax=-1,
                                       int  fdebug=1,
                                       int  PrintProgress=50000,
                                       TString fDataPath = "/volatile/clas12/users/ecohen/GEMC/hipo/10.2/AcceptanceCorrection/",
