@@ -313,7 +313,7 @@ void CloseOutputFiles (){
     
     std::cout << "output files ready in csv formats in " << std::endl
     << std::endl
-    < std::endl << DataPath + "/" + PiCharge + "/" + "ee" + PiCharge + "_" + FileLabel + ".csv"
+    << DataPath + "/" + PiCharge + "/" + "ee" + PiCharge + "_" + FileLabel + ".csv"
     << std::endl;
 }
 
@@ -407,7 +407,6 @@ void InitializeVariables(){
         e_DC_z[regionIdx]               = -9999;
     }
     Ve                                  = TVector3();
-    ePastCutsInEvent                    = false;
 
     piplus      .clear();
     piminus     .clear();
@@ -690,11 +689,11 @@ void Stream_e_pi_line_to_CSV( int fdebug ){
     TLorentzVector  pi;
     TVector3        Vpi;
     double          Zpi;
-    if (piCharge=="pips") {
+    if (PiCharge=="pips") {
         pi  = piplus [piIdx];
         Vpi = Vpiplus[piIdx];
     }
-    else if (piCharge=="pims") {
+    else if (PiCharge=="pims") {
         pi  = piminus [piIdx];
         Vpi = Vpiminus[piIdx];
    }
