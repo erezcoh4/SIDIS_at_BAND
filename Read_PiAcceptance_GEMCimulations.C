@@ -244,8 +244,8 @@ void Read_PiAcceptance_GEMCimulations(int  NeventsMax=-1,
 
               cout <<
                 "MC particle "  << i_mc     << " " << pid    <<
-                " p4 = "        << p4.X()   << "," << p4.Y() << "," << p4.Z() << "," << p4.T()
-                << ", mass "    << p4.M()
+                " p4 = "        << P_mc_particle.X()   << "," << P_mc_particle.Y() << "," << P_mc_particle.Z() << "," << P_mc_particle.T()
+                << ", mass "    << P_mc_particle.M()
                 << endl;
               
             }
