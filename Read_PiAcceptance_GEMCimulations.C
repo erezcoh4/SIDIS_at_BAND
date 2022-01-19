@@ -259,7 +259,7 @@ void Read_PiAcceptance_GEMCimulations(int  NeventsMax=-1,
                 ExtractPionsInformation     (fdebug);
             }
             else {
-                if (fdebug>1) std::cout << "no electrons in event " << event << std::cout
+                if (fdebug>1) std::cout << "no electrons in event " << event << std::endl;
             }
             WriteEventToOutput              (fdebug);
             
