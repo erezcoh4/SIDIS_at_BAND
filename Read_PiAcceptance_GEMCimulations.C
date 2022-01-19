@@ -185,11 +185,11 @@ std::vector<region_part_ptr>  electrons, neutrons, protons, pipluses, piminuses,
 // Main functionality
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void Read_PiAcceptance_GEMCimulations(TString fPiCharge = "pips",
-                                      int  NeventsMax=-1,                                      
+                                      int  NeventsMax=-1,
                                       int  fdebug=1,
                                       int  PrintProgress=50000,
                                       TString fFileLabel = "p_uniform_distribution",
-                                      TString fDataPath = "/volatile/clas12/users/ecohen/GEMC/hipo/10.2/AcceptanceCorrection/",
+                                      TString fDataPath = "/volatile/clas12/users/ecohen/GEMC/hipo/10.2/AcceptanceCorrection/"
                                       ){
     
     SetDataPath ( fDataPath  );
