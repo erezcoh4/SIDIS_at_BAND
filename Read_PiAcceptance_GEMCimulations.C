@@ -230,6 +230,8 @@ void Read_PiAcceptance_GEMCimulations(int  NeventsMax=-1,
             deuterons   = c12.getByID( 1000010020 );
             GetParticlesByType ( evnum, fdebug );
             
+            
+            if (fdebug>1) std::cout << "Grabbing truth-information" << std::endl;
             // CONTINUE HERE:
             // add truth-information,
             // i.e. generated electron and generated pion information
@@ -237,26 +239,29 @@ void Read_PiAcceptance_GEMCimulations(int  NeventsMax=-1,
             const Int_t Ngen=mcpbank->getRows();
             
             for( Int_t i_mc =0; i_mc< Ngen ; i_mc++){
-              mcpbank -> setEntry(i_mc);
-              
-              P_mc_particle.SetXYZM( mcpbank->getPx() , mcpbank->getPy() , mcpbank->getPz() , mcpbank->getMass() );
-              auto pid = mcpbank->getPid();
-
-              cout <<
+                mcpbank -> setEntry(i_mc);
+                
+                P_mc_particle.SetXYZM( mcpbank->getPx() , mcpbank->getPy() , mcpbank->getPz() , mcpbank->getMass() );
+                auto pid = mcpbank->getPid();
+                
+                cout <<
                 "MC particle "  << i_mc     << " " << pid    <<
                 " p4 = "        << P_mc_particle.X()   << "," << P_mc_particle.Y() << "," << P_mc_particle.Z() << "," << P_mc_particle.T()
                 << ", mass "    << P_mc_particle.M()
                 << endl;
-              
+                
             }
             
-            
-            // do not filter any events here, extract information from all
-            // we keep only d(e,e’pi+)X and d(e,e’pi-)X events
-            
-            ExtractElectronInformation  (fdebug);
-            ExtractPionsInformation     (fdebug);
-            WriteEventToOutput          (fdebug);
+            if (Ne>0){
+                // We do not filter, so we write event non-reconstructed events.
+                // But here we extract information from electrons and pions
+                ExtractElectronInformation  (fdebug);
+                ExtractPionsInformation     (fdebug);
+            }
+            else {
+                if (fdebug>1) std::cout << "no electrons in event " << event << std::cout
+            }
+            WriteEventToOutput              (fdebug);
             
             if (fdebug>1) {
                 std::cout << "done processing event " << evnum
