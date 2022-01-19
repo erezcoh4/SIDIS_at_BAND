@@ -28,6 +28,10 @@
 using namespace clas12;
 
 
+// globals
+auto db = TDatabasePDG::Instance();
+TString DataPath, FileLabel, PiCharge;
+
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 // start clock
@@ -57,9 +61,6 @@ void                          SetPiCharge ( TString fPiCharge )  {PiCharge = fPi
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 
-// globals
-auto db = TDatabasePDG::Instance();
-TString DataPath, FileLabel, PiCharge;
 
 // meta-data
 int           torusBending = -1; // -1 for In-bending, +1 for Out-bending
@@ -169,10 +170,10 @@ std::vector<TVector3>             Vpiminus;
 // kinematics
 Double_t     Ebeam, xB, Q2, omega, W, W2, xF, y, M_X;
 
+// MC information
+TLorentzVector          P_mc_particle;
+TLorentzVector          e_g, pi_g;
 
-// vectors in q-frame
-//TLorentzVector       piplus_qFrame;
-//Double_t        Ppips_t_q, Ppips_q;
 // auxiliary
 DCfid_SIDIS dcfid;
 std::vector<region_part_ptr>  electrons, neutrons, protons, pipluses, piminuses, gammas, deuterons;
@@ -193,7 +194,7 @@ void Read_PiAcceptance_GEMCimulations(int  NeventsMax=-1,
     SetFileLabel( fFileLabel );
     SetPiCharge ( fPiCharge  );
     // open result files
-    OpenResultFiles( outfilepath );
+    OpenResultFiles();
     
     TString inputFile = DataPath + "/" + PiCharge + "/ee" + PiCharge + "_" + FileLabel + ".hipo";
     TChain fake("hipo");
@@ -232,13 +233,13 @@ void Read_PiAcceptance_GEMCimulations(int  NeventsMax=-1,
             // CONTINUE HERE:
             // add truth-information,
             // i.e. generated electron and generated pion information
-            auto mcpbank = c12->mcparts();
+            auto mcpbank = c12.mcparts();
             const Int_t Ngen=mcpbank->getRows();
             
             for( Int_t i_mc =0; i_mc< Ngen ; i_mc++){
               mcpbank -> setEntry(i_mc);
               
-              p4.SetXYZM( mcpbank->getPx() , mcpbank->getPy() , mcpbank->getPz() , mcpbank->getMass() );
+              P_mc_particle.SetXYZM( mcpbank->getPx() , mcpbank->getPy() , mcpbank->getPz() , mcpbank->getMass() );
               auto pid = mcpbank->getPid();
 
               cout <<
