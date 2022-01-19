@@ -172,7 +172,9 @@ Double_t     Ebeam, xB, Q2, omega, W, W2, xF, y, M_X;
 
 // MC information
 TLorentzVector          P_mc_particle;
-TLorentzVector          e_g, pi_g;
+TLorentzVector          e_g,    pi_g;
+TVector3                V_mc_particle;
+TVector3                Ve_g,   Vpi_g;
 
 // auxiliary
 DCfid_SIDIS dcfid;
@@ -232,7 +234,6 @@ void Read_PiAcceptance_GEMCimulations(int  NeventsMax=-1,
             
             
             if (fdebug>1) std::cout << "Grabbing truth-information" << std::endl;
-            // CONTINUE HERE:
             // add truth-information,
             // i.e. generated electron and generated pion information
             auto mcpbank = c12.mcparts();
@@ -242,13 +243,28 @@ void Read_PiAcceptance_GEMCimulations(int  NeventsMax=-1,
                 mcpbank -> setEntry(i_mc);
                 
                 P_mc_particle.SetXYZM( mcpbank->getPx() , mcpbank->getPy() , mcpbank->getPz() , mcpbank->getMass() );
+                V_mc_particle.SetXYZ( mcpbank->getVx() , mcpbank->getVy() , mcpbank->getVz() );
                 auto pid = mcpbank->getPid();
-                
-                cout <<
-                "MC particle "  << i_mc     << " " << pid    <<
-                " p4 = "        << P_mc_particle.X()   << "," << P_mc_particle.Y() << "," << P_mc_particle.Z() << "," << P_mc_particle.T()
-                << ", mass "    << P_mc_particle.M()
-                << endl;
+                if ( pid==11 ) {
+                    e_g = P_mc_particle;
+                    Ve_g = V_mc_particle;
+                }
+                else if ( (pid==211) && (PiCharge=="pips") ) {
+                    pi_g = P_mc_particle;
+                    Vpi_g = V_mc_particle;
+                }
+                else if ( (pid==-211) && (PiCharge=="pims") ) {
+                    pi_g = P_mc_particle;
+                    Vpi_g = V_mc_particle;
+                }
+                else  {
+                    std::cout << "MC particle PDG code " << pid << " do not match generated particles: e (" << 11 << ") + ";
+                    if ( PiCharge=="pips")
+                        std::cout << " pi+ (" << 211;
+                    else if ( PiCharge=="pims")
+                        std::cout << " pi- (" << -211;
+                    std::cout << ")" << std::endl;
+                }
                 
             }
             
@@ -475,7 +491,10 @@ TString GetRunNumberSTR(int RunNumber, int fdebug){
 void OpenResultFiles(){
     OpenOutputFiles(( (TString)"e_P,e_Theta,e_Phi,e_Vz,"
                      +(TString)"pi_P,pi_Theta,pi_Phi,pi_Vz,"
-                     +(TString)"Npips,Npims,Nelectrons,Ngammas,Nprotons,Nneutrons,Ndeuterons,"));
+                     +(TString)"Npips,Npims,Nelectrons,Ngammas,Nprotons,Nneutrons,Ndeuterons,")
+                     +(TString)"e_P_g,e_Theta_g,e_Phi_g,e_Vz_g,"
+                     +(TString)"pi_P_g,pi_Theta_g,pi_Phi_g,pi_Vz_g,"
+                    );
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -712,6 +731,8 @@ void Stream_e_pi_line_to_CSV( int fdebug ){
         pi.P(),         pi.Theta(),         pi.Phi(),           Vpi.Z(),
         (double)Npips, (double)Npims,       (double)Ne,         (double)Ngammas,
         (double)Np,    (double)Nn,          (double)Nd,
+        e_g.P(),          e_g.Theta(),          e_g.Phi(),      Ve_g.Z(),
+        pi_g.P(),         pi_g.Theta(),         pi.Phi(),       Vpi_g.Z(),
     };
     StreamToCSVfile( variables, fdebug );
 }
