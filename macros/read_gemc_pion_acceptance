@@ -22,7 +22,7 @@ PrintProgress = args.PrintProgress
 
 runIdx = 0
 for piCharge in ['pips','pims']:#{
-    commandline = ("clas12root -q 'Read_PiAcceptance_GEMCimulations.C+(%s,%d,%d,%d)'"%
+    commandline = ("clas12root -q 'Read_PiAcceptance_GEMCimulations.C+(\"%s\",%d,%d,%d)'"%
                     (piCharge,NeventsMax,fdebug,PrintProgress))
     print('')
     print("Readind %s acceptance simulations"%(piCharge))
