@@ -313,7 +313,7 @@ void CloseOutputFiles (){
     
     std::cout << "output files ready in csv formats in " << std::endl
     << std::endl
-    < std::endl << DataPath + "/" + PiCharge + "/" + "ee" + piCharge + "_" + FileLabel + ".csv"
+    < std::endl << DataPath + "/" + PiCharge + "/" + "ee" + PiCharge + "_" + FileLabel + ".csv"
     << std::endl;
 }
 
@@ -367,88 +367,7 @@ int GetBeamHelicity( event_ptr p_event, int runnum, int fdebug ){
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 double GetBeamEnergy (int fdebug){
-    // ToDo:
-    // make this automatic using GetBeamEnergy
-    // rcdb crashes with
-    /*
-     *** Break *** segmentation violation
 
-
-
-     ===========================================================
-     There was a crash.
-     This is the entire stack trace of all threads:
-     ===========================================================
-     #0  0x00007f1733bdf41c in waitpid () from /lib64/libc.so.6
-     #1  0x00007f1733b5cf12 in do_system () from /lib64/libc.so.6
-     #2  0x00007f17386cff95 in TUnixSystem::StackTrace() () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCore.so.6.20
-     #3  0x00007f17386cd00c in TUnixSystem::DispatchSignals(ESignals) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCore.so.6.20
-     #4  <signal handler called>
-     #5  0x00007f171f2b7584 in SIDISc12rSkimmer(int, int, int, bool, int, int, TString) () from /u/home/cohen/SIDIS_at_BAND/SIDISc12rSkimmer_C.so
-     #6  0x00007f17391a308b in ?? ()
-     #7  0x00007ffe3aadbba0 in ?? ()
-     #8  0x00007ffe3aadbc90 in ?? ()
-     #9  0x00007ffe3aadbc50 in ?? ()
-     #10 0x00007ffe3aadbba0 in ?? ()
-     #11 0x00007ffe00000001 in ?? ()
-     #12 0x00000000019f8a20 in ?? ()
-     #13 0x00007f1738abe220 in vtable for TString () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCore.so.6.20
-     #14 0x0000005a00000061 in ?? ()
-     #15 0x0000000008f9ae70 in ?? ()
-     #16 0x00007ffe3aadc120 in ?? ()
-     #17 0x0000000000861d80 in ?? ()
-     #18 0x00007f172cb02df1 in cling::IncrementalExecutor::executeWrapper(llvm::StringRef, cling::Value*) const () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCling.so
-     #19 0x00007f172ca8ef23 in cling::Interpreter::RunFunction(clang::FunctionDecl const*, cling::Value*) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCling.so
-     #20 0x00007f172ca90a5d in cling::Interpreter::EvaluateInternal(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, cling::CompilationOptions, cling::Value*, cling::Transaction**, unsigned long) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCling.so
-     #21 0x00007f172ca90d45 in cling::Interpreter::process(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, cling::Value*, cling::Transaction**, bool) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCling.so
-     #22 0x00007f172cb517ad in cling::MetaProcessor::process(llvm::StringRef, cling::Interpreter::CompilationResult&, cling::Value*, bool) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCling.so
-     #23 0x00007f172c9f711c in HandleInterpreterException(cling::MetaProcessor*, char const*, cling::Interpreter::CompilationResult&, cling::Value*) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCling.so
-     #24 0x00007f172ca0d65c in TCling::ProcessLine(char const*, TInterpreter::EErrorCode*) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCling.so
-     #25 0x00007f172ca0dae1 in TCling::ProcessLineSynch(char const*, TInterpreter::EErrorCode*) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCling.so
-     #26 0x00007f173858ca0a in TApplication::ExecuteFile(char const*, int*, bool) [clone .localalias] () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCore.so.6.20
-     #27 0x00007f173858d6a7 in TApplication::ProcessLine(char const*, bool, int*) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCore.so.6.20
-     #28 0x00007f1735e4b462 in TRint::ProcessLineNr(char const*, char const*, int*) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libRint.so.6.20
-     #29 0x00007f1735e4cb7b in TRint::Run(bool) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libRint.so.6.20
-     #30 0x0000000000400c76 in main ()
-     ===========================================================
-
-
-     The lines below might hint at the cause of the crash.
-     You may get help by asking at the ROOT forum http://root.cern.ch/forum
-     Only if you are really convinced it is a bug in ROOT then please submit a
-     report at http://root.cern.ch/bugs Please post the ENTIRE stack trace
-     from above as an attachment in addition to anything else
-     that might help us fixing this issue.
-     ===========================================================
-     #5  0x00007f171f2b7584 in SIDISc12rSkimmer(int, int, int, bool, int, int, TString) () from /u/home/cohen/SIDIS_at_BAND/SIDISc12rSkimmer_C.so
-     #6  0x00007f17391a308b in ?? ()
-     #7  0x00007ffe3aadbba0 in ?? ()
-     #8  0x00007ffe3aadbc90 in ?? ()
-     #9  0x00007ffe3aadbc50 in ?? ()
-     #10 0x00007ffe3aadbba0 in ?? ()
-     #11 0x00007ffe00000001 in ?? ()
-     #12 0x00000000019f8a20 in ?? ()
-     #13 0x00007f1738abe220 in vtable for TString () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCore.so.6.20
-     #14 0x0000005a00000061 in ?? ()
-     #15 0x0000000008f9ae70 in ?? ()
-     #16 0x00007ffe3aadc120 in ?? ()
-     #17 0x0000000000861d80 in ?? ()
-     #18 0x00007f172cb02df1 in cling::IncrementalExecutor::executeWrapper(llvm::StringRef, cling::Value*) const () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCling.so
-     #19 0x00007f172ca8ef23 in cling::Interpreter::RunFunction(clang::FunctionDecl const*, cling::Value*) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCling.so
-     #20 0x00007f172ca90a5d in cling::Interpreter::EvaluateInternal(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, cling::CompilationOptions, cling::Value*, cling::Transaction**, unsigned long) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCling.so
-     #21 0x00007f172ca90d45 in cling::Interpreter::process(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, cling::Value*, cling::Transaction**, bool) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCling.so
-     #22 0x00007f172cb517ad in cling::MetaProcessor::process(llvm::StringRef, cling::Interpreter::CompilationResult&, cling::Value*, bool) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCling.so
-     #23 0x00007f172c9f711c in HandleInterpreterException(cling::MetaProcessor*, char const*, cling::Interpreter::CompilationResult&, cling::Value*) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCling.so
-     ===========================================================
-
-     */
-    //rcdb info
-    //        if (fdebug>3) std::cout << "reading RCDB info" << std::endl;
-    //        auto& rcdbData = c12.rcdb()->current();//struct with all relevent rcdb values
-    //
-    //        // get beam energy
-    //        if (fdebug>3) std::cout << "getting beam energy" << std::endl;
-    //        Ebeam = rcdbData.beam_energy ;
     if (fdebug>3) std::cout << "set beam energy" << std::endl;
     double Ebeam = 10.2; // [GeV] ( for Fall-2019 the enrgy was 10.4096)
     return Ebeam;
@@ -466,13 +385,6 @@ void InitializeFileReading(int NeventsMax, int c12Nentries, int fdebug){
     NeventsMaxToProcess = NeventsMax;
     if (NeventsMax<0) NeventsMaxToProcess = c12Nentries;
     Nevents_processed           = 0;
-    Nevents_passed_e_cuts       = 0;
-    Nevents_passed_pips_cuts    = 0;
-    Nevents_passed_pims_cuts    = 0;
-    Nevents_passed_e_pips_cuts  = 0;
-    Nevents_passed_e_pims_cuts  = 0;
-    Nevents_passed_e_pips_kinematics_cuts = 0;
-    Nevents_passed_e_pims_kinematics_cuts = 0;
     if (fdebug>1) {
         std::cout << "NeventsMaxToProcess =  " << NeventsMaxToProcess << "" << std::endl;
     }
@@ -533,13 +445,9 @@ void InitializeVariables(){
         }
         piplus  .push_back( TLorentzVector(0,0,0,db->GetParticle( 211 )->Mass()) );
         Vpiplus .push_back( TVector3() );
-        pipsPastSelectionCuts[piIdx]                = false;
-        eepipsPastKinematicalCuts[piIdx]            = false;
         
         piminus .push_back( TLorentzVector(0,0,0,db->GetParticle( -211 )->Mass()) );
         Vpiminus.push_back( TVector3() );
-        pimsPastSelectionCuts[piIdx]                = false;
-        eepimsPastKinematicalCuts[piIdx]            = false;
         
         piplus_Px[piIdx]    = piplus_Py[piIdx]  = piplus_Pz[piIdx]  = piplus_E[piIdx]   = -9999;
         piminus_Px[piIdx]   = piminus_Py[piIdx] = piminus_Pz[piIdx] = piminus_E[piIdx]  = -9999;
@@ -549,11 +457,6 @@ void InitializeVariables(){
     }
     DC_layer                                        = -9999;
     status                                          = 1; // 0 is good...
-    
-    pipsPastCutsInEvent                             = false;
-    eepipsPastCutsInEvent                           = false;
-    pimsPastCutsInEvent                             = false;
-    eepimsPastCutsInEvent                           = false;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -620,19 +523,6 @@ void ExtractElectronInformation(int fdebug){
         e_DC_z[regionIdx] = electrons[leading_e_index]->traj(DC,DC_layer)->getZ();
     }
     if (fdebug > 2) std::cout << "extracted electron information and computed kinematics" << std::endl;
-    
-    // ------------------------------------------------------------------------------------------------
-    // now, check if electron passed event selection requirements
-    // ------------------------------------------------------------------------------------------------
-    ePastCutsInEvent = CheckIfElectronPassedSelectionCuts(e_PCAL_x, e_PCAL_y,
-                                                              e_PCAL_W, e_PCAL_V,
-                                                              e_E_PCAL, e_E_ECIN,
-                                                              e_E_ECOUT,
-                                                              e, Ve,
-                                                              e_PCAL_sector, // e_PCAL_sector should be consistent with e_DC_sector
-                                                              e_DC_x, e_DC_y, e_DC_z,
-                                                              torusBending );
-    if (ePastCutsInEvent)  Nevents_passed_e_cuts++ ;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -716,27 +606,6 @@ void ExtractPipsInformation( int pipsIdx, int fdebug ){
             << std::endl;
         }
     }
-    // ------------------------------------------------------------------------------------------------
-    // now, check if pion passed event selection requirements
-    // ------------------------------------------------------------------------------------------------
-    pipsPastSelectionCuts[pipsIdx] = CheckIfPionPassedSelectionCuts("pi+",
-                                                                     pips_DC_sector[pipsIdx],
-                                                                     pips_DC_x[pipsIdx],
-                                                                     pips_DC_y[pipsIdx],
-                                                                     pips_DC_z[pipsIdx],
-                                                                     pips_chi2PID[pipsIdx],  piplus[pipsIdx].P(),
-                                                                     Ve,
-                                                                     Vpiplus[pipsIdx],
-                                                                     fdebug);
-    eepipsPastKinematicalCuts[pipsIdx] = eepiPassedKinematicalCriteria(piplus[pipsIdx],
-                                                                       fdebug);
-    if (pipsPastSelectionCuts[pipsIdx]) {
-        pipsPastCutsInEvent = true;
-        Nevents_passed_pips_cuts ++;
-        if (eepipsPastKinematicalCuts[pipsIdx]) {
-            eepipsPastCutsInEvent = true;
-        }
-    }
     
     piplus_Px[pipsIdx]          = piplus[pipsIdx].Px();
     piplus_Py[pipsIdx]          = piplus[pipsIdx].Py();
@@ -779,28 +648,7 @@ void ExtractPimsInformation( int pimsIdx, int fdebug ){
         pims_DC_y[pimsIdx][regionIdx] = piminuses[pimsIdx]->traj(DC,DC_layer)->getY();
         pims_DC_z[pimsIdx][regionIdx] = piminuses[pimsIdx]->traj(DC,DC_layer)->getZ();
     }
-    // ------------------------------------------------------------------------------------------------
-    // now, check if pion passed event selection requirements
-    // ------------------------------------------------------------------------------------------------
-    pimsPastSelectionCuts[pimsIdx] = CheckIfPionPassedSelectionCuts("pi-",
-                                                                     pims_DC_sector[pimsIdx],
-                                                                     pims_DC_x[pimsIdx],
-                                                                     pims_DC_y[pimsIdx],
-                                                                     pims_DC_z[pimsIdx],
-                                                                     pims_chi2PID[pimsIdx],  piminus[pimsIdx].P(),
-                                                                     Ve,
-                                                                     Vpiminus[pimsIdx],
-                                                                     fdebug);
-    eepimsPastKinematicalCuts[pimsIdx] = eepiPassedKinematicalCriteria(piminus[pimsIdx],
-                                                                       fdebug);
-    if (pimsPastSelectionCuts[pimsIdx]) {
-        pimsPastCutsInEvent = true;
-        Nevents_passed_pims_cuts ++;
-        if (eepimsPastKinematicalCuts[pimsIdx]) {
-            eepimsPastCutsInEvent = true;
-        }
-    }
-    
+
     piminus_Px[pimsIdx]          = piminus[pimsIdx].Px();
     piminus_Py[pimsIdx]          = piminus[pimsIdx].Py();
     piminus_Pz[pimsIdx]          = piminus[pimsIdx].Pz();
