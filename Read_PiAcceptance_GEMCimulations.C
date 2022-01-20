@@ -233,11 +233,12 @@ void Read_PiAcceptance_GEMCimulations(TString fPiCharge = "pips",
             GetParticlesByType ( evnum, fdebug );
             
             
-            if (fdebug>1) std::cout << "Grabbing truth-information" << std::endl;
+            
             // add truth-information,
             // i.e. generated electron and generated pion information
             auto mcpbank = c12.mcparts();
             const Int_t Ngen=mcpbank->getRows();
+            if (fdebug>1) std::cout << "Grabbing truth-information of " << Ngen << " particles" << std::endl;
             
             for( Int_t i_mc =0; i_mc< Ngen ; i_mc++){
                 mcpbank -> setEntry(i_mc);
