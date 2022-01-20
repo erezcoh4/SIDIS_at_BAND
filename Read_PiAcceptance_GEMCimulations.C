@@ -267,12 +267,14 @@ void Read_PiAcceptance_GEMCimulations(TString fPiCharge = "pips",
                     Vpi_g = V_mc_particle;
                 }
                 else  {
-                    std::cout << "MC particle PDG code " << pid << " do not match generated particles: e (" << 11 << ") + ";
-                    if ( PiCharge=="pips")
-                        std::cout << " pi+ (" << 211;
-                    else if ( PiCharge=="pims")
-                        std::cout << " pi- (" << -211;
-                    std::cout << ")" << std::endl;
+                    if (fdebug>2){
+                        std::cout << "MC particle PDG code " << pid << " do not match generated particles: e (" << 11 << ") + ";
+                        if ( PiCharge=="pips")
+                            std::cout << " pi+ (" << 211;
+                        else if ( PiCharge=="pims")
+                            std::cout << " pi- (" << -211;
+                        std::cout << ")" << std::endl;
+                    }
                 }
                 
             }
