@@ -2,8 +2,11 @@
 # -*- coding: utf-8 -*-
 #
 # read GEMC simulation results for the production of pion acceptance maps
-# last edit Jan-19, 2022 (EOC)
+# last edit Jan-20, 2022 (EOC)
 #
+# example execute:
+# ./macros/read_gemc_pion_acceptance --NeventsMax=10 --fdebug=5 --only-pi+
+
 import sys, os, linecache
 import argparse
 
@@ -14,18 +17,25 @@ parser.add_argument("--fdebug",       type=int, default=1,
                     required=False, help="verbosity")
 parser.add_argument("--PrintProgress",type=int, default=50000,
                     required=False, help="print progress (every N events)")
+parser.add_argument('--only-pi+',   dest='only_pips', action='store_true', help="do only pi+ (and not pi-)")
+
+
 args = parser.parse_args()
 
 NeventsMax    = args.NeventsMax
 fdebug        = args.fdebug
 PrintProgress = args.PrintProgress
 
-runIdx = 0
-for piCharge in ['pips','pims']:#{
+pi_charges = ['pi+','pi-']
+if args.only_pips: #{
+    pi_charges    = ['pi+']
+#}
+
+for pi_charge in pi_charges:#{
     commandline = ("clas12root -q 'Read_PiAcceptance_GEMCimulations.C+(\"%s\",%d,%d,%d)'"%
-                    (piCharge,NeventsMax,fdebug,PrintProgress))
+                    (pi_charge,NeventsMax,fdebug,PrintProgress))
     print('')
-    print("Readind %s acceptance simulations"%(piCharge))
+    print("Readind %s acceptance simulations"%(pi_charge))
     print('')
     print(commandline)
     print('')

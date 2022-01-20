@@ -10,6 +10,12 @@ Produce a LUND file of (e,e'\pi) events to simulate with GEMC.
 1  -1.  1     11   0    0  -0.9830   0.0981  9.6502  9.7007  0.0005  0.0000 0.0000  -0.8072
 2   1.  1   2212   0    0   0.7333   0.1126  0.6391  1.3560  0.9380  0.0000 0.0000  -0.8072
                        
+The electron is taken from an accepted and selected (e,e'pi-) event from run 6420
+/Users/erezcohen/Desktop/data/BAND/SIDIS_skimming/skimmed_SIDIS_inc_006420_e_piminus_selected_eepi_kinematics.csv
+
+runnum,evnum,e_P,e_Theta,e_Phi,e_Vz
+6420,993,6.33416,0.175525,1.18165,-3.39518
+
 
 """
 #%% Imports and definitions
@@ -66,37 +72,25 @@ phi_arr     = np.zeros(Nevents)
 M[0]  = m_e
 PDG[0]= PDG_e
 # electron momentum from example DVCS event [https://gemc.jlab.org/gemc/html/documentation/generator/lund.html]
-Px[0] = -0.9830
-Py[0] = 0.0981
-Pz[0] = 9.6502
-Pe    = np.sqrt(np.square(Px[0])+np.square(Py[0])+np.square(Pz[0]))
-E[0]  = np.sqrt( np.square(Pe) + np.square(m_e) )
+# Px[0] = -0.9830 #Py[0] = 0.0981 #Pz[0] = 9.6502
+# Pe    = np.sqrt(np.square(Px[0])+np.square(Py[0])+np.square(Pz[0]))
+# E[0]  = np.sqrt( np.square(Pe) + np.square(m_e) )
+
+e_P    = 6.33416
+e_theta = 0.175525
+e_phi = 1.18165
+e_Vz  = -3.39518
+Px[0] = e_P*np.sin(e_theta)*np.cos(e_phi)
+Py[0] = e_P*np.sin(e_theta)*np.sin(e_phi)
+Pz[0] = e_P*np.cos(e_theta)
+E[0]  = np.sqrt( np.square(e_P) + np.square(m_e) )
+
 # electron vertex - at origin
 vx[0] = 0
 vy[0] = 0
-vz[0] = 0;
+vz[0] = e_Vz;
  
 
-
-
-M           = np.zeros(Nparticles)
-PDG         = np.zeros(Nparticles)
-Px,Py,Pz,E  = np.zeros(Nparticles),np.zeros(Nparticles),np.zeros(Nparticles),np.zeros(Nparticles)
-vx,vy,vz    = np.zeros(Nparticles),np.zeros(Nparticles),np.zeros(Nparticles)
-
-M[0]  = m_e
-PDG[0]= PDG_e
-# electron momentum from example DVCS event [https://gemc.jlab.org/gemc/html/documentation/generator/lund.html]
-Px[0] = -0.9830
-Py[0] = 0.0981
-Pz[0] = 9.6502
-Pe    = np.sqrt(np.square(Px[0])+np.square(Py[0])+np.square(Pz[0]))
-E[0]  = np.sqrt( np.square(Pe) + np.square(m_e) )
-# electron vertex - at origin
-vx[0] = 0
-vy[0] = 0
-vz[0] = 0;
- 
 
 
 #%% Sample pion momentum and print to file
@@ -168,6 +162,8 @@ for pi_charge,pi_label,pi_PDG in zip(['pips','pims'],['\pi^+','\pi^-'],[PDG_pips
     print("Saved output file \n%s"%("/Users/erezcohen/Desktop/data/BAND/AcceptanceCorrection/InputFiles/"
                                     +"/ee%s_p_uniform_distribution.dat"%(pi_charge)))    
 print('done.')
+print(' ')
+print('scp -r /Users/erezcohen/Desktop/data/BAND/AcceptanceCorrection/InputFiles/eepims_p_uniform_distribution.dat cohen@ftp.jlab.org:/volatile/clas12/users/ecohen/GEMC/LUND/10.2/AcceptanceCorrection/pims/')
 
 #%% Monitoring plots
 # =============================================================================
