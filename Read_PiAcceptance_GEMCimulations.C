@@ -245,6 +245,15 @@ void Read_PiAcceptance_GEMCimulations(TString fPiCharge = "pips",
                 P_mc_particle.SetXYZM( mcpbank->getPx() , mcpbank->getPy() , mcpbank->getPz() , mcpbank->getMass() );
                 V_mc_particle.SetXYZ( mcpbank->getVx() , mcpbank->getVy() , mcpbank->getVz() );
                 auto pid = mcpbank->getPid();
+                
+                if (fdebug>2){
+                    std::cout << "MC particle PDG code " << pid
+                    << ", p: "<< P_mc_particle.P() << "GeV/c, "
+                    << ", \theta: "<< P_mc_particle.Theta()*r2d << "deg, "
+                    << ", \phi: "<< P_mc_particle.Phi()*r2d << "deg, "
+                    << std::endl;
+                }
+                
                 if ( pid==11 ) {
                     e_g = P_mc_particle;
                     Ve_g = V_mc_particle;
@@ -304,6 +313,7 @@ TVector3 GetParticleVertex(clas12::region_part_ptr rp){
     return V;
 }
 
+
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void SetLorentzVector (TLorentzVector &p4,clas12::region_part_ptr rp){
     p4.SetXYZM(rp->par()->getPx(),
@@ -311,6 +321,7 @@ void SetLorentzVector (TLorentzVector &p4,clas12::region_part_ptr rp){
                rp->par()->getPz(),
                p4.M());
 }
+
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void OpenOutputFiles (TString header){

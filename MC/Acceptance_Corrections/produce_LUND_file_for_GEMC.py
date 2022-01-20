@@ -100,6 +100,7 @@ vz[0] = 0;
 
 
 #%% Sample pion momentum and print to file
+
 # do the same process of positive and negative pions
 fdebug=1
 for pi_charge,pi_label,pi_PDG in zip(['pips','pims'],['\pi^+','\pi^-'],[PDG_pips,PDG_pims]):
@@ -108,6 +109,10 @@ for pi_charge,pi_label,pi_PDG in zip(['pips','pims'],['\pi^+','\pi^-'],[PDG_pips
     theta_arr   = np.zeros(Nevents)
     phi_arr     = np.zeros(Nevents)
 
+    px_arr       = np.zeros(Nevents)
+    py_arr       = np.zeros(Nevents)
+    pz_arr       = np.zeros(Nevents)
+    
     PDG[1]= pi_PDG
     M[1]  = m_pi
 
@@ -131,6 +136,10 @@ for pi_charge,pi_label,pi_PDG in zip(['pips','pims'],['\pi^+','\pi^-'],[PDG_pips
         Py[1] = p*np.sin(theta)*np.sin(phi)
         Pz[1] = p*np.cos(theta)
         E[1]  = np.sqrt( np.square(p) + np.square(m_pi) )
+        
+        px_arr[n]    = Px[1]
+        py_arr[n]    = Py[1]
+        pz_arr[n]    = Pz[1]
         
         # sample pion vertex 
         vx[1] = 0
@@ -171,6 +180,19 @@ for x,label,units,bins,scale_factor,subplot_idx in zip([p_arr,theta_arr,phi_arr]
                                     ['[GeV/c]','[deg.]', '[deg.]'], 
                                     [np.linspace(p_min, p_max,30),np.linspace(theta_min, theta_max,30),np.linspace(phi_min, phi_max,30)],
                                     [1,r2d,r2d],
+                                    range(3)):
+    ax = fig.add_subplot(1,3,subplot_idx+1)
+    ax.hist( x*scale_factor, bins , edgecolor='k')
+    set_axes(ax,label + ' ' + units,'counts' if subplot_idx==0 else '',title=label, fontsize=18)
+
+plt.tight_layout();
+
+fig = plt.figure(figsize=(16,6))
+for x,label,units,bins,scale_factor,subplot_idx in zip([px_arr,py_arr,pz_arr],
+                                    ['$p_x$','$p_y$', '$p_z$'], 
+                                    ['[GeV/c]','[GeV/c]', '[GeV/c]'], 
+                                    [np.linspace(-p_max, p_max,30),np.linspace(-p_max, p_max,30),np.linspace(-p_max, p_max,30)],
+                                    [1,1,1],
                                     range(3)):
     ax = fig.add_subplot(1,3,subplot_idx+1)
     ax.hist( x*scale_factor, bins , edgecolor='k')
