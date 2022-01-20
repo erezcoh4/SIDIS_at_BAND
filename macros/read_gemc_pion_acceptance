@@ -26,9 +26,9 @@ NeventsMax    = args.NeventsMax
 fdebug        = args.fdebug
 PrintProgress = args.PrintProgress
 
-pi_charges = ['pi+','pi-']
+pi_charges = ['pips','pims']
 if args.only_pips: #{
-    pi_charges    = ['pi+']
+    pi_charges    = ['pips']
 #}
 
 for pi_charge in pi_charges:#{
