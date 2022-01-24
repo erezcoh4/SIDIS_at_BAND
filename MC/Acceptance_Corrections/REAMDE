@@ -25,8 +25,19 @@ FILE="LUND, /volatile/clas12/users/ecohen/GEMC/LUND/10.2/AcceptanceCorrection/pi
     > cd clas12-offline-software/
     > ./build-coatjava.sh
     
-    then convert EVIO to HIPO:
+    (3.1) convert EVIO to HIPO:
+
     > /u/home/cohen/clas12-offline-software/coatjava/bin/evio2hipo -t -1 -s -1 -r 11 -i /volatile/clas12/users/ecohen/GEMC/evio/10.2/AcceptanceCorrection/pips/eepips_p_uniform_distribution.ev -o /volatile/clas12/users/ecohen/GEMC/hipo/10.2/AcceptanceCorrection/pips/eepips_p_uniform_distribution.hipo
+
+
+    (3.2) Apply event reconstruction:
+
+    > /u/home/cohen/clas12-offline-software/coatjava/bin/recon-util -i /volatile/clas12/users/ecohen/GEMC/hipo/10.2/AcceptanceCorrection/pips/eepips_p_uniform_distribution.hipo -o /volatile/clas12/users/ecohen/GEMC/hipo/10.2/AcceptanceCorrection/pips/eepips_p_uniform_distribution_reconstructed.hipo -y /u/home/cohen/SIDIS_at_BAND/MC/Acceptance_Corrections/yaml_cards/Erez_rgb_fall2019.yaml
+
+(I am using a custom gcard, it seems it was derived from /group/clas12/gemc/4.4.1/config/rgb_fall2019.gcard or similar. If so, I should use /group/clas12/gemc/4.4.1/config/rgb_fall2019.yaml
+There were a couple of things that may give problems. I've replaced them after copying /group/clas12/gemc/4.4.1/config/rgb_fall2019.yaml to /u/home/cohen/SIDIS_at_BAND/MC/Acceptance_Corrections/yaml_cards/Erez_rgb_fall2019.yaml)
+
+
     
 (4) read output hipo file
 

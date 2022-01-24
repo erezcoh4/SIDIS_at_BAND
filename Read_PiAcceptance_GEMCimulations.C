@@ -198,7 +198,7 @@ void Read_PiAcceptance_GEMCimulations(TString fPiCharge = "pips",
     // open result files
     OpenResultFiles();
     
-    TString inputFile = DataPath + "/" + PiCharge + "/ee" + PiCharge + "_" + FileLabel + ".hipo";
+    TString inputFile = DataPath + "/" + PiCharge + "/ee" + PiCharge + "_" + FileLabel + "_reconstructed.hipo";
     TChain fake("hipo");
     fake.Add(inputFile.Data());
     //get the hipo data

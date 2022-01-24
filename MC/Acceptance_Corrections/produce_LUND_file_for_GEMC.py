@@ -69,13 +69,15 @@ p_arr       = np.zeros(Nevents)
 theta_arr   = np.zeros(Nevents)
 phi_arr     = np.zeros(Nevents)
 
+#%% Electron information 
+
 M[0]  = m_e
 PDG[0]= PDG_e
 # electron momentum from example DVCS event [https://gemc.jlab.org/gemc/html/documentation/generator/lund.html]
 # Px[0] = -0.9830 #Py[0] = 0.0981 #Pz[0] = 9.6502
 # Pe    = np.sqrt(np.square(Px[0])+np.square(Py[0])+np.square(Pz[0]))
 # E[0]  = np.sqrt( np.square(Pe) + np.square(m_e) )
-
+# electron is taken from an accepted and selected (e,e'pi-) event from run 6420 event 993
 e_P    = 6.33416
 e_theta = 0.175525
 e_phi = 1.18165
@@ -151,7 +153,7 @@ for pi_charge,pi_label,pi_PDG in zip(['pips','pims'],['\pi^+','\pi^-'],[PDG_pips
         if fdebug>2: print( event_header_str )
         
         for particle, j in zip(particles,range(len(particles))):
-            particle_str = ('%d \t %.3f \t %d \t %d \t %d \t %d \t %.3f \t %.3f \t %.3f \t %.3f \t %.3f \t %.3f \t %.3f \t %.3f \n'%
+            particle_str = ('%d \t %.3f \t %d \t %d \t %d \t %d \t %.5f \t %.5f \t %.5f \t %.5f \t %.5f \t %.5f \t %.5f \t %.3f \n'%
                             (j+1, 0.0, 1, PDG[j], 0, 0, Px[j], Py[j], Pz[j], E[j], M[j], vx[j], vy[j], vz[j])) 
             outputfile.write( particle_str )
             if fdebug>2: print(particle_str)
