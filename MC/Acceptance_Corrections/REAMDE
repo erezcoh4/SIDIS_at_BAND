@@ -11,10 +11,14 @@ Simulation of tagged (e,e'\pi) events - by Tyler K.
 
 (2) simulate
 
-/u/home/cohen/clas12Tags/4.4.1/source/gemc /u/home/cohen/SIDIS_at_BAND/MC/Acceptance_Corrections/gcards/Erez_band-clas12.gcard -USE_GUI=0 -N=10000 -INPUT_GEN_
+	/u/home/cohen/clas12Tags/4.4.1/source/gemc /group/clas12/gemc/4.4.1/config/clas12-default.gcard -USE_GUI=0 -N=100 -INPUT_GEN_FILE="LUND, /volatile/clas12/users/ecohen/GEMC/LUND/10.2/AcceptanceCorrection/pips/eepips_p_uniform_distribution.dat" -OUTPUT="evio, /volatile/clas12/users/ecohen/GEMC/evio/10.2/AcceptanceCorrection/pips/eepips_p_uniform_distribution.ev"
+
+
+	previous (not working for some reason with a GEMC using custom made gcard...): 
+	/u/home/cohen/clas12Tags/4.4.1/source/gemc /u/home/cohen/SIDIS_at_BAND/MC/Acceptance_Corrections/gcards/Erez_band-clas12.gcard -USE_GUI=0 -N=10000 -INPUT_GEN_
 FILE="LUND, /volatile/clas12/users/ecohen/GEMC/LUND/10.2/AcceptanceCorrection/pips/eepips_p_uniform_distribution.dat" -OUTPUT="evio, /volatile/clas12/users/ecohen/GEMC/evio/10.2/AcceptanceCorrection/pips/eepips_p_uniform_distribution.ev"
 
-/u/home/cohen/clas12Tags/4.4.1/source/gemc /u/home/cohen/SIDIS_at_BAND/MC/Acceptance_Corrections/gcards/Erez_band-clas12.gcard -USE_GUI=0 -N=10000 -INPUT_GEN_
+	/u/home/cohen/clas12Tags/4.4.1/source/gemc /u/home/cohen/SIDIS_at_BAND/MC/Acceptance_Corrections/gcards/Erez_band-clas12.gcard -USE_GUI=0 -N=10000 -INPUT_GEN_
 FILE="LUND, /volatile/clas12/users/ecohen/GEMC/LUND/10.2/AcceptanceCorrection/pims/eepims_p_uniform_distribution.dat" -OUTPUT="evio, /volatile/clas12/users/ecohen/GEMC/evio/10.2/AcceptanceCorrection/pims/eepims_p_uniform_distribution.ev"
 
 
@@ -27,12 +31,23 @@ FILE="LUND, /volatile/clas12/users/ecohen/GEMC/LUND/10.2/AcceptanceCorrection/pi
     
     (3.1) convert EVIO to HIPO:
 
-    > /u/home/cohen/clas12-offline-software/coatjava/bin/evio2hipo -t -1 -s -1 -r 11 -i /volatile/clas12/users/ecohen/GEMC/evio/10.2/AcceptanceCorrection/pips/eepips_p_uniform_distribution.ev -o /volatile/clas12/users/ecohen/GEMC/hipo/10.2/AcceptanceCorrection/pips/eepips_p_uniform_distribution.hipo
+
+	> /u/home/cohen/clas12-offline-software/coatjava/bin/evio2hipo -t -1 -s -1 -r 11 -i /volatile/clas12/users/ecohen/GEMC/evio/10.2/AcceptanceCorrection/pips/eepips_p_uniform_distribution.ev -o /volatile/clas12/users/ecohen/GEMC/hipo/10.2/AcceptanceCorrection/pips/eepips_p_uniform_distribution.hipo
+
+
+	previous (not working for some reason with a GEMC using custom made gcard...): 
+	> /u/home/cohen/clas12-offline-software/coatjava/bin/evio2hipo -t -1 -s -1 -r 11 -i /volatile/clas12/users/ecohen/GEMC/evio/10.2/AcceptanceCorrection/pips/eepips_p_uniform_distribution.ev -o /volatile/clas12/users/ecohen/GEMC/hipo/10.2/AcceptanceCorrection/pips/eepips_p_uniform_distribution.hipo
+
 
 
     (3.2) Apply event reconstruction:
 
-    > /u/home/cohen/clas12-offline-software/coatjava/bin/recon-util -i /volatile/clas12/users/ecohen/GEMC/hipo/10.2/AcceptanceCorrection/pips/eepips_p_uniform_distribution.hipo -o /volatile/clas12/users/ecohen/GEMC/hipo/10.2/AcceptanceCorrection/pips/eepips_p_uniform_distribution_reconstructed.hipo -y /u/home/cohen/SIDIS_at_BAND/MC/Acceptance_Corrections/yaml_cards/Erez_rgb_fall2019.yaml
+
+	> /u/home/cohen/clas12-offline-software/coatjava/bin//recon-util -i /volatile/clas12/users/ecohen/GEMC/hipo/10.2/AcceptanceCorrection/pips/eepips_p_uniform_distribution.hipo -o /volatile/clas12/users/ecohen/GEMC/hipo/10.2/AcceptanceCorrection/pips/eepips_p_uniform_distribution_reconstructed.hipo -y /group/clas12/gemc/4.4.1/config/clas12-default.yaml
+
+
+	previous (not working for some reason with a GEMC using custom made gcard...): 
+	> /u/home/cohen/clas12-offline-software/coatjava/bin/recon-util -i /volatile/clas12/users/ecohen/GEMC/hipo/10.2/AcceptanceCorrection/pips/eepips_p_uniform_distribution.hipo -o /volatile/clas12/users/ecohen/GEMC/hipo/10.2/AcceptanceCorrection/pips/eepips_p_uniform_distribution_reconstructed.hipo -y /u/home/cohen/SIDIS_at_BAND/MC/Acceptance_Corrections/yaml_cards/Erez_rgb_fall2019.yaml
 
 
 	(
