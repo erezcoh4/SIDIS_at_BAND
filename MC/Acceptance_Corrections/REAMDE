@@ -11,10 +11,10 @@ Simulation of tagged (e,e'\pi) events - by Tyler K.
 
 (2) simulate
 
-/u/home/cohen/clas12Tags/4.4.1/source/gemc /u/home/cohen/clas12Tags/gcards/band-clas12.gcard -USE_GUI=0 -N=10000 -INPUT_GEN_
+/u/home/cohen/clas12Tags/4.4.1/source/gemc /u/home/cohen/SIDIS_at_BAND/MC/Acceptance_Corrections/gcards/Erez_band-clas12.gcard -USE_GUI=0 -N=10000 -INPUT_GEN_
 FILE="LUND, /volatile/clas12/users/ecohen/GEMC/LUND/10.2/AcceptanceCorrection/pips/eepips_p_uniform_distribution.dat" -OUTPUT="evio, /volatile/clas12/users/ecohen/GEMC/evio/10.2/AcceptanceCorrection/pips/eepips_p_uniform_distribution.ev"
 
-/u/home/cohen/clas12Tags/4.4.1/source/gemc /u/home/cohen/clas12Tags/gcards/band-clas12.gcard -USE_GUI=0 -N=10000 -INPUT_GEN_
+/u/home/cohen/clas12Tags/4.4.1/source/gemc /u/home/cohen/SIDIS_at_BAND/MC/Acceptance_Corrections/gcards/Erez_band-clas12.gcard -USE_GUI=0 -N=10000 -INPUT_GEN_
 FILE="LUND, /volatile/clas12/users/ecohen/GEMC/LUND/10.2/AcceptanceCorrection/pims/eepims_p_uniform_distribution.dat" -OUTPUT="evio, /volatile/clas12/users/ecohen/GEMC/evio/10.2/AcceptanceCorrection/pims/eepims_p_uniform_distribution.ev"
 
 
@@ -34,8 +34,27 @@ FILE="LUND, /volatile/clas12/users/ecohen/GEMC/LUND/10.2/AcceptanceCorrection/pi
 
     > /u/home/cohen/clas12-offline-software/coatjava/bin/recon-util -i /volatile/clas12/users/ecohen/GEMC/hipo/10.2/AcceptanceCorrection/pips/eepips_p_uniform_distribution.hipo -o /volatile/clas12/users/ecohen/GEMC/hipo/10.2/AcceptanceCorrection/pips/eepips_p_uniform_distribution_reconstructed.hipo -y /u/home/cohen/SIDIS_at_BAND/MC/Acceptance_Corrections/yaml_cards/Erez_rgb_fall2019.yaml
 
-(I am using a custom gcard, it seems it was derived from /group/clas12/gemc/4.4.1/config/rgb_fall2019.gcard or similar. If so, I should use /group/clas12/gemc/4.4.1/config/rgb_fall2019.yaml
-There were a couple of things that may give problems. I've replaced them after copying /group/clas12/gemc/4.4.1/config/rgb_fall2019.yaml to /u/home/cohen/SIDIS_at_BAND/MC/Acceptance_Corrections/yaml_cards/Erez_rgb_fall2019.yaml)
+
+	(
+	Following the discussion at
+	[https://clas12.discourse.group/t/simulated-events-empty/503/7] 
+	I am using a custom gcard, it seems it was derived from /group/clas12/gemc/4.4.1/config/rgb_fall2019.gcard or similar. 
+	If so, I should use /group/clas12/gemc/4.4.1/config/rgb_fall2019.yaml
+	There were a couple of things that may give problems. 
+
+	I've produced a copy of
+
+	/group/clas12/gemc/4.4.1/config/rgb_fall2019.yaml
+	at
+	/u/home/cohen/SIDIS_at_BAND/MC/Acceptance_Corrections/yaml_cards/Erez_rgb_fall2019.yaml
+
+	and a copy of the gcard
+
+	/u/home/cohen/clas12Tags/gcards/band-clas12.gcard
+	to
+	/u/home/cohen/SIDIS_at_BAND/MC/Acceptance_Corrections/gcards/Erez_band-clas12.gcard
+
+	)
 
 
     
