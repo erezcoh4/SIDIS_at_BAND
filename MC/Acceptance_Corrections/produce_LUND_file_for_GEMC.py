@@ -77,10 +77,11 @@ PDG[0]= PDG_e
 # Px[0] = -0.9830 #Py[0] = 0.0981 #Pz[0] = 9.6502
 # Pe    = np.sqrt(np.square(Px[0])+np.square(Py[0])+np.square(Pz[0]))
 # E[0]  = np.sqrt( np.square(Pe) + np.square(m_e) )
-# electron is taken from an accepted and selected (e,e'pi-) event from run 6420 event 993
+
+# electron taken from an accepted and selected (e,e'pi-) event from run 6420 event 993
 e_P    = 6.33416
-e_theta = 0.175525
-e_phi = 1.18165
+e_theta = 0.175525 # = 10.1 deg.
+e_phi = 1.18165    # = 67.4 deg.
 e_Vz  = -3.39518
 Px[0] = e_P*np.sin(e_theta)*np.cos(e_phi)
 Py[0] = e_P*np.sin(e_theta)*np.sin(e_phi)
