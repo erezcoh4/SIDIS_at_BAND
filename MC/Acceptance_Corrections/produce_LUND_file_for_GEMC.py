@@ -93,8 +93,8 @@ PDG[0]= PDG_e
 # electron taken from a simulated event that passed reconstruction stage with default clas12 yaml card
 # MC particle PDG code 11, p: 1.345 GeV/c, , theta: 30.9 deg, , phi: -163.4 deg, , V(z): 7.758 cm
 e_P    = 1.345
-e_theta= 30.9 * r2d # = 30.9 deg.
-e_phi = -163.4 * r2d   # = 67.4 deg.
+e_theta= 30.9 * d2r # = 30.9 deg.
+e_phi = -163.4 * d2r   # = 67.4 deg.
 e_Vz  = 7.758 
 
 Px[0] = e_P*np.sin(e_theta)*np.cos(e_phi)
@@ -132,16 +132,16 @@ for pi_charge,pi_label,pi_PDG in zip(['pips','pims'],['\pi^+','\pi^-'],[PDG_pips
                       +"/ee%s_p_uniform_distribution.dat"%(pi_charge), "w")
     for n in range(Nevents):
         
-        # Sample electron momentum to find a good one that is accepted
-        p           = np.random.uniform(p_min    ,p_max    )
-        cos_theta   = np.random.uniform( np.cos(theta_min*d2r) ,np.cos(theta_max*d2r) )
-        theta       = np.arccos(cos_theta)
-        phi         = np.random.uniform(phi_min*d2r  ,phi_max*d2r  )        
-        Px[0] = p*np.sin(theta)*np.cos(phi)
-        Py[0] = p*np.sin(theta)*np.sin(phi)
-        Pz[0] = p*np.cos(theta)
-        E[0]  = np.sqrt( np.square(p) + np.square(m_e) )
-        vz[0] = np.random.uniform( vz_min, vz_max );
+        # # Sample electron momentum to find a good one that is accepted
+        # p           = np.random.uniform(p_min    ,p_max    )
+        # cos_theta   = np.random.uniform( np.cos(theta_min*d2r) ,np.cos(theta_max*d2r) )
+        # theta       = np.arccos(cos_theta)
+        # phi         = np.random.uniform(phi_min*d2r  ,phi_max*d2r  )        
+        # Px[0] = p*np.sin(theta)*np.cos(phi)
+        # Py[0] = p*np.sin(theta)*np.sin(phi)
+        # Pz[0] = p*np.cos(theta)
+        # E[0]  = np.sqrt( np.square(p) + np.square(m_e) )
+        # vz[0] = np.random.uniform( vz_min, vz_max );
 
         
         # sample pion momentum uniformly in p, cos(theta), and phi

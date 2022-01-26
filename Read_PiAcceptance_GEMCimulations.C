@@ -748,7 +748,7 @@ void Stream_e_pi_line_to_CSV( int fdebug ){
         (double)Npips, (double)Npims,       (double)Ne,         (double)Ngammas,
         (double)Np,    (double)Nn,          (double)Nd,
         e_g.P(),          e_g.Theta(),          e_g.Phi(),      Ve_g.Z(),
-        pi_g.P(),         pi_g.Theta(),         pi.Phi(),       Vpi_g.Z(),
+        pi_g.P(),         pi_g.Theta(),         pi_g.Phi(),       Vpi_g.Z(),
     };
     StreamToCSVfile( variables, fdebug );
 }
