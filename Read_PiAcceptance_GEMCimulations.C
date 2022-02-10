@@ -712,6 +712,10 @@ void ExtractPipsInformation( int pipsIdx, int fdebug ){
     Vpiplus_Y[pipsIdx]          = Vpiplus[pipsIdx].Y();
     Vpiplus_Z[pipsIdx]          = Vpiplus[pipsIdx].Z();
     
+    if (evnum>67 && evnum<74)
+        std::cout << "event " << evnum << " before CheckIfPionPassedSelectionCuts( pipsIdx=" << pipsIdx << ")" << std::endl;
+
+    
     pipsPastSelectionCuts[pipsIdx] = CheckIfPionPassedSelectionCuts("pi+",
                                                                      pips_DC_sector[pipsIdx],
                                                                      pips_DC_x[pipsIdx],
@@ -722,6 +726,9 @@ void ExtractPipsInformation( int pipsIdx, int fdebug ){
                                                                      Vpiplus[pipsIdx],
                                                                     pipsIdx,
                                                                      fdebug);
+    if (evnum>67 && evnum<74)
+        std::cout << "event " << evnum << " after CheckIfPionPassedSelectionCuts( pipsIdx=" << pipsIdx << ")" << std::endl;
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
