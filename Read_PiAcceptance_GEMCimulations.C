@@ -64,6 +64,8 @@ bool       CheckIfPionPassedSelectionCuts (TString pionCharge, // "pi+" or "pi-"
                                            Double_t chi2PID, Double_t p,
                                            TVector3 Ve,      TVector3 Vpi,
                                            int fdebug);
+Double_t          Chi2PID_pion_lowerBound (Double_t p, Double_t C=0.88); // C(pi+)=0.88, C(pi-)=0.93
+Double_t          Chi2PID_pion_upperBound (Double_t p, Double_t C=0.88); // C(pi+)=0.88, C(pi-)=0.93
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 
@@ -102,6 +104,10 @@ double          e_DC_Chi2N;
 double           e_DC_x[3];
 double           e_DC_y[3];
 double           e_DC_z[3];
+
+bool            pi_reconstructed;
+bool              pi_passed_cuts;
+
 
 // positive pions
 bool         pipsReconstructed[NMAXPIONS];
@@ -771,6 +777,7 @@ void Stream_e_pi_line_to_CSV( int piIdx, int fdebug ){ // write a row of pion nu
     TVector3        Vpi;
     double          Zpi;
     
+    
     if (PiCharge=="pips") {
         pi  = piplus [piIdx];
         Vpi = Vpiplus[piIdx];
@@ -794,13 +801,13 @@ void Stream_e_pi_line_to_CSV( int piIdx, int fdebug ){ // write a row of pion nu
     }
     // write a (e,e'pi) event-line to CSV file
     std::vector<double> variables =
-    {   e.P(),              e.Theta(),          e.Phi(),            Ve.Z(),
-        pi.P(),             pi.Theta(),         pi.Phi(),           Vpi.Z(),
-        (double)Npips,      (double)Npims,       (double)Ne,         (double)Ngammas,
-        (double)Np,         (double)Nn,          (double)Nd,
-        e_g.P(),            e_g.Theta(),          e_g.Phi(),      Ve_g.Z(),
-        pi_g.P(),           pi_g.Theta(),         pi_g.Phi(),       Vpi_g.Z(),
-        pi_reconstructed,   pi_passed_cuts,
+    {   e.P(),              e.Theta(),          e.Phi(),                Ve.Z(),
+        pi.P(),             pi.Theta(),         pi.Phi(),               Vpi.Z(),
+        (double)Npips,      (double)Npims,      (double)Ne,             (double)Ngammas,
+        (double)Np,         (double)Nn,         (double)Nd,
+        e_g.P(),            e_g.Theta(),        e_g.Phi(),              Ve_g.Z(),
+        pi_g.P(),           pi_g.Theta(),       pi_g.Phi(),             Vpi_g.Z(),
+        (double)pi_reconstructed,               (double)pi_passed_cuts,
     };
     StreamToCSVfile( variables, fdebug );
 }
@@ -890,7 +897,7 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
        (( Chi2PID_pion_lowerBound( p, C ) < chi2PID && chi2PID < Chi2PID_pion_upperBound( p , C ) )
        
        // Cut on the z-Vertex Difference Between Electrons and Hadrons.
-       &&  ( fabs((Ve-Vpi).Z()) < cutValue_Ve_Vpi_dz_max )
+       &&  ( fabs((Ve-Vpi).Z()) < 20. )
        )) {
         return false;
     }
@@ -898,3 +905,45 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
     return true;
 }
 
+// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+Double_t Chi2PID_pion_lowerBound( Double_t p, Double_t C){
+    // compute lower bound for chi2PID for a pi+
+    // based on RGA_Analysis_Overview_and_Procedures_Nov_4_2020-6245173-2020-12-09-v3.pdf
+    // p. 75
+    // "Strict cut"
+    //
+    // input:
+    // -------
+    // p        pion momentum
+    // C        is the scaling factor for sigma (away from the mean value of the pion distribution)
+    //
+    
+    return ( -C * 3 );
+}
+
+// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+Double_t Chi2PID_pion_upperBound( Double_t p, Double_t C){
+    // compute upper bound for chi2PID for a pi+
+    // based on RGA_Analysis_Overview_and_Procedures_Nov_4_2020-6245173-2020-12-09-v3.pdf
+    // p. 75
+    // "Strict cut"
+    //
+    // input:
+    // -------
+    // p        pion momentum
+    // C        is the scaling factor for sigma (away from the mean value of the pion distribution)
+    //
+    
+    if (p<2.44)
+        
+        return C*3;
+    
+    else if (p<4.6)
+        
+        return C*( 0.00869 + 14.98587*exp(-p/1.18236)+1.81751*exp(-p/4.86394) ) ;
+    
+    else
+        
+        return C*( -1.14099 + 24.14992*exp(-p/1.36554) + 2.66876*exp(-p/6.80552) );
+    
+}
