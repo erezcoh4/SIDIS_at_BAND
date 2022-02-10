@@ -771,6 +771,7 @@ void ExtractPimsInformation( int pimsIdx, int fdebug ){
                                                                      pims_chi2PID[pimsIdx],  piminus[pimsIdx].P(),
                                                                      Ve,
                                                                      Vpiminus[pimsIdx],
+                                                                    pimsIdx
                                                                      fdebug);
 
 }
@@ -883,7 +884,7 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
         C       = 0.93;
     } else {
         std::cout << "pion charge is not defined in CheckIfPionPassedSelectionCuts(), returning false" << std::endl;
-        pipsPastPIDCuts[piIdx] = false
+        pipsPastPIDCuts[piIdx] = false;
         return false;
     }
 
@@ -913,7 +914,7 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
                                                 regionIdx+1,        // layer
                                                 bending);           // torus bending
         if (DC_fid == false) {
-            pipsPastFiducialCuts[piIdx] = false
+            pipsPastFiducialCuts[piIdx] = false;
             return false;
         }
         pipsPastFiducialCuts[piIdx] = true;
