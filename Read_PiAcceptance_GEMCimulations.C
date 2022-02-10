@@ -771,7 +771,7 @@ void ExtractPimsInformation( int pimsIdx, int fdebug ){
                                                                      pims_chi2PID[pimsIdx],  piminus[pimsIdx].P(),
                                                                      Ve,
                                                                      Vpiminus[pimsIdx],
-                                                                    pimsIdx
+                                                                    pimsIdx,
                                                                      fdebug);
 
 }
