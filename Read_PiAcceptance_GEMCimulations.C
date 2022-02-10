@@ -603,8 +603,8 @@ void ExtractElectronInformation(int fdebug){
 void ExtractPionsInformation(int fdebug){
     
     // positive pions
-    if (evnum>67 && evnum<74)
-        std::cout << "event " << evnum << " in ExtractPionsInformation, Npips= " << Npips << std::endl;
+//    if (evnum>67 && evnum<74)
+//        std::cout << "event " << evnum << " in ExtractPionsInformation, Npips= " << Npips << std::endl;
 
     for (int pipsIdx=0; pipsIdx < Npips; pipsIdx++) {
         std::cout << "event " << evnum << " pipsIdx= " << pipsIdx << std::endl;
@@ -990,8 +990,8 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
         << "succesfully passed CheckIfPionPassedSelectionCuts(), return true"
         << std::endl;
     }
-    if (evnum>67 && evnum<74)
-        std::cout << "before return in evnum " << evnum << " piIdx " << piIdx << ", pipsPastFiducialCuts[piIdx]: " << pipsPastFiducialCuts[piIdx] << std::endl;
+//    if (evnum>67 && evnum<74)
+//        std::cout << "before return in evnum " << evnum << " piIdx " << piIdx << ", pipsPastFiducialCuts[piIdx]: " << pipsPastFiducialCuts[piIdx] << std::endl;
 
     
     if (pionCharge=="pi+"){
