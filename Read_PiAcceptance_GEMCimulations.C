@@ -607,7 +607,7 @@ void ExtractPionsInformation(int fdebug){
 //        std::cout << "event " << evnum << " in ExtractPionsInformation, Npips= " << Npips << std::endl;
 
     for (int pipsIdx=0; pipsIdx < Npips; pipsIdx++) {
-        std::cout << "event " << evnum << " pipsIdx= " << pipsIdx << std::endl;
+//        std::cout << "event " << evnum << " pipsIdx= " << pipsIdx << std::endl;
         ExtractPipsInformation( pipsIdx, fdebug );
     }
     // negative pions
