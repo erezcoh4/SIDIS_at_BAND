@@ -946,7 +946,15 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
         } else {
             pimsPastPIDCuts[piIdx] = false;
         }
+    } else {
+        if (pionCharge=="pi+"){
+            pipsPastPIDCuts[piIdx] = true;
+        } else {
+            pimsPastPIDCuts[piIdx] = true;
+        }
+
     }
+    
     if (fdebug>3) {
         std::cout
         << "succesfully passed CheckIfPionPassedSelectionCuts(), return true"
