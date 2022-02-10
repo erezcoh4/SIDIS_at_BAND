@@ -884,8 +884,11 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
         C       = 0.93;
     } else {
         std::cout << "pion charge is not defined in CheckIfPionPassedSelectionCuts(), returning false" << std::endl;
-        pipsPastPIDCuts[piIdx] = false;
-        return false;
+        if (pionCharge=="pi+"){
+            pipsPastPIDCuts[piIdx] = false;
+        } else {
+            pimsPastPIDCuts[piIdx] = false;
+        }
     }
 
     for (int regionIdx=0; regionIdx<3; regionIdx++) {
@@ -913,11 +916,12 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
                                                 DC_sector,          // sector
                                                 regionIdx+1,        // layer
                                                 bending);           // torus bending
-        if (DC_fid == false) {
-            pipsPastFiducialCuts[piIdx] = false;
-            return false;
+        
+        if (pionCharge=="pi+"){
+            pipsPastFiducialCuts[piIdx] = DC_fid;
+        } else {
+            pimsPastFiducialCuts[piIdx] = DC_fid;
         }
-        pipsPastFiducialCuts[piIdx] = true;
     }
     
     if (fdebug>3) {
@@ -937,13 +941,29 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
        // Cut on the z-Vertex Difference Between Electrons and Hadrons.
        &&  ( fabs((Ve-Vpi).Z()) < 20. )
        )) {
-        pipsPastPIDCuts[piIdx] = false;
-        return false;
+        if (pionCharge=="pi+"){
+            pipsPastPIDCuts[piIdx] = false;
+        } else {
+            pimsPastPIDCuts[piIdx] = false;
+        }
     }
-    if (fdebug>3) { std::cout << "succesfully passed CheckIfPionPassedSelectionCuts(), return true" << std::endl; }
-    pipsPastPIDCuts[piIdx] = true;
-    pipsPastFiducialCuts[piIdx] = true;
-    return true;
+    if (fdebug>3) {
+        std::cout
+        << "succesfully passed CheckIfPionPassedSelectionCuts(), return true"
+        << std::endl;
+    }
+    
+    if (pionCharge=="pi+"){
+        
+        pipsPastSelectionCuts[piIdx] = (pipsPastPIDCuts[piIdx] && pipsPastFiducialCuts[piIdx]);
+        return pipsPastSelectionCuts[piIdx];
+        
+    } else {
+        
+        pimsPastSelectionCuts[piIdx] = (pimsPastPIDCuts[piIdx] && pimsPastFiducialCuts[piIdx]);
+        return pimsPastSelectionCuts[piIdx];
+        
+    }
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
