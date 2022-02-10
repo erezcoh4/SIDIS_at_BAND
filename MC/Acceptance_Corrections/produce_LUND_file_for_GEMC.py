@@ -35,7 +35,7 @@ from plot_tools             import *;
 from my_data_analysis_tools import *;
 #%config InlineBackend.figure_format = 'retina'
     
-Nevents = 50000;
+Nevents = 500000;
 
 particles = ['e-','pi'];
 r2d       = 180./np.pi;

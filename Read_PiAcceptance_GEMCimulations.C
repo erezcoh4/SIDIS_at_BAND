@@ -602,15 +602,29 @@ void WriteEventToOutput(int fdebug){
     // if we simulated a positive pion
     // stream to csv all positive pions as seperate rows
     if (PiCharge=="pips") {
-        for (int pipsIdx=0; pipsIdx<Npips; pipsIdx++) {
-            Stream_e_pi_line_to_CSV( pipsIdx, fdebug );
+        if (Npips==0) {
+            // this means that no pions were reconstructed,
+            // and we just want to record the event that we generated
+            Stream_e_pi_line_to_CSV( 0, fdebug );
+        }
+        else {
+            for (int pipsIdx=0; pipsIdx<Npips; pipsIdx++) {
+                Stream_e_pi_line_to_CSV( pipsIdx, fdebug );
+            }
         }
     }
     // if we simulated a negative pion
     // stream to csv all negative pions as seperate rows
     else if (PiCharge=="pims") {
+        if (Npims==0) {
+            // this means that no pions were reconstructed,
+            // and we just want to record the event that we generated
+            Stream_e_pi_line_to_CSV( 0, fdebug );
+        }
+        else {
         for (int pimsIdx=0; pimsIdx<Npims; pimsIdx++) {
             Stream_e_pi_line_to_CSV( pimsIdx, fdebug );
+        }
         }
     }
 }
