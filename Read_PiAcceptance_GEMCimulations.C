@@ -782,16 +782,16 @@ void Stream_e_pi_line_to_CSV( int piIdx, int fdebug ){ // write a row of pion nu
         pi  = piplus [piIdx];
         Vpi = Vpiplus[piIdx];
         
-        if ( Npips>piIdx )  pi_reconstructed = TRUE;
-        else                pi_reconstructed = FALSE;
+        if ( Npips>piIdx )  pi_reconstructed = true;
+        else                pi_reconstructed = false;
         pi_passed_cuts = pipsPastSelectionCuts[piIdx];
     }
     else if (PiCharge=="pims") {
         pi  = piminus [piIdx];
         Vpi = Vpiminus[piIdx];
         
-        if ( Npims>piIdx )  pi_reconstructed = TRUE;
-        else                pi_reconstructed = FALSE;
+        if ( Npims>piIdx )  pi_reconstructed = true;
+        else                pi_reconstructed = false;
         pi_passed_cuts = pimsPastSelectionCuts[piIdx];
 
    }
