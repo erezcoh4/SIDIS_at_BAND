@@ -821,6 +821,7 @@ void Stream_e_pi_line_to_CSV( int piIdx, int fdebug ){ // write a row of pion nu
         pi_passed_PID_cuts          = pipsPastPIDCuts[piIdx];
     }
     else if (PiCharge=="pims") {
+        
         pi  = piminus [piIdx];
         Vpi = Vpiminus[piIdx];
         
@@ -925,10 +926,17 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
     if (pionCharge=="pi+"){
 //        pipsPastFiducialCuts[piIdx] = DCFidRegion[0] && DCFidRegion[1] && DCFidRegion[2];
         pipsPastFiducialCuts[piIdx] = true;
+        if (evnum>67 && evnum<74)
+            std::cout << "evnum " << evnum << " piIdx " << piIdx << ", pipsPastFiducialCuts[piIdx]: " << pipsPastFiducialCuts[piIdx] << std::endl;
+        
     } else {
         pimsPastFiducialCuts[piIdx] = DCFidRegion[0] && DCFidRegion[1] && DCFidRegion[2];
     }
 
+    if (evnum>67 && evnum<74)
+        std::cout << "after if in evnum " << evnum << " piIdx " << piIdx << ", pipsPastFiducialCuts[piIdx]: " << pipsPastFiducialCuts[piIdx] << std::endl;
+    
+    
     if (fdebug>3) {
         std::cout << "in CheckIfPionPassedSelectionCuts()"<< std::endl
         << "pion charge: "          << pionCharge               << ","
@@ -964,6 +972,9 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
         << "succesfully passed CheckIfPionPassedSelectionCuts(), return true"
         << std::endl;
     }
+    if (evnum>67 && evnum<74)
+        std::cout << "before return in evnum " << evnum << " piIdx " << piIdx << ", pipsPastFiducialCuts[piIdx]: " << pipsPastFiducialCuts[piIdx] << std::endl;
+
     
     if (pionCharge=="pi+"){
         
