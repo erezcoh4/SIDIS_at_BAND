@@ -825,6 +825,7 @@ void Stream_e_pi_line_to_CSV( int piIdx, int fdebug ){ // write a row of pion nu
         
         if ( Npims>piIdx )  pi_reconstructed = true;
         else                pi_reconstructed = false;
+        
         pi_passed_cuts              = pimsPastSelectionCuts[piIdx];
         pi_passed_fiducial_cuts     = pimsPastFiducialCuts[piIdx];
         pi_passed_PID_cuts          = pimsPastPIDCuts[piIdx];
@@ -921,6 +922,7 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
     }
     if (pionCharge=="pi+"){
         pipsPastFiducialCuts[piIdx] = DCFidRegion[0] && DCFidRegion[1] && DCFidRegion[2];
+        pipsPastFiducialCuts[piIdx] = true;
     } else {
         pimsPastFiducialCuts[piIdx] = DCFidRegion[0] && DCFidRegion[1] && DCFidRegion[2];
     }
@@ -936,7 +938,7 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
         << std::endl;
     }
     if(!
-       // pi+ Identification Refinement - chi2PID vs. momentum
+       // pion Identification Refinement - chi2PID vs. momentum
        (( Chi2PID_pion_lowerBound( p, C ) < chi2PID && chi2PID < Chi2PID_pion_upperBound( p , C ) )
        
        // Cut on the z-Vertex Difference Between Electrons and Hadrons.
