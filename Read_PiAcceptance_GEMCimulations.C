@@ -891,6 +891,7 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
         }
     }
 
+    bool DCFidRegion[3];
     for (int regionIdx=0; regionIdx<3; regionIdx++) {
         // DC_e_fid:
         // sector:  1-6
@@ -916,14 +917,14 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
                                                 DC_sector,          // sector
                                                 regionIdx+1,        // layer
                                                 bending);           // torus bending
-        
-        if (pionCharge=="pi+"){
-            pipsPastFiducialCuts[piIdx] = DC_fid;
-        } else {
-            pimsPastFiducialCuts[piIdx] = DC_fid;
-        }
+        DCFidRegion[regionIdx] = DC_fid;
     }
-    
+    if (pionCharge=="pi+"){
+        pipsPastFiducialCuts[piIdx] = DCFidRegion[0] && DCFidRegion[1] && DCFidRegion[2];
+    } else {
+        pimsPastFiducialCuts[piIdx] = DCFidRegion[0] && DCFidRegion[1] && DCFidRegion[2];
+    }
+
     if (fdebug>3) {
         std::cout << "in CheckIfPionPassedSelectionCuts()"<< std::endl
         << "pion charge: "          << pionCharge               << ","
@@ -952,7 +953,6 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
         } else {
             pimsPastPIDCuts[piIdx] = true;
         }
-
     }
     
     if (fdebug>3) {
