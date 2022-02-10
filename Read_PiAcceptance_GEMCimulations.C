@@ -808,7 +808,7 @@ void Stream_e_pi_line_to_CSV( int piIdx, int fdebug ){ // write a row of pion nu
     TVector3        Vpi;
     double          Zpi;
     
-    std::cout << "Stream_e_pi_line_to_CSV(): "<< "Npips: " << Npips << ", piIdx: " << piIdx << std::endl;
+    std::cout << "Stream_e_pi_line_to_CSV(evnum="<<evnum<<"): "<< "Npips: " << Npips << ", piIdx: " << piIdx << std::endl;
     if (PiCharge=="pips") {
         pi  = piplus [piIdx];
         Vpi = Vpiplus[piIdx];
@@ -923,7 +923,7 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
         DCFidRegion[regionIdx] = DC_fid;
     }
     if (pionCharge=="pi+"){
-        pipsPastFiducialCuts[piIdx] = DCFidRegion[0] && DCFidRegion[1] && DCFidRegion[2];
+//        pipsPastFiducialCuts[piIdx] = DCFidRegion[0] && DCFidRegion[1] && DCFidRegion[2];
         pipsPastFiducialCuts[piIdx] = true;
     } else {
         pimsPastFiducialCuts[piIdx] = DCFidRegion[0] && DCFidRegion[1] && DCFidRegion[2];
