@@ -106,6 +106,7 @@ double           e_DC_x[3];
 double           e_DC_y[3];
 double           e_DC_z[3];
 
+bool             e_reconstructed;
 bool            pi_reconstructed;
 bool              pi_passed_cuts;
 bool     pi_passed_fiducial_cuts;
@@ -306,10 +307,12 @@ void Read_PiAcceptance_GEMCimulations(TString fPiCharge = "pips",
             if (Ne>0){
                 // We do not filter, so we write event non-reconstructed events.
                 // But here we extract information from electrons and pions
+                e_reconstructed = true;
                 ExtractElectronInformation  (fdebug);
                 ExtractPionsInformation     (fdebug);
             }
             else {
+                e_reconstructed = false;
                 if (fdebug>1) std::cout << "no electrons in event " << event << std::endl;
             }
             WriteEventToOutput              (fdebug);
@@ -476,6 +479,7 @@ void InitializeVariables(){
     neutrons    .clear();
     protons     .clear();
     gammas      .clear();
+    e_reconstructed = false;
     for (int piIdx=0; piIdx<NMAXPIONS; piIdx++) {
         pips_chi2PID[piIdx]                         = -9999;
         pips_DC_sector[piIdx]                       = -9999;
@@ -539,7 +543,8 @@ void OpenResultFiles(){
                      +(TString)"Npips,Npims,Nelectrons,Ngammas,Nprotons,Nneutrons,Ndeuterons,"
                      +(TString)"e_P_g,e_Theta_g,e_Phi_g,e_Vz_g,"
                      +(TString)"pi_P_g,pi_Theta_g,pi_Phi_g,pi_Vz_g,"
-                     +(TString)"pi_reconstructed,pi_passed_cuts,pi_passed_fiducial_cuts,pi_passed_PID_cuts,")
+                     +(TString)"pi_reconstructed,pi_passed_cuts,pi_passed_fiducial_cuts,pi_passed_PID_cuts,"
+                     +(TString)"e_reconstructed,")
                     );
 }
 
@@ -716,8 +721,8 @@ void ExtractPipsInformation( int pipsIdx, int fdebug ){
     Vpiplus_Y[pipsIdx]          = Vpiplus[pipsIdx].Y();
     Vpiplus_Z[pipsIdx]          = Vpiplus[pipsIdx].Z();
     
-    if (evnum>67 && evnum<74)
-        std::cout << "event " << evnum << " before CheckIfPionPassedSelectionCuts( pipsIdx=" << pipsIdx << ")" << std::endl;
+//    if (evnum>67 && evnum<74)
+//        std::cout << "event " << evnum << " before CheckIfPionPassedSelectionCuts( pipsIdx=" << pipsIdx << ")" << std::endl;
 
     
     pipsPastSelectionCuts[pipsIdx] = CheckIfPionPassedSelectionCuts("pi+",
@@ -730,8 +735,8 @@ void ExtractPipsInformation( int pipsIdx, int fdebug ){
                                                                      Vpiplus[pipsIdx],
                                                                     pipsIdx,
                                                                      fdebug);
-    if (evnum>67 && evnum<74)
-        std::cout << "event " << evnum << " after CheckIfPionPassedSelectionCuts( pipsIdx=" << pipsIdx << ")" << std::endl;
+//    if (evnum>67 && evnum<74)
+//        std::cout << "event " << evnum << " after CheckIfPionPassedSelectionCuts( pipsIdx=" << pipsIdx << ")" << std::endl;
 
 }
 
@@ -819,16 +824,17 @@ void Stream_e_pi_line_to_CSV( int piIdx, int fdebug ){ // write a row of pion nu
     TVector3        Vpi;
     double          Zpi;
     
-    std::cout << "Stream_e_pi_line_to_CSV(evnum="<<evnum<<"): "<< "Npips: " << Npips << ", piIdx: " << piIdx << std::endl;
+//    std::cout << "Stream_e_pi_line_to_CSV(evnum="<<evnum<<"): "<< "Npips: " << Npips << ", piIdx: " << piIdx << std::endl;
     if (PiCharge=="pips") {
         pi  = piplus [piIdx];
         Vpi = Vpiplus[piIdx];
         
         if ( Npips>piIdx )  pi_reconstructed = true;
         else                pi_reconstructed = false;
+        
         pi_passed_cuts              = pipsPastSelectionCuts[piIdx];
         pi_passed_fiducial_cuts     = pipsPastFiducialCuts[piIdx];
-        std::cout << "if (PiCharge==pips) { "<< "pi_passed_fiducial_cuts: " << pi_passed_fiducial_cuts << std::endl;
+//        std::cout << "if (PiCharge==pips) { "<< "pi_passed_fiducial_cuts: " << pi_passed_fiducial_cuts << std::endl;
         pi_passed_PID_cuts          = pipsPastPIDCuts[piIdx];
     }
     else if (PiCharge=="pims") {
@@ -849,7 +855,7 @@ void Stream_e_pi_line_to_CSV( int piIdx, int fdebug ){ // write a row of pion nu
         return;
     }
     // write a (e,e'pi) event-line to CSV file
-    std::cout << "variables: "<< "pi_passed_fiducial_cuts: " << pi_passed_fiducial_cuts << std::endl;
+//    std::cout << "variables: "<< "pi_passed_fiducial_cuts: " << pi_passed_fiducial_cuts << std::endl;
     std::vector<double> variables =
     {   e.P(),              e.Theta(),          e.Phi(),                Ve.Z(),
         pi.P(),             pi.Theta(),         pi.Phi(),               Vpi.Z(),
@@ -859,6 +865,7 @@ void Stream_e_pi_line_to_CSV( int piIdx, int fdebug ){ // write a row of pion nu
         pi_g.P(),           pi_g.Theta(),       pi_g.Phi(),             Vpi_g.Z(),
         (double)pi_reconstructed,               (double)pi_passed_cuts,
         (double)pi_passed_fiducial_cuts,        (double)pi_passed_PID_cuts,
+        (double)e_reconstructed,
     };
     StreamToCSVfile( variables, fdebug );
 }
@@ -935,17 +942,17 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
         DCFidRegion[regionIdx] = DC_fid;
     }
     if (pionCharge=="pi+"){
-//        pipsPastFiducialCuts[piIdx] = DCFidRegion[0] && DCFidRegion[1] && DCFidRegion[2];
-        pipsPastFiducialCuts[piIdx] = true;
-        if (evnum>67 && evnum<74)
-            std::cout << "evnum " << evnum << " piIdx " << piIdx << ", pipsPastFiducialCuts[piIdx]: " << pipsPastFiducialCuts[piIdx] << std::endl;
+        pipsPastFiducialCuts[piIdx] = DCFidRegion[0] && DCFidRegion[1] && DCFidRegion[2];
+//        pipsPastFiducialCuts[piIdx] = true;
+//        if (evnum>67 && evnum<74)
+//            std::cout << "evnum " << evnum << " piIdx " << piIdx << ", pipsPastFiducialCuts[piIdx]: " << pipsPastFiducialCuts[piIdx] << std::endl;
         
     } else {
         pimsPastFiducialCuts[piIdx] = DCFidRegion[0] && DCFidRegion[1] && DCFidRegion[2];
     }
 
-    if (evnum>67 && evnum<74)
-        std::cout << "after if in evnum " << evnum << " piIdx " << piIdx << ", pipsPastFiducialCuts[piIdx]: " << pipsPastFiducialCuts[piIdx] << std::endl;
+//    if (evnum>67 && evnum<74)
+//        std::cout << "after if in evnum " << evnum << " piIdx " << piIdx << ", pipsPastFiducialCuts[piIdx]: " << pipsPastFiducialCuts[piIdx] << std::endl;
     
     
     if (fdebug>3) {
