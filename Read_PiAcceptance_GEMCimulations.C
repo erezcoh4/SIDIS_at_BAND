@@ -854,7 +854,7 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
                                     Double_t chi2PID, Double_t p,
                                     TVector3 Ve,
                                     TVector3 Vpi,
-                                    int pipsIdx,
+                                    int piIdx,
                                     int fdebug){
     
     // decide if pion (pi+ or pi-) passed event selection cuts
