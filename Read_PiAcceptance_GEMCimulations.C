@@ -817,6 +817,7 @@ void Stream_e_pi_line_to_CSV( int piIdx, int fdebug ){ // write a row of pion nu
         else                pi_reconstructed = false;
         pi_passed_cuts              = pipsPastSelectionCuts[piIdx];
         pi_passed_fiducial_cuts     = pipsPastFiducialCuts[piIdx];
+        std::cout << "if (PiCharge==pips) { "<< "pi_passed_fiducial_cuts: " << pi_passed_fiducial_cuts << std::endl;
         pi_passed_PID_cuts          = pipsPastPIDCuts[piIdx];
     }
     else if (PiCharge=="pims") {
@@ -836,6 +837,7 @@ void Stream_e_pi_line_to_CSV( int piIdx, int fdebug ){ // write a row of pion nu
         return;
     }
     // write a (e,e'pi) event-line to CSV file
+    std::cout << "variables: "<< "pi_passed_fiducial_cuts: " << pi_passed_fiducial_cuts << std::endl;
     std::vector<double> variables =
     {   e.P(),              e.Theta(),          e.Phi(),                Ve.Z(),
         pi.P(),             pi.Theta(),         pi.Phi(),               Vpi.Z(),
