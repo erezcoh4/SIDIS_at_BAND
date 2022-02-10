@@ -11,6 +11,12 @@ This repository is responsible for
     
 ## Revisions
 
+Feb-10, 2022    
+-------------
+1. Added fiducial cuts a PID requirements to *Read_PiAcceptance_GEMCimulations.C*.
+    Now, each "event" (simulated pion) has another two variables:
+    pi_reconstructed , pi_passed_cuts  
+
 
 Jan-18, 2022    
 -------------

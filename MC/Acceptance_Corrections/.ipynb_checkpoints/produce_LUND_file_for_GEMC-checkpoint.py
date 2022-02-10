@@ -43,10 +43,11 @@ d2r       = np.pi/180.;
 p_min     = 1.25 # GeV/c
 p_max     = 5.00 # GeV/c
 theta_min = 3    # deg.
-theta_max = 40  # deg.
+theta_max = 40   # deg.
 phi_min   = -180 # deg.
 phi_max   = 180  # deg.
-delta_Vz_resolution = 0.5; # 1\sigma = 5 mm momentum resolution for CLAS
+vz_min    = -10; # cm
+vz_max    = 10;  # cm
 fdebug    = 3
 m_pi      = 0.13957 # GeV/c2
 m_e       = 0.511e-3 # GeV/c2
@@ -92,7 +93,7 @@ PDG[0]= PDG_e
 # electron taken from a simulated event that passed reconstruction stage with default clas12 yaml card
 # MC particle PDG code 11, p: 1.345 GeV/c, , theta: 30.9 deg, , phi: -163.4 deg, , V(z): 7.758 cm
 e_P    = 1.345
-e_theta= 30.9 * d2r    # = 30.9 deg.
+e_theta= 30.9 * d2r # = 30.9 deg.
 e_phi = -163.4 * d2r   # = 67.4 deg.
 e_Vz  = 7.758 
 
@@ -167,7 +168,7 @@ for pi_charge,pi_label,pi_PDG in zip(['pips','pims'],['\pi^+','\pi^-'],[PDG_pips
         # sample pion vertex 
         vx[1] = 0
         vy[1] = 0
-        vz[1] = np.random.normal( loc=e_Vz, scale=delta_Vz_resolution );
+        vz[1] = np.random.uniform( vz_min, vz_max );
         
         if fdebug:  
             if n%(Nevents/10)==0: print( '%.1f'%(100.*n/Nevents)+'%')

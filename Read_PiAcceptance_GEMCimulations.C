@@ -54,10 +54,16 @@ void                    ComputeKinematics ();
 void                   WriteEventToOutput (int fdebug);
 void                        FinishProgram ();
 void                   GetParticlesByType (int evnum, int fdebug );
-void              Stream_e_pi_line_to_CSV (int fdebug );
+void              Stream_e_pi_line_to_CSV (int piIdx, int fdebug );
 void                          SetDataPath ( TString fDataPath )  {DataPath = fDataPath;}
 void                         SetFileLabel ( TString fFileLabel ) {FileLabel = fFileLabel;}
 void                          SetPiCharge ( TString fPiCharge )  {PiCharge = fPiCharge;}
+bool       CheckIfPionPassedSelectionCuts (TString pionCharge, // "pi+" or "pi-"
+                                           Double_t DC_sector,
+                                           Double_t DC_x[3], Double_t DC_y[3], Double_t DC_z[3],
+                                           Double_t chi2PID, Double_t p,
+                                           TVector3 Ve,      TVector3 Vpi,
+                                           int fdebug);
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 
@@ -98,6 +104,7 @@ double           e_DC_y[3];
 double           e_DC_z[3];
 
 // positive pions
+bool         pipsReconstructed[NMAXPIONS];
 bool     pipsPastSelectionCuts[NMAXPIONS];
 bool eepipsPastKinematicalCuts[NMAXPIONS];
 double        pips_chi2PID[NMAXPIONS];
@@ -128,6 +135,7 @@ double           Vpiplus_Z[NMAXPIONS];
 
 
 // negative pions
+bool         pimsReconstructed[NMAXPIONS];
 bool     pimsPastSelectionCuts[NMAXPIONS];
 bool eepimsPastKinematicalCuts[NMAXPIONS];
 double        pims_chi2PID[NMAXPIONS];
@@ -507,9 +515,10 @@ TString GetRunNumberSTR(int RunNumber, int fdebug){
 void OpenResultFiles(){
     OpenOutputFiles(( (TString)"e_P,e_Theta,e_Phi,e_Vz,"
                      +(TString)"pi_P,pi_Theta,pi_Phi,pi_Vz,"
-                     +(TString)"Npips,Npims,Nelectrons,Ngammas,Nprotons,Nneutrons,Ndeuterons,")
+                     +(TString)"Npips,Npims,Nelectrons,Ngammas,Nprotons,Nneutrons,Ndeuterons,"
                      +(TString)"e_P_g,e_Theta_g,e_Phi_g,e_Vz_g,"
                      +(TString)"pi_P_g,pi_Theta_g,pi_Phi_g,pi_Vz_g,"
+                     +(TString)"pi_reconstructed,pi_passed_cuts,")
                     );
 }
 
@@ -583,7 +592,21 @@ void ExtractPionsInformation(int fdebug){
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void WriteEventToOutput(int fdebug){
     if (fdebug>3) std::cout << "Writing (e,e'pi) event" << std::endl;
-    Stream_e_pi_line_to_CSV( fdebug );
+    
+    // if we simulated a positive pion
+    // stream to csv all positive pions as seperate rows
+    if (PiCharge=="pips") {
+        for (int pipsIdx=0; pipsIdx<Npips; pipsIdx++) {
+            Stream_e_pi_line_to_CSV( pipsIdx, fdebug );
+        }
+    }
+    // if we simulated a negative pion
+    // stream to csv all negative pions as seperate rows
+    else if (PiCharge=="pims") {
+        for (int pimsIdx=0; pimsIdx<Npims; pimsIdx++) {
+            Stream_e_pi_line_to_CSV( pimsIdx, fdebug );
+        }
+    }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -654,7 +677,15 @@ void ExtractPipsInformation( int pipsIdx, int fdebug ){
     Vpiplus_Y[pipsIdx]          = Vpiplus[pipsIdx].Y();
     Vpiplus_Z[pipsIdx]          = Vpiplus[pipsIdx].Z();
     
-    
+    pipsPastSelectionCuts[pipsIdx] = CheckIfPionPassedSelectionCuts("pi+",
+                                                                     pips_DC_sector[pipsIdx],
+                                                                     pips_DC_x[pipsIdx],
+                                                                     pips_DC_y[pipsIdx],
+                                                                     pips_DC_z[pipsIdx],
+                                                                     pips_chi2PID[pipsIdx],  piplus[pipsIdx].P(),
+                                                                     Ve,
+                                                                     Vpiplus[pipsIdx],
+                                                                     fdebug);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -696,6 +727,15 @@ void ExtractPimsInformation( int pimsIdx, int fdebug ){
     Vpiminus_Y[pimsIdx]          = Vpiminus[pimsIdx].Y();
     Vpiminus_Z[pimsIdx]          = Vpiminus[pimsIdx].Z();
     
+    pimsPastSelectionCuts[pimsIdx] = CheckIfPionPassedSelectionCuts("pi-",
+                                                                     pims_DC_sector[pimsIdx],
+                                                                     pims_DC_x[pimsIdx],
+                                                                     pims_DC_y[pimsIdx],
+                                                                     pims_DC_z[pimsIdx],
+                                                                     pims_chi2PID[pimsIdx],  piminus[pimsIdx].P(),
+                                                                     Ve,
+                                                                     Vpiminus[pimsIdx],
+                                                                     fdebug);
 
 }
 
@@ -724,18 +764,29 @@ void GetParticlesByType (int evnum, int fdebug){
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-void Stream_e_pi_line_to_CSV( int fdebug ){
-    int piIdx = 0;
+void Stream_e_pi_line_to_CSV( int piIdx, int fdebug ){ // write a row of pion number piIdx to CSV file
+    
+    
     TLorentzVector  pi;
     TVector3        Vpi;
     double          Zpi;
+    
     if (PiCharge=="pips") {
         pi  = piplus [piIdx];
         Vpi = Vpiplus[piIdx];
+        
+        if ( Npips>piIdx )  pi_reconstructed = TRUE;
+        else                pi_reconstructed = FALSE;
+        pi_passed_cuts = pipsPastSelectionCuts[piIdx];
     }
     else if (PiCharge=="pims") {
         pi  = piminus [piIdx];
         Vpi = Vpiminus[piIdx];
+        
+        if ( Npims>piIdx )  pi_reconstructed = TRUE;
+        else                pi_reconstructed = FALSE;
+        pi_passed_cuts = pimsPastSelectionCuts[piIdx];
+
    }
     else {
         std::cout << "pion charge undefined at Stream_e_pi_line_to_CSV(), returning " << std::endl;
@@ -743,15 +794,107 @@ void Stream_e_pi_line_to_CSV( int fdebug ){
     }
     // write a (e,e'pi) event-line to CSV file
     std::vector<double> variables =
-    {   e.P(),          e.Theta(),          e.Phi(),            Ve.Z(),
-        pi.P(),         pi.Theta(),         pi.Phi(),           Vpi.Z(),
-        (double)Npips, (double)Npims,       (double)Ne,         (double)Ngammas,
-        (double)Np,    (double)Nn,          (double)Nd,
-        e_g.P(),          e_g.Theta(),          e_g.Phi(),      Ve_g.Z(),
-        pi_g.P(),         pi_g.Theta(),         pi_g.Phi(),       Vpi_g.Z(),
+    {   e.P(),              e.Theta(),          e.Phi(),            Ve.Z(),
+        pi.P(),             pi.Theta(),         pi.Phi(),           Vpi.Z(),
+        (double)Npips,      (double)Npims,       (double)Ne,         (double)Ngammas,
+        (double)Np,         (double)Nn,          (double)Nd,
+        e_g.P(),            e_g.Theta(),          e_g.Phi(),      Ve_g.Z(),
+        pi_g.P(),           pi_g.Theta(),         pi_g.Phi(),       Vpi_g.Z(),
+        pi_reconstructed,   pi_passed_cuts,
     };
     StreamToCSVfile( variables, fdebug );
 }
 
 
+
+// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
+                                     Double_t DC_sector,
+                                     Double_t DC_x[3], Double_t DC_y[3], Double_t DC_z[3],
+                                     Double_t chi2PID, Double_t p,
+                                     TVector3 Ve,
+                                     TVector3 Vpi,
+                                     int fdebug){
+    
+    // decide if pion (pi+ or pi-) passed event selection cuts
+    //
+    // input:
+    // --------
+    // DC_x, DC_y   pi drift-chamber coordinates
+    // chi2PID      pi chi2PID     (pips_chi2PID)
+    // p            pi momentum    (pi.P())
+    //
+    // comments
+    // ---------------
+    // DC - fiducial cuts on DC
+    if (fdebug>3) {
+        std::cout << "CheckIfPionPassedSelectionCuts()" << std::endl;
+    }
+    if (DC_sector == 0) { if (fdebug>2){std::cout << "DC_sector=0 (funny...)" << std::endl;} return false;}
+    
+    int PDGcode;
+    double    C;
+    if (pionCharge=="pi+"){
+        PDGcode = 211;
+        C       = 0.88;
+    } else if (pionCharge=="pi-") {
+        PDGcode = -211;
+        C       = 0.93;
+    } else {
+        std::cout << "pion charge is not defined in CheckIfPionPassedSelectionCuts(), returning false" << std::endl;
+        return false;
+    }
+
+    for (int regionIdx=0; regionIdx<3; regionIdx++) {
+        // DC_e_fid:
+        // sector:  1-6
+        // layer:   1-3
+        // bending: 0(out)/1(in)
+        int bending  = 1 ? (torusBending==-1) : 0;
+        // new version Aug-11,2021
+        if (fdebug>3) {
+            std::cout << "dcfid.DC_fid_th_ph_sidis(): "
+            << DC_x[regionIdx] <<     ","
+            << DC_y[regionIdx] <<     ","
+            << DC_z[regionIdx] <<     ","
+            << DC_sector       <<     ","
+            << regionIdx+1     <<     ","
+            << bending         <<     ","
+            << std::endl;
+            
+        }
+        bool DC_fid  = dcfid.DC_fid_th_ph_sidis(PDGcode,            // particle PID
+                                                DC_x[regionIdx],    // x
+                                                DC_y[regionIdx],    // y
+                                                DC_z[regionIdx],    // z
+                                                DC_sector,          // sector
+                                                regionIdx+1,        // layer
+                                                bending);           // torus bending
+        if (DC_fid == false) {
+            return false;
+        }
+    }
+    
+    if (fdebug>3) {
+        std::cout << "in CheckIfPionPassedSelectionCuts()"<< std::endl
+        << "pion charge: "          << pionCharge               << ","
+        << "DC_x[0]: "              << DC_x[0]                  << ","
+        << "chi2PID:"               << chi2PID                  << ","
+        << "Chi2PID_pion_lowerBound( p="<<p<<", C="<<C<<" ): "  << Chi2PID_pion_lowerBound( p, C ) << ","
+        << "Chi2PID_pion_upperBound( p="<<p<<", C="<<C<<" ): "  << Chi2PID_pion_upperBound( p, C ) << ","
+        << "fabs((Ve-Vpi).Z()): "   << fabs((Ve-Vpi).Z())       << ","
+        << std::endl;
+    }
+    if(!
+       // pi+ Identification Refinement - chi2PID vs. momentum
+       (( Chi2PID_pion_lowerBound( p, C ) < chi2PID && chi2PID < Chi2PID_pion_upperBound( p , C ) )
+       
+       // Cut on the z-Vertex Difference Between Electrons and Hadrons.
+       &&  ( fabs((Ve-Vpi).Z()) < cutValue_Ve_Vpi_dz_max )
+       )) {
+        return false;
+    }
+    if (fdebug>3) { std::cout << "succesfully passed CheckIfPionPassedSelectionCuts(), return true" << std::endl; }
+    return true;
+}
 
