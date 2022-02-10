@@ -63,6 +63,7 @@ bool       CheckIfPionPassedSelectionCuts (TString pionCharge, // "pi+" or "pi-"
                                            Double_t DC_x[3], Double_t DC_y[3], Double_t DC_z[3],
                                            Double_t chi2PID, Double_t p,
                                            TVector3 Ve,      TVector3 Vpi,
+                                           int pipsIdx,
                                            int fdebug);
 Double_t          Chi2PID_pion_lowerBound (Double_t p, Double_t C=0.88); // C(pi+)=0.88, C(pi-)=0.93
 Double_t          Chi2PID_pion_upperBound (Double_t p, Double_t C=0.88); // C(pi+)=0.88, C(pi-)=0.93
@@ -107,11 +108,15 @@ double           e_DC_z[3];
 
 bool            pi_reconstructed;
 bool              pi_passed_cuts;
+bool     pi_passed_fiducial_cuts;
+bool          pi_passed_PID_cuts;
 
 
 // positive pions
 bool         pipsReconstructed[NMAXPIONS];
 bool     pipsPastSelectionCuts[NMAXPIONS];
+bool      pipsPastFiducialCuts[NMAXPIONS];
+bool           pipsPastPIDCuts[NMAXPIONS];
 bool eepipsPastKinematicalCuts[NMAXPIONS];
 double        pips_chi2PID[NMAXPIONS];
 double         pips_PCAL_W[NMAXPIONS];
@@ -143,6 +148,8 @@ double           Vpiplus_Z[NMAXPIONS];
 // negative pions
 bool         pimsReconstructed[NMAXPIONS];
 bool     pimsPastSelectionCuts[NMAXPIONS];
+bool      pimsPastFiducialCuts[NMAXPIONS];
+bool           pimsPastPIDCuts[NMAXPIONS];
 bool eepimsPastKinematicalCuts[NMAXPIONS];
 double        pims_chi2PID[NMAXPIONS];
 double         pims_PCAL_W[NMAXPIONS];
@@ -505,7 +512,13 @@ void InitializeVariables(){
         Vpiminus_X[piIdx]   = Vpiminus_Y[piIdx] = Vpiminus_Z[piIdx] = -9999;
         
         pipsPastSelectionCuts[piIdx]                = false;
+        pipsPastFiducialCuts[piIdx]                 = false;
+        pipsPastPIDCuts[piIdx]                      = false;
+        
         pimsPastSelectionCuts[piIdx]                = false;
+        pimsPastFiducialCuts[piIdx]                 = false;
+        pimsPastPIDCuts[piIdx]                      = false;
+
     }
     DC_layer                                        = -9999;
     status                                          = 1; // 0 is good...
@@ -526,7 +539,7 @@ void OpenResultFiles(){
                      +(TString)"Npips,Npims,Nelectrons,Ngammas,Nprotons,Nneutrons,Ndeuterons,"
                      +(TString)"e_P_g,e_Theta_g,e_Phi_g,e_Vz_g,"
                      +(TString)"pi_P_g,pi_Theta_g,pi_Phi_g,pi_Vz_g,"
-                     +(TString)"pi_reconstructed,pi_passed_cuts,")
+                     +(TString)"pi_reconstructed,pi_passed_cuts,pi_passed_fiducial_cuts,pi_passed_PID_cuts,")
                     );
 }
 
@@ -707,6 +720,7 @@ void ExtractPipsInformation( int pipsIdx, int fdebug ){
                                                                      pips_chi2PID[pipsIdx],  piplus[pipsIdx].P(),
                                                                      Ve,
                                                                      Vpiplus[pipsIdx],
+                                                                    pipsIdx,
                                                                      fdebug);
 }
 
@@ -800,7 +814,9 @@ void Stream_e_pi_line_to_CSV( int piIdx, int fdebug ){ // write a row of pion nu
         
         if ( Npips>piIdx )  pi_reconstructed = true;
         else                pi_reconstructed = false;
-        pi_passed_cuts = pipsPastSelectionCuts[piIdx];
+        pi_passed_cuts              = pipsPastSelectionCuts[piIdx];
+        pi_passed_fiducial_cuts     = pipsPastFiducialCuts[piIdx];
+        pi_passed_PID_cuts          = pipsPastPIDCuts[piIdx];
     }
     else if (PiCharge=="pims") {
         pi  = piminus [piIdx];
@@ -808,8 +824,10 @@ void Stream_e_pi_line_to_CSV( int piIdx, int fdebug ){ // write a row of pion nu
         
         if ( Npims>piIdx )  pi_reconstructed = true;
         else                pi_reconstructed = false;
-        pi_passed_cuts = pimsPastSelectionCuts[piIdx];
-
+        pi_passed_cuts              = pimsPastSelectionCuts[piIdx];
+        pi_passed_fiducial_cuts     = pimsPastFiducialCuts[piIdx];
+        pi_passed_PID_cuts          = pimsPastPIDCuts[piIdx];
+    
    }
     else {
         std::cout << "pion charge undefined at Stream_e_pi_line_to_CSV(), returning " << std::endl;
@@ -824,20 +842,20 @@ void Stream_e_pi_line_to_CSV( int piIdx, int fdebug ){ // write a row of pion nu
         e_g.P(),            e_g.Theta(),        e_g.Phi(),              Ve_g.Z(),
         pi_g.P(),           pi_g.Theta(),       pi_g.Phi(),             Vpi_g.Z(),
         (double)pi_reconstructed,               (double)pi_passed_cuts,
+        (double)pi_passed_fiducial_cuts,        (double)pi_passed_PID_cuts,
     };
     StreamToCSVfile( variables, fdebug );
 }
 
-
-
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
-                                     Double_t DC_sector,
-                                     Double_t DC_x[3], Double_t DC_y[3], Double_t DC_z[3],
-                                     Double_t chi2PID, Double_t p,
-                                     TVector3 Ve,
-                                     TVector3 Vpi,
-                                     int fdebug){
+                                    Double_t DC_sector,
+                                    Double_t DC_x[3], Double_t DC_y[3], Double_t DC_z[3],
+                                    Double_t chi2PID, Double_t p,
+                                    TVector3 Ve,
+                                    TVector3 Vpi,
+                                    int pipsIdx,
+                                    int fdebug){
     
     // decide if pion (pi+ or pi-) passed event selection cuts
     //
@@ -865,6 +883,7 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
         C       = 0.93;
     } else {
         std::cout << "pion charge is not defined in CheckIfPionPassedSelectionCuts(), returning false" << std::endl;
+        pipsPastPIDCuts[piIdx] = false
         return false;
     }
 
@@ -894,8 +913,10 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
                                                 regionIdx+1,        // layer
                                                 bending);           // torus bending
         if (DC_fid == false) {
+            pipsPastFiducialCuts[piIdx] = false
             return false;
         }
+        pipsPastFiducialCuts[piIdx] = true;
     }
     
     if (fdebug>3) {
@@ -915,9 +936,12 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
        // Cut on the z-Vertex Difference Between Electrons and Hadrons.
        &&  ( fabs((Ve-Vpi).Z()) < 20. )
        )) {
+        pipsPastPIDCuts[piIdx] = false;
         return false;
     }
     if (fdebug>3) { std::cout << "succesfully passed CheckIfPionPassedSelectionCuts(), return true" << std::endl; }
+    pipsPastPIDCuts[piIdx] = true;
+    pipsPastFiducialCuts[piIdx] = true;
     return true;
 }
 
