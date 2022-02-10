@@ -597,8 +597,12 @@ void ExtractElectronInformation(int fdebug){
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void ExtractPionsInformation(int fdebug){
     
-    // positive pions)
+    // positive pions
+    if (evnum>67 && evnum<74)
+        std::cout << "event " << evnum << " in ExtractPionsInformation, Npips= " << Npips << std::endl;
+
     for (int pipsIdx=0; pipsIdx < Npips; pipsIdx++) {
+        std::cout << "event " << evnum << " pipsIdx= " << pipsIdx << std::endl;
         ExtractPipsInformation( pipsIdx, fdebug );
     }
     // negative pions
