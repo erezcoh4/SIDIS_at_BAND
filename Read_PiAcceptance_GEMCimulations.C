@@ -503,7 +503,9 @@ void InitializeVariables(){
         piminus_Px[piIdx]   = piminus_Py[piIdx] = piminus_Pz[piIdx] = piminus_E[piIdx]  = -9999;
         Vpiplus_X[piIdx]    = Vpiplus_Y[piIdx]  = Vpiplus_Z[piIdx]  = -9999;
         Vpiminus_X[piIdx]   = Vpiminus_Y[piIdx] = Vpiminus_Z[piIdx] = -9999;
-         
+        
+        pipsPastSelectionCuts[piIdx]                = false;
+        pimsPastSelectionCuts[piIdx]                = false;
     }
     DC_layer                                        = -9999;
     status                                          = 1; // 0 is good...
