@@ -808,7 +808,7 @@ void Stream_e_pi_line_to_CSV( int piIdx, int fdebug ){ // write a row of pion nu
     TVector3        Vpi;
     double          Zpi;
     
-    
+    std::cout << "Stream_e_pi_line_to_CSV(): "<< "Npips: " << Npips << ", piIdx: " << piIdx << std::endl;
     if (PiCharge=="pips") {
         pi  = piplus [piIdx];
         Vpi = Vpiplus[piIdx];
