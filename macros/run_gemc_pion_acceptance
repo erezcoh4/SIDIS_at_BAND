@@ -70,7 +70,7 @@ for pi_charge in pi_charges:#{
                     + "-i %s "%evio_file
                     + "-o %s "%hipo_file)
     print( commandline )
-#    os.system( commandline )
+    os.system( commandline )
     
     # (3) Apply event reconstruction
     print("")
@@ -81,7 +81,7 @@ for pi_charge in pi_charges:#{
                     + "-o %s "%reco_file
                     + "-y /group/clas12/gemc/4.4.1/config/clas12-default.yaml ")
     print( commandline )
-#    os.system( commandline )
+    os.system( commandline )
     
     
     print("")
