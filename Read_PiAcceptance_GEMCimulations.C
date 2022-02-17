@@ -213,14 +213,21 @@ void Read_PiAcceptance_GEMCimulations(TString fPiCharge = "pips",
                                       TString fFileLabel = "p_uniform_distribution",
                                       TString fDataPath = "/volatile/clas12/users/ecohen/GEMC/hipo/10.2/AcceptanceCorrection/"
                                       ){
-    
+    if (fdebug>2) std::cout << "SetDataPath ( "<<fDataPath<<"  ); " << std::endl;
     SetDataPath ( fDataPath  );
+    
+    if (fdebug>2) std::cout << "SetFileLabel ( "<<fFileLabel<<"  ); " << std::endl;
     SetFileLabel( fFileLabel );
+    
+    if (fdebug>2) std::cout << "SetPiCharge ( "<<fPiCharge<<"  ); "  << std::endl;
     SetPiCharge ( fPiCharge  );
     // open result files
+    if (fdebug>2) std::cout << "OpenResultFiles (); "  << std::endl;
     OpenResultFiles();
     
     TString inputFile = DataPath + "/" + PiCharge + "/ee" + PiCharge + "_" + FileLabel + "_reconstructed.hipo";
+    if (fdebug>2) std::cout << "inputFile: " << inputFile << std::endl;
+    
     TChain fake("hipo");
     fake.Add(inputFile.Data());
     //get the hipo data
