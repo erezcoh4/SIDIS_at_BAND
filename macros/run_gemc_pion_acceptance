@@ -42,10 +42,10 @@ for pi_charge in pi_charges:#{
     print("(1) Run GEMC simulation")
     print("")
     os.system( "cd /u/home/cohen && source set_gemc_env.csh" )
-    commandline = ("/u/home/cohen/clas12Tags/4.4.1/source/gemc /group/clas12/gemc/4.4.1/config/clas12-default.gcard"
-                    + "-USE_GUI=0"
-                    + "-N=%d"%Nevents
-                    + "-INPUT_GEN_FILE=\"LUND, %s\""%lund_file
+    commandline = ("/u/home/cohen/clas12Tags/4.4.1/source/gemc /group/clas12/gemc/4.4.1/config/clas12-default.gcard "
+                    + "-USE_GUI=0 "
+                    + "-N=%d "%Nevents
+                    + "-INPUT_GEN_FILE=\"LUND, %s\" "%lund_file
                     + "-OUTPUT=\"evio, %s\" "%evio_file )
     print( commandline )
     os.system(commandline)
@@ -57,8 +57,8 @@ for pi_charge in pi_charges:#{
     os.system( "cd /u/home/cohen && source set_cook_env.csh" )
     
     commandline = ("/u/home/cohen/clas12-offline-software/coatjava/bin/evio2hipo -t -1 -s -1 -r 11 "
-                    + "-i %s"%evio_file
-                    + "-o %s"%hipo_file)
+                    + "-i %s "%evio_file
+                    + "-o %s "%hipo_file)
     print( commandline )
     os.system( commandline )
     
@@ -67,9 +67,9 @@ for pi_charge in pi_charges:#{
     print("(3) Apply event reconstruction")
     print("")
     commandline = ("/u/home/cohen/clas12-offline-software/coatjava/bin/recon-util "
-                    + "-i %s"%hipo_file
-                    + "-o %s"%reco_file
-                    + "-y /group/clas12/gemc/4.4.1/config/clas12-default.yaml")
+                    + "-i %s "%hipo_file
+                    + "-o %s "%reco_file
+                    + "-y /group/clas12/gemc/4.4.1/config/clas12-default.yaml ")
     print( commandline )
     os.system( commandline )
     
