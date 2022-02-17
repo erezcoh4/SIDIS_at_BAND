@@ -46,7 +46,7 @@ for pi_charge in pi_charges:#{
                     + "-USE_GUI=0" +
                     + "-N=%d"%Nevents
                     + "-INPUT_GEN_FILE=\"LUND, %s\""%lund_file
-                    +"-OUTPUT=\"evio, %s\""%evio_file)
+                    + "-OUTPUT=\"evio, %s\" "%evio_file )
     print( commandline )
     os.system(commandline)
 
