@@ -15,9 +15,7 @@ parser.add_argument("--Nevents",   type=int, default=-1,
                     required=False, help="Number of events to simulate")
 parser.add_argument("--fdebug",       type=int, default=1,
                     required=False, help="verbosity")
-parser.add_argument("--PrintProgress",type=int, default=50000,
-                    required=False, help="print progress (every N events)")
-parser.add_argument('--only-pi+',   dest='only_pips', action='store_true', help="do only pi+ (and not pi-)")
+parser.add_argument("--only-pi+",   dest="only_pips", action='store_true', help="do only pi+ (and not pi-)")
 
 
 args = parser.parse_args()
