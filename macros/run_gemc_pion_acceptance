@@ -36,6 +36,11 @@ for pi_charge in pi_charges:#{
     hipo_file = main_data_path + "hipo" + main_subdir + pi_charge + "/" + filelabel + ".hipo"
     reco_file = main_data_path + "hipo" + main_subdir + pi_charge + "/" + filelabel + "_reconstructed.hipo"
 
+    # (0) delete existing results file
+    
+    commandline =  "rm %s %s"%(hipo_file,reco_file)
+    print( commandline )
+    os.system( commandline )
 
     # (1) run GEMC simulation
     print("")
@@ -61,7 +66,6 @@ for pi_charge in pi_charges:#{
 
     # (2) convert EVIO to HIPO
     print("")
-    print("exit, then reconnect for cooking:")
     print("(2) Convert EVIO to HIPO")
     print("")
     os.system( "cd /u/home/cohen && source set_cook_env.csh" )
