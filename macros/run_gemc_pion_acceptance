@@ -22,7 +22,6 @@ args = parser.parse_args()
 
 Nevents       = args.Nevents
 fdebug        = args.fdebug
-PrintProgress = args.PrintProgress
 
 pi_charges = ['pips','pims']
 if args.only_pips: #{
