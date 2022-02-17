@@ -32,9 +32,9 @@ main_subdir     = "/10.2/AcceptanceCorrection/"
 for pi_charge in pi_charges:#{
     filelabel = "ee"+pi_charge+"_p_uniform_distribution"
     lund_file = main_data_path + "LUND" + main_subdir + pi_charge + "/" + filelabel + ".dat"
-    evio_file = main_data_path + "evio" + main_subdir + pi_charge + "/" + filelabel + ".dat"
-    hipo_file = main_data_path + "hipo" + main_subdir + pi_charge + "/" + filelabel + ".dat"
-    reco_file = main_data_path + "hipo" + main_subdir + pi_charge + "/" + filelabel + "_reconstructed.dat"
+    evio_file = main_data_path + "evio" + main_subdir + pi_charge + "/" + filelabel + ".ev"
+    hipo_file = main_data_path + "hipo" + main_subdir + pi_charge + "/" + filelabel + ".hipo"
+    reco_file = main_data_path + "hipo" + main_subdir + pi_charge + "/" + filelabel + "_reconstructed.hipo"
 
 
     # (1) run GEMC simulation
