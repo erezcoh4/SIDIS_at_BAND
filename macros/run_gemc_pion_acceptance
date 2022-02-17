@@ -1,0 +1,89 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+# run GEMC simulation for the production of pion acceptance maps
+# last edit Feb-17, 2022 (EOC)
+#
+# example execute:
+# ./macros/run_gemc_pion_acceptance --Nevents=100 --fdebug=5 --only-pi+
+
+import sys, os, linecache
+import argparse
+
+parser = argparse.ArgumentParser(description='Run GEMC simulation - pion acceptance maps')
+parser.add_argument("--Nevents",   type=int, default=-1,
+                    required=False, help="Number of events to simulate")
+parser.add_argument("--fdebug",       type=int, default=1,
+                    required=False, help="verbosity")
+parser.add_argument("--PrintProgress",type=int, default=50000,
+                    required=False, help="print progress (every N events)")
+parser.add_argument('--only-pi+',   dest='only_pips', action='store_true', help="do only pi+ (and not pi-)")
+
+
+args = parser.parse_args()
+
+Nevents       = args.Nevents
+fdebug        = args.fdebug
+PrintProgress = args.PrintProgress
+
+pi_charges = ['pips','pims']
+if args.only_pips: #{
+    pi_charges    = ['pips']
+#}
+main_data_path  = "/volatile/clas12/users/ecohen/GEMC/"
+main_subdir     = "/10.2/AcceptanceCorrection/"
+for pi_charge in pi_charges:#{
+    filelabel = "ee"+pi_charge+"_p_uniform_distribution"
+    lund_file = main_data_path + "LUND" + main_subdir + pi_charge + "/" + filelabel + ".dat"
+    evio_file = main_data_path + "evio" + main_subdir + pi_charge + "/" + filelabel + ".dat"
+    hipo_file = main_data_path + "hipo" + main_subdir + pi_charge + "/" + filelabel + ".dat"
+    reco_file = main_data_path + "hipo" + main_subdir + pi_charge + "/" + filelabel + "_reconstructed.dat"
+
+
+    # (1) run GEMC simulation
+    print("")
+    print("(1) Run GEMC simulation")
+    print("")
+    os.system( "cd /u/home/cohen && source set_gemc_env.csh" )
+    commandline = ("/u/home/cohen/clas12Tags/4.4.1/source/gemc /group/clas12/gemc/4.4.1/config/clas12-default.gcard"
+                    + "-USE_GUI=0" +
+                    + "-N=%d"%Nevents
+                    + "-INPUT_GEN_FILE=\"LUND, %s\""%lund_file
+                    +"-OUTPUT=\"evio, %s\""%evio_file)
+    print( commandline )
+    os.system(commandline)
+
+    # (2) convert EVIO to HIPO
+    print("")
+    print("(2) Convert EVIO to HIPO")
+    print("")
+    os.system( "cd /u/home/cohen && source set_cook_env.csh" )
+    
+    commandline = ("/u/home/cohen/clas12-offline-software/coatjava/bin/evio2hipo -t -1 -s -1 -r 11 "
+                    + "-i %s"%evio_file
+                    + "-o %s"%hipo_file)
+    print( commandline )
+    os.system( commandline )
+    
+    # (3) Apply event reconstruction
+    print("")
+    print("(3) Apply event reconstruction")
+    print("")
+    commandline = ("/u/home/cohen/clas12-offline-software/coatjava/bin/recon-util "
+                    + "-i %s"%hipo_file
+                    + "-o %s"%reco_file
+                    + "-y /group/clas12/gemc/4.4.1/config/clas12-default.yaml")
+    print( commandline )
+    os.system( commandline )
+    
+    
+    print("")
+    print("Done %s"%pi_charge)
+    print("")
+#}
+
+print('')
+print('done.')
+print('')
+
+os.system('date | mail -s "Done processing run_gemc_pion_acceptance on ifarm" cohen.erez7@gmail.com')
