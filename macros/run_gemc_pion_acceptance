@@ -61,6 +61,7 @@ for pi_charge in pi_charges:#{
 
     # (2) convert EVIO to HIPO
     print("")
+    print("exit, then reconnect for cooking:")
     print("(2) Convert EVIO to HIPO")
     print("")
     os.system( "cd /u/home/cohen && source set_cook_env.csh" )
@@ -69,7 +70,7 @@ for pi_charge in pi_charges:#{
                     + "-i %s "%evio_file
                     + "-o %s "%hipo_file)
     print( commandline )
-    os.system( commandline )
+#    os.system( commandline )
     
     # (3) Apply event reconstruction
     print("")
@@ -80,7 +81,7 @@ for pi_charge in pi_charges:#{
                     + "-o %s "%reco_file
                     + "-y /group/clas12/gemc/4.4.1/config/clas12-default.yaml ")
     print( commandline )
-    os.system( commandline )
+#    os.system( commandline )
     
     
     print("")
