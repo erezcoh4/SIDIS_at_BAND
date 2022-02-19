@@ -11,6 +11,13 @@ This repository is responsible for
     
 ## Revisions
 
+Feb-17, 2022    
+-------------
+1. Added a script to run GEMC simulation for pion acceptance maps production
+
+2. Changed electron direction generation to uniform in acceptance map production, to avoid a "hole" in the acceptance map produced by artificial close-proximity between the electron and the pion   
+
+
 Feb-10, 2022    
 -------------
 1. Added fiducial cuts a PID requirements to *Read_PiAcceptance_GEMCimulations.C*.

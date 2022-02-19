@@ -16,6 +16,7 @@ parser.add_argument("--Nevents",   type=int, default=-1,
 parser.add_argument("--fdebug",       type=int, default=1,
                     required=False, help="verbosity")
 parser.add_argument("--only-pi+",   dest="only_pips", action='store_true', help="do only pi+ (and not pi-)")
+parser.add_argument("--only-reconstruction",   dest="only_reconstruction", action='store_true', help="do only reconstruction (and no simulation)")
 
 
 args = parser.parse_args()
@@ -37,44 +38,45 @@ for pi_charge in pi_charges:#{
     reco_file = main_data_path + "hipo" + main_subdir + pi_charge + "/" + filelabel + "_reconstructed.hipo"
 
     # (0) delete existing results file
-    
     commandline =  "rm %s %s"%(hipo_file,reco_file)
     print( commandline )
     os.system( commandline )
 
-    # (1) run GEMC simulation
-    print("")
-    print("(1) Run GEMC simulation")
-    print("")
-    
-    commandline =  "cd /u/home/cohen"
-    print( commandline )
-    os.system( commandline )
-    
-    commandline =  "source set_gemc_env.csh"
-    print( commandline )
-    os.system( commandline )
-    
-    
-    commandline = ("/u/home/cohen/clas12Tags/4.4.1/source/gemc /group/clas12/gemc/4.4.1/config/clas12-default.gcard "
-                    + "-USE_GUI=0 "
-                    + "-N=%d "%Nevents
-                    + "-INPUT_GEN_FILE=\"LUND, %s\" "%lund_file
-                    + "-OUTPUT=\"evio, %s\" "%evio_file )
-    print( commandline )
-    os.system(commandline)
+    if args.only_reconstruction == False:#{
+        # (1) run GEMC simulation
+        print("")
+        print("(1) Run GEMC simulation")
+        print("")
+        
+        commandline =  "cd /u/home/cohen"
+        print( commandline )
+        os.system( commandline )
+        
+        commandline =  "source set_gemc_env.csh"
+        print( commandline )
+        os.system( commandline )
+        
+        
+        commandline = ("/u/home/cohen/clas12Tags/4.4.1/source/gemc /group/clas12/gemc/4.4.1/config/clas12-default.gcard "
+                        + "-USE_GUI=0 "
+                        + "-N=%d "%Nevents
+                        + "-INPUT_GEN_FILE=\"LUND, %s\" "%lund_file
+                        + "-OUTPUT=\"evio, %s\" "%evio_file )
+        print( commandline )
+        os.system(commandline)
 
-    # (2) convert EVIO to HIPO
-    print("")
-    print("(2) Convert EVIO to HIPO")
-    print("")
-    os.system( "cd /u/home/cohen && source set_cook_env.csh" )
-    
-    commandline = ("/u/home/cohen/clas12-offline-software/coatjava/bin/evio2hipo -t -1 -s -1 -r 11 "
-                    + "-i %s "%evio_file
-                    + "-o %s "%hipo_file)
-    print( commandline )
-    os.system( commandline )
+        # (2) convert EVIO to HIPO
+        print("")
+        print("(2) Convert EVIO to HIPO")
+        print("")
+        os.system( "cd /u/home/cohen && source set_cook_env.csh" )
+        
+        commandline = ("/u/home/cohen/clas12-offline-software/coatjava/bin/evio2hipo -t -1 -s -1 -r 11 "
+                        + "-i %s "%evio_file
+                        + "-o %s "%hipo_file)
+        print( commandline )
+        os.system( commandline )
+    #}
     
     # (3) Apply event reconstruction
     print("")
