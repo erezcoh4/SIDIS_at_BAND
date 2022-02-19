@@ -41,6 +41,8 @@ for pi_charge in pi_charges:#{
     commandline =  "rm %s %s"%(hipo_file,reco_file)
     print( commandline )
     os.system( commandline )
+    
+    
 
     if args.only_reconstruction == False:#{
         # (1) run GEMC simulation
@@ -65,19 +67,20 @@ for pi_charge in pi_charges:#{
         print( commandline )
         os.system(commandline)
 
-        # (2) convert EVIO to HIPO
-        print("")
-        print("(2) Convert EVIO to HIPO")
-        print("")
-        os.system( "cd /u/home/cohen && source set_cook_env.csh" )
-        
-        commandline = ("/u/home/cohen/clas12-offline-software/coatjava/bin/evio2hipo -t -1 -s -1 -r 11 "
-                        + "-i %s "%evio_file
-                        + "-o %s "%hipo_file)
-        print( commandline )
-        os.system( commandline )
     #}
     
+    # (2) convert EVIO to HIPO
+    print("")
+    print("(2) Convert EVIO to HIPO")
+    print("")
+    os.system( "cd /u/home/cohen && source set_cook_env.csh" )
+    
+    commandline = ("/u/home/cohen/clas12-offline-software/coatjava/bin/evio2hipo -t -1 -s -1 -r 11 "
+                    + "-i %s "%evio_file
+                    + "-o %s "%hipo_file)
+    print( commandline )
+    os.system( commandline )
+
     # (3) Apply event reconstruction
     print("")
     print("(3) Apply event reconstruction")
