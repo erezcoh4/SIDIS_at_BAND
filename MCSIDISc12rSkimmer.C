@@ -254,15 +254,18 @@ std::vector<region_part_ptr>  electrons, neutrons, protons, pipluses, piminuses,
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 // Main functionality
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-void SIDISc12rSkimmer(int  RunNumber=6420,
-                      int  NeventsMax=-1,
+void MCSIDISc12rSkimmer(int  NeventsMax=-1,
                       int  fdebug=1,
                       int  PrintProgress=50000,
                       int NpipsMin=1, // minimal number of pi+
                       TString DataPath = "/volatile/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train_20200610/inc/",
+                      TString outfilepath = "/volatile/clas12/users/akiral/BAND/SIDIS_skimming/",
+                      TString outfilename = "skimmed_SIDIS_inc",
                       int setInclusive=0 ){
-    TString RunNumberStr = GetRunNumberSTR(RunNumber,fdebug);
+    //TString RunNumberStr = GetRunNumberSTR(RunNumber,fdebug);
     // read cut values
+    std::cout << outfilepath << " " << outfilename << std::endl;
+    std::cout << "AAAAAAAAA" << std::endl;
     loadCutValues("BANDcutValues.csv",fdebug);
 
     inclusive = setInclusive;
@@ -274,15 +277,16 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
     VpiminusArray   = new TClonesArray("TVector3", 20);
 
     // open result files
-    TString outfilepath = "/volatile/clas12/users/akiral/BAND/SIDIS_skimming/";
-    TString outfilename = "skimmed_SIDIS_inc_" + RunNumberStr;
+    //TString outfilepath = "/volatile/clas12/users/akiral/BAND/SIDIS_skimming/";
+    //TString outfilename = "skimmed_SIDIS_inc_" + RunNumberStr;
     OpenResultFiles( outfilepath, outfilename );
 
-    TString inputFile = DataPath + "inc_" + RunNumberStr + ".hipo";
+    //TString inputFile = DataPath + "inc_" + RunNumberStr + ".hipo";
     TChain fake("hipo");
-    fake.Add(inputFile.Data());
+    fake.Add(DataPath.Data());
     //get the hipo data
     auto files = fake.GetListOfFiles();
+    std::cout << outfilepath << " " << outfilename << std::endl;
     
     // step over events and extract information....
     for(Int_t i=0;i<files->GetEntries();i++){
@@ -310,9 +314,14 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
             pipluses    = c12.getByID( 211  );
             piminuses   = c12.getByID(-211  );
             gammas      = c12.getByID( 22   );
-            // wrong number for deuteron, ask Andrew if needed
             deuterons   = c12.getByID( 1000010020 );
             GetParticlesByType ( evnum, fdebug );
+
+            for (int j = 0; j < 30; j++){
+                c12.mcparts()->setEntry(j);
+                std::cout << j << " " << c12.mcparts()->getPid() << " " << c12.mcparts()->getPx() << " " << c12.mcparts()->getVx() << " " << c12.mcparts()->getMass() << std::endl;
+                //std::cout << "a" << std::endl;
+            }
             
             
             // filter events, extract information, and compute event kinematics:
@@ -343,7 +352,7 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
         
     } // end file loop
     
-    
+    std::cout << outfilepath << " " << outfilename << std::endl;
     FinishProgram( outfilepath, outfilename);
 }
 
@@ -440,7 +449,7 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
     // comments
     // ---------------
     // DC - fiducial cuts on DC
-    std::cout << DC_sector << " " << DC_x[0] << " " << DC_y[0] << " " << DC_z[0] << std::endl;
+    //std::cout << DC_sector << " " << DC_x[0] << " " << DC_y[0] << " " << DC_z[0] << std::endl;
     if (fdebug>3) {
         std::cout << "CheckIfPionPassedSelectionCuts()" << std::endl;
     }

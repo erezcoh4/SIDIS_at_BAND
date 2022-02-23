@@ -1,0 +1,77 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+import sys, os, linecache, re
+import argparse
+from subprocess import Popen, PIPE
+
+parser = argparse.ArgumentParser(description='SIDIS skimming of multiple runs')
+parser.add_argument("--Nruns",        type=int, default=-1,
+                    required=False, help="number of runs to process ('-1' for all runs)")
+parser.add_argument("--FirstRun",     type=int, default=0,
+                    required=False, help="first run to start from")
+parser.add_argument("--NeventsMax",   type=int, default=-1,
+                    required=False, help="maximal number of events to process")
+parser.add_argument("--fdebug",       type=int, default=0,
+                    required=False, help="verbosity")
+parser.add_argument("--PrintProgress",type=int, default=500000,
+                    required=False, help="print progress (every N events)")
+parser.add_argument("--Neutrons",     type=int, default=0,
+                    required=False, help="tagged (1) or untagged (0)")
+args = parser.parse_args()
+
+Nruns         = args.Nruns
+NeventsMax    = args.NeventsMax
+fdebug        = args.fdebug
+PrintProgress = args.PrintProgress
+FirstRun      = args.FirstRun
+Neutrons      = args.Neutrons
+txt_dir       = "/volatile/clas12/users/akiral/BAND/txt_files"
+skimmer       = "/work/clas12/users/akiral/SIDIS_at_BAND/CppAnalysis/MCPionRatios.C"
+infiledir     = "/volatile/clas12/users/akiral/BAND/MC"
+outfiledir    = "/volatile/clas12/users/akiral/BAND/MC/hists"
+pion_codes    = [211, -211]
+
+if Neutrons:
+    skimmer = "/work/clas12/users/akiral/SIDIS_at_BAND/CppAnalysis/TaggedRatios.C"
+
+runIdx = 0
+for fname in os.listdir(infiledir):
+    pi_match = re.match("(mc_)(\d{4})(_e_)([a-z]*)(\.root)", fname)
+    if not pi_match:
+        continue
+    if pi_match.group(4) == "piplus":
+        pion_code = 211
+    elif pi_match.group(4) == "piminus":
+        pion_code = -211
+
+    infile = os.path.join(infiledir, fname)
+    outfile = os.path.join(outfiledir, fname[:-5] + "_hist.root")
+    runn_str = pi_match.group(2)
+    print(infile, outfile)
+    commandline = """#!/bin/sh
+#SBATCH --job-name=hmc_{7}
+#SBATCH -p production
+#SBATCH --account=clas12
+#SBATCH --time=60
+#SBATCH --mem-per-cpu=1000
+#SBATCH --output={5}/hist_mc_{7}.txt
+root -l -q '{6}({0},{1},{2},"{3}","{4}")'
+""".format(NeventsMax, pion_code, Neutrons, infile, outfile, txt_dir, skimmer, runn_str)
+    print('')
+    print("processing run %d/%d"%(Nruns,pion_code))
+    print('')
+    print(commandline)
+    print('')
+    
+    p=Popen(args=["sbatch"],stdin=PIPE)
+    p.communicate(commandline.encode())
+
+    runIdx += 1
+    if Nruns > 0 and runIdx >= Nruns:
+        break
+    
+print('')
+print('done.')
+print('')
+

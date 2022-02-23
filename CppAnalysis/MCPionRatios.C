@@ -91,7 +91,7 @@ void   InitializeHists();
 void   InitializeCuts();
 double sq(double x) {return x*x;}
 
-void PionRatios(Int_t RunNumber=6420, Int_t NeventsMax=-1, Int_t pionCode=211, Int_t neutrons=0) {
+void MCPionRatios(Int_t NeventsMax=-1, Int_t pionCode=211, Int_t neutrons=0, TString infilename="", TString outfileName="") {
     InitializeHists();
     InitializeCuts();
 
@@ -107,23 +107,13 @@ void PionRatios(Int_t RunNumber=6420, Int_t NeventsMax=-1, Int_t pionCode=211, I
         return;
     }
 
-    char RunNumberStr[20];
-    sprintf( RunNumberStr, "00%d", RunNumber );
-
-    TString outfileName;
     TTree *tree;
 
     if (neutrons == 0) {
-        TString infilename = DataPath + "SIDIS_skimming/skimmed_SIDIS_inc_" + RunNumberStr + "_e_pi" + pionType + ".root";
-        outfileName        = DataPath + "histograms/pion_ratio_" + RunNumberStr + "_" + pionType + ".root";
-
         TFile *infile      = new TFile(infilename);
         tree               = (TTree*)infile->Get("tree");
     }
     else if (neutrons == 1) {
-        TString infilename = DataPath + "merged_SIDIS_and_BAND_skimming/skimmed_SIDIS_and_BAND_inc_" + RunNumberStr + "_e_pi" + pionType + "_n.root";
-        outfileName        = DataPath + "histograms/tagged/tagged_ratio_" + RunNumberStr + "_" + pionType + ".root";
-
         TFile *infile      = new TFile(infilename);
         tree               = (TTree*)infile->Get("T");
     }
