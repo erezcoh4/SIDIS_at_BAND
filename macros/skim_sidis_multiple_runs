@@ -28,7 +28,9 @@ PrintProgress = args.PrintProgress
 FirstRun      = args.FirstRun
 runs_filename = "/work/clas12/users/akiral/SIDIS_at_BAND/macros/runlists/good_runs_10-2.txt"
 txt_dir       = "/volatile/clas12/users/akiral/BAND/txt_files"
-skimmer       = "/work/clas12/users/akiral/SIDIS_at_BAND/SIDISc12rSkimmer.C"
+skimmer       = "/work/clas12/users/akiral/SIDIS_at_BAND/MCSIDISc12rSkimmer.C"
+input_dir     = "/volatile/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train_20200610/inc/"
+outfilepath   = "/volatile/clas12/users/akiral/BAND/SIDIS_skimming/"
 
 
 # Using readlines()
@@ -49,8 +51,10 @@ runIdx = 0
 for line in run_fileLines[FirstRun:]:#{
     runIdx += 1
     run = int(line.strip())
-#    commandline = ("clas12root -q 'SIDISc12rSkimmer.C+(%d,%d,%d,%d)'"%
-#                    (run,NeventsMax,fdebug,PrintProgress))
+    run_str = str(run).zfill(6)
+    input_path = os.path.join(input_dir, "inc_" + run_str + ".hipo")
+    outfilename = "skimmed_SIDIS_inc_" + run_str
+
     commandline = """#!/bin/sh
 #SBATCH --job-name=s{0}
 #SBATCH -p production
@@ -58,9 +62,9 @@ for line in run_fileLines[FirstRun:]:#{
 #SBATCH --time=60
 #SBATCH --constraint=centos77
 #SBATCH --mem-per-cpu=1000
-#SBATCH --output={4}/sidis_{0}.txt
-clas12root -q '{5}+({0},{1},{2},{3})'
-""".format(run,NeventsMax,fdebug,PrintProgress, txt_dir, skimmer)
+#SBATCH --output={7}/sidis_{0}.txt
+clas12root -q '{8}+({1},{2},{3},1,"{4}","{5}","{6}")'
+""".format(run, NeventsMax, fdebug, PrintProgress, input_path, outfilepath, outfilename, txt_dir, skimmer)
     print('')
     print("processing run %d/%d"%(runIdx,Nruns))
     print('')
@@ -77,4 +81,3 @@ clas12root -q '{5}+({0},{1},{2},{3})'
 print('')
 print('done.')
 print('')
-

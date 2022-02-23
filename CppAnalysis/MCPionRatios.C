@@ -30,9 +30,6 @@
 #include "../Auxiliary/clashit.cpp"
 #include "../Auxiliary/genpart.cpp"
 
-TString DataPath             = "/volatile/clas12/users/akiral/BAND/";
-std::string GoodRunsFilename = "/work/clas12/users/akiral/SIDIS_at_BAND/macros/runlists/good_runs_10-2.txt";
-
 TH1D* mmiss_hist;
 TH1D* Q2_hist;
 TH1D* xB_hist;
@@ -94,18 +91,6 @@ double sq(double x) {return x*x;}
 void MCPionRatios(Int_t NeventsMax=-1, Int_t pionCode=211, Int_t neutrons=0, TString infilename="", TString outfileName="") {
     InitializeHists();
     InitializeCuts();
-
-    TString pionType;
-    if (pionCode == 211) {
-        pionType = "plus";
-    }
-    else if (pionCode == -211) {
-        pionType = "minus";
-    }
-    else {
-        cout << "Unknown particle code for pion: " << pionCode << endl;
-        return;
-    }
 
     TTree *tree;
 
