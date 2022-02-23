@@ -82,13 +82,37 @@ const double theta_momentum_cut_params[6][2][2][2] =
     {{{4.02349973, 9.73539597}, {6.05465832, 33.12697781}}, {{6.79515088, 15.30515795}, {6.58713963, 33.28105369}}},
     {{{4.2116445,  9.68950529}, {5.41861825, 34.35713488}}, {{7.21262506, 14.53342703}, {6.96618552, 31.76762161}}}};
 
+
+const double Q2_xb_bins[9][6][2] = 
+    {{{0.0835, 1.3}, {0.15, 2.28}, {0.15, 1.38}, {0.12, 1.3}, {-1, -1}, {-1, -1}},
+    {{0.15, 1.38}, {0.15, 1.98}, {0.24, 2.75}, {0.24, 1.5}, {0.20, 1.45}, {-1, -1}},
+    {{0.15, 1.98}, {0.15, 2.28}, {0.24, 3.625}, {0.24, 2.75}, {-1, -1}, {-1, -1}},
+    {{0.24, 1.5}, {0.24, 2.75}, {0.34, 3.63}, {0.34, 1.6}, {0.30, 1.56}, {0.27, 1.53}},
+    {{0.24, 2.75}, {0.24, 3.625}, {0.34, 5.12}, {0.34, 3.63}, {-1, -1}, {-1, -1}},
+    {{0.34, 1.6}, {0.34, 3.63}, {0.45, 4.7}, {0.45, 2.52}, {-1, -1}, {-1, -1}},
+    {{0.34, 3.63}, {0.34, 5.12}, {0.45, 6.76}, {0.45, 4.7}, {-1, -1}, {-1, -1}},
+    {{0.45, 2.52}, {0.45, 4.7}, {0.708, 7.42}, {0.64, 5.4}, {0.57, 4.05}, {0.50, 3.05}},
+    {{0.45, 4.7}, {0.45, 6.76}, {0.677, 10.185}, {0.7896, 11.351}, {0.75, 9.52}, {0.708, 7.42}}};
+
 using namespace std;
 
 void   InitializeHists();
 void   InitializeCuts();
+int CalculateQ2XbBin(double xB, double Q2);
 double sq(double x) {return x*x;}
 
 void MCPionRatios(Int_t NeventsMax=-1, Int_t pionCode=211, Int_t neutrons=0, TString infilename="", TString outfileName="") {
+    double xB_test = 0.1;
+    double Q2_test = 1;
+
+    while (xB_test < 0.8) {
+        while (Q2_test < 10) {
+            std::cout << "(" << xB_test << ", " << Q2_test << "): " << CalculateQ2XbBin(xB_test, Q2_test) << std::endl;
+        }
+    }
+
+    return;
+
     InitializeHists();
     InitializeCuts();
 
@@ -346,6 +370,35 @@ void InitializeCuts() {
             for (int k = 0; k < 2; k++) {
                 theta_momentum_cut[i][j][k] = new TF1(Form("pion_cut_%d_%d_%d", i, j, k),Form("%f+%f/TMath::Power(x,1.)", theta_momentum_cut_params[i][j][k][0], theta_momentum_cut_params[i][j][k][1]),0,5.);
             }
+        }
+    }
+}
+
+// returns bin-1 for Q2-xb bin defined in the SIDIS analysis note from RGA
+int CalculateQ2XbBin(double xB, double Q2){
+    for (int i = 0; i < 9; i++) {
+        int j = 0;
+        bool inBin = true;
+        while (j < 6 && Q2_xb_bins[i][j+1][0] != -1) {
+            // do a rotation around (a, b) defined by the angle between the vector (a, b) -> (c, d) and the y-axis, then check if the (xb, Q2) point is still to the right of (a, b)
+            double a = Q2_xb_bins[i][j][0];
+            double b = Q2_xb_bins[i][j][1];
+            double c = Q2_xb_bins[i][j+1][0];
+            double d = Q2_xb_bins[i][j+1][1];
+
+            double x = c - a;
+            double y = d - b;
+            double z = sqrt(sq(x) + sq(y));
+
+            if ((y * xB) + (x * Q2) / z < a) {
+                inBin = false;
+            }
+
+            j++;
+        }
+
+        if (inBin) {
+            return i;
         }
     }
 }
