@@ -2,11 +2,15 @@
 # -*- coding: utf-8 -*-
 
 """
+
+./MC/Acceptance_Corrections/produce_LUND_file_for_GEMC.py --Nevents=1000000
+
+
 Produce a LUND file of (e,e'\pi) events to simulate with GEMC.
                         We are interested in pion accetpance,
                         so we simulate the same electron multiple times
                         
-   last update Feb-17, 2022
+   last update Feb-24, 2022
                         
  LUND output:
 2   1   1    0.0   0.0 PDG_beam   Ebeam   1       1      event_weight
