@@ -65,6 +65,8 @@ TH1D* e_dc_s_hist;
 TH1D* pi_dc_s_hist;
 TH1D* pi_no_hist;
 
+TH1D* pi_phi_hist_bins[9];
+
 TH2D* e_xy_hist_S[6];
 TH2D* e_theta_phi_hist_S[6];
 TH2D* pi_theta_phi_hist_S[6];
@@ -98,21 +100,10 @@ using namespace std;
 
 void   InitializeHists();
 void   InitializeCuts();
-int CalculateQ2XbBin(double xB, double Q2);
+int CalculateXbQ2Bin(double xB, double Q2);
 double sq(double x) {return x*x;}
 
 void MCPionRatios(Int_t NeventsMax=-1, Int_t pionCode=211, Int_t neutrons=0, TString infilename="", TString outfileName="") {
-    double xB_test = 0.1;
-    double Q2_test = 1;
-
-    while (xB_test < 0.8) {
-        while (Q2_test < 10) {
-            std::cout << "(" << xB_test << ", " << Q2_test << "): " << CalculateQ2XbBin(xB_test, Q2_test) << std::endl;
-        }
-    }
-
-    return;
-
     InitializeHists();
     InitializeCuts();
 
@@ -266,6 +257,12 @@ void MCPionRatios(Int_t NeventsMax=-1, Int_t pionCode=211, Int_t neutrons=0, TSt
             e_dc_s_hist->Fill(e_DC_sector);
             pi_dc_s_hist->Fill(pi_DC_sector[piNo]);
 
+            int xb_Q2_bin = CalculateXbQ2Bin(xB, Q2);
+            //cout << xb_Q2_bin << endl;
+            if (xb_Q2_bin > 0) {
+                pi_phi_hist_bins[xb_Q2_bin-1]->Fill(ppi->Phi()*180/M_PI);
+            }
+
             e_xy_hist_S[(int)e_DC_sector-1]->Fill(e_DC_x[0], e_DC_y[0]);
             e_theta_phi_hist_S[(int)e_DC_sector-1]->Fill(e->Theta()*180/M_PI, e->Phi()*180/M_PI);
             pi_theta_phi_hist_S[(int)pi_DC_sector[piNo]-1]->Fill(ppi->Theta()*180/M_PI, ppi->Phi()*180/M_PI);
@@ -305,6 +302,10 @@ void MCPionRatios(Int_t NeventsMax=-1, Int_t pionCode=211, Int_t neutrons=0, TSt
     e_dc_s_hist->Write();
     pi_dc_s_hist->Write();
     pi_no_hist->Write();
+
+    for (int b = 1; b <= 9; b++) {
+        pi_phi_hist_bins[b-1]->Write();
+    }
 
     for (int s = 1; s <= 6; s++) {
         e_xy_hist_S[s-1]->Write();
@@ -355,6 +356,10 @@ void InitializeHists() {
     pi_dc_s_hist = new TH1D("pi_dc_s", "pi_dc_s", 7, 0, 6);
     pi_no_hist = new TH1D("pi_no", "pi_no", 21, 0, 20);
 
+    for (int b = 1; b <= 9; b++) {
+        pi_phi_hist_bins[b-1] = new TH1D(Form("pi_phi_hist_B_%d",b), Form("bin %d", b), 360, -180, 180);   
+    }
+
     for (int s = 1; s <= 6; s++) {
         e_xy_hist_S[s-1] = new TH2D(Form("e_xy_S_%d",s), Form("sector %d",s), 100, -300, 300, 100, -300, 300);
         e_theta_phi_hist_S[s-1] = new TH2D(Form("e_theta_phi_S_%d",s), Form("sector %d",s), 60, 5, 35, 360, -180, 180);
@@ -362,6 +367,8 @@ void InitializeHists() {
         pi_p_theta_hist_S[s-1] = new TH2D(Form("pi_p_theta_S_%d",s), Form("sector %d",s), 100, 1, 5, 160, 5, 35);
         z_pt_hist_S[s-1] = new TH2D(Form("z_pt_S_%d",s), Form("sector %d",s), 100, 0.3, 1.6, 100, 0, 1);
     }
+
+    
 }
 
 void InitializeCuts() {
@@ -375,12 +382,16 @@ void InitializeCuts() {
 }
 
 // returns bin-1 for Q2-xb bin defined in the SIDIS analysis note from RGA
-int CalculateQ2XbBin(double xB, double Q2){
+int CalculateXbQ2Bin(double xB, double Q2){
+//    cout << "a" << endl;
     for (int i = 0; i < 9; i++) {
+//        cout << "i: " << i << endl;
         int j = 0;
         bool inBin = true;
-        while (j < 6 && Q2_xb_bins[i][j+1][0] != -1) {
+        while (inBin && j < 5 && Q2_xb_bins[i][j+1][0] != -1) {
+//            cout << "j: " << j << " " << Q2_xb_bins[i][j+1][0] << endl;
             // do a rotation around (a, b) defined by the angle between the vector (a, b) -> (c, d) and the y-axis, then check if the (xb, Q2) point is still to the right of (a, b)
+            // only works if cut is convex, can add extra checks for concavity if required
             double a = Q2_xb_bins[i][j][0];
             double b = Q2_xb_bins[i][j][1];
             double c = Q2_xb_bins[i][j+1][0];
@@ -388,9 +399,11 @@ int CalculateQ2XbBin(double xB, double Q2){
 
             double x = c - a;
             double y = d - b;
-            double z = sqrt(sq(x) + sq(y));
 
-            if ((y * xB) + (x * Q2) / z < a) {
+//            cout << i << " " << j << " " << a << " " << b << " " << c << " " << d << " " << x << " " << y << " " << (y * (xB - a)) - (x * (Q2 - b)) << endl;
+
+            if ((y * (xB - a)) - (x * (Q2 - b)) < 0) {
+//                cout << "false" << endl;
                 inBin = false;
             }
 
@@ -398,7 +411,25 @@ int CalculateQ2XbBin(double xB, double Q2){
         }
 
         if (inBin) {
-            return i;
+            double a = Q2_xb_bins[i][j][0];
+            double b = Q2_xb_bins[i][j][1];
+            double c = Q2_xb_bins[i][0][0];
+            double d = Q2_xb_bins[i][0][1];
+
+            double x = c - a;
+            double y = d - b;
+
+//            cout << i << " " << j << " " << a << " " << b << " " << c << " " << d << " " << x << " " << y << " " << (y * (xB - a)) - (x * (Q2 - b)) << endl;
+
+            if ((y * (xB - a)) - (x * (Q2 - b)) < 0) {
+//                cout << "false" << endl;
+                inBin = false;
+            }
+
+        }
+        if (inBin) {
+            return i+1;
         }
     }
+    return 0;
 }

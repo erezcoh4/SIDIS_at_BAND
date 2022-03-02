@@ -219,6 +219,7 @@ double           Vpiminus_Y[NMAXPIONS];
 double           Vpiminus_Z[NMAXPIONS];
 
 
+
 // Output root file and tree
 TFile * outFile_e_piplus, * outFile_e_piminus;
 TTree * outTree_e_piplus, * outTree_e_piminus;
@@ -229,17 +230,23 @@ std::ofstream   CSVfile_e_piminus, SelectedEventsCSVfile_e_piminus, SelectedEven
 TLorentzVector          Beam, target, e, q;
 std::vector<TLorentzVector>         piplus; // positive pions
 std::vector<TLorentzVector>        piminus; // negative pions
-TClonesArray *                     piplusArray; // positive pions
-TClonesArray *                     piminusArray; // negative pions
+TClonesArray *                 piplusArray; // positive pions
+TClonesArray *                 piminusArray; // negative pions
 // reconstructed vertex position
 TVector3                                Ve;
 std::vector<TVector3>              Vpiplus;
 std::vector<TVector3>             Vpiminus;
-TClonesArray *                    VpiplusArray;
-TClonesArray *                    VpiminusArray;
+TClonesArray *                VpiplusArray;
+TClonesArray *               VpiminusArray;
 
 // kinematics
 Double_t     Ebeam, xB, Q2, omega, W, W2, xF, y, M_X;
+
+// Monte carlo
+bool                             mc = false;
+TLorentzVector                        mc_e;
+TClonesArray *                   mc_piplus;
+TClonesArray *                  mc_piminus;
 
 
 // vectors in q-frame
@@ -310,11 +317,11 @@ void MCSIDISc12rSkimmer(int  NeventsMax=-1,
             deuterons   = c12.getByID( 1000010020 );
             GetParticlesByType ( evnum, fdebug );
 
-            for (int j = 0; j < 30; j++){
+            /*for (int j = 0; j < 30; j++){
                 c12.mcparts()->setEntry(j);
-                std::cout << j << " " << c12.mcparts()->getPid() << " " << c12.mcparts()->getPx() << " " << c12.mcparts()->getVx() << " " << c12.mcparts()->getMass() << std::endl;
+                //std::cout << j << " " << c12.mcparts()->getPid() << " " << c12.mcparts()->getPx() << " " << c12.mcparts()->getVx() << " " << c12.mcparts()->getMass() << std::endl;
                 //std::cout << "a" << std::endl;
-            }
+            }*/
             
             
             // filter events, extract information, and compute event kinematics:
@@ -896,6 +903,10 @@ void SetOutputTTrees(){
     outTree_e_piplus->Branch("Vpiplus_Y"                ,&Vpiplus_Y              , "Vpiplus_Y[20]/D"    );
     outTree_e_piplus->Branch("Vpiplus_Z"                ,&Vpiplus_Z              , "Vpiplus_Z[20]/D"    );
 
+    outTree_e_piplus->Branch("mc"                   ,&mc                    );
+    outTree_e_piplus->Branch("mc_e"                 ,&mc_e                  );
+    outTree_e_piplus->Branch("mc_piplus"            ,&mc_piplus             );
+    outTree_e_piplus->Branch("mc_piminus"           ,&mc_piminus            );
     
     
     // pi-
@@ -964,6 +975,11 @@ void SetOutputTTrees(){
     outTree_e_piminus->Branch("Vpiminus_X"                ,&Vpiminus_X              , "Vpiminus_X[20]/D"    );
     outTree_e_piminus->Branch("Vpiminus_Y"                ,&Vpiminus_Y              , "Vpiminus_Y[20]/D"    );
     outTree_e_piminus->Branch("Vpiminus_Z"                ,&Vpiminus_Z              , "Vpiminus_Z[20]/D"    );
+
+    outTree_e_piminus->Branch("mc"                   ,&mc                    );
+    outTree_e_piminus->Branch("mc_e"                 ,&mc_e                  );
+    outTree_e_piminus->Branch("mc_piplus"            ,&mc_piplus             );
+    outTree_e_piminus->Branch("mc_piminus"           ,&mc_piminus            );
 
     
 }
@@ -1084,6 +1100,8 @@ void InitializeFileReading(int NeventsMax, int c12Nentries, int fdebug){
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void InitializeVariables(){
     e = TLorentzVector(0,0,0,db->GetParticle( 11   )->Mass());
+    mc_e = TLorentzVector(0,0,0,db->GetParticle( 11   )->Mass());
+    
     
     xB          = Q2        = omega     = -9999;
     xF          = y         = M_X       = -9999;
@@ -1108,6 +1126,8 @@ void InitializeVariables(){
     piminusArray    ->Clear();
     VpiplusArray    ->Clear();
     VpiminusArray   ->Clear();
+    mc_piplus       ->Clear();
+    mc_piminus      ->Clear();
     pipluses        .clear();
     pipluses        .clear();
     piminuses       .clear();

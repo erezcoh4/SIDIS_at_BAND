@@ -60,15 +60,15 @@ for line in run_fileLines[FirstRun:]:#{
 
     for pion_code in pion_codes:
         pion_type = ""
-        if pion_code == "211":
+        if pion_code == 211:
             pion_type = "plus"
-        elif pion_code == "-211":
+        elif pion_code == -211:
             pion_type = "minus"
         else:
-            raise ValueError("Unknown Pion code: " + pion_code)
+            raise ValueError("Unknown Pion code: " + str(pion_code))
 
         infilename  = os.path.join(outfilepath, "SIDIS_skimming", "skimmed_SIDIS_inc_" + run_str + "_e_pi" + pion_type + ".root")
-        outfileName = os.path.join(outfilepath, "histograms", "pion_ratio_" + run_str + "_" + pion_type + ".root")
+        outfilename = os.path.join(outfilepath, "histograms", "pion_ratio_" + run_str + "_" + pion_type + ".root")
 
         commandline = """#!/bin/sh
     #SBATCH --job-name=h{0}
@@ -77,10 +77,9 @@ for line in run_fileLines[FirstRun:]:#{
     #SBATCH --time=60
     #SBATCH --constraint=centos77
     #SBATCH --mem-per-cpu=1000
-    #SBATCH --error={4}/hist_err_{0}.txt
-    #SBATCH --output={4}/hist_{0}.txt
-    root -l -q '{5}({1},{2},{3})'
-    """.format(run, NeventsMax, pion_code, Neutrons, txt_dir, skimmer)
+    #SBATCH --output={6}/hist_{0}.txt
+    root -l -q '{7}({1},{2},{3},"{4}","{5}")'
+    """.format(run, NeventsMax, pion_code, Neutrons, infilename, outfilename, txt_dir, skimmer)
         print('')
         print("processing run %d/%d/%d"%(runIdx,Nruns,pion_code))
         print('')
