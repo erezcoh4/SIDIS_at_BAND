@@ -1,6 +1,5 @@
 {
     "files.associations": {
-        "PionRatios.C": "cpp",
-        "MCPionRatios.C": "cpp"
+        "MCSIDISSkimmer.C": "cpp"
     }
 }
