@@ -7,6 +7,24 @@
 # example execute:
 # ./macros/run_gemc_pion_acceptance --Nevents=100 --fdebug=5 --only-pi+
 
+#
+#
+# comments
+#
+# (1) evio apps
+# [https://indico.jlab.org/event/180/contributions/1452/attachments/1234/1635/collab_demo_1nov16.pdf]
+# -t specifies the number of threads to use for multi-threaded systems
+# -r specifies a yaml file which contains a list of services to be run
+# 11 the run number used in the simulation
+# -1.0 the torus scale used in the simulation (defined in the gcard)
+#
+# (2) split the files if more than 100k events
+# EVIO apps can not process large files
+# for 1M events (file size 9.5 GB), e.g. I got an error message 'file too large (must be < 2.1475GB)'
+#
+
+
+
 import sys, os, linecache
 import argparse
 
@@ -21,8 +39,15 @@ parser.add_argument("--only-reconstruction",   dest="only_reconstruction", actio
 
 args = parser.parse_args()
 
-Nevents       = args.Nevents
 fdebug        = args.fdebug
+Nevents       = args.Nevents
+email_str     = 'date | mail -s "Done processing run_gemc_pion_acceptance on ifarm \n %d events" cohen.erez7@gmail.com'%Nevents
+# split to multiple files if we want more than 100k events
+Nfiles = 1
+if Nevents > 100000: #{
+    Nfiles  = int( Nevents/100000 )
+    Nevents = 100000
+#}
 
 pi_charges = ['pips','pims']
 if args.only_pips: #{
@@ -30,76 +55,81 @@ if args.only_pips: #{
 #}
 main_data_path  = "/volatile/clas12/users/ecohen/GEMC/"
 main_subdir     = "/10.2/AcceptanceCorrection/"
-for pi_charge in pi_charges:#{
-    filelabel = "ee"+pi_charge+"_p_uniform_distribution"
-    lund_file = main_data_path + "LUND" + main_subdir + pi_charge + "/" + filelabel + ".dat"
-    evio_file = main_data_path + "evio" + main_subdir + pi_charge + "/" + filelabel + ".ev"
-    hipo_file = main_data_path + "hipo" + main_subdir + pi_charge + "/" + filelabel + ".hipo"
-    reco_file = main_data_path + "hipo" + main_subdir + pi_charge + "/" + filelabel + "_reconstructed.hipo"
 
-    # (0) delete existing results file
-    commandline =  "rm %s %s"%(hipo_file,reco_file)
-    print( commandline )
-    os.system( commandline )
-    
-    
 
-    if args.only_reconstruction == False:#{
-        # (1) run GEMC simulation
-        print("")
-        print("(1) Run GEMC simulation")
-        print("")
-        
-        commandline =  "cd /u/home/cohen"
-        print( commandline )
-        os.system( commandline )
-        
-        commandline =  "source set_gemc_env.csh"
+for file_idx in range(Nfiles):#{
+
+    for pi_charge in pi_charges:#{
+        filelabel = "ee"+pi_charge+"_p_uniform_distribution_%d"%file_idx
+        lund_file = main_data_path + "LUND" + main_subdir + pi_charge + "/" + filelabel + ".dat"
+        evio_file = main_data_path + "evio" + main_subdir + pi_charge + "/" + filelabel + ".ev"
+        hipo_file = main_data_path + "hipo" + main_subdir + pi_charge + "/" + filelabel + ".hipo"
+        reco_file = main_data_path + "hipo" + main_subdir + pi_charge + "/" + filelabel + "_reconstructed.hipo"
+
+        # (0) delete existing results file
+        commandline =  "rm %s %s"%(hipo_file,reco_file)
         print( commandline )
         os.system( commandline )
         
         
-        commandline = ("/u/home/cohen/clas12Tags/4.4.1/source/gemc /group/clas12/gemc/4.4.1/config/clas12-default.gcard "
-                        + "-USE_GUI=0 "
-                        + "-N=%d "%Nevents
-                        + "-INPUT_GEN_FILE=\"LUND, %s\" "%lund_file
-                        + "-OUTPUT=\"evio, %s\" "%evio_file )
-        print( commandline )
-        os.system(commandline)
 
+        if args.only_reconstruction == False:#{
+            # (1) run GEMC simulation
+            print("")
+            print("(1) Run GEMC simulation")
+            print("")
+            
+            commandline =  "cd /u/home/cohen"
+            print( commandline )
+            os.system( commandline )
+            
+            commandline =  "source set_gemc_env.csh"
+            print( commandline )
+            os.system( commandline )
+            
+            
+            commandline = ("/u/home/cohen/clas12Tags/4.4.1/source/gemc /group/clas12/gemc/4.4.1/config/clas12-default.gcard "
+                            + "-USE_GUI=0 "
+                            + "-N=%d "%Nevents
+                            + "-INPUT_GEN_FILE=\"LUND, %s\" "%lund_file
+                            + "-OUTPUT=\"evio, %s\" "%evio_file )
+            print( commandline )
+            os.system(commandline)
+
+        #}
+        
+        # (2) convert EVIO to HIPO
+        print("")
+        print("(2) Convert EVIO to HIPO")
+        print("")
+        os.system( "cd /u/home/cohen && source set_cook_env.csh" )
+        
+        commandline = ("/u/home/cohen/clas12-offline-software/coatjava/bin/evio2hipo -t -1 -s -1 -r 11 "
+                        + "-i %s "%evio_file
+                        + "-o %s "%hipo_file)
+        print( commandline )
+        os.system( commandline )
+
+        # (3) Apply event reconstruction
+        print("")
+        print("(3) Apply event reconstruction")
+        print("")
+        commandline = ("/u/home/cohen/clas12-offline-software/coatjava/bin/recon-util "
+                        + "-i %s "%hipo_file
+                        + "-o %s "%reco_file
+                        + "-y /group/clas12/gemc/4.4.1/config/clas12-default.yaml ")
+        print( commandline )
+        os.system( commandline )
+        
+        
+        print("")
+        print("Done %s in file number %d"%(pi_charge,file_idx))
+        print("")
     #}
-    
-    # (2) convert EVIO to HIPO
-    print("")
-    print("(2) Convert EVIO to HIPO")
-    print("")
-    os.system( "cd /u/home/cohen && source set_cook_env.csh" )
-    
-    commandline = ("/u/home/cohen/clas12-offline-software/coatjava/bin/evio2hipo -t -1 -s -1 -r 11 "
-                    + "-i %s "%evio_file
-                    + "-o %s "%hipo_file)
-    print( commandline )
-    os.system( commandline )
-
-    # (3) Apply event reconstruction
-    print("")
-    print("(3) Apply event reconstruction")
-    print("")
-    commandline = ("/u/home/cohen/clas12-offline-software/coatjava/bin/recon-util "
-                    + "-i %s "%hipo_file
-                    + "-o %s "%reco_file
-                    + "-y /group/clas12/gemc/4.4.1/config/clas12-default.yaml ")
-    print( commandline )
-    os.system( commandline )
-    
-    
-    print("")
-    print("Done %s"%pi_charge)
-    print("")
 #}
 
 print('')
 print('done.')
 print('')
 
-os.system('date | mail -s "Done processing run_gemc_pion_acceptance on ifarm" cohen.erez7@gmail.com')
+os.system(email_str)

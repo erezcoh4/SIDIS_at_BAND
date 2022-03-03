@@ -15,6 +15,8 @@ Mar-1, 2022
 -------------
 1. Added ROOT files with no cuts
 
+2. Split simulation files to individual small files of 100k events
+
 Feb-17, 2022    
 -------------
 1. Added a script to run GEMC simulation for pion acceptance maps production

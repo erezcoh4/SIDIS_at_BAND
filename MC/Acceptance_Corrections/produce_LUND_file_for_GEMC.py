@@ -42,6 +42,11 @@ and save only the events in which the electron was reconstructed
 Electron is taken from a simulated event that worked....
 
 
+Mar-3, 2022: created a file of 1M events, but the file is too large for evio apps:
+The file is 9.5 GB
+error message: 'file too large (must be < 2.1475GB)'
+So, we need to breakup the simulation to maximum 100k events
+
 """
 
 
@@ -135,97 +140,103 @@ vz[0] = e_Vz;
 #E[0]  = np.sqrt( np.square(e_P) + np.square(m_e) )
 
  
-
-
+# split to multiple files if we want more than 100k events
+Nfiles = 1
+if Nevents > 100000: #{
+    Nfiles  = int( Nevents/100000 )
+    Nevents = 100000
+#}
 
 #%% Sample pion momentum and print to file
 
 # do the same process of positive and negative pions
 fdebug=1
-for pi_charge,pi_label,pi_PDG in zip(['pips','pims'],['\pi^+','\pi^-'],[PDG_pips,PDG_pims]): #{
-    
-    p_arr       = np.zeros(Nevents)
-    theta_arr   = np.zeros(Nevents)
-    phi_arr     = np.zeros(Nevents)
+for file_idx in range(Nfiles):#{
+    for pi_charge,pi_label,pi_PDG in zip(['pips','pims'],['\pi^+','\pi^-'],[PDG_pips,PDG_pims]): #{
+        
+        p_arr       = np.zeros(Nevents)
+        theta_arr   = np.zeros(Nevents)
+        phi_arr     = np.zeros(Nevents)
 
-    px_arr       = np.zeros(Nevents)
-    py_arr       = np.zeros(Nevents)
-    pz_arr       = np.zeros(Nevents)
-    
-    PDG[1]= pi_PDG
-    M[1]  = m_pi
+        px_arr       = np.zeros(Nevents)
+        py_arr       = np.zeros(Nevents)
+        pz_arr       = np.zeros(Nevents)
+        
+        PDG[1]= pi_PDG
+        M[1]  = m_pi
 
-    print("Generating %d (e,e'%s) events."%(Nevents,pi_label))    
-    outputfile = open("/Users/erezcohen/Desktop/data/BAND/AcceptanceCorrection/InputFiles/"
-                      +"/ee%s_p_uniform_distribution.dat"%(pi_charge), "w")
-    for n in range(Nevents):#{
-    
-        # Sample electron momentum uniformly
-        #         p           = np.random.uniform(p_min    ,p_max    )
-        # Sample electron vertex position uniformly
-        #                 vz[0] = np.random.uniform( vz_min, vz_max );
+        print("Generating %d (e,e'%s) events in event %d."%(Nevents,pi_label,file_idx))
+        outputfile = open("/Users/erezcohen/Desktop/data/BAND/AcceptanceCorrection/InputFiles/"
+                          +"/ee%s_p_uniform_distribution_%d.dat"%(pi_charge,file_idx), "w")
+        for n in range(Nevents):#{
+        
+            # Sample electron momentum uniformly
+            #         p           = np.random.uniform(p_min    ,p_max    )
+            # Sample electron vertex position uniformly
+            #                 vz[0] = np.random.uniform( vz_min, vz_max );
 
-        # Sample electron momentum direction uniformly
-        cos_theta   = np.random.uniform( np.cos(theta_min*d2r) ,np.cos(theta_max*d2r) )
-        theta       = np.arccos(cos_theta)
-        phi         = np.random.uniform(phi_min*d2r  ,phi_max*d2r  )
-        Px[0] = e_P*np.sin(theta)*np.cos(phi)
-        Py[0] = e_P*np.sin(theta)*np.sin(phi)
-        Pz[0] = e_P*np.cos(theta)
-        E[0]  = np.sqrt( np.square(e_P) + np.square(m_e) )
+            # Sample electron momentum direction uniformly
+            cos_theta   = np.random.uniform( np.cos(theta_min*d2r) ,np.cos(theta_max*d2r) )
+            theta       = np.arccos(cos_theta)
+            phi         = np.random.uniform(phi_min*d2r  ,phi_max*d2r  )
+            Px[0] = e_P*np.sin(theta)*np.cos(phi)
+            Py[0] = e_P*np.sin(theta)*np.sin(phi)
+            Pz[0] = e_P*np.cos(theta)
+            E[0]  = np.sqrt( np.square(e_P) + np.square(m_e) )
+            
+            
+            # sample pion momentum uniformly in p, cos(theta), and phi
+            p           = np.random.uniform(p_min    ,p_max    )
+            cos_theta   = np.random.uniform( np.cos(theta_min*d2r) ,np.cos(theta_max*d2r) )
+            theta       = np.arccos(cos_theta)
+            phi         = np.random.uniform(phi_min*d2r  ,phi_max*d2r  )
+            
+            # record for monitoring
+            p_arr[n]    = p
+            theta_arr[n]= theta
+            phi_arr[n]  = phi
+            
+            # move to Cartesian coordinates
+            Px[1] = p*np.sin(theta)*np.cos(phi)
+            Py[1] = p*np.sin(theta)*np.sin(phi)
+            Pz[1] = p*np.cos(theta)
+            E[1]  = np.sqrt( np.square(p) + np.square(m_pi) )
+            
+            px_arr[n]    = Px[1]
+            py_arr[n]    = Py[1]
+            pz_arr[n]    = Pz[1]
+            
+            # sample pion vertex
+            vx[1] = 0
+            vy[1] = 0
+            vz[1] = np.random.normal( loc=e_Vz, scale=delta_Vz_resolution );
+            
+            if fdebug: #{
+                if n%(Nevents/10)==0: print( '%.1f'%(100.*n/Nevents)+'%')
+                if fdebug>1: print('event',n,', p =',p,'GeV/c, \\theta =',theta, ', \phi =',phi );
+            #}
+            
+            event_header_str = ('%d \t 1 \t 1 \t 0.0 \t 0.0 %d \t %.3f \t 1 \t 1 \t %d\n'%
+                          (Nparticles, PDG_beam, Ebeam, event_weight))
+            outputfile.write( event_header_str )
+            if fdebug>2: print( event_header_str )
+            
+            for particle, j in zip(particles,range(len(particles))):#{
+                particle_str = ('%d \t %.3f \t %d \t %d \t %d \t %d \t %.5f \t %.5f \t %.5f \t %.5f \t %.5f \t %.5f \t %.5f \t %.3f \n'%
+                                (j+1, 0.0, 1, PDG[j], 0, 0, Px[j], Py[j], Pz[j], E[j], M[j], vx[j], vy[j], vz[j]))
+                outputfile.write( particle_str )
+                if fdebug>2: print(particle_str)
+            #}
         
-        
-        # sample pion momentum uniformly in p, cos(theta), and phi
-        p           = np.random.uniform(p_min    ,p_max    )
-        cos_theta   = np.random.uniform( np.cos(theta_min*d2r) ,np.cos(theta_max*d2r) )
-        theta       = np.arccos(cos_theta)
-        phi         = np.random.uniform(phi_min*d2r  ,phi_max*d2r  )
-        
-        # record for monitoring
-        p_arr[n]    = p
-        theta_arr[n]= theta
-        phi_arr[n]  = phi
-        
-        # move to Cartesian coordinates
-        Px[1] = p*np.sin(theta)*np.cos(phi)
-        Py[1] = p*np.sin(theta)*np.sin(phi)
-        Pz[1] = p*np.cos(theta)
-        E[1]  = np.sqrt( np.square(p) + np.square(m_pi) )
-        
-        px_arr[n]    = Px[1]
-        py_arr[n]    = Py[1]
-        pz_arr[n]    = Pz[1]
-        
-        # sample pion vertex 
-        vx[1] = 0
-        vy[1] = 0
-        vz[1] = np.random.normal( loc=e_Vz, scale=delta_Vz_resolution );
-        
-        if fdebug: #{
-            if n%(Nevents/10)==0: print( '%.1f'%(100.*n/Nevents)+'%')
-            if fdebug>1: print('event',n,', p =',p,'GeV/c, \\theta =',theta, ', \phi =',phi );
         #}
-        
-        event_header_str = ('%d \t 1 \t 1 \t 0.0 \t 0.0 %d \t %.3f \t 1 \t 1 \t %d\n'%
-                      (Nparticles, PDG_beam, Ebeam, event_weight))
-        outputfile.write( event_header_str )
-        if fdebug>2: print( event_header_str )
-        
-        for particle, j in zip(particles,range(len(particles))):#{
-            particle_str = ('%d \t %.3f \t %d \t %d \t %d \t %d \t %.5f \t %.5f \t %.5f \t %.5f \t %.5f \t %.5f \t %.5f \t %.3f \n'%
-                            (j+1, 0.0, 1, PDG[j], 0, 0, Px[j], Py[j], Pz[j], E[j], M[j], vx[j], vy[j], vz[j])) 
-            outputfile.write( particle_str )
-            if fdebug>2: print(particle_str)
-        #}
-    
+        print("done generating %d (e,e'%s) events in event %d."%(Nevents,pi_label,file_idx))
+        outputfile.close();
+        print("Saved output file \n%s"%("/Users/erezcohen/Desktop/data/BAND/AcceptanceCorrection/InputFiles/"
+                                        +"/ee%s_p_uniform_distribution_%d.dat"%(pi_charge,file_idx)))
+        print('scp -r /Users/erezcohen/Desktop/data/BAND/AcceptanceCorrection/InputFiles/ee%s_p_uniform_distribution_%d.dat cohen@ftp.jlab.org:/volatile/clas12/users/ecohen/GEMC/LUND/10.2/AcceptanceCorrection/%s/'%(pi_charge,file_idx,pi_charge))
     #}
-    print("done generating %d (e,e'%s) events."%(Nevents,pi_label))
-    outputfile.close();
-    print("Saved output file \n%s"%("/Users/erezcohen/Desktop/data/BAND/AcceptanceCorrection/InputFiles/"
-                                    +"/ee%s_p_uniform_distribution.dat"%(pi_charge)))    
-    print('scp -r /Users/erezcohen/Desktop/data/BAND/AcceptanceCorrection/InputFiles/ee%s_p_uniform_distribution.dat cohen@ftp.jlab.org:/volatile/clas12/users/ecohen/GEMC/LUND/10.2/AcceptanceCorrection/%s/'%(pi_charge,pi_charge))
+    print('done.')
 #}
-print('done.')
 print(' ')
 
 
