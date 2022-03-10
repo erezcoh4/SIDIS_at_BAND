@@ -11,6 +11,11 @@ This repository is responsible for
     
 ## Revisions
 
+Mar-10, 2022    
+-------------
+1. Added information about the pion and electron sector to SIDIS skimming and SIDIS/band merging
+
+
 Mar-1, 2022    
 -------------
 1. Added ROOT files with no cuts

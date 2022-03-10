@@ -1644,11 +1644,13 @@ void Stream_e_pi_line_to_CSV( TString pionCharge, int piIdx,
         pi  = piplus [piIdx];
         Vpi = Vpiplus[piIdx];
         Zpi = Zpips  [piIdx];
+        pi_DC_sector = pips_DC_sector[piIdx];
     }
     else if (pionCharge=="pi-") {
         pi  = piminus [piIdx];
         Vpi = Vpiminus[piIdx];
         Zpi = Zpims   [piIdx];
+        pi_DC_sector = pims_DC_sector[piIdx];
    }
     else {
         std::cout << "pion charge ill defined at Stream_e_pi_line_to_CSV(), returning " << std::endl;
@@ -1683,6 +1685,7 @@ void Stream_e_pi_line_to_CSV( TString pionCharge, int piIdx,
         omega,          xF,                 y,                  M_X,
         (double)Npips, (double)Npims,       (double)Ne,         (double)Ngammas,
         (double)Np,    (double)Nn,          (double)Nd,
+        (double)e_DC_sector,                (double)pi_DC_sector
     };
     StreamToCSVfile( pionCharge, variables ,
                     passed_cuts_e_pi, passed_cuts_e_pi_kinematics,
