@@ -1309,7 +1309,8 @@ void OpenResultFiles( TString outfilepath, TString outfilename ){
                      +(TString)"pi_P,pi_Theta,pi_Phi,pi_Vz,"
                      +(TString)"Q2,W,xB,Zpi,omega,"
                      +(TString)"xF,y,M_X,"
-                     +(TString)"Npips,Npims,Nelectrons,Ngammas,Nprotons,Nneutrons,Ndeuterons,"));
+                     +(TString)"Npips,Npims,Nelectrons,Ngammas,Nprotons,Nneutrons,Ndeuterons,"                    
+                     +(TString)"e_DC_sector,pi_DC_sector,"));
     // output tree branches
     SetOutputTTrees();
 }
