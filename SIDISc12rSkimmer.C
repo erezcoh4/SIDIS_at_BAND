@@ -1640,6 +1640,8 @@ void Stream_e_pi_line_to_CSV( TString pionCharge, int piIdx,
     TLorentzVector  pi;
     TVector3        Vpi;
     double          Zpi;
+    int    pi_DC_sector;
+    
     if (pionCharge=="pi+") {
         pi  = piplus [piIdx];
         Vpi = Vpiplus[piIdx];
