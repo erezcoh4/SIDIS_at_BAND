@@ -241,8 +241,8 @@ void Read_PiAcceptance_GEMCimulations(TString fPiCharge = "pips",
     
     // determine how many files to process
     int NfilesToProcess = 1;
-    if (NeventsMaxToProcess > 100000) {
-        NfilesToProcess  = int( NeventsMaxToProcess/100000 );
+    if (NeventsMax > 100000) {
+        NfilesToProcess  = int( NeventsMax/100000 );
     }
 
     
