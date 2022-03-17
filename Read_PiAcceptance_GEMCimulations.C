@@ -234,15 +234,27 @@ void Read_PiAcceptance_GEMCimulations(TString fPiCharge = "pips",
     
     if (fdebug>2) std::cout << "SetPiCharge ( "<<fPiCharge<<"  ); "  << std::endl;
     SetPiCharge ( fPiCharge  );
+    
     // open result files
     if (fdebug>2) std::cout << "OpenResultFiles (); "  << std::endl;
     OpenResultFiles();
     
-    TString inputFile = DataPath + "/" + PiCharge + "/ee" + PiCharge + "_" + FileLabel + "_reconstructed.hipo";
-    if (fdebug>2) std::cout << "inputFile: " << inputFile << std::endl;
+    // determine how many files to process
+    int NfilesToProcess = 1;
+    if (NeventsMaxToProcess > 100000) {
+        NfilesToProcess  = int( NeventsMaxToProcess/100000 )
+    }
+
     
     TChain fake("hipo");
-    fake.Add(inputFile.Data());
+    for (int fileIdx=0; fileIdx<NfilesToProcess; fileIdx++){
+        TString inputFile = (DataPath + "/" + PiCharge
+                             + "/ee" + PiCharge + "_" + FileLabel
+                             + "_" + num2str(file_idx)
+                             + "_reconstructed.hipo");
+        if (fdebug>2) std::cout << "inputFile: " << inputFile << std::endl;
+        fake.Add(inputFile.Data());
+    }
     //get the hipo data
     auto files = fake.GetListOfFiles();
     
@@ -457,15 +469,15 @@ double GetBeamEnergy (int fdebug){
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void InitializeFileReading(int NeventsMax, int c12Nentries, int fdebug){
     if (fdebug>1) {
-        std::cout << "InitializeFileReading( " << NeventsMax << " , " << c12Nentries << " , " << fdebug << ")" << std::endl;
+        std::cout << "InitializeFileReading( "
+        << NeventsMax << " , " << c12Nentries
+        << " , " << fdebug << ")" << std::endl;
     }
     Ebeam   = GetBeamEnergy( fdebug );
     Beam    .SetPxPyPzE (0, 0, Ebeam, Ebeam );
     target  .SetXYZM    (0, 0, 0,     Md    );
     
     NeventsMaxToProcess = NeventsMax;
-    if (NeventsMax<0) NeventsMaxToProcess = c12Nentries;
-    Nevents_processed           = 0;
     if (fdebug>1) {
         std::cout << "NeventsMaxToProcess =  " << NeventsMaxToProcess << "" << std::endl;
     }
