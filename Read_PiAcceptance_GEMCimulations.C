@@ -566,7 +566,8 @@ void OpenResultFiles(){
                      +(TString)"e_P_g,e_Theta_g,e_Phi_g,e_Vz_g,"
                      +(TString)"pi_P_g,pi_Theta_g,pi_Phi_g,pi_Vz_g,"
                      +(TString)"pi_reconstructed,pi_passed_cuts,pi_passed_fiducial_cuts,pi_passed_PID_cuts,"
-                     +(TString)"e_reconstructed,e_passed_cuts,")
+                     +(TString)"e_reconstructed,e_passed_cuts,"
+                     +(TString)"e_DC_sector,pi_DC_sector")
                     );
 }
 
@@ -857,6 +858,7 @@ void Stream_e_pi_line_to_CSV( int piIdx, int fdebug ){ // write a row of pion nu
     TLorentzVector  pi;
     TVector3        Vpi;
     double          Zpi;
+    int    pi_DC_sector;
     
 //    std::cout << "Stream_e_pi_line_to_CSV(evnum="<<evnum<<"): "<< "Npips: " << Npips << ", piIdx: " << piIdx << std::endl;
     if (PiCharge=="pips") {
@@ -870,6 +872,7 @@ void Stream_e_pi_line_to_CSV( int piIdx, int fdebug ){ // write a row of pion nu
         pi_passed_fiducial_cuts     = pipsPastFiducialCuts[piIdx];
 //        std::cout << "if (PiCharge==pips) { "<< "pi_passed_fiducial_cuts: " << pi_passed_fiducial_cuts << std::endl;
         pi_passed_PID_cuts          = pipsPastPIDCuts[piIdx];
+        pi_DC_sector                = pips_DC_sector[piIdx];
     }
     else if (PiCharge=="pims") {
         
@@ -882,7 +885,7 @@ void Stream_e_pi_line_to_CSV( int piIdx, int fdebug ){ // write a row of pion nu
         pi_passed_cuts              = pimsPastSelectionCuts[piIdx];
         pi_passed_fiducial_cuts     = pimsPastFiducialCuts[piIdx];
         pi_passed_PID_cuts          = pimsPastPIDCuts[piIdx];
-    
+        pi_DC_sector                = pims_DC_sector[piIdx];
    }
     else {
         std::cout << "pion charge undefined at Stream_e_pi_line_to_CSV(), returning " << std::endl;
@@ -900,6 +903,7 @@ void Stream_e_pi_line_to_CSV( int piIdx, int fdebug ){ // write a row of pion nu
         (double)pi_reconstructed,               (double)pi_passed_cuts,
         (double)pi_passed_fiducial_cuts,        (double)pi_passed_PID_cuts,
         (double)e_reconstructed,                (double)e_passed_cuts,
+        (double)e_DC_sector,                    (double)pi_DC_sector
     };
     StreamToCSVfile( variables, fdebug );
 }
