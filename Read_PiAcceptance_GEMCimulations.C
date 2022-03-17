@@ -579,7 +579,7 @@ void OpenResultFiles(){
                      +(TString)"pi_P_g,pi_Theta_g,pi_Phi_g,pi_Vz_g,"
                      +(TString)"pi_reconstructed,pi_passed_cuts,pi_passed_fiducial_cuts,pi_passed_PID_cuts,"
                      +(TString)"e_reconstructed,e_passed_cuts,"
-                     +(TString)"e_DC_sector,pi_DC_sector")
+                     +(TString)"e_DC_sector,pi_DC_sector,")
                     );
 }
 
@@ -915,7 +915,7 @@ void Stream_e_pi_line_to_CSV( int piIdx, int fdebug ){ // write a row of pion nu
         (double)pi_reconstructed,               (double)pi_passed_cuts,
         (double)pi_passed_fiducial_cuts,        (double)pi_passed_PID_cuts,
         (double)e_reconstructed,                (double)e_passed_cuts,
-        (double)e_DC_sector,                    (double)pi_DC_sector
+        (double)e_DC_sector,                    (double)pi_DC_sector,
     };
     StreamToCSVfile( variables, fdebug );
 }
