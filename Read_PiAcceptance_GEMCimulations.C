@@ -302,7 +302,7 @@ void Read_PiAcceptance_GEMCimulations(TString fPiCharge = "pips",
                 auto pid = mcpbank->getPid();
                 
                 if (fdebug>2){
-                    std::cout << "MC particle PDG code " << pid
+                    std::cout << "MC particle PDG code " << pid << 
                     << std::setprecision(4)
                     << ", p: "    << P_mc_particle.P()          << " GeV/c, "
                     << ", theta: "<< P_mc_particle.Theta()      << ", " << P_mc_particle.Theta()*r2d  << " deg, "
