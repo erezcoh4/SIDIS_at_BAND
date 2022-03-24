@@ -8,6 +8,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <iomanip>
 #include <chrono>
 #include <TFile.h>
 #include <TTree.h>
@@ -20,6 +21,7 @@
 #include <TChain.h>
 #include <TCanvas.h>
 #include <TBenchmark.h>
+
 #include "clas12reader.h"
 #include "Auxiliary/DCfid_SIDIS.cpp"
 #include "Auxiliary/csv_reader.h"
@@ -302,7 +304,7 @@ void Read_PiAcceptance_GEMCimulations(TString fPiCharge = "pips",
                 auto pid = mcpbank->getPid();
                 
                 if (fdebug>2){
-                    std::cout << "MC particle PDG code " << pid << 
+                    std::cout << "MC particle PDG code " << pid
                     << std::setprecision(4)
                     << ", p: "    << P_mc_particle.P()          << " GeV/c, "
                     << ", theta: "<< P_mc_particle.Theta()      << ", " << P_mc_particle.Theta()*r2d  << " deg, "
