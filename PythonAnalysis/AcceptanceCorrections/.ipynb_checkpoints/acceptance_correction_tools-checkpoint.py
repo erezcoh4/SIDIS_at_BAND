@@ -25,12 +25,87 @@ phi_xlim    = [-180,180]
 
 e_e_pi, e_e_pi_n                                   = dict(),dict()
 e_e_pi_GEMC                                        = dict()
+e_e_pi_pass_cuts, e_e_pi_n_pass_cuts               = dict(),dict()
+e_e_pi_GEMC_pass_cuts                              = dict()
 h, h_err                                           = dict(),dict()
 AccCorrec, AccCorrec_err                           = dict(),dict()
 AccCorrecTightFiducial, AccCorrecTightFiducial_err = dict(),dict()
 TightFiducialPhi, TightFiducialPhiAreaFraction     = dict(),dict()
 # TightFiducialPhi = the are in phi by "good" phi, which we want to keep (0 or 1 for each of phi_centers)
 # TightFiducialPhiAreaFraction = the fraction of are occupied by "good" phi in TightFiducialPhi (out of 2\pi)
+
+
+# ------------------------------------------------------------------------------------------------ #
+def apply_further_selection_cuts_to_data(fdebug=2):#{
+    '''
+    Apply selection cuts not previously imposed
+    
+    1. pi+/pi- acceptance matching cut in p-theta plane 
+    2. Missing mass cut on (e,e'\pi) events
+    
+    '''
+    global e_e_pi, e_e_pi_n, e_e_pi_GEMC
+    global e_e_pi_pass_cuts, e_e_pi_n_pass_cuts, e_e_pi_GEMC_pass_cuts
+    
+    # (e,e'\pi) SIDIS data
+    e_e_pi_after_p_theta_cut = apply_p_theta_acceptance_cut( e_e_pi )
+    e_e_pi_after_Mx_cut      = apply_Mx_cut( e_e_pi_after_p_theta_cut )
+
+    # (e,e'\pi) - (uniform) MC for acceptance correction (uniform in e and \pi)
+    e_e_pi_GEMC_pi_accepted = dict()
+    for pi_ch in pi_charge_names:#{
+        e_e_pi_GEMC_pi_accepted[pi_ch] = e_e_pi_GEMC[pi_ch][e_e_pi_GEMC[pi_ch].pi_passed_cuts==1];
+    #}
+    e_e_pi_GEMC_after_p_theta_cut = apply_p_theta_acceptance_cut( e_e_pi_GEMC_pi_accepted )
+    e_e_pi_GEMC_after_Mx_cut      = apply_Mx_cut(  e_e_pi_GEMC_after_p_theta_cut )
+
+    # (e,e'\pi n) SIDIS data complete this -  need to add sector ID in the (e,e'\pi n) data 
+    
+    # print number of events retained on every cut
+    if fdebug < 1: return
+    Nevents      = dict()
+    frac_Nevents = dict()
+    for pi_ch in pi_charge_names:#{
+        print('(e,e',pi_ch,')')
+              
+        Nevents[pi_ch + ' original'] = len(e_e_pi[pi_ch])
+        frac_Nevents[pi_ch + ' original'] = 1        
+        print(Nevents[pi_ch + ' original'],'events before cut')    
+        
+        Nevents[pi_ch +' p-theta cut'] = len(e_e_pi_after_p_theta_cut[pi_ch])
+        frac_Nevents[pi_ch + ' p-theta cut'] = float(Nevents[pi_ch +' p-theta cut'])/ Nevents[pi_ch + ' original']
+        print(Nevents[pi_ch +' p-theta cut'],'events after p-theta cut (%.1f'%(100.*frac_Nevents[pi_ch + ' p-theta cut']),'%)')    
+
+
+        Nevents[pi_ch +' Mx cut'] = len(e_e_pi_after_Mx_cut[pi_ch])
+        frac_Nevents[pi_ch + ' Mx cut'] = float(Nevents[pi_ch +' Mx cut'])/Nevents[pi_ch + ' original']
+        print(Nevents[pi_ch +' Mx cut'],'events after M_X cut (%.1f'%(100.*frac_Nevents[pi_ch + ' Mx cut']),'%)')
+    #}
+    
+    # print number of events retained on every cut in the uniform GEMC
+    if fdebug<2: return
+    for pi_ch in pi_charge_names:#{
+        print('(e,e',pi_ch,') in uniform GEMC simulation')
+              
+        Nevents[pi_ch + ' GEMC original'] = len(e_e_pi_GEMC[pi_ch])
+        frac_Nevents[pi_ch + ' GEMC original'] = 1        
+        print(Nevents[pi_ch + ' GEMC original'],'events before cut')    
+        
+        Nevents[pi_ch +' GEMC p-theta cut'] = len(e_e_pi_GEMC_after_p_theta_cut[pi_ch])
+        frac_Nevents[pi_ch + ' GEMC p-theta cut'] = float(Nevents[pi_ch +' GEMC p-theta cut'])/ Nevents[pi_ch + ' GEMC original']
+        print(Nevents[pi_ch +' GEMC p-theta cut'],'events after p-theta cut (%.1f'%(100.*frac_Nevents[pi_ch + ' GEMC p-theta cut']),'%)')    
+
+
+        Nevents[pi_ch +' GEMC Mx cut'] = len(e_e_pi_GEMC_after_Mx_cut[pi_ch])
+        frac_Nevents[pi_ch + ' GEMC Mx cut'] = float(Nevents[pi_ch +' GEMC Mx cut'])/Nevents[pi_ch + ' GEMC original']
+        print(Nevents[pi_ch +' GEMC Mx cut'],'events after M_X cut (%.1f'%(100.*frac_Nevents[pi_ch + ' GEMC Mx cut']),'%)')
+    #}        
+    e_e_pi_pass_cuts      = e_e_pi_after_Mx_cut;
+    e_e_pi_GEMC_pass_cuts = e_e_pi_GEMC_after_Mx_cut;
+#}
+# ------------------------------------------------------------------------------------------------ #
+
+
 
 
 
@@ -48,7 +123,8 @@ def load_SIDIS_data(runs_filename = "good_runs_10-2.txt",
     and e.g. e_e_pi['piplus'] is a pandas.DataFrame object containing the (e,e'p) events data
     
     '''
-    global e_e_pi, e_e_pi_n;
+    global e_e_pi
+    global e_e_pi_n;
 
     e_e_pi_data_path   = main_data_path + 'SIDIS_skimming/'
     e_e_pi_n_data_path = main_data_path + 'merged_SIDIS_and_BAND_skimming/'
@@ -131,11 +207,11 @@ def load_MC_data_for_acceptance_correction():#{
 
 
 # ------------------------------------------------------------------------------------------------ #
-def ComputeAcceptanceCorrectionAsFunctionOfPhi( max_AccCorrec = 1.5  # omit regions where the acceptance-correction is greater than 50%
+def ComputeAcceptanceCorrectionAsFunctionOfPhi( max_AccCorrec = 1.9  # omit regions where the acceptance-correction is greater than the average flat correction
                                               ):#{
     global h, h_err, AccCorrec, AccCorrec_err
     global TightFiducialPhi, AccCorrecTightFiducial, AccCorrecTightFiducial_err
-
+    global e_e_pi_GEMC, e_e_pi_GEMC_pass_cuts
 
     var_gen      = 'pi_Phi_g'
     label        = '$\phi$'
@@ -144,11 +220,10 @@ def ComputeAcceptanceCorrectionAsFunctionOfPhi( max_AccCorrec = 1.5  # omit regi
 
     # (1) compute histograms of generated, reconstructed and accepted events asna function of $\phi$
     fig = plt.figure(figsize=(14,6));
-    for eepi_GEMC,pi_charge_name,pi_charge_label,pi_idx in zip([eepips_GEMC,eepims_GEMC],pi_charge_names,pi_labels,range(2)):
-        pi_ch = pi_charge_name
-        df_gen = eepi_GEMC;
-        df_rec = eepi_GEMC[eepi_GEMC.pi_reconstructed==1];
-        df_acc = eepi_GEMC[eepi_GEMC.pi_passed_cuts  ==1];    
+    for pi_ch,pi_charge_label,pi_idx in zip(pi_charge_names,pi_labels,range(2)):
+        df_gen = e_e_pi_GEMC[pi_ch];
+        df_rec = e_e_pi_GEMC[pi_ch][e_e_pi_GEMC[pi_ch].pi_reconstructed==1];
+        df_acc = e_e_pi_GEMC_pass_cuts[pi_ch][e_e_pi_GEMC_pass_cuts[pi_ch].pi_passed_cuts==1];    
         x_gen = df_gen[var_gen]
         x_rec = df_rec[var_gen]    
         x_acc = df_acc[var_gen]    
@@ -168,11 +243,9 @@ def ComputeAcceptanceCorrectionAsFunctionOfPhi( max_AccCorrec = 1.5  # omit regi
     plt.tight_layout();
     
     # (2) compute acceptance correction
-    for eepi_GEMC,pi_charge_name,pi_charge_label,pi_idx in zip([eepips_GEMC,eepims_GEMC],pi_charge_names,pi_labels,range(2)):#{
-        pi_ch = pi_charge_name
+    for pi_ch,pi_idx in zip(pi_charge_names,range(2)):#{
         h[pi_ch+'eff'] = h[pi_ch+'acc']/h[pi_ch+'gen']
         h_err[pi_ch+'eff'] = h[pi_ch+'eff']*np.sqrt( np.square(h_err[pi_ch+'acc']/h[pi_ch+'acc']) + np.square(h_err[pi_ch+'gen']/h[pi_ch+'gen'])  )
-
         AccCorrec[pi_ch]     = 1./h[pi_ch+'eff']
         AccCorrec_err[pi_ch] = h_err[pi_ch+'eff']/np.square( h[pi_ch+'eff'] )
     #}
@@ -181,7 +254,7 @@ def ComputeAcceptanceCorrectionAsFunctionOfPhi( max_AccCorrec = 1.5  # omit regi
     # as we want to avoid large acceptance correction uncertainty.
     # This effectively means tightening the fiducial cut
     # We do this by assigning an acceptance correction of 0 to these regions
-    for eepi_GEMC,pi_ch,pi_charge_label,pi_idx in zip([eepips_GEMC,eepims_GEMC],pi_charge_names,pi_labels,range(2)):#{        
+    for pi_ch,pi_idx in zip(pi_charge_names,range(2)):#{        
         AccCorrecTightFiducial[pi_ch],AccCorrecTightFiducial_err[pi_ch] = np.zeros(Nphi_pts),np.zeros(Nphi_pts)
         TightFiducialPhi[pi_ch] = np.zeros(Nphi_pts)
         NgoodPhi = 0.0
@@ -204,8 +277,7 @@ def ComputeAcceptanceCorrectionAsFunctionOfPhi( max_AccCorrec = 1.5  # omit regi
     # (4) plot acceptance correction weight
     color,capsize,capthick,marker,linewidth = 'k', 2, 2, 'o', 2    
     fig = plt.figure(figsize=(14,12));
-    for eepi_GEMC,pi_charge_name,pi_charge_label,pi_idx in zip([eepips_GEMC,eepims_GEMC],pi_charge_names,pi_labels,range(2)):
-        pi_ch = pi_charge_name
+    for pi_ch,pi_charge_label,pi_idx in zip(pi_charge_names,pi_labels,range(2)):
         ax = fig.add_subplot(2,2,pi_idx+1)
         plt.step ( x, h[pi_ch+'eff']*100., color=color, where='mid', label=None )
         plt.errorbar ( x=x, xerr=x_err, y=h[pi_ch+'eff']*100., yerr=h_err[pi_ch+'eff']*100.,
@@ -219,7 +291,7 @@ def ComputeAcceptanceCorrectionAsFunctionOfPhi( max_AccCorrec = 1.5  # omit regi
             title='$'+pi_charge_label+'$ acceptance as a function of '+label, 
                  fontsize=24, do_add_grid=True,xlim=phi_xlim, xticks=phi_xticks)
 
-    for eepi_GEMC,pi_ch,pi_charge_label,pi_idx in zip([eepips_GEMC,eepims_GEMC],pi_charge_names,pi_labels,range(2)):
+    # for pi_ch,pi_charge_label,pi_idx in zip([eepips_GEMC,eepims_GEMC],pi_charge_names,pi_labels,range(2)):
         ax = fig.add_subplot(2,2,pi_idx+3)
         plt.step ( x, AccCorrec[pi_ch], '--', color=color, where='mid', label=None )
         plt.errorbar ( x=x, xerr=x_err, y=AccCorrecTightFiducial[pi_ch], yerr=AccCorrecTightFiducial_err[pi_ch],
@@ -240,6 +312,8 @@ def ComputeAcceptanceCorrectionAsFunctionOfPhi( max_AccCorrec = 1.5  # omit regi
     plt.tight_layout(); 
 #}
 # ------------------------------------------------------------------------------------------------ #
+
+
 
 
 # ------------------------------------------------------------------------------------------------ #
@@ -311,7 +385,7 @@ def apply_p_theta_acceptance_cut( df_dict=None ):
         Apply a pi+/pi- acceptance matching cut on the in p-\theta plane
         
     '''    
-    import numpy as np, pandas as pd, matplotlib.pyplot as plt, matplotlib as mpl
+    import numpy as np
     
     df_dict_after_cut = dict()
     for pi_charge_name in pi_charge_names:

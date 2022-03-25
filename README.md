@@ -16,12 +16,14 @@ Mar-24, 2022
 1. Added M_X to the uniform GEMC simulation data, in order to apply acceptance correction using MC on which the same cuts were applied as the data (p-theta acceptance matching, and M_X )
     Where M_X = || Beam + target - e - pi  || is the (e,e'\pi) reaction missing mass
     
-2. 
+2. Added information about the pion and electron sector to tagged-SIDIS merging
+
+3. Updated and cleaned Python analysis scheme, mostly in *acceptance_correction_tools*
 
 
 Mar-10, 2022    
 -------------
-1. Added information about the pion and electron sector to SIDIS skimming and SIDIS/band merging
+1. Added information about the pion and electron sector to SIDIS skimming 
 
 
 Mar-1, 2022    

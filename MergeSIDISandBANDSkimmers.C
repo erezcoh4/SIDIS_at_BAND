@@ -44,7 +44,8 @@ TString            csvheader = ((TString)"status,runnum,evnum,beam_helicity,"
                                 +(TString)"Q2,W,xB,Zpi,"
                                 +(TString)"omega,xF,y,"
                                 +(TString)"M_X_ee_pi,M_X_ee_pi_n,xPrime1,xPrime2,"
-                                +(TString)"theta_sq,WPrime,");
+                                +(TString)"theta_sq,WPrime,"
+                                +(TString)"e_DC_sector,pi_DC_sector,");
 
 // Input root files and trees
 TFile * SIDISFile, * BANDFile;
@@ -145,6 +146,8 @@ double       starttime = 0;
 double         current = 0;
 double          weight = 0;
 
+double                    e_DC_sector;
+
 double           piplus_Px[NMAXPIONS];
 double           piplus_Py[NMAXPIONS];
 double           piplus_Pz[NMAXPIONS];
@@ -152,6 +155,7 @@ double            piplus_E[NMAXPIONS];
 double           Vpiplus_X[NMAXPIONS];
 double           Vpiplus_Y[NMAXPIONS];
 double           Vpiplus_Z[NMAXPIONS];
+double      pips_DC_sector[NMAXPIONS];
 
 double          piminus_Px[NMAXPIONS];
 double          piminus_Py[NMAXPIONS];
@@ -160,7 +164,7 @@ double           piminus_E[NMAXPIONS];
 double          Vpiminus_X[NMAXPIONS];
 double          Vpiminus_Y[NMAXPIONS];
 double          Vpiminus_Z[NMAXPIONS];
-
+double      pims_DC_sector[NMAXPIONS];
 
 clashit *eHit             = new clashit;
 //TClonesArray      * eHit  = new TClonesArray("clashit"); // CLAS12 electrons in BAND analysis
@@ -544,14 +548,14 @@ void SetInputAndOutputTTrees (){
     SIDISTree  -> SetBranchAddress("beam_helicity"              ,&beam_helicity         );
     SIDISTree  -> SetBranchAddress("q"                          ,&q                     );
     SIDISTree  -> SetBranchAddress("omega"                     ,&omega                  );
-    // SIDISTree  -> SetBranchAddress("Z"                         ,&Zpips                  );
     SIDISTree  -> SetBranchAddress("Nelectrons"                ,&Ne                     );
     SIDISTree  -> SetBranchAddress("Ngammas"                   ,&Ngammas                );
     SIDISTree  -> SetBranchAddress("Nprotons"                  ,&Np                     );
     SIDISTree  -> SetBranchAddress("Nneutrons"                 ,&Nn                     );
     SIDISTree  -> SetBranchAddress("Npips"                     ,&Npips                  );
     SIDISTree  -> SetBranchAddress("Npims"                     ,&Npims                  );
-    
+    SIDISTree  -> SetBranchAddress("e_DC_sector"               ,&e_DC_sector            );
+
     
     
     //    // branches that depend on pion charge
@@ -565,9 +569,10 @@ void SetInputAndOutputTTrees (){
         SIDISTree -> SetBranchAddress("Vpiplus_X"                  ,&Vpiplus_X                );
         SIDISTree -> SetBranchAddress("Vpiplus_Y"                  ,&Vpiplus_Y                );
         SIDISTree -> SetBranchAddress("Vpiplus_Z"                  ,&Vpiplus_Z                );
+        SIDISTree -> SetBranchAddress("pips_DC_sector"             ,&pips_DC_sector           );
     } else if (pionCharge=="pi-") {
-        SIDISTree  -> SetBranchAddress("eepimsPastCutsInEvent"     ,&eepimsPastCutsInEvent      );
-        SIDISTree  -> SetBranchAddress("eepimsPastKinematicalCuts" ,&eepimsPastKinematicalCuts  );
+        SIDISTree  -> SetBranchAddress("eepimsPastCutsInEvent"      ,&eepimsPastCutsInEvent     );
+        SIDISTree  -> SetBranchAddress("eepimsPastKinematicalCuts"  ,&eepimsPastKinematicalCuts );
         SIDISTree -> SetBranchAddress("piminus_Px"                  ,&piminus_Px                );
         SIDISTree -> SetBranchAddress("piminus_Py"                  ,&piminus_Py                );
         SIDISTree -> SetBranchAddress("piminus_Pz"                  ,&piminus_Pz                );
@@ -575,6 +580,7 @@ void SetInputAndOutputTTrees (){
         SIDISTree -> SetBranchAddress("Vpiminus_X"                  ,&Vpiminus_X                );
         SIDISTree -> SetBranchAddress("Vpiminus_Y"                  ,&Vpiminus_Y                );
         SIDISTree -> SetBranchAddress("Vpiminus_Z"                  ,&Vpiminus_Z                );
+        SIDISTree -> SetBranchAddress("pims_DC_sector"              ,&pims_DC_sector            );
     }
     
     
@@ -825,13 +831,17 @@ void Stream_e_pi_n_line_to_CSV(int piIdx,
     TLorentzVector  * pi;
     TVector3        * Vpi;
     double          Zpi;
+    int    pi_DC_sector;
+    
     if (pionCharge=="pi+") {
-        pi  = &piplus[piIdx];
-        Vpi = &Vpiplus[piIdx];
+        pi           = &piplus[piIdx];
+        Vpi          = &Vpiplus[piIdx];
+        pi_DC_sector = &pips_DC_sector[piIdx];
     }
     else if (pionCharge=="pi-") {
-        pi  = &piminus[piIdx];
-        Vpi = &Vpiminus[piIdx];
+        pi           = &piminus[piIdx];
+        Vpi          = &Vpiminus[piIdx];
+        pi_DC_sector = &pims_DC_sector[piIdx];
     }
     else {
         std::cout << "pion charge ill defined at Stream_e_pi_line_to_CSV(), returning " << std::endl;
@@ -888,6 +898,7 @@ void Stream_e_pi_n_line_to_CSV(int piIdx,
         M_X_ee_pi,      M_X_ee_pi_n,        xPrime1,              xPrime2,
         theta_sq,
         WPrime,
+        (double)e_DC_sector,                (double)pi_DC_sector,
     };
     StreamToCSVfile(variables);
 }
