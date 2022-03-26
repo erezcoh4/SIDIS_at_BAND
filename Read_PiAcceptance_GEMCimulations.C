@@ -1314,7 +1314,7 @@ void ComputeKinematics(int fdebug){
         << "xB: "   << xB       << " , "
         << "W: "    << W        << " (GeV/c2), "
         << "w:"     << omega    << " GeV, "
-        << "y: "    << y        << " , "
+        << "y: "    << y        << std::endl;
     }
 }
 
