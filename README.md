@@ -11,6 +11,11 @@ This repository is responsible for
     
 ## Revisions
 
+Mar-26, 2022    
+-------------
+1. Added SIDIS kinematical cuts to uniform GEMC simulations, to verify that cuts do not alter $\phi$ distribution    
+
+
 Mar-24, 2022    
 -------------
 1. Added M_X to the uniform GEMC simulation data, in order to apply acceptance correction using MC on which the same cuts were applied as the data (p-theta acceptance matching, and M_X )

@@ -33,6 +33,15 @@ using namespace clas12;
 // globals
 auto db = TDatabasePDG::Instance();
 TString DataPath, FileLabel, PiCharge;
+TString csvheader = ( (TString)"e_P,e_Theta,e_Phi,e_Vz,"
+                     +(TString)"pi_P,pi_Theta,pi_Phi,pi_Vz,"
+                     +(TString)"Npips,Npims,Nelectrons,Ngammas,Nprotons,Nneutrons,Ndeuterons,"
+                     +(TString)"e_P_g,e_Theta_g,e_Phi_g,e_Vz_g,"
+                     +(TString)"pi_P_g,pi_Theta_g,pi_Phi_g,pi_Vz_g,"
+                     +(TString)"pi_reconstructed,pi_passed_cuts,pi_passed_fiducial_cuts,pi_passed_PID_cuts,"
+                     +(TString)"e_reconstructed,e_passed_cuts,"
+                     +(TString)"e_DC_sector,pi_DC_sector,"
+                     +(TString)"M_X,eepiPastKinematicalCuts,");
 
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
@@ -43,11 +52,13 @@ TVector3                GetParticleVertex (clas12::region_part_ptr rp);
 void                     SetLorentzVector (TLorentzVector &p4, clas12::region_part_ptr rp);
 void                      OpenOutputFiles (TString filelabel, TString header);
 void                     CloseOutputFiles ();
-void                      StreamToCSVfile (std::vector<Double_t> observables,
-                                           int fdebug);
+void                      StreamToCSVfile (std::vector<Double_t> observables, int fdebug);
 void                InitializeFileReading (int NeventsMax,int c12Nentries, int fdebug);
 void                  InitializeVariables ();
 void                      OpenResultFiles ();
+void                       printCutValues ();
+void                        loadCutValues (TString cutValuesFilename = "cutValues.csv", int fdebug=0);
+double                       FindCutValue ( std::string cutName );
 void           ExtractElectronInformation (int fdebug);
 void              ExtractPionsInformation (int fdebug);
 void               ExtractPipsInformation (int pipsIdx, int fdebug );
@@ -79,9 +90,12 @@ bool       CheckIfPionPassedSelectionCuts (TString pionCharge, // "pi+" or "pi-"
                                            TVector3 Ve,      TVector3 Vpi,
                                            int pipsIdx,
                                            int fdebug);
+
+bool        eepiPassedKinematicalCriteria (TLorentzVector pi,
+                                           int fdebug);
+
 Double_t          Chi2PID_pion_lowerBound (Double_t p, Double_t C=0.88); // C(pi+)=0.88, C(pi-)=0.93
 Double_t          Chi2PID_pion_upperBound (Double_t p, Double_t C=0.88); // C(pi+)=0.88, C(pi-)=0.93
-
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 
 
@@ -126,6 +140,36 @@ bool               e_passed_cuts;
 bool              pi_passed_cuts;
 bool     pi_passed_fiducial_cuts;
 bool          pi_passed_PID_cuts;
+
+
+// cut values
+std::vector<std::pair<std::string, double>> cutValues;
+double               cutValue_Vz_min;
+double               cutValue_Vz_max;
+double             cutValue_e_PCAL_W;
+double             cutValue_e_PCAL_V;
+double             cutValue_e_E_PCAL;
+double cutValue_SamplingFraction_min;
+double     cutValue_PCAL_ECIN_SF_min;
+double        cutValue_Ve_Vpi_dz_max;
+double               cutValue_Q2_min;
+double                cutValue_W_min;
+double                cutValue_y_max;
+double          cutValue_e_theta_min;
+double          cutValue_e_theta_max;
+double         cutValue_pi_theta_min;
+double         cutValue_pi_theta_max;
+double              cutValue_Ppi_min;
+double              cutValue_Ppi_max;
+double              cutValue_Zpi_min;
+double              cutValue_Zpi_max;
+
+bool        ePastCutsInEvent = false;
+bool     pipsPastCutsInEvent = false;
+bool   eepipsPastCutsInEvent = false;
+bool     pimsPastCutsInEvent = false;
+bool         EventPassedCuts = false;
+bool   eepimsPastCutsInEvent = false;
 
 
 // positive pions
@@ -237,12 +281,18 @@ void Read_PiAcceptance_GEMCimulations(TString fPiCharge = "pips",
     if (fdebug>2) std::cout << "SetPiCharge ( "<<fPiCharge<<"  ); "  << std::endl;
     SetPiCharge ( fPiCharge  );
     
-    // open result files
+    // Open result files
     if (fdebug>2) std::cout << "OpenResultFiles (); "  << std::endl;
     OpenResultFiles();
     
+    // Load cut values
+    if (fdebug>2) std::cout << "Load cut values "  << std::endl;
+    loadCutValues("cutValues.csv",fdebug);
+
+    
     // determine how many files to process
     int NfilesToProcess = 1;
+    if (NeventsMax<0) NeventsMax = 1000000;
     if (NeventsMax > 100000) {
         NfilesToProcess  = int( NeventsMax/100000 );
     }
@@ -343,6 +393,7 @@ void Read_PiAcceptance_GEMCimulations(TString fPiCharge = "pips",
                 // But here we extract information from electrons and pions
                 e_reconstructed = true;
                 ExtractElectronInformation  (fdebug);
+                ComputeKinematics           ();
                 ExtractPionsInformation     (fdebug);
             }
             else {
@@ -361,8 +412,7 @@ void Read_PiAcceptance_GEMCimulations(TString fPiCharge = "pips",
         } // end event loop
         
     } // end file loop
-    
-    
+        
     FinishProgram();
 }
 
@@ -554,10 +604,12 @@ void InitializeVariables(){
         pipsPastSelectionCuts[piIdx]                = false;
         pipsPastFiducialCuts[piIdx]                 = false;
         pipsPastPIDCuts[piIdx]                      = false;
+        eepipsPastKinematicalCuts[piIdx]            = false;
         
         pimsPastSelectionCuts[piIdx]                = false;
         pimsPastFiducialCuts[piIdx]                 = false;
         pimsPastPIDCuts[piIdx]                      = false;
+        eepimsPastKinematicalCuts[piIdx]            = false;
 
     }
     DC_layer                                        = -9999;
@@ -574,16 +626,7 @@ TString GetRunNumberSTR(int RunNumber, int fdebug){
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void OpenResultFiles(){
-    OpenOutputFiles(( (TString)"e_P,e_Theta,e_Phi,e_Vz,"
-                     +(TString)"pi_P,pi_Theta,pi_Phi,pi_Vz,"
-                     +(TString)"Npips,Npims,Nelectrons,Ngammas,Nprotons,Nneutrons,Ndeuterons,"
-                     +(TString)"e_P_g,e_Theta_g,e_Phi_g,e_Vz_g,"
-                     +(TString)"pi_P_g,pi_Theta_g,pi_Phi_g,pi_Vz_g,"
-                     +(TString)"pi_reconstructed,pi_passed_cuts,pi_passed_fiducial_cuts,pi_passed_PID_cuts,"
-                     +(TString)"e_reconstructed,e_passed_cuts,"
-                     +(TString)"e_DC_sector,pi_DC_sector,"
-                     +(TString)"M_X,")
-                    );
+    OpenOutputFiles(csvheader);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -870,12 +913,13 @@ void GetParticlesByType (int evnum, int fdebug){
 void Stream_e_pi_line_to_CSV( int piIdx, int fdebug ){ // write a row of pion number piIdx to CSV file
     
     
-    TLorentzVector  pi;
-    TVector3        Vpi;
-    double          Zpi;
-    int    pi_DC_sector;
-    
+    TLorentzVector              pi;
+    TVector3                   Vpi;
+    double                     Zpi;
+    int               pi_DC_sector;
+    bool   eepiPastKinematicalCuts;
     //    std::cout << "Stream_e_pi_line_to_CSV(evnum="<<evnum<<"): "<< "Npips: " << Npips << ", piIdx: " << piIdx << std::endl;
+    
     if (PiCharge=="pips") {
         pi  = piplus [piIdx];
         Vpi = Vpiplus[piIdx];
@@ -888,6 +932,7 @@ void Stream_e_pi_line_to_CSV( int piIdx, int fdebug ){ // write a row of pion nu
         //        std::cout << "if (PiCharge==pips) { "<< "pi_passed_fiducial_cuts: " << pi_passed_fiducial_cuts << std::endl;
         pi_passed_PID_cuts          = pipsPastPIDCuts[piIdx];
         pi_DC_sector                = pips_DC_sector[piIdx];
+        eepiPastKinematicalCuts     = eepipsPastKinematicalCuts[piIdx];
     }
     else if (PiCharge=="pims") {
         
@@ -901,6 +946,7 @@ void Stream_e_pi_line_to_CSV( int piIdx, int fdebug ){ // write a row of pion nu
         pi_passed_fiducial_cuts     = pimsPastFiducialCuts[piIdx];
         pi_passed_PID_cuts          = pimsPastPIDCuts[piIdx];
         pi_DC_sector                = pims_DC_sector[piIdx];
+        eepiPastKinematicalCuts     = eepimsPastKinematicalCuts[piIdx];
    }
     else {
         std::cout << "pion charge undefined at Stream_e_pi_line_to_CSV(), returning " << std::endl;
@@ -928,7 +974,7 @@ void Stream_e_pi_line_to_CSV( int piIdx, int fdebug ){ // write a row of pion nu
         (double)pi_passed_fiducial_cuts,        (double)pi_passed_PID_cuts,
         (double)e_reconstructed,                (double)e_passed_cuts,
         (double)e_DC_sector,                    (double)pi_DC_sector,
-        M_X,
+        M_X,                                    (double)eepiPastKinematicalCuts,
     };
     StreamToCSVfile( variables, fdebug );
 }
@@ -1055,16 +1101,18 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
     }
     //    if (evnum>67 && evnum<74)
     //        std::cout << "before return in evnum " << evnum << " piIdx " << piIdx << ", pipsPastFiducialCuts[piIdx]: " << pipsPastFiducialCuts[piIdx] << std::endl;
-    
+
     
     if (pionCharge=="pi+"){
         
-        pipsPastSelectionCuts[piIdx] = (pipsPastPIDCuts[piIdx] && pipsPastFiducialCuts[piIdx]);
+        pipsPastSelectionCuts[piIdx]     = (pipsPastPIDCuts[piIdx] && pipsPastFiducialCuts[piIdx]);
+        eepipsPastKinematicalCuts[piIdx] = eepiPassedKinematicalCriteria( piplus[piIdx], fdebug);
         return pipsPastSelectionCuts[piIdx];
         
     } else {
         
-        pimsPastSelectionCuts[piIdx] = (pimsPastPIDCuts[piIdx] && pimsPastFiducialCuts[piIdx]);
+        pimsPastSelectionCuts[piIdx]    = (pimsPastPIDCuts[piIdx] && pimsPastFiducialCuts[piIdx]);
+        eepimsPastKinematicalCuts[pidx] = eepiPassedKinematicalCriteria( piminus[piIdx], fdebug);
         return pimsPastSelectionCuts[piIdx];
         
     }
@@ -1158,6 +1206,108 @@ bool CheckIfElectronPassedSelectionCuts(Double_t e_PCAL_x, Double_t e_PCAL_y,
     
     return true;
 }
+
+
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+void loadCutValues(TString cutValuesFilename, int fdebug){
+    
+    // read cut values csv file
+    csv_reader csvr;
+    cutValues = csvr.read_csv("cutValues.csv");
+    if (fdebug>2) { printCutValues(); }
+    
+    // assign specific cut values - to speed things up
+    // by avoiding recalling FindCutValue() on every event
+    
+    // Cut on z-vertex position:
+    // based on RGA_Analysis_Overview_and_Procedures_Nov_4_2020-6245173-2020-12-09-v3.pdf
+    // p. 71
+    if (torusBending==-1){ // in-bending torus field
+        // Spring 19 and Spring 2020 in-bending.
+        cutValue_Vz_min = FindCutValue("Vz_e_min_inbending");
+        cutValue_Vz_max = FindCutValue("Vz_e_max_inbending");
+    } else if (torusBending==1){ // Out-bending torus field
+        // Fall 2019 (without low-energy-run) was out-bending.
+        cutValue_Vz_min = FindCutValue("Vz_e_min_outbending");
+        cutValue_Vz_max = FindCutValue("Vz_e_max_outbending");
+        
+    } else {
+        std::cout
+        << "Un-identified torus bending "
+        << torusBending
+        << ", return" << std::endl;
+        return;
+    }
+        
+    cutValue_e_PCAL_W               = FindCutValue("e_PCAL_W_min");
+    cutValue_e_PCAL_V               = FindCutValue("e_PCAL_V_min");
+    cutValue_e_E_PCAL               = FindCutValue("e_E_PCAL_min");
+    cutValue_SamplingFraction_min   = FindCutValue("SamplingFraction_min");
+    cutValue_PCAL_ECIN_SF_min       = FindCutValue("PCAL_ECIN_SF_min");
+    cutValue_Ve_Vpi_dz_max          = FindCutValue("(Ve-Vpi)_z_max");
+    cutValue_Q2_min                 = FindCutValue("Q2_min");
+    cutValue_W_min                  = FindCutValue("W_min");
+    cutValue_y_max                  = FindCutValue("y_max");
+    cutValue_e_theta_min            = FindCutValue("e_theta_min");
+    cutValue_e_theta_max            = FindCutValue("e_theta_max");
+    cutValue_pi_theta_min           = FindCutValue("pi_theta_min");
+    cutValue_pi_theta_max           = FindCutValue("pi_theta_max");
+    cutValue_Ppi_min                = FindCutValue("Ppi_min");
+    cutValue_Ppi_max                = FindCutValue("Ppi_max");
+    cutValue_Zpi_min                = FindCutValue("Zpi_min");
+    cutValue_Zpi_max                = FindCutValue("Zpi_max");
+}
+
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+void printCutValues(){
+    std::cout << "Using cut values:" << std::endl;
+    for (auto cut: cutValues) {
+        std::cout << cut.first << ": " << cut.second << std::endl;
+    }
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+double FindCutValue( std::string cutName ){
+    for (auto cut: cutValues) {
+        if (strcmp(cut.first.c_str(),cutName.c_str())==0){
+            return cut.second;
+        }
+    }
+}
+
+// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+bool eepiPassedKinematicalCriteria(TLorentzVector pi, int fdebug){
+    double Zpi = pi.E()/omega;
+    if(   (      cutValue_Q2_min < Q2)
+       && (       cutValue_W_min < W)
+       && (                    y < cutValue_y_max )
+       && ( cutValue_e_theta_min < e.Theta()*r2d  && e.Theta()*r2d  < cutValue_e_theta_max  )
+       && (cutValue_pi_theta_min < pi.Theta()*r2d && pi.Theta()*r2d < cutValue_pi_theta_max )
+       && (     cutValue_Ppi_min < pi.P()         &&         pi.P() < cutValue_Ppi_max      )
+       && (     cutValue_Zpi_min < Zpi            &&            Zpi < cutValue_Zpi_max      )
+       ) {
+        if (fdebug>3) { std::cout << "succesfully passed (e,e'pi) kinematical cuts" << std::endl; }
+        return true;
+    }
+    return false;
+}
+
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+void ComputeKinematics(){
+    // compute event kinematics (from e-only information)
+    q       = Beam - e;
+    Q2      = -q.Mag2();
+    omega   = q.E();
+    xB      = Q2/(2. * Mp * q.E());
+    W2      = Mp2 - Q2 + 2. * omega * Mp;
+    W       = sqrt(W2);
+    y       = omega / Ebeam;
+}
+
+
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 Double_t Chi2PID_pion_lowerBound( Double_t p, Double_t C){
     // compute lower bound for chi2PID for a pi+
