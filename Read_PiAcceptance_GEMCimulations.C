@@ -63,7 +63,7 @@ void           ExtractElectronInformation (int fdebug);
 void              ExtractPionsInformation (int fdebug);
 void               ExtractPipsInformation (int pipsIdx, int fdebug );
 void               ExtractPimsInformation (int pimsIdx, int fdebug );
-void                    ComputeKinematics ();
+void                    ComputeKinematics (int fdebug);
 void                   WriteEventToOutput (int fdebug);
 void                        FinishProgram ();
 void                   GetParticlesByType (int evnum, int fdebug );
@@ -393,7 +393,7 @@ void Read_PiAcceptance_GEMCimulations(TString fPiCharge = "pips",
                 // But here we extract information from electrons and pions
                 e_reconstructed = true;
                 ExtractElectronInformation  (fdebug);
-                ComputeKinematics           ();
+                ComputeKinematics           (fdebug);
                 ExtractPionsInformation     (fdebug);
             }
             else {
@@ -1294,9 +1294,8 @@ bool eepiPassedKinematicalCriteria(TLorentzVector pi, int fdebug){
     return false;
 }
 
-
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-void ComputeKinematics(){
+void ComputeKinematics(int fdebug){
     // compute event kinematics (from e-only information)
     q       = Beam - e;
     Q2      = -q.Mag2();
@@ -1305,8 +1304,19 @@ void ComputeKinematics(){
     W2      = Mp2 - Q2 + 2. * omega * Mp;
     W       = sqrt(W2);
     y       = omega / Ebeam;
+    
+    if (fdebug>1) {
+        
+        std::cout << "Kinematics: " << std::endl
+        << "Q2: "   << Q2       << " (GeV/c)2, "
+        << "Ebeam: "<< Ebeam    << " GeV, "
+        << "E(e): " << e.E()    << " GeV, "
+        << "xB: "   << xB       << " , "
+        << "W: "    << W        << " (GeV/c2), "
+        << "w:"     << omega    << " GeV, "
+        << "y: "    << y        << " , "
+    }
 }
-
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 Double_t Chi2PID_pion_lowerBound( Double_t p, Double_t C){
