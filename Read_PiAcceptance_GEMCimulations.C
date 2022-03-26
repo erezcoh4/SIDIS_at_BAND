@@ -1112,7 +1112,7 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
     } else {
         
         pimsPastSelectionCuts[piIdx]    = (pimsPastPIDCuts[piIdx] && pimsPastFiducialCuts[piIdx]);
-        eepimsPastKinematicalCuts[pidx] = eepiPassedKinematicalCriteria( piminus[piIdx], fdebug);
+        eepimsPastKinematicalCuts[piIdx] = eepiPassedKinematicalCriteria( piminus[piIdx], fdebug);
         return pimsPastSelectionCuts[piIdx];
         
     }
