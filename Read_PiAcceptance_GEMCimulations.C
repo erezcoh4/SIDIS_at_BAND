@@ -977,6 +977,15 @@ void Stream_e_pi_line_to_CSV( int piIdx, int fdebug ){ // write a row of pion nu
         M_X,                                    (double)eepiPastKinematicalCuts,
     };
     StreamToCSVfile( variables, fdebug );
+    
+    if (fdebug>2){
+        std::cout
+        << "PiCharge: "         << PiCharge         << ", "
+        << "pi_DC_sector: "     << pi_DC_sector     << ", "
+        << "M_X: "              << M_X              << ", "
+        << "eepiPastKinematicalCuts: "              << eepiPastKinematicalCuts
+        << std::endl;
+    }
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
@@ -1292,7 +1301,9 @@ bool eepiPassedKinematicalCriteria(TLorentzVector pi, int fdebug){
        && (     cutValue_Ppi_min < pi.P()         &&         pi.P() < cutValue_Ppi_max      )
        && (     cutValue_Zpi_min < Zpi            &&            Zpi < cutValue_Zpi_max      )
        ) {
-        if (fdebug>3) { std::cout << "succesfully passed (e,e'pi) kinematical cuts" << std::endl; }
+        if (fdebug>3) {
+            std::cout << "succesfully passed (e,e'pi) kinematical cuts" << std::endl;
+        }
         return true;
     }
     return false;
