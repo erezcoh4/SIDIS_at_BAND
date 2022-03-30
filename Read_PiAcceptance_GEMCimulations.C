@@ -1288,18 +1288,34 @@ double FindCutValue( std::string cutName ){
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 bool eepiPassedKinematicalCriteria(TLorentzVector pi, int fdebug){
+    if (fdebug>3) {
+        std::cout
+        << "eepiPassedKinematicalCriteria()"
+        << "Q2: "               << Q2               << ", "
+        << "W: "                << W                << ", "
+        << "e.Theta()*r2d: "    << e.Theta()*r2d    << ", "
+        << "pi.Theta()*r2d: "   << pi.Theta()*r2d   << ", "
+        << "pi.P(): "           << pi.P()           << ", "
+        << "Zpi: "              << Zpi              << ", "
+        << std::endl;
+        
+    }
+    
     double Zpi = pi.E()/omega;
     if(   (      cutValue_Q2_min < Q2)
        && (       cutValue_W_min < W)
        // do not impose y cut, as we simulate an outgoing electron of 1.8 GeV
        // and E = 10.2 GeV, thus omega = 8.4 GeV and y = 0.9
        // which is off the limit but does nothing to the acceptance
-//       && (                    y < cutValue_y_max )
+       //       && (                    y < cutValue_y_max )
        //
        && ( cutValue_e_theta_min < e.Theta()*r2d  && e.Theta()*r2d  < cutValue_e_theta_max  )
        && (cutValue_pi_theta_min < pi.Theta()*r2d && pi.Theta()*r2d < cutValue_pi_theta_max )
        && (     cutValue_Ppi_min < pi.P()         &&         pi.P() < cutValue_Ppi_max      )
-       && (     cutValue_Zpi_min < Zpi            &&            Zpi < cutValue_Zpi_max      )
+       // do not impose y cut, as we simulate an outgoing electron of 1.8 GeV
+       // and E = 10.2 GeV, thus omega = 8.4 GeV and z ~= 0.1-0.2
+       //       && (     cutValue_Zpi_min < Zpi            &&            Zpi < cutValue_Zpi_max      )
+       //
        ) {
         if (fdebug>3) {
             std::cout << "succesfully passed (e,e'pi) kinematical cuts" << std::endl;
