@@ -1288,6 +1288,8 @@ double FindCutValue( std::string cutName ){
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 bool eepiPassedKinematicalCriteria(TLorentzVector pi, int fdebug){
+    double Zpi = pi.E()/omega;
+    
     if (fdebug>3) {
         std::cout
         << "eepiPassedKinematicalCriteria()"
@@ -1301,7 +1303,7 @@ bool eepiPassedKinematicalCriteria(TLorentzVector pi, int fdebug){
         
     }
     
-    double Zpi = pi.E()/omega;
+    
     if(   (      cutValue_Q2_min < Q2)
        && (       cutValue_W_min < W)
        // do not impose y cut, as we simulate an outgoing electron of 1.8 GeV
