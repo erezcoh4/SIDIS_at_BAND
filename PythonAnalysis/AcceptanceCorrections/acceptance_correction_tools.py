@@ -35,6 +35,7 @@ TightFiducialPhi, TightFiducialPhiAreaFraction     = dict(),dict()
 # TightFiducialPhiAreaFraction = the fraction of are occupied by "good" phi in TightFiducialPhi (out of 2\pi)
 
 
+
 # ------------------------------------------------------------------------------------------------ #
 def apply_further_selection_cuts_to_data(fdebug=2):#{
     '''
@@ -52,11 +53,15 @@ def apply_further_selection_cuts_to_data(fdebug=2):#{
     e_e_pi_after_Mx_cut      = apply_Mx_cut( e_e_pi_after_p_theta_cut )
 
     # (e,e'\pi) - (uniform) MC for acceptance correction (uniform in e and \pi)
-    e_e_pi_GEMC_pi_accepted = dict()
+    e_e_pi_GEMC_after_eepi_cuts       = dict()
+    # Apply (e,e'pi) SIDIS kinematical cuts while asking if pion was accepted, 
+    # externally (here, and not in the CLAS12ROOT script) since we
+    # want to retain and record also the events that did not pass these cuts, in the simulation
+    # whereas in data we just omit events that did not pass these cuts
     for pi_ch in pi_charge_names:#{
-        e_e_pi_GEMC_pi_accepted[pi_ch] = e_e_pi_GEMC[pi_ch][e_e_pi_GEMC[pi_ch].pi_passed_cuts==1];
+        e_e_pi_GEMC_after_eepi_cuts[pi_ch] = e_e_pi_GEMC[pi_ch][(e_e_pi_GEMC[pi_ch].pi_passed_cuts==1) & (e_e_pi_GEMC[pi_ch].eepiPastKinematicalCuts==1)];
     #}
-    e_e_pi_GEMC_after_p_theta_cut = apply_p_theta_acceptance_cut( e_e_pi_GEMC_pi_accepted )
+    e_e_pi_GEMC_after_p_theta_cut = apply_p_theta_acceptance_cut( e_e_pi_GEMC_after_eepi_cuts )
     e_e_pi_GEMC_after_Mx_cut      = apply_Mx_cut(  e_e_pi_GEMC_after_p_theta_cut )
 
     # (e,e'\pi n) SIDIS data complete this -  need to add sector ID in the (e,e'\pi n) data 
@@ -182,8 +187,12 @@ def load_MC_data_for_acceptance_correction():#{
     e_e_pi_GEMC['piplus']  = pd.read_csv( sim_data_path + 'eepips_p_uniform_distribution_1M_events.csv')
     e_e_pi_GEMC['piminus'] = pd.read_csv( sim_data_path + 'eepims_p_uniform_distribution_1M_events.csv')
 
+    for pi_ch in pi_charge_names:#{
+        df = e_e_pi_GEMC[pi_ch]
+        print(pi_ch+': %d generated events'%len(df))
+
+
     # Omit events in which the electron is not reconstructed
-    print('%d generated events'%len(e_e_pi_GEMC))
     e_e_pi_GEMC['piplus']  = e_e_pi_GEMC['piplus'] [e_e_pi_GEMC['piplus'] .e_passed_cuts==1]
     e_e_pi_GEMC['piminus'] = e_e_pi_GEMC['piminus'][e_e_pi_GEMC['piminus'].e_passed_cuts==1]
 
@@ -207,8 +216,24 @@ def load_MC_data_for_acceptance_correction():#{
 
 
 # ------------------------------------------------------------------------------------------------ #
-def ComputeAcceptanceCorrectionAsFunctionOfPhi( max_AccCorrec = 1.9  # omit regions where the acceptance-correction is greater than the average flat correction
-                                              ):#{
+def ComputeAcceptanceCorrectionAsFunctionOfPhi( ):#{
+    '''
+    Comments:
+    
+    We omit regions where the acceptance-correction is greater than the "plateau value"
+    as we want to avoid large acceptance correction uncertainty.
+    This effectively means tightening the fiducial cut
+    We do this by,
+    first finding this plateau by computing the meidan of the acceptance correction
+    and defining the "good" regions as the ones with a correction
+    smaller than the median + std/3
+    and assigning an acceptance correction of 0 to these regions
+  
+    '''
+  
+
+
+    
     global h, h_err, AccCorrec, AccCorrec_err
     global TightFiducialPhi, AccCorrecTightFiducial, AccCorrecTightFiducial_err
     global e_e_pi_GEMC, e_e_pi_GEMC_pass_cuts
@@ -250,22 +275,26 @@ def ComputeAcceptanceCorrectionAsFunctionOfPhi( max_AccCorrec = 1.9  # omit regi
         AccCorrec_err[pi_ch] = h_err[pi_ch+'eff']/np.square( h[pi_ch+'eff'] )
     #}
     
-    # (3) omit regions where the acceptance-correction is greater than 50%
-    # as we want to avoid large acceptance correction uncertainty.
-    # This effectively means tightening the fiducial cut
-    # We do this by assigning an acceptance correction of 0 to these regions
+    # (3) omit regions where the acceptance-correction is greater than the "plateau value"
+    # (3.1) first find this plateau
+    median_correction_phi_Plateau,std_correction_phi_Plateau = dict(), dict()
+    for pi_ch,pi_idx in zip(pi_charge_names,range(2)):#{
+        median_correction_phi_Plateau[pi_ch] = np.median( AccCorrec[pi_ch] )
+        std_correction_phi_Plateau[pi_ch]  = np.std( AccCorrec[pi_ch] )
+    #}
+    # (3.2) now compute all correction
     for pi_ch,pi_idx in zip(pi_charge_names,range(2)):#{        
         AccCorrecTightFiducial[pi_ch],AccCorrecTightFiducial_err[pi_ch] = np.zeros(Nphi_pts),np.zeros(Nphi_pts)
         TightFiducialPhi[pi_ch] = np.zeros(Nphi_pts)
         NgoodPhi = 0.0
         for phi_idx in range(Nphi_pts):#{
-            if AccCorrec[pi_ch][phi_idx] > max_AccCorrec: #{
-                AccCorrecTightFiducial_err[pi_ch][phi_idx] = AccCorrec_err[pi_ch][phi_idx]
+            if AccCorrec[pi_ch][phi_idx] > (median_correction_phi_Plateau[pi_ch] + std_correction_phi_Plateau[pi_ch]/3): #{
+                AccCorrecTightFiducial_err[pi_ch][phi_idx] = 1e-5
                 TightFiducialPhi[pi_ch][phi_idx]           = 0
                 AccCorrecTightFiducial[pi_ch][phi_idx]     = 0            
             #}
             else :#{
-                AccCorrecTightFiducial_err[pi_ch][phi_idx] = 1e-5
+                AccCorrecTightFiducial_err[pi_ch][phi_idx] = AccCorrec_err[pi_ch][phi_idx]
                 AccCorrecTightFiducial[pi_ch][phi_idx]     = AccCorrec[pi_ch][phi_idx]
                 TightFiducialPhi[pi_ch][phi_idx]           = 1
                 NgoodPhi = NgoodPhi + 1
@@ -312,6 +341,8 @@ def ComputeAcceptanceCorrectionAsFunctionOfPhi( max_AccCorrec = 1.9  # omit regi
     plt.tight_layout(); 
 #}
 # ------------------------------------------------------------------------------------------------ #
+
+
 
 
 

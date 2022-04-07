@@ -33,8 +33,14 @@ parser.add_argument("--Nevents",   type=int, default=-1,
                     required=False, help="Number of events to simulate")
 parser.add_argument("--fdebug",       type=int, default=1,
                     required=False, help="verbosity")
-parser.add_argument("--only-pi+",   dest="only_pips", action='store_true', help="do only pi+ (and not pi-)")
-parser.add_argument("--only-reconstruction",   dest="only_reconstruction", action='store_true', help="do only reconstruction (and no simulation)")
+parser.add_argument("--only-pi+",               dest="only_pips",
+                    action='store_true', help="do only pi+ (and not pi-)")
+parser.add_argument("--only-reconstruction",    dest="only_reconstruction",
+                    action='store_true', help="do only reconstruction (and no simulation)")
+parser.add_argument("--merge-background",       dest="merge_background",
+                    default=False,
+                    required=False,
+                    action='store_true', help="Add random background to the simulated events")
 
 
 args = parser.parse_args()
@@ -55,17 +61,24 @@ if args.only_pips: #{
 #}
 main_data_path  = "/volatile/clas12/users/ecohen/GEMC/"
 main_subdir     = "/10.2/AcceptanceCorrection/"
+coatjava        = "/u/home/cohen/clas12-offline-software/coatjava/bin/"
+backgroundfile  =
+gcard           = "/group/clas12/gemc/4.4.1/config/clas12-default.gcard"
+yaml            = "/group/clas12/gemc/4.4.1/config/clas12-default.yaml"
 
 
 for file_idx in range(Nfiles):#{
 
     for pi_charge in pi_charges:#{
-        filelabel = "ee"+pi_charge+"_p_uniform_distribution_%d"%file_idx
-        lund_file = main_data_path + "LUND" + main_subdir + pi_charge + "/" + filelabel + ".dat"
-        evio_file = main_data_path + "evio" + main_subdir + pi_charge + "/" + filelabel + ".ev"
-        hipo_file = main_data_path + "hipo" + main_subdir + pi_charge + "/" + filelabel + ".hipo"
-        reco_file = main_data_path + "hipo" + main_subdir + pi_charge + "/" + filelabel + "_reconstructed.hipo"
-
+    
+        filelabel    = "ee"+pi_charge+"_p_uniform_distribution_%d"%file_idx
+        lund_file    = main_data_path + "LUND" + main_subdir + pi_charge + "/" + filelabel + ".dat"
+        evio_file    = main_data_path + "evio" + main_subdir + pi_charge + "/" + filelabel + ".ev"
+        hipo_file    = main_data_path + "hipo" + main_subdir + pi_charge + "/" + filelabel + ".hipo"
+        hipo_bg_file = main_data_path + "hipo" + main_subdir + pi_charge + "/" + filelabel + "_with_bg.hipo"
+        reco_file    = main_data_path + "hipo" + main_subdir + pi_charge + "/" + filelabel + "_reco.hipo"
+        reco_bg_file = main_data_path + "hipo" + main_subdir + pi_charge + "/" + filelabel + "_reco_with_bg.hipo"
+        
         # (0) delete existing results file
         commandline =  "rm %s %s"%(hipo_file,reco_file)
         print( commandline )
@@ -88,7 +101,7 @@ for file_idx in range(Nfiles):#{
             os.system( commandline )
             
             
-            commandline = ("/u/home/cohen/clas12Tags/4.4.1/source/gemc /group/clas12/gemc/4.4.1/config/clas12-default.gcard "
+            commandline = ("/u/home/cohen/clas12Tags/4.4.1/source/gemc %s "%gcard
                             + "-USE_GUI=0 "
                             + "-N=%d "%Nevents
                             + "-INPUT_GEN_FILE=\"LUND, %s\" "%lund_file
@@ -104,20 +117,34 @@ for file_idx in range(Nfiles):#{
         print("")
         os.system( "cd /u/home/cohen && source set_cook_env.csh" )
         
-        commandline = ("/u/home/cohen/clas12-offline-software/coatjava/bin/evio2hipo -t -1 -s -1 -r 11 "
-                        + "-i %s "%evio_file
-                        + "-o %s "%hipo_file)
+        commandline = ("%s/evio2hipo -t -1 -s -1 -r 11 "%coatjava
+                        + "-i %s "                      %evio_file
+                        + "-o %s "                      %hipo_file)
         print( commandline )
         os.system( commandline )
+        
+        
+        if args.merge_background == False:#{
+            # This implementation is not completed! Stopped in the middle (7 April-2022)
+            commandline = ("%s/bg-merger "      %coatjava
+                            +"-b %s "           %backgroundfile
+                            +"-i %s"            %hipo_file
+                            +"-o %s"            %hipo_with_bg_file
+                            +"-d \"DC,FTOF,ECAL,HTCC,LTCC,BST,BMT,CND,CTOF,FTCAL,FTHODO\"")
+            # change the name of the hipo file we want to reconstruct,
+            # to that with the merged background
+            hipo_file = hipo_bg_file;
+            reco_file = reco_bg_file;
+        #}
 
         # (3) Apply event reconstruction
         print("")
         print("(3) Apply event reconstruction")
         print("")
-        commandline = ("/u/home/cohen/clas12-offline-software/coatjava/bin/recon-util "
+        commandline = ("%s/recon-util "%coatjava
                         + "-i %s "%hipo_file
                         + "-o %s "%reco_file
-                        + "-y /group/clas12/gemc/4.4.1/config/clas12-default.yaml ")
+                        + "-y %s "%yaml)
         print( commandline )
         os.system( commandline )
         

@@ -11,6 +11,18 @@ This repository is responsible for
     
 ## Revisions
 
+Apr-7, 2022    
+-------------
+1. Added to SIDIS skimming results information of the pion direction with respect to q
+    This is since the physics has no preference in azimuthal angle with respect to q, and so we want to use the data to apply acceptance correction (We've learned that at this point the MC is not ready for acceptance correction as the acceptance and efficiency don't reproduce the data)
+    
+    defined the "q-frame" as follows:
+    z axis is defined by the q - parallel to q 
+    x axis is defined by the e' - such that p(e') resides in the x-z plane
+     
+    
+
+
 Mar-26, 2022    
 -------------
 1. Added SIDIS kinematical cuts to uniform GEMC simulations, to verify that cuts do not alter $\phi$ distribution    

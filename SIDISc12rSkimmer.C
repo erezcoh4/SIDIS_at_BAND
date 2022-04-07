@@ -44,7 +44,7 @@ void                       printCutValues ();
 void                        loadCutValues (TString cutValuesFilename = "cutValues.csv", int fdebug=0);
 void                      SetOutputTTrees ();
 double                       FindCutValue ( std::string cutName );
-bool      CheckIfElectronPassedSelectionCuts (Double_t e_PCAL_x, Double_t e_PCAL_y,
+bool   CheckIfElectronPassedSelectionCuts (Double_t e_PCAL_x, Double_t e_PCAL_y,
                                            Double_t e_PCAL_W,Double_t e_PCAL_V,
                                            Double_t e_E_PCAL,
                                            Double_t e_E_ECIN, Double_t e_E_ECOUT,
@@ -83,6 +83,10 @@ void              Stream_e_pi_line_to_CSV (TString pionCharge, int piIdx,
                                            bool passed_cuts_e_pi,
                                            bool passed_cuts_e_pi_kinematics,
                                            int fdebug );
+void                         RotateVector (TVector3 * V);
+void                        MoveTo_qFrame (int fdebug);
+void                         Print4Vector (TLorentzVector v);
+
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 
 // globals
@@ -108,6 +112,7 @@ double              cutValue_Ppi_min;
 double              cutValue_Ppi_max;
 double              cutValue_Zpi_min;
 double              cutValue_Zpi_max;
+double        Pe_phi, q_phi, q_theta; // "q-frame" parameters
 
 bool        ePastCutsInEvent = false;
 bool     pipsPastCutsInEvent = false;
@@ -241,7 +246,9 @@ Double_t     Ebeam, xB, Q2, omega, W, W2, xF, y, M_X;
 
 
 // vectors in q-frame
-//TLorentzVector       piplus_qFrame;
+TLorentzVector               e_qFrame, q_qFrame;
+std::vector<TLorentzVector>       piplus_qFrame;
+std::vector<TLorentzVector>      piminus_qFrame;
 //Double_t        Ppips_t_q, Ppips_q;
 // auxiliary
 DCfid_SIDIS dcfid;
@@ -1231,6 +1238,8 @@ void InitializeVariables(){
         e_DC_y[regionIdx]               = -9999;
         e_DC_z[regionIdx]               = -9999;
     }
+    Pe_phi = q_phi = q_theta            = 0;
+    
     Ve                                  = TVector3();
     ePastCutsInEvent                    = false;
 
@@ -1268,12 +1277,14 @@ void InitializeVariables(){
             pims_DC_x[piIdx][regionIdx]= pims_DC_y[piIdx][regionIdx]    = -9999;
             pims_DC_z[piIdx][regionIdx]                                 = -9999;
         }
-        piplus  .push_back( TLorentzVector(0,0,0,db->GetParticle( 211 )->Mass()) );
+        piplus       .push_back( TLorentzVector(0,0,0,db->GetParticle( 211 )->Mass()) );
+        piplus_qFrame.push_back( TLorentzVector(0,0,0,db->GetParticle( 211 )->Mass()) );
         Vpiplus .push_back( TVector3() );
         pipsPastSelectionCuts[piIdx]                = false;
         eepipsPastKinematicalCuts[piIdx]            = false;
         
-        piminus .push_back( TLorentzVector(0,0,0,db->GetParticle( -211 )->Mass()) );
+        piminus       .push_back( TLorentzVector(0,0,0,db->GetParticle( -211 )->Mass()) );
+        piminus_qFrame.push_back( TLorentzVector(0,0,0,db->GetParticle( -211 )->Mass()) );
         Vpiminus.push_back( TVector3() );
         pimsPastSelectionCuts[piIdx]                = false;
         eepimsPastKinematicalCuts[piIdx]            = false;
@@ -1390,6 +1401,9 @@ void ExtractPionsInformation(int fdebug){
     for (int pimsIdx=0; pimsIdx < Npims; pimsIdx++) {
         ExtractPimsInformation( pimsIdx, fdebug );
     }
+    
+    // move to q-frame and define the pion momentum with respect to q
+    MoveTo_qFrame( fdebug );
     
     // done
     if (fdebug > 2) std::cout << "done extracting pion information" << std::endl;
@@ -1696,4 +1710,68 @@ void Stream_e_pi_line_to_CSV( TString pionCharge, int piIdx,
 }
 
 
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+void MoveTo_qFrame(int fdebug){
+    
+    //    Move to the "q-frame" and define the pion momentum in this frame
+    //    q-frame is defined as follows:
+    //    z axis is defined by the q - parallel to q
+    //    x axis is defined by the e' - such that p(e') resides in the x-z plane
 
+    Pe_phi  = e.Phi();
+    q_phi   = q.Phi();
+    q_theta = q.Theta();
+
+    
+    // verify on q and Pe that the frame-change is done correctly
+    TVector3 Pe = e.Vect();
+    RotateVectorTo_qFrame( &Pe );
+    e_qFrame.SetVectM( Pe );
+    TVector3 Pq = q.Vect();
+    RotateVectorTo_qFrame( &Pq );
+    q_qFrame.SetVectM( Pq );
+    if (fdebug>1){
+        std::cout << "e_qFrame:"<<std::endl;
+        Print4Vector( e_qFrame );
+        std::cout << "q_qFrame:"<<std::endl;
+        Print4Vector( q_qFrame );
+    }
+    
+    
+    
+    for (int piIdx=0; piIdx<NMAXPIONS; piIdx++) {
+        TVector3 Ppiplus = piplus.at(piIdx).Vect();
+        RotateVectorTo_qFrame( &Ppiplus.at( piIdx ) );
+        piplus_qFrame.at(piIdx).SetVectM( Ppiplus.at( piIdx ) );
+    
+        TVector3 Ppiminus = piminus.at(piIdx).Vect();
+        RotateVectorTo_qFrame( &Ppiminus.at( piIdx ) );
+        piminus_qFrame.at(piIdx).SetVectM( Ppiminus.at( piIdx ) );
+        
+        if (fdebug>1){
+            std::cout << "piplus_qFrame.at(piIdx="<<piIdx<<"):"<<std::endl;
+            Print4Vector( piplus_qFrame.at(piIdx) );
+            std::cout << "piminus_qFrame.at(piIdx="<<piIdx<<"):"<<std::endl;
+            Print4Vector( piminus_qFrame.at(piIdx) );
+        }
+    }
+}
+
+
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+void RotateVector( TVector3 * V ){
+    // move to q-Pe system: q is the z axis, Pe is in x-z plane: Pe=(Pe[x],0,Pe[q])
+    V -> RotateZ( -q_phi  );
+    V -> RotateY( -q_theta);
+    V -> RotateZ( -Pe_Phi );
+}
+
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+void Print4Vector( TLorentzVector v ){
+    std::cout <<
+    << "(Px,Py,Pz,E) = " << v.Px() << "," << v.Py() << "," << v.Pz() << "," << v.E()
+    << ", M = " << v.Mag()
+    << std::endl;
+}
