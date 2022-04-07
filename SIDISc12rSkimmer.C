@@ -356,7 +356,7 @@ void SIDISc12rSkimmer(int RunNumber=6420,
                 }
                 Nevents_processed++;
             }
-            if (fdebug && event%PrintProgress==0){
+            if (fdebug && event%PrintProgress==0 && (event > FirstEvent)){
                 std::cout << std::setprecision(1) << " event " << event << std::endl;
             }
         } // end event loop
