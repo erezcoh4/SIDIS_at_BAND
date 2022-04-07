@@ -86,7 +86,7 @@ void              Stream_e_pi_line_to_CSV (TString pionCharge, int piIdx,
                                            int fdebug );
 void                RotateVectorTo_qFrame (TVector3 * V);
 void                        MoveTo_qFrame (int fdebug);
-void                         Print4Vector (TLorentzVector v);
+void                         Print4Vector (TLorentzVector v, std::string label="" );
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 
@@ -1732,15 +1732,16 @@ void MoveTo_qFrame(int fdebug){
     // verify on q and Pe that the frame-change is done correctly
     TVector3 Pe = e.Vect();
     RotateVectorTo_qFrame( &Pe );
-    e_qFrame.SetVectM( Pe, Mpi );
+    e_qFrame.SetVectM( Pe, Me );
     TVector3 Pq = q.Vect();
     RotateVectorTo_qFrame( &Pq );
     q_qFrame.SetVectM( Pq, q.M() );
     if (fdebug>1){
-        std::cout << "e in q-Frame:"<<std::endl;
-        Print4Vector( e_qFrame );
-        std::cout << "q in q-Frame:"<<std::endl;
-        Print4Vector( q_qFrame );
+        
+        Print4Vector( e, "e" );
+        Print4Vector( e_qFrame, "e in q-Frame" );
+        Print4Vector( q , "q");
+        Print4Vector( q_qFrame, "q in q-Frame" );
     }
     
     
@@ -1750,8 +1751,8 @@ void MoveTo_qFrame(int fdebug){
         RotateVectorTo_qFrame( &Ppiplus );
         piplus_qFrame.at(piIdx).SetVectM( Ppiplus, Mpi  );
         if (fdebug>1){
-            std::cout << "piplus("<<piIdx<<"):"<<std::endl;
-            Print4Vector( piplus_qFrame.at(piIdx) );
+//            std::cout << "piplus("<<piIdx<<"):"<<std::endl;
+            Print4Vector( piplus_qFrame.at(piIdx), "pi+(" + num2str(piIdx) + ")" );
         }
     }
         for (int piIdx=0; piIdx<Npims; piIdx++) {
@@ -1760,8 +1761,8 @@ void MoveTo_qFrame(int fdebug){
         piminus_qFrame.at(piIdx).SetVectM( Ppiminus, Mpi );
         
         if (fdebug>1){
-            std::cout << "piminus("<<piIdx<<"):"<<std::endl;
-            Print4Vector( piminus_qFrame.at(piIdx) );
+//            std::cout << "piminus("<<piIdx<<"):"<<std::endl;
+            Print4Vector( piminus_qFrame.at(piIdx), , "pi-(" + num2str(piIdx) + ")" );
         }
     }
 }
@@ -1778,7 +1779,8 @@ void RotateVectorTo_qFrame( TVector3 * V ){
 
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-void Print4Vector( TLorentzVector v ){
+void Print4Vector( TLorentzVector v, std::string label ){
+    std::cout << label << " 4-vector:"<<std::endl;
     std::cout
     << "(Px,Py,Pz,E) = " << v.Px() << "," << v.Py() << "," << v.Pz() << "," << v.E()
     << ", M = " << v.Mag()

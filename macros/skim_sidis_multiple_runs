@@ -18,6 +18,10 @@ parser.add_argument("--fdebug",       type=int, default=1,
                     required=False, help="verbosity")
 parser.add_argument("--PrintProgress",type=int, default=50000,
                     required=False, help="print progress (every N events)")
+parser.add_argument("--no-email",   dest="no_email",
+                    default=False,  required=False,
+                    action='store_true', help="do not send email")
+
 args = parser.parse_args()
 
 Nruns         = args.Nruns
@@ -59,7 +63,9 @@ for line in run_fileLines[FirstRun:]:#{
 print('')
 print('done.')
 print('')
-mailtitle = 'Done processing skim_sidis_multiple_runs on ifarm'
-mailbody  = 'e.g. scp -r cohen@ftp.jlab.org:/volatile/clas12/users/ecohen/BAND/SIDIS_skimming/skimmed_SIDIS_inc_006420_e_piplus_selected_eepi_kinematics.csv ~/Desktop/data/BAND/SIDIS_skimming/'
-emailstr = ('echo %s | mail -s "%s" cohen.erez7@gmail.com'%(mailbody,mailtitle) )
-os.system(emailstr)
+if args.no_email==False:#{
+    mailtitle = 'Done processing skim_sidis_multiple_runs on ifarm'
+    mailbody  = 'e.g. scp -r cohen@ftp.jlab.org:/volatile/clas12/users/ecohen/BAND/SIDIS_skimming/skimmed_SIDIS_inc_006420_e_piplus_selected_eepi_kinematics.csv ~/Desktop/data/BAND/SIDIS_skimming/'
+    emailstr = ('echo %s | mail -s "%s" cohen.erez7@gmail.com'%(mailbody,mailtitle) )
+    os.system(emailstr)
+#}
