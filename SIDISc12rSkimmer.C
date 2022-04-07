@@ -1712,7 +1712,9 @@ void Stream_e_pi_line_to_CSV( TString pionCharge, int piIdx,
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void MoveTo_qFrame(int fdebug){
-    
+    if (fdebug>1){
+        std::cout << "Moving to q-Frame" <<std::endl;
+    }
     //    Move to the "q-frame" and define the pion momentum in this frame
     //    q-frame is defined as follows:
     //    z axis is defined by the q - parallel to q
