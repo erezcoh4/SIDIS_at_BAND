@@ -1652,6 +1652,7 @@ void GetParticlesByType (int evnum, int fdebug){
     if (fdebug>2){
         std::cout
         << "GetParticlesByType (event "     << evnum        << ")"
+        << std::endl
         << "particles in event "            << evnum        << " : "
         << "N(electrons): "                 << Ne           <<  ","
         << "N(protons): "                   << Np           <<  ","
@@ -1660,6 +1661,13 @@ void GetParticlesByType (int evnum, int fdebug){
         << "N(pi-): "                       << Npims        <<  ","
         << "N(gammas): "                    << Ngammas      <<  ","
         << "N(deuterons): "                 << Nd           <<  ","
+        << std::endl;
+        
+        std::cout
+        << "size(piplus): "         << piplus.size()        << ","
+        << "size(piminus): "        << piminus.size()       << ","
+        << "size(piplus_qFrame): "  << piplus_qFrame.size() << ","
+        << "size(piminus_qFrame): " << piminus_qFrame.size()<< ","
         << std::endl;
     }
 }
