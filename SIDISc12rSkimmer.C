@@ -145,10 +145,13 @@ int                   inclusive; // tag to look at inclusive run - all the event
 int         Ne, Nn, Np, Npips, Npims, Ngammas;
 int                          Nd; // number of detected deuterons
 
-// variables
-double          Mp = 0.938;
-double       Mp2 = Mp * Mp;
-double       Md = 1.875612; // NIST
+// masses in GeV/c2
+double          Me = 0.000511;
+double         Mpi = 0.139570;
+double          Mp = 0.938656;
+double          Mn = 0.939272;
+double          Mp2 = Mp * Mp;
+double          Md = 1.875612; // NIST
 // leading electron
 double            e_E_PCAL; // electron energy deposit in PCAL [GeV]
 double            e_E_ECIN; // electron energy deposit in ECAL_in [GeV]
@@ -1729,10 +1732,10 @@ void MoveTo_qFrame(int fdebug){
     // verify on q and Pe that the frame-change is done correctly
     TVector3 Pe = e.Vect();
     RotateVectorTo_qFrame( &Pe );
-    e_qFrame.SetVect( Pe );
+    e_qFrame.SetVectM( Pe, Mpi );
     TVector3 Pq = q.Vect();
     RotateVectorTo_qFrame( &Pq );
-    q_qFrame.SetVect( Pq );
+    q_qFrame.SetVectM( Pq, q.M() );
     if (fdebug>1){
         std::cout << "e_qFrame:"<<std::endl;
         Print4Vector( e_qFrame );
@@ -1745,11 +1748,11 @@ void MoveTo_qFrame(int fdebug){
     for (int piIdx=0; piIdx<NMAXPIONS; piIdx++) {
         TVector3 Ppiplus = piplus.at(piIdx).Vect();
         RotateVectorTo_qFrame( &Ppiplus );
-        piplus_qFrame.at(piIdx).SetVect( Ppiplus );
+        piplus_qFrame.at(piIdx).SetVectM( Ppiplus, Mpi  );
     
         TVector3 Ppiminus = piminus.at(piIdx).Vect();
         RotateVectorTo_qFrame( &Ppiminus );
-        piminus_qFrame.at(piIdx).SetVect( Ppiminus );
+        piminus_qFrame.at(piIdx).SetVectM( Ppiminus, Mpi );
         
         if (fdebug>1){
             std::cout << "piplus_qFrame.at(piIdx="<<piIdx<<"):"<<std::endl;
