@@ -84,7 +84,7 @@ void              Stream_e_pi_line_to_CSV (TString pionCharge, int piIdx,
                                            bool passed_cuts_e_pi,
                                            bool passed_cuts_e_pi_kinematics,
                                            int fdebug );
-void                         RotateVector (TVector3 * V);
+void                RotateVectorTo_qFrame (TVector3 * V);
 void                        MoveTo_qFrame (int fdebug);
 void                         Print4Vector (TLorentzVector v);
 
