@@ -1737,27 +1737,30 @@ void MoveTo_qFrame(int fdebug){
     RotateVectorTo_qFrame( &Pq );
     q_qFrame.SetVectM( Pq, q.M() );
     if (fdebug>1){
-        std::cout << "e_qFrame:"<<std::endl;
+        std::cout << "e in q-Frame:"<<std::endl;
         Print4Vector( e_qFrame );
-        std::cout << "q_qFrame:"<<std::endl;
+        std::cout << "q in q-Frame:"<<std::endl;
         Print4Vector( q_qFrame );
     }
     
     
     
-    for (int piIdx=0; piIdx<NMAXPIONS; piIdx++) {
+    for (int piIdx=0; piIdx<Npips; piIdx++) {
         TVector3 Ppiplus = piplus.at(piIdx).Vect();
         RotateVectorTo_qFrame( &Ppiplus );
         piplus_qFrame.at(piIdx).SetVectM( Ppiplus, Mpi  );
-    
-        TVector3 Ppiminus = piminus.at(piIdx).Vect();
+        if (fdebug>1){
+            std::cout << "piplus("<<piIdx<<"):"<<std::endl;
+            Print4Vector( piplus_qFrame.at(piIdx) );
+        }
+    }
+        for (int piIdx=0; piIdx<Npims; piIdx++) {
+            TVector3 Ppiminus = piminus.at(piIdx).Vect();
         RotateVectorTo_qFrame( &Ppiminus );
         piminus_qFrame.at(piIdx).SetVectM( Ppiminus, Mpi );
         
         if (fdebug>1){
-            std::cout << "piplus_qFrame.at(piIdx="<<piIdx<<"):"<<std::endl;
-            Print4Vector( piplus_qFrame.at(piIdx) );
-            std::cout << "piminus_qFrame.at(piIdx="<<piIdx<<"):"<<std::endl;
+            std::cout << "piminus("<<piIdx<<"):"<<std::endl;
             Print4Vector( piminus_qFrame.at(piIdx) );
         }
     }
