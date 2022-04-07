@@ -1264,8 +1264,10 @@ void InitializeVariables(){
     Ve                                  = TVector3();
     ePastCutsInEvent                    = false;
 
-    piplus      .clear();
-    piminus     .clear();
+    piplus          .clear();
+    piminus         .clear();
+    piplus_qFrame   .clear();
+    piminus_qFrame  .clear();
     Vpiplus     .clear();
     Vpiminus    .clear();
     pipluses    .clear();
