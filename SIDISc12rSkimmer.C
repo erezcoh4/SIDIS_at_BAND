@@ -312,49 +312,53 @@ void SIDISc12rSkimmer(int RunNumber=6420,
         // process the events...
         while((c12.next()==true) && (event < NeventsMaxToProcess)){
             
-            if (i < FirstEvent) continue;
-            
-            runnum = c12.runconfig()->getRun();
-            evnum  = c12.runconfig()->getEvent();
-            if (fdebug>2) std::cout << "begin analysis of event " << evnum << " (run " << runnum << ")"  << std::endl;
-            
-            GetBeamHelicity    ( c12.event() , runnum, fdebug );
-            InitializeVariables();
-            // Get Particles By Type
-            electrons   = c12.getByID( 11   );
-            neutrons    = c12.getByID( 2112 );
-            protons     = c12.getByID( 2212 );
-            pipluses    = c12.getByID( 211  );
-            piminuses   = c12.getByID(-211  );
-            gammas      = c12.getByID( 22   );
-            deuterons   = c12.getByID( 1000010020 );
-            GetParticlesByType ( evnum, fdebug );
-            
-            
-            // filter events, extract information, and compute event kinematics:
-            // we keep only d(e,e’pi+)X and d(e,e’pi-)X events
-            if(  0 < Ne // after studying some MC and data, we need to kill events with more than 1 electron
-               &&
-               (inclusive == 1 || (0 < Npips && Npips < NMAXPIONS) || (0 < Npims && Npims < NMAXPIONS)) ){
-                   
-                ExtractElectronInformation  (fdebug);
-                ComputeKinematics           ();
-                ExtractPionsInformation     (fdebug);
-                WriteEventToOutput          (fdebug);
+            event++;
+            if (event > FirstEvent) {
                 
-            } else {
-                if (fdebug>1) {
-                    std::cout << "Skipped computations in this event as there are not enough particles: "
-                    << "Ne = " << Ne << ",Npips = " << Npips << ",Npims = " << Npims << std::endl ;
+                runnum = c12.runconfig()->getRun();
+                evnum  = c12.runconfig()->getEvent();
+                if (fdebug>2) std::cout << "begin analysis of event " << evnum << " (run " << runnum << ")"  << std::endl;
+                
+                GetBeamHelicity    ( c12.event() , runnum, fdebug );
+                InitializeVariables();
+                // Get Particles By Type
+                electrons   = c12.getByID( 11   );
+                neutrons    = c12.getByID( 2112 );
+                protons     = c12.getByID( 2212 );
+                pipluses    = c12.getByID( 211  );
+                piminuses   = c12.getByID(-211  );
+                gammas      = c12.getByID( 22   );
+                deuterons   = c12.getByID( 1000010020 );
+                GetParticlesByType ( evnum, fdebug );
+                
+                
+                // filter events, extract information, and compute event kinematics:
+                // we keep only d(e,e’pi+)X and d(e,e’pi-)X events
+                if(  0 < Ne // after studying some MC and data, we need to kill events with more than 1 electron
+                   &&
+                   (inclusive == 1 || (0 < Npips && Npips < NMAXPIONS) || (0 < Npims && Npims < NMAXPIONS)) ){
+                    
+                    ExtractElectronInformation  (fdebug);
+                    ComputeKinematics           ();
+                    ExtractPionsInformation     (fdebug);
+                    WriteEventToOutput          (fdebug);
+                    
+                } else {
+                    if (fdebug>1) {
+                        std::cout << "Skipped computations in this event as there are not enough particles: "
+                        << "Ne = " << Ne << ",Npips = " << Npips << ",Npims = " << Npims << std::endl ;
+                    }
                 }
+                if (fdebug>1) {
+                    std::cout << "done processing event " << evnum
+                    << " (" << event << "/" << NeventsMaxToProcess<< ") "
+                    << std::endl << "------------------------------------------------------------" << std::endl ;
+                }
+                Nevents_processed++;
             }
-            if (fdebug>1) {
-                std::cout << "done processing event " << evnum
-                << " (" << event << "/" << NeventsMaxToProcess<< ") "
-                << std::endl << "------------------------------------------------------------" << std::endl ;
+            if (fdebug && event%PrintProgress==0){
+                std::cout << std::setprecision(1) << " event " << event << std::endl;
             }
-            event++; Nevents_processed++;
-            if (fdebug && event%PrintProgress==0) std::cout << std::setprecision(1) << " event " << event << std::endl;
         } // end event loop
         
     } // end file loop
