@@ -60,9 +60,11 @@ print('')
 print('done.')
 print('')
 
-emailstr = ('date | mail -s "Done processing skim_sidis_multiple_runs on ifarm" cohen.erez7@gmail.com'
+emailstr = ("date "
         +
-        'e.g.\n'
+        "e.g.\n"
         +
-        'scp -r cohen@ftp.jlab.org:/volatile/clas12/users/ecohen/BAND/SIDIS_skimming/skimmed_SIDIS_inc_006420_e_piplus_selected_eepi_kinematics.csv ~/Desktop/data/BAND/SIDIS_skimming/')
+        "scp -r cohen@ftp.jlab.org:/volatile/clas12/users/ecohen/BAND/SIDIS_skimming/skimmed_SIDIS_inc_006420_e_piplus_selected_eepi_kinematics.csv ~/Desktop/data/BAND/SIDIS_skimming/"
+            +
+            '| mail -s "Done processing skim_sidis_multiple_runs on ifarm" cohen.erez7@gmail.com'        )
 os.system(emailstr)
