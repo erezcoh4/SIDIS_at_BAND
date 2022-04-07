@@ -1651,6 +1651,7 @@ void GetParticlesByType (int evnum, int fdebug){
     Nd      = deuterons.size();
     if (fdebug>2){
         std::cout
+        << "GetParticlesByType (event "     << evnum        << ")"
         << "particles in event "            << evnum        << " : "
         << "N(electrons): "                 << Ne           <<  ","
         << "N(protons): "                   << Np           <<  ","
