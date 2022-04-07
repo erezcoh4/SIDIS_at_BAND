@@ -146,7 +146,7 @@ int         Ne, Nn, Np, Npips, Npims, Ngammas;
 int                          Nd; // number of detected deuterons
 
 // masses in GeV/c2
-double          Me = 0.000511;
+double          Me = 0.000510999;
 double         Mpi = 0.139570;
 double          Mp = 0.938656;
 double          Mn = 0.939272;
@@ -1724,20 +1724,29 @@ void MoveTo_qFrame(int fdebug){
     //    z axis is defined by the q - parallel to q
     //    x axis is defined by the e' - such that p(e') resides in the x-z plane
 
-    Pe_phi  = e.Phi();
+    // (1) define q-angles
     q_phi   = q.Phi();
     q_theta = q.Theta();
 
-    
-    // verify on q and Pe that the frame-change is done correctly
+    // (2) rotate Pe and q according to q angles
     TVector3 Pe = e.Vect();
-    RotateVectorTo_qFrame( &Pe );
-    e_qFrame.SetVectM( Pe, Me );
     TVector3 Pq = q.Vect();
-    RotateVectorTo_qFrame( &Pq );
+    
+    Pe       .RotateZ(-q_phi);
+    Pe       .RotateY(-q_theta);
+    Pe_phi   = Pmiss.Phi();
+    Pe       .RotateZ(-Pe_phi);
+    Pq       .RotateZ(-q_phi);
+    Pq       .RotateY(-q_theta);
+
+    
+    // (3) verify on q and Pe that the frame-change is done correctly
+    //    RotateVectorTo_qFrame( &Pe );
+    e_qFrame.SetVectM( Pe, Me );
+    //    RotateVectorTo_qFrame( &Pq );
     q_qFrame.SetVectM( Pq, q.M() );
+    
     if (fdebug>1){
-        
         Print4Vector( e, "e" );
         Print4Vector( e_qFrame, "e in q-Frame" );
         Print4Vector( q , "q");
@@ -1745,23 +1754,21 @@ void MoveTo_qFrame(int fdebug){
     }
     
     
-    
+    // (4) rotate pions to this q-frame
     for (int piIdx=0; piIdx<Npips; piIdx++) {
         TVector3 Ppiplus = piplus.at(piIdx).Vect();
         RotateVectorTo_qFrame( &Ppiplus );
         piplus_qFrame.at(piIdx).SetVectM( Ppiplus, Mpi  );
         if (fdebug>1){
-//            std::cout << "piplus("<<piIdx<<"):"<<std::endl;
             Print4Vector( piplus_qFrame.at(piIdx), "pi+(" + std::to_string(piIdx) + ")" );
         }
     }
-        for (int piIdx=0; piIdx<Npims; piIdx++) {
-            TVector3 Ppiminus = piminus.at(piIdx).Vect();
+    for (int piIdx=0; piIdx<Npims; piIdx++) {
+        TVector3 Ppiminus = piminus.at(piIdx).Vect();
         RotateVectorTo_qFrame( &Ppiminus );
         piminus_qFrame.at(piIdx).SetVectM( Ppiminus, Mpi );
         
         if (fdebug>1){
-//            std::cout << "piminus("<<piIdx<<"):"<<std::endl;
             Print4Vector( piminus_qFrame.at(piIdx), "pi-(" + std::to_string(piIdx) + ")" );
         }
     }
@@ -1782,7 +1789,7 @@ void RotateVectorTo_qFrame( TVector3 * V ){
 void Print4Vector( TLorentzVector v, std::string label ){
     std::cout << label << " 4-vector:"<<std::endl;
     std::cout
-    << "(Px,Py,Pz,E) = " << v.Px() << "," << v.Py() << "," << v.Pz() << "," << v.E()
-    << ", M = " << v.Mag()
+    << "(Px,Py,Pz,E) = (" << v.Px() << "," << v.Py() << "," << v.Pz() << "," << v.E()
+    << "), M = " << v.Mag()
     << std::endl;
 }
