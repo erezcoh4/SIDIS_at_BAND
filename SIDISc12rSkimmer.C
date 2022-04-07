@@ -26,6 +26,16 @@
 #define r2d 180./3.1415 // radians to degrees
 using namespace clas12;
 
+// Results in CSV file
+TString csvheader = ( (TString)"status,runnum,evnum,beam_helicity,"
+                     +(TString)"e_P,e_Theta,e_Phi,e_Vz,"
+                     +(TString)"pi_P,pi_Theta,pi_Phi,pi_Vz,"
+                     +(TString)"Q2,W,xB,Zpi,omega,"
+                     +(TString)"xF,y,M_X,"
+                     +(TString)"Npips,Npims,Nelectrons,Ngammas,Nprotons,Nneutrons,Ndeuterons,"
+                     +(TString)"e_DC_sector,pi_DC_sector,"
+                     +(TString)"e_Theta_qFrame,e_Phi_qFrame,"
+                     +(TString)"pi_Theta_qFrame,pi_Phi_qFrame,");
 
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
@@ -1318,14 +1328,7 @@ TString GetRunNumberSTR(int RunNumber, int fdebug){
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void OpenResultFiles( TString outfilepath, TString outfilename ){
-    OpenOutputFiles( outfilepath + outfilename,
-                    ( (TString)"status,runnum,evnum,beam_helicity,"
-                     +(TString)"e_P,e_Theta,e_Phi,e_Vz,"
-                     +(TString)"pi_P,pi_Theta,pi_Phi,pi_Vz,"
-                     +(TString)"Q2,W,xB,Zpi,omega,"
-                     +(TString)"xF,y,M_X,"
-                     +(TString)"Npips,Npims,Nelectrons,Ngammas,Nprotons,Nneutrons,Ndeuterons,"                    
-                     +(TString)"e_DC_sector,pi_DC_sector,"));
+    OpenOutputFiles( outfilepath + outfilename, csvheader);
     // output tree branches
     SetOutputTTrees();
 }
@@ -1657,21 +1660,24 @@ void Stream_e_pi_line_to_CSV( TString pionCharge, int piIdx,
                              bool passed_cuts_e_pi_kinematics,
                              int fdebug ){
     TLorentzVector  pi;
+    TLorentzVector  pi_qFrame;
     TVector3        Vpi;
     double          Zpi;
     int    pi_DC_sector;
     
     if (pionCharge=="pi+") {
-        pi  = piplus [piIdx];
-        Vpi = Vpiplus[piIdx];
-        Zpi = Zpips  [piIdx];
-        pi_DC_sector = pips_DC_sector[piIdx];
+        pi              = piplus        [piIdx];
+        pi_qFrame       = piplus_qFrame [piIdx];
+        Vpi             = Vpiplus       [piIdx];
+        Zpi             = Zpips         [piIdx];
+        pi_DC_sector    = pips_DC_sector[piIdx];
     }
     else if (pionCharge=="pi-") {
-        pi  = piminus [piIdx];
-        Vpi = Vpiminus[piIdx];
-        Zpi = Zpims   [piIdx];
-        pi_DC_sector = pims_DC_sector[piIdx];
+        pi           = piminus          [piIdx];
+        pi_qFrame    = piminus_qFrame   [piIdx];
+        Vpi          = Vpiminus         [piIdx];
+        Zpi          = Zpims            [piIdx];
+        pi_DC_sector = pims_DC_sector   [piIdx];
    }
     else {
         std::cout << "pion charge ill defined at Stream_e_pi_line_to_CSV(), returning " << std::endl;
@@ -1706,7 +1712,9 @@ void Stream_e_pi_line_to_CSV( TString pionCharge, int piIdx,
         omega,          xF,                 y,                  M_X,
         (double)Npips, (double)Npims,       (double)Ne,         (double)Ngammas,
         (double)Np,    (double)Nn,          (double)Nd,
-        (double)e_DC_sector,                (double)pi_DC_sector
+        (double)e_DC_sector,                (double)pi_DC_sector,
+        e_qFrame.Theta(),                   e_qFrame.Phi(),
+        pi_qFrame.Theta(),                  pi_qFrame.Phi(),
     };
     StreamToCSVfile( pionCharge, variables ,
                     passed_cuts_e_pi, passed_cuts_e_pi_kinematics,
