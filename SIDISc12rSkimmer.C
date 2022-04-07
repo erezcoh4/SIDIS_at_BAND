@@ -1684,15 +1684,15 @@ void Stream_e_pi_line_to_CSV( TString pionCharge, int piIdx,
     int    pi_DC_sector;
     
     if (pionCharge=="pi+") {
-        pi              = piplus        [piIdx];
-        pi_qFrame       = piplus_qFrame [piIdx];
-        Vpi             = Vpiplus       [piIdx];
-        Zpi             = Zpips         [piIdx];
-        pi_DC_sector    = pips_DC_sector[piIdx];
+        pi              = piplus       .at(piIdx);
+        pi_qFrame       = piplus_qFrame.at(piIdx);
+        Vpi             = Vpiplus         [piIdx];
+        Zpi             = Zpips           [piIdx];
+        pi_DC_sector    = pips_DC_sector  [piIdx];
     }
     else if (pionCharge=="pi-") {
-        pi           = piminus          [piIdx];
-        pi_qFrame    = piminus_qFrame   [piIdx];
+        pi           = piminus       .at(piIdx);
+        pi_qFrame    = piminus_qFrame.at(piIdx);
         Vpi          = Vpiminus         [piIdx];
         Zpi          = Zpims            [piIdx];
         pi_DC_sector = pims_DC_sector   [piIdx];
@@ -1797,6 +1797,12 @@ void MoveTo_qFrame(int fdebug){
         if (fdebug>1){
             Print4Vector( piminus_qFrame.at(piIdx), "pi-(" + std::to_string(piIdx) + ")" );
         }
+    }
+    if (fdebug>2){
+        std::cout
+        << "size(piplus_qFrame): "  << piplus_qFrame.size() << ","
+        << "size(piminus_qFrame): " << piminus_qFrame.size()<< ","
+        << std::endl;
     }
 }
 
