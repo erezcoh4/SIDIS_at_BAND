@@ -6,6 +6,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <iomanip>
 #include <chrono>
 #include <TFile.h>
 #include <TTree.h>
@@ -1728,10 +1729,10 @@ void MoveTo_qFrame(int fdebug){
     // verify on q and Pe that the frame-change is done correctly
     TVector3 Pe = e.Vect();
     RotateVectorTo_qFrame( &Pe );
-    e_qFrame.SetVectM( Pe );
+    e_qFrame.SetVect( Pe );
     TVector3 Pq = q.Vect();
     RotateVectorTo_qFrame( &Pq );
-    q_qFrame.SetVectM( Pq );
+    q_qFrame.SetVect( Pq );
     if (fdebug>1){
         std::cout << "e_qFrame:"<<std::endl;
         Print4Vector( e_qFrame );
@@ -1743,12 +1744,12 @@ void MoveTo_qFrame(int fdebug){
     
     for (int piIdx=0; piIdx<NMAXPIONS; piIdx++) {
         TVector3 Ppiplus = piplus.at(piIdx).Vect();
-        RotateVectorTo_qFrame( &Ppiplus.at( piIdx ) );
-        piplus_qFrame.at(piIdx).SetVectM( Ppiplus.at( piIdx ) );
+        RotateVectorTo_qFrame( &Ppiplus );
+        piplus_qFrame.at(piIdx).SetVect( Ppiplus );
     
         TVector3 Ppiminus = piminus.at(piIdx).Vect();
-        RotateVectorTo_qFrame( &Ppiminus.at( piIdx ) );
-        piminus_qFrame.at(piIdx).SetVectM( Ppiminus.at( piIdx ) );
+        RotateVectorTo_qFrame( &Ppiminus );
+        piminus_qFrame.at(piIdx).SetVect( Ppiminus );
         
         if (fdebug>1){
             std::cout << "piplus_qFrame.at(piIdx="<<piIdx<<"):"<<std::endl;
@@ -1762,17 +1763,17 @@ void MoveTo_qFrame(int fdebug){
 
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-void RotateVector( TVector3 * V ){
+void RotateVectorTo_qFrame( TVector3 * V ){
     // move to q-Pe system: q is the z axis, Pe is in x-z plane: Pe=(Pe[x],0,Pe[q])
     V -> RotateZ( -q_phi  );
     V -> RotateY( -q_theta);
-    V -> RotateZ( -Pe_Phi );
+    V -> RotateZ( -Pe_phi );
 }
 
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void Print4Vector( TLorentzVector v ){
-    std::cout <<
+    std::cout
     << "(Px,Py,Pz,E) = " << v.Px() << "," << v.Py() << "," << v.Pz() << "," << v.E()
     << ", M = " << v.Mag()
     << std::endl;
