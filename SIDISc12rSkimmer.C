@@ -1734,7 +1734,7 @@ void MoveTo_qFrame(int fdebug){
     
     Pe       .RotateZ(-q_phi);
     Pe       .RotateY(-q_theta);
-    Pe_phi   = Pmiss.Phi();
+    Pe_phi = Pe.Phi();
     Pe       .RotateZ(-Pe_phi);
     Pq       .RotateZ(-q_phi);
     Pq       .RotateY(-q_theta);
