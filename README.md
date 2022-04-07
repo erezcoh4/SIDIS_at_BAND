@@ -20,6 +20,8 @@ Apr-7, 2022
     z axis is defined by the q - parallel to q 
     x axis is defined by the e' - such that p(e') resides in the x-z plane
      
+
+    The relevant variables that were added to the csv-file are \theta and \phi of the pion (and the electron) in the q-frame  
     
 
 

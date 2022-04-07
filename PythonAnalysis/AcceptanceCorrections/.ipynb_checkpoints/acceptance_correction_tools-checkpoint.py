@@ -51,19 +51,7 @@ def apply_further_selection_cuts_to_data(fdebug=2):#{
     # (e,e'\pi) SIDIS data
     e_e_pi_after_p_theta_cut = apply_p_theta_acceptance_cut( e_e_pi )
     e_e_pi_after_Mx_cut      = apply_Mx_cut( e_e_pi_after_p_theta_cut )
-
-    # (e,e'\pi) - (uniform) MC for acceptance correction (uniform in e and \pi)
-    e_e_pi_GEMC_after_eepi_cuts       = dict()
-    # Apply (e,e'pi) SIDIS kinematical cuts while asking if pion was accepted, 
-    # externally (here, and not in the CLAS12ROOT script) since we
-    # want to retain and record also the events that did not pass these cuts, in the simulation
-    # whereas in data we just omit events that did not pass these cuts
-    for pi_ch in pi_charge_names:#{
-        e_e_pi_GEMC_after_eepi_cuts[pi_ch] = e_e_pi_GEMC[pi_ch][(e_e_pi_GEMC[pi_ch].pi_passed_cuts==1) & (e_e_pi_GEMC[pi_ch].eepiPastKinematicalCuts==1)];
-    #}
-    e_e_pi_GEMC_after_p_theta_cut = apply_p_theta_acceptance_cut( e_e_pi_GEMC_after_eepi_cuts )
-    e_e_pi_GEMC_after_Mx_cut      = apply_Mx_cut(  e_e_pi_GEMC_after_p_theta_cut )
-
+    
     # (e,e'\pi n) SIDIS data complete this -  need to add sector ID in the (e,e'\pi n) data 
     
     # print number of events retained on every cut
@@ -86,29 +74,49 @@ def apply_further_selection_cuts_to_data(fdebug=2):#{
         frac_Nevents[pi_ch + ' Mx cut'] = float(Nevents[pi_ch +' Mx cut'])/Nevents[pi_ch + ' original']
         print(Nevents[pi_ch +' Mx cut'],'events after M_X cut (%.1f'%(100.*frac_Nevents[pi_ch + ' Mx cut']),'%)')
     #}
-    
-    # print number of events retained on every cut in the uniform GEMC
-    if fdebug<2: return
-    for pi_ch in pi_charge_names:#{
-        print('(e,e',pi_ch,') in uniform GEMC simulation')
-              
-        Nevents[pi_ch + ' GEMC original'] = len(e_e_pi_GEMC[pi_ch])
-        frac_Nevents[pi_ch + ' GEMC original'] = 1        
-        print(Nevents[pi_ch + ' GEMC original'],'events before cut')    
-        
-        Nevents[pi_ch +' GEMC p-theta cut'] = len(e_e_pi_GEMC_after_p_theta_cut[pi_ch])
-        frac_Nevents[pi_ch + ' GEMC p-theta cut'] = float(Nevents[pi_ch +' GEMC p-theta cut'])/ Nevents[pi_ch + ' GEMC original']
-        print(Nevents[pi_ch +' GEMC p-theta cut'],'events after p-theta cut (%.1f'%(100.*frac_Nevents[pi_ch + ' GEMC p-theta cut']),'%)')    
-
-
-        Nevents[pi_ch +' GEMC Mx cut'] = len(e_e_pi_GEMC_after_Mx_cut[pi_ch])
-        frac_Nevents[pi_ch + ' GEMC Mx cut'] = float(Nevents[pi_ch +' GEMC Mx cut'])/Nevents[pi_ch + ' GEMC original']
-        print(Nevents[pi_ch +' GEMC Mx cut'],'events after M_X cut (%.1f'%(100.*frac_Nevents[pi_ch + ' GEMC Mx cut']),'%)')
-    #}        
     e_e_pi_pass_cuts      = e_e_pi_after_Mx_cut;
-    e_e_pi_GEMC_pass_cuts = e_e_pi_GEMC_after_Mx_cut;
+    
+    # MC
+    if (e_e_pi_GEMC=={}) is False:#{
+        # (e,e'\pi) - (uniform) MC for acceptance correction (uniform in e and \pi)
+        e_e_pi_GEMC_after_eepi_cuts       = dict()
+
+        # Apply (e,e'pi) SIDIS kinematical cuts while asking if pion was accepted, 
+        # externally (here, and not in the CLAS12ROOT script) since we
+        # want to retain and record also the events that did not pass these cuts, in the simulation
+        # whereas in data we just omit events that did not pass these cuts
+        for pi_ch in pi_charge_names:#{
+            e_e_pi_GEMC_after_eepi_cuts[pi_ch] = e_e_pi_GEMC[pi_ch][(e_e_pi_GEMC[pi_ch].pi_passed_cuts==1) & (e_e_pi_GEMC[pi_ch].eepiPastKinematicalCuts==1)];
+        #}
+        e_e_pi_GEMC_after_p_theta_cut = apply_p_theta_acceptance_cut( e_e_pi_GEMC_after_eepi_cuts )
+        e_e_pi_GEMC_after_Mx_cut      = apply_Mx_cut(  e_e_pi_GEMC_after_p_theta_cut )
+
+        
+        # print number of events retained on every cut in the uniform GEMC
+        if fdebug<2: return
+        for pi_ch in pi_charge_names:#{
+            print('(e,e',pi_ch,') in uniform GEMC simulation')
+
+            Nevents[pi_ch + ' GEMC original'] = len(e_e_pi_GEMC[pi_ch])
+            frac_Nevents[pi_ch + ' GEMC original'] = 1        
+            print(Nevents[pi_ch + ' GEMC original'],'events before cut')    
+
+            Nevents[pi_ch +' GEMC p-theta cut'] = len(e_e_pi_GEMC_after_p_theta_cut[pi_ch])
+            frac_Nevents[pi_ch + ' GEMC p-theta cut'] = float(Nevents[pi_ch +' GEMC p-theta cut'])/ Nevents[pi_ch + ' GEMC original']
+            print(Nevents[pi_ch +' GEMC p-theta cut'],'events after p-theta cut (%.1f'%(100.*frac_Nevents[pi_ch + ' GEMC p-theta cut']),'%)')    
+
+
+            Nevents[pi_ch +' GEMC Mx cut'] = len(e_e_pi_GEMC_after_Mx_cut[pi_ch])
+            frac_Nevents[pi_ch + ' GEMC Mx cut'] = float(Nevents[pi_ch +' GEMC Mx cut'])/Nevents[pi_ch + ' GEMC original']
+            print(Nevents[pi_ch +' GEMC Mx cut'],'events after M_X cut (%.1f'%(100.*frac_Nevents[pi_ch + ' GEMC Mx cut']),'%)')
+        #}        
+        e_e_pi_GEMC_pass_cuts = e_e_pi_GEMC_after_Mx_cut;
+    #}
+    
 #}
 # ------------------------------------------------------------------------------------------------ #
+
+
 
 
 

@@ -21,6 +21,9 @@ parser.add_argument("--PrintProgress",type=int, default=50000,
 parser.add_argument("--no-email",   dest="no_email",
                     default=False,  required=False,
                     action='store_true', help="do not send email")
+parser.add_argument("--FirstEvent",     type=int, default=0,
+                    required=False, help="first event to start from")
+                                
 
 args = parser.parse_args()
 
@@ -29,6 +32,7 @@ NeventsMax    = args.NeventsMax
 fdebug        = args.fdebug
 PrintProgress = args.PrintProgress
 FirstRun      = args.FirstRun
+FirstEvent    = args.FirstEvent
 runs_filename = "macros/runlists/good_runs_10-2.txt"
 
 # Using readlines()
@@ -41,15 +45,15 @@ if fdebug>1:#{
         print(int(line.strip()), end =" ")
     #}
     print('')
-    print('processing %d runs, starting from run %d'%(Nruns-FirstRun,FirstRun))
+    print('processing %d runs, starting from run %d, event %d'%(Nruns-FirstRun,FirstRun, FirstEvent))
 #}
 
 runIdx = 0
 for line in run_fileLines[FirstRun:]:#{
     runIdx += 1
     run = int(line.strip())
-    commandline = ("clas12root -q 'SIDISc12rSkimmer.C+(%d,%d,%d,%d)'"%
-                    (run,NeventsMax,fdebug,PrintProgress))
+    commandline = ("clas12root -q 'SIDISc12rSkimmer.C+(%d,%d,%d,%d,%d)'"%
+                    (run,NeventsMax,fdebug,PrintProgress,FirstEvent))
     print('')
     print("processing run %d/%d"%(runIdx,Nruns))
     print('')
@@ -65,7 +69,7 @@ print('done.')
 print('')
 if args.no_email==False:#{
     mailtitle = 'Done processing skim_sidis_multiple_runs on ifarm'
-    mailbody  = 'e.g. scp -r cohen@ftp.jlab.org:/volatile/clas12/users/ecohen/BAND/SIDIS_skimming/skimmed_SIDIS_inc_006420_e_piplus_selected_eepi_kinematics.csv ~/Desktop/data/BAND/SIDIS_skimming/'
+    mailbody  = 'e.g. scp -r cohen@ftp.jlab.org:/volatile/clas12/users/ecohen/BAND/SIDIS_skimming/skimmed_SIDIS_inc_006420_e_piplus_selected_eepi_kinematics.csv \~/Desktop/data/BAND/SIDIS_skimming/'
     emailstr = ('echo %s | mail -s "%s" cohen.erez7@gmail.com'%(mailbody,mailtitle) )
     os.system(emailstr)
 #}

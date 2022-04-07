@@ -273,10 +273,11 @@ std::vector<region_part_ptr>  electrons, neutrons, protons, pipluses, piminuses,
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 // Main functionality
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-void SIDISc12rSkimmer(int  RunNumber=6420,
-                      int  NeventsMax=-1,
-                      int  fdebug=1,
-                      int  PrintProgress=50000,
+void SIDISc12rSkimmer(int RunNumber=6420,
+                      int NeventsMax=-1,
+                      int fdebug=1,
+                      int PrintProgress=50000,
+                      int FirstEvent=0, // first event to analyze
                       int NpipsMin=1, // minimal number of pi+
                       TString DataPath = "/volatile/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train_20200610/inc/",
                       int setInclusive=0 ){
@@ -300,7 +301,7 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
     
     // step over events and extract information....
     for(Int_t i=0;i<files->GetEntries();i++){
-            
+        
         //create the event reader
         if (fdebug) std::cout << "reading file " << i << std::endl;
         clas12reader c12(files->At(i)->GetTitle(),{0});
@@ -310,6 +311,8 @@ void SIDISc12rSkimmer(int  RunNumber=6420,
 
         // process the events...
         while((c12.next()==true) && (event < NeventsMaxToProcess)){
+            
+            if (i < FirstEvent) continue;
             
             runnum = c12.runconfig()->getRun();
             evnum  = c12.runconfig()->getEvent();
