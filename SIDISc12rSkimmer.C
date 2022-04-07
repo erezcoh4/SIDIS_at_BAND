@@ -1772,7 +1772,7 @@ void MoveTo_qFrame(int fdebug){
     //    RotateVectorTo_qFrame( &Pq );
     q_qFrame.SetVectM( Pq, q.M() );
     
-    if (fdebug>1){
+    if (fdebug>2){
         Print4Vector( e, "e" );
         Print4Vector( e_qFrame, "e in q-Frame" );
         Print4Vector( q , "q");
@@ -1782,16 +1782,15 @@ void MoveTo_qFrame(int fdebug){
     
     // (4) rotate pions to this q-frame
     for (int piIdx=0; piIdx<Npips; piIdx++) {
-        TVector3 Ppiplus = piplus.at(piIdx).Vect();
-        RotateVectorTo_qFrame( &Ppiplus );
+        TVector3 Ppiplus = RotateVectorTo_qFrame( piplus.at(piIdx).Vect() );
         piplus_qFrame.at(piIdx).SetVectM( Ppiplus, Mpi  );
+        
         if (fdebug>1){
             Print4Vector( piplus_qFrame.at(piIdx), "pi+(" + std::to_string(piIdx) + ")" );
         }
     }
     for (int piIdx=0; piIdx<Npims; piIdx++) {
-        TVector3 Ppiminus = piminus.at(piIdx).Vect();
-        RotateVectorTo_qFrame( &Ppiminus );
+        TVector3 Ppiminus = RotateVectorTo_qFrame( piminus.at(piIdx).Vect() );
         piminus_qFrame.at(piIdx).SetVectM( Ppiminus, Mpi );
         
         if (fdebug>1){
@@ -1809,11 +1808,12 @@ void MoveTo_qFrame(int fdebug){
 
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-void RotateVectorTo_qFrame( TVector3 * V ){
+TVector3 RotateVectorTo_qFrame( TVector3 v ){
     // move to q-Pe system: q is the z axis, Pe is in x-z plane: Pe=(Pe[x],0,Pe[q])
-    V -> RotateZ( -q_phi  );
-    V -> RotateY( -q_theta);
-    V -> RotateZ( -Pe_phi );
+    v.RotateZ( -q_phi  );
+    v.RotateY( -q_theta);
+    v.RotateZ( -Pe_phi );
+    return v;
 }
 
 
