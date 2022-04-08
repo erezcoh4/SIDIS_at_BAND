@@ -321,7 +321,7 @@ void SIDISc12rSkimmer(int RunNumber=6420,
                     std::cout << "begin analysis of event " << evnum
                     << " (run " << runnum << ")"
                     << std::endl
-                    << "------------------------------------------------------------" << std::endl ;
+                    << "------------------------------------------------------------" 
                     << std::endl;
                 }
                 
