@@ -23,7 +23,9 @@ Apr-7, 2022
 
     The relevant variables that were added to the csv-file are \theta and \phi of the pion (and the electron) in the q-frame  
     
-
+2. Added 
+    *(Npips < NMAXPIONS) && (Npims < NMAXPIONS)* 
+    condition to analyzing an event in SIDIS skimming, as event 131227479 (run 6420) included 22 pi+ and 3pi- in a manner that caused memory crash
 
 Mar-26, 2022    
 -------------

@@ -317,7 +317,13 @@ void SIDISc12rSkimmer(int RunNumber=6420,
                 
                 runnum = c12.runconfig()->getRun();
                 evnum  = c12.runconfig()->getEvent();
-                if (fdebug>2) std::cout << "begin analysis of event " << evnum << " (run " << runnum << ")"  << std::endl;
+                if (fdebug>2) {
+                    std::cout << "begin analysis of event " << evnum
+                    << " (run " << runnum << ")"
+                    << std::endl
+                    << "------------------------------------------------------------" << std::endl ;
+                    << std::endl;
+                }
                 
                 GetBeamHelicity    ( c12.event() , runnum, fdebug );
                 InitializeVariables();
@@ -336,7 +342,10 @@ void SIDISc12rSkimmer(int RunNumber=6420,
                 // we keep only d(e,e’pi+)X and d(e,e’pi-)X events
                 if(  0 < Ne // after studying some MC and data, we need to kill events with more than 1 electron
                    &&
-                   (inclusive == 1 || (0 < Npips && Npips < NMAXPIONS) || (0 < Npims && Npims < NMAXPIONS)) ){
+                   (inclusive == 1 || (0 < Npips) || (0 < Npims)) // "inclusive" means (e,e') events
+                   &&
+                   (Npips < NMAXPIONS) && (Npims < NMAXPIONS) // we don't want to crash the memeory
+                   ){
                     
                     ExtractElectronInformation  (fdebug);
                     ComputeKinematics           ();
