@@ -318,10 +318,11 @@ void SIDISc12rSkimmer(int RunNumber=6420,
                 runnum = c12.runconfig()->getRun();
                 evnum  = c12.runconfig()->getEvent();
                 if (fdebug>2) {
-                    std::cout << "begin analysis of event " << evnum
-                    << " (run " << runnum << ")"
+                    std::cout
+                    << ".............................................."
                     << std::endl
-                    << "------------------------------------------------------------" 
+                    << "begin analysis of event " << evnum
+                    << " (run " << runnum << ")"
                     << std::endl;
                 }
                 
