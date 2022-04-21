@@ -22,19 +22,51 @@ Nphi_pts    = len(phi_centers)
 phi_xticks  = [-180,-60,60,180]
 phi_xlim    = [-180,180] 
 
+# (e,e'π) and (e,e'πn) events 
+global e_e_pi, e_e_pi_n; 
+# (e,e'π) and (e,e'πn) events after all selection cuts
+# (p-theta acceptance mathcing, Mx)
+global e_e_pi_pass_cuts, e_e_pi_n_pass_cuts;
+
+# (e,e'π) simulated events, generated from uniform electron direction and uniform pion direction and momoentum
+global e_e_pi_GEMC;
+global e_e_pi_GEMC_pass_cuts; 
+global h, h_err;
+
+
+# (binary 0/1) flag of tight fiducial
+# The areas in \phi that are "good", which we want to keep (0 or 1 for each of phi_centers)
+global TightFiducialPhi;
+global idx_good_phi # same as 'TightFiducialPhi' albeit the indices in phi that are "good"
+global idx_bad_phi # inverse of 'idx_good_phi'
+
+# The fraction of area occupied by "good" phi in TightFiducialPhi (out of 2\pi)
+global TightFiducialPhiAreaFraction;
+global fraction_bad_phi; # same as above but inverse
+
+# acceptance correction as a function of pion \phi angle
+# integral "height" of the acceptance correction for pi+ and pi-, based on GEMC
+global AccCorrecHeight, AccCorrecHeight_err;
+# acceptance corrcetion in each \phi bin
+global AccCorrec,       AccCorrec_err;
+# acceptance correction in "good" \phi regions (=0 in "bad" \phi regions)
+global AccCorrecTightFiducial, AccCorrecTightFiducial_err;
+
+
+
+
 
 e_e_pi, e_e_pi_n                                   = dict(),dict()
-e_e_pi_GEMC                                        = dict()
 e_e_pi_pass_cuts, e_e_pi_n_pass_cuts               = dict(),dict()
+e_e_pi_GEMC                                        = dict()
 e_e_pi_GEMC_pass_cuts                              = dict()
 h, h_err                                           = dict(),dict()
+AccCorrecHeight, AccCorrecHeight_err               = dict(),dict() 
 AccCorrec, AccCorrec_err                           = dict(),dict()
 AccCorrecTightFiducial, AccCorrecTightFiducial_err = dict(),dict()
 TightFiducialPhi, TightFiducialPhiAreaFraction     = dict(),dict()
-# TightFiducialPhi = the are in phi by "good" phi, which we want to keep (0 or 1 for each of phi_centers)
-# TightFiducialPhiAreaFraction = the fraction of are occupied by "good" phi in TightFiducialPhi (out of 2\pi)
-
-
+idx_good_phi,idx_bad_phi                           = dict(),dict()
+fraction_bad_phi                                   = dict()
 
 # ------------------------------------------------------------------------------------------------ #
 def apply_further_selection_cuts_to_data(fdebug=2):#{
@@ -48,9 +80,6 @@ def apply_further_selection_cuts_to_data(fdebug=2):#{
     global e_e_pi, e_e_pi_n, e_e_pi_GEMC
     global e_e_pi_pass_cuts, e_e_pi_n_pass_cuts, e_e_pi_GEMC_pass_cuts
     
-    # (e,e'\pi) SIDIS data
-    e_e_pi_after_p_theta_cut = apply_p_theta_acceptance_cut( e_e_pi )
-    e_e_pi_after_Mx_cut      = apply_Mx_cut( e_e_pi_after_p_theta_cut )
     
     # (e,e'\pi n) SIDIS data complete this -  need to add sector ID in the (e,e'\pi n) data 
     
@@ -58,26 +87,36 @@ def apply_further_selection_cuts_to_data(fdebug=2):#{
     if fdebug < 1: return
     Nevents      = dict()
     frac_Nevents = dict()
-    for pi_ch in pi_charge_names:#{
-        print('(e,e',pi_ch,')')
-              
-        Nevents[pi_ch + ' original'] = len(e_e_pi[pi_ch])
-        frac_Nevents[pi_ch + ' original'] = 1        
-        print(Nevents[pi_ch + ' original'],'events before cut')    
-        
-        Nevents[pi_ch +' p-theta cut'] = len(e_e_pi_after_p_theta_cut[pi_ch])
-        frac_Nevents[pi_ch + ' p-theta cut'] = float(Nevents[pi_ch +' p-theta cut'])/ Nevents[pi_ch + ' original']
-        print(Nevents[pi_ch +' p-theta cut'],'events after p-theta cut (%.1f'%(100.*frac_Nevents[pi_ch + ' p-theta cut']),'%)')    
-
-
-        Nevents[pi_ch +' Mx cut'] = len(e_e_pi_after_Mx_cut[pi_ch])
-        frac_Nevents[pi_ch + ' Mx cut'] = float(Nevents[pi_ch +' Mx cut'])/Nevents[pi_ch + ' original']
-        print(Nevents[pi_ch +' Mx cut'],'events after M_X cut (%.1f'%(100.*frac_Nevents[pi_ch + ' Mx cut']),'%)')
-    #}
-    e_e_pi_pass_cuts      = e_e_pi_after_Mx_cut;
     
-    # MC
+    # (1) Data
+    if (e_e_pi=={}) is False:#{
+        
+        # (e,e'\pi) SIDIS data
+        e_e_pi_after_p_theta_cut = apply_p_theta_acceptance_cut( e_e_pi )
+        e_e_pi_after_Mx_cut      = apply_Mx_cut( e_e_pi_after_p_theta_cut )
+        e_e_pi_pass_cuts         = e_e_pi_after_Mx_cut;
+
+        for pi_ch in pi_charge_names:#{
+            print('(e,e',pi_ch,')')
+
+            Nevents[pi_ch + ' original'] = len(e_e_pi[pi_ch])
+            frac_Nevents[pi_ch + ' original'] = 1        
+            print(Nevents[pi_ch + ' original'],'events before cut')    
+
+            Nevents[pi_ch +' p-theta cut'] = len(e_e_pi_after_p_theta_cut[pi_ch])
+            frac_Nevents[pi_ch + ' p-theta cut'] = float(Nevents[pi_ch +' p-theta cut'])/ Nevents[pi_ch + ' original']
+            print(Nevents[pi_ch +' p-theta cut'],'events after p-theta cut (%.1f'%(100.*frac_Nevents[pi_ch + ' p-theta cut']),'%)')    
+
+
+            Nevents[pi_ch +' Mx cut'] = len(e_e_pi_after_Mx_cut[pi_ch])
+            frac_Nevents[pi_ch + ' Mx cut'] = float(Nevents[pi_ch +' Mx cut'])/Nevents[pi_ch + ' original']
+            print(Nevents[pi_ch +' Mx cut'],'events after M_X cut (%.1f'%(100.*frac_Nevents[pi_ch + ' Mx cut']),'%)')
+        #}
+    #}
+    
+    # (2) MC
     if (e_e_pi_GEMC=={}) is False:#{
+        
         # (e,e'\pi) - (uniform) MC for acceptance correction (uniform in e and \pi)
         e_e_pi_GEMC_after_eepi_cuts       = dict()
 
@@ -90,6 +129,8 @@ def apply_further_selection_cuts_to_data(fdebug=2):#{
         #}
         e_e_pi_GEMC_after_p_theta_cut = apply_p_theta_acceptance_cut( e_e_pi_GEMC_after_eepi_cuts )
         e_e_pi_GEMC_after_Mx_cut      = apply_Mx_cut(  e_e_pi_GEMC_after_p_theta_cut )
+        e_e_pi_GEMC_pass_cuts         = e_e_pi_GEMC_after_Mx_cut;
+
 
         
         # print number of events retained on every cut in the uniform GEMC
@@ -110,13 +151,83 @@ def apply_further_selection_cuts_to_data(fdebug=2):#{
             frac_Nevents[pi_ch + ' GEMC Mx cut'] = float(Nevents[pi_ch +' GEMC Mx cut'])/Nevents[pi_ch + ' GEMC original']
             print(Nevents[pi_ch +' GEMC Mx cut'],'events after M_X cut (%.1f'%(100.*frac_Nevents[pi_ch + ' GEMC Mx cut']),'%)')
         #}        
-        e_e_pi_GEMC_pass_cuts = e_e_pi_GEMC_after_Mx_cut;
     #}
     
 #}
 # ------------------------------------------------------------------------------------------------ #
 
 
+
+
+
+# ------------------------------------------------------------------------------------------------ #
+def ComputeAverageAcceptanceInPhiPlateau( do_plot_reconstructed=False, do_add_legend=False ):#{
+    '''
+    Comments:
+    
+    Compute the average acceptance of pi+ and pi- in phi-plateau 
+    We compute this since CLAS12 MC is missing some local ingredients,
+    like dead wires in certain sectors and local ineffiencies,
+    but we believe that the integral pion detection effieciency is not completely off.
+    In addition, we are studying the super-ratio of tagged/untagged pi+/pi- production ratio,
+    and the integral height of the plateau, used for acceptance correction,
+    will cancel out in this super-ratio 
+  
+    '''
+    global h, h_err, AccCorrecHeight, AccCorrecHeight_err
+
+    var_gen      = 'pi_Phi_g'
+    # scale_factor = r2d
+    label        = '$\phi$'
+    units        = '[deg.]'    
+
+
+    # (1) compute histograms of generated, reconstructed and accepted events asna function of $\phi$
+    fig = plt.figure(figsize=(14,6));
+    for pi_ch,pi_charge_label,pi_idx in zip(pi_charge_names,pi_labels,range(2)):
+        df_gen = e_e_pi_GEMC[pi_ch];
+        df_rec = e_e_pi_GEMC[pi_ch][e_e_pi_GEMC[pi_ch].pi_reconstructed==1];
+        df_acc = e_e_pi_GEMC_pass_cuts[pi_ch][e_e_pi_GEMC_pass_cuts[pi_ch].pi_passed_cuts==1];    
+        x_gen = df_gen[var_gen]
+        x_rec = df_rec[var_gen]    
+        x_acc = df_acc[var_gen]    
+
+        N_gen = len(x_gen)/Nphi_pts;
+        ax = fig.add_subplot(1,2,pi_idx+1)
+        
+        # compute (and plot) histograms of generated and accepted (after cuts)
+        x,h[pi_ch+'gen'],x_err,h_err[pi_ch+'gen'] = plot_step_hist( x_gen*r2d, phi_bins,     color='k',           label='Generated',             ScaleFactor=100./N_gen)
+        x,h[pi_ch+'acc'],x_err,h_err[pi_ch+'acc'] = plot_step_hist( x_acc*r2d, phi_bins,     color='forestgreen', label='Accepted passed cuts',  ScaleFactor=100./N_gen)
+        if do_plot_reconstructed: 
+            x,h[pi_ch+'rec'],x_err,h_err[pi_ch+'rec'] = plot_step_hist( x_rec*r2d, phi_bins, color='royalblue',   label='Reconsutrcted (no cuts)',  ScaleFactor=100./N_gen)
+
+
+        # compute (and plot) average height in plateau of generated and accepted (after cuts)
+        indices_in_plateau = np.where( h[pi_ch+'acc'] > np.median(h[pi_ch+'acc']) - 0.2*np.std(h[pi_ch+'acc']) )
+        average_gen_in_plateau = np.mean( h[pi_ch+'gen'][indices_in_plateau] );
+        average_acc_in_plateau = np.mean( h[pi_ch+'acc'][indices_in_plateau] );
+        ax.plot( x , average_gen_in_plateau*np.ones(len(x)) , '-', color='k',           label=None , alpha=0.2, linewidth=10)
+        ax.plot( x , average_acc_in_plateau*np.ones(len(x)) , '-', color='forestgreen', label=None , alpha=0.2, linewidth=10)
+
+        AccCorrecHeight[pi_ch]     = average_gen_in_plateau/average_acc_in_plateau
+        # The uncertainty needs to be rescaed by N_gen since we 'pealed' it off from the histograms
+        AccCorrecHeight_err[pi_ch] = AccCorrecHeight[pi_ch] * np.sqrt(1./(N_gen*average_gen_in_plateau) + 1./(N_gen*average_acc_in_plateau))
+            
+        # plot a text with average acceptance
+        plt.text(-120, 1.2*average_acc_in_plateau, 
+                 'Average acceptance $%.1f\pm%.1f$'%(100.*1./AccCorrecHeight[pi_ch],
+                                                     100.*AccCorrecHeight_err[pi_ch]/(AccCorrecHeight[pi_ch]*AccCorrecHeight[pi_ch]))+'%',
+                 color='k',fontsize=20)
+        
+        # cosmetics
+        set_axes(ax,label + ' ' + units,'Fraction of events [%]' if pi_idx==0 else '',
+                    do_add_legend=do_add_legend if pi_idx==1 else False,
+                     title='$'+pi_charge_label+'$ acceptance as a function of '+label, fontsize=24, 
+                 do_add_grid=True,xlim=phi_xlim,xticks=phi_xticks)
+
+    plt.tight_layout();
+
+# ------------------------------------------------------------------------------------------------ #
 
 
 
