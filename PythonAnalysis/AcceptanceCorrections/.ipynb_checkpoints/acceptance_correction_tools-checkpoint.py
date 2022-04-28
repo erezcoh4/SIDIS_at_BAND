@@ -3,8 +3,6 @@ import sys; sys.path.insert(0, '/Users/erezcohen/Desktop/Software/mySoftware/Pyt
 from my_tools               import *; 
 from plot_tools             import *;
 from my_data_analysis_tools import *;
-# global eepips_GEMC, eepims_GEMC;
-
 
 
 r2d = 180./np.pi
@@ -68,9 +66,173 @@ TightFiducialPhi, TightFiducialPhiAreaFraction     = dict(),dict()
 idx_good_phi,idx_bad_phi                           = dict(),dict()
 fraction_bad_phi                                   = dict()
 
+
+
+# ------------------------------------------------------------------------------------------------ #
+def compute_ratio_pips_to_pims(df_dict, var='xB', bins=np.linspace(0,1,10), z_min=0, z_max=1, 
+                               theta_min=0, theta_max=np.pi, 
+                               Mx_min=0, Mx_max=100,  
+                               is_eepi=True):#{
+    '''
+    last edit Apr-28, 2022
+    '''
+    # z_min,z_max are z limits on the pion outgoing momentum
+    df_pips = df_dict['piplus']
+    df_pims = df_dict['piminus']
+    # cut on z
+    df_pips = df_pips[ (z_min<df_pips.Zpi) & (df_pips.Zpi<z_max) 
+                      & (theta_min<df_pips.pi_Theta*r2d) & (df_pips.pi_Theta*r2d<theta_max) ]
+    
+    df_pims = df_pims[  (z_min     < df_pims.Zpi)          & (df_pims.Zpi          < z_max) 
+                      & (theta_min< df_pims.pi_Theta*r2d) & (df_pims.pi_Theta*r2d < theta_max)]
+
+    # and cut on Mx if its (e,e'pi)
+    if is_eepi:#{
+        df_pips = df_pips[ (Mx_min < df_pips.M_X) & (df_pips.M_X < Mx_max)]    
+        df_pims = df_pims[ (Mx_min < df_pims.M_X) & (df_pims.M_X < Mx_max)]
+    #}
+    
+    pips = df_pips[var]
+    pims = df_pims[var]
+    R_pips_to_pims, R_pips_to_pims_err = [],[]
+    for x_min,x_max in zip(bins[:-1],bins[1:]):#{
+        
+        pips_in_bin  = pips[ (x_min < pips) & (pips < x_max) ]
+        Npips_in_bin = len(pips_in_bin)
+        pims_in_bin  = pims[ (x_min < pims) & (pims < x_max) ]
+        Npims_in_bin = len(pims_in_bin)    
+
+        R            = Npips_in_bin/np.max([Npims_in_bin,1])
+        R_err        = R * np.sqrt( 1./np.max([1,Npips_in_bin]) + 1./np.max([1,Npims_in_bin]) )
+
+        R_pips_to_pims    .append(R)
+        R_pips_to_pims_err.append(R_err)
+    #}    
+    R_pips_to_pims_errup,R_pips_to_pims_errdw = get_err_up_dw(R_pips_to_pims, R_pips_to_pims_err)
+    
+    return np.array(R_pips_to_pims),np.array(R_pips_to_pims_errup),np.array(R_pips_to_pims_errdw)
+#}
+# ------------------------------------------------------------------------------------------------ #
+
+
+
+# ------------------------------------------------------------------------------------------------ #
+def get_err_up_dw(x, xerr,lim_dw = 0,lim_up = 10):
+    '''
+    last edit Apr-28, 2022
+    '''
+    errup=xerr
+    errdw=xerr    
+    for i in range(len(x)):#{
+        if (x[i]+errup[i]) > lim_up:   errup[i] = lim_up-x[i]        
+        if lim_dw > (x[i]-errdw[i]):   errdw[i] = x[i]-lim_dw
+    #}
+    return errup,errdw
+#}
+# ------------------------------------------------------------------------------------------------ #
+
+
+
+# ------------------------------------------------------------------------------------------------ #
+def ComputeAcceptanceCorrectionFromRun6420( ):#{
+    '''
+    Comments:
+    
+    Compute the acceptance correction for pi+ and pi- using data from run 6420
+  
+    '''
+    global e_e_pi_pass_cuts
+    global idx_good_phi, idx_bad_phi
+    global fraction_bad_phi
+    med_AccCorr_phi, std_AccCorr_phi = dict(),dict()
+     
+    fig = plt.figure(figsize=(16,6));
+
+    
+    for pi_ch,pi_label,pi_color,pi_idx in zip(pi_charge_names,pi_labels,pi_colors,[1,2]):#{
+        ax = fig.add_subplot(1,2,pi_idx)
+
+        df  = e_e_pi_pass_cuts[pi_ch];
+        df = df[df.runnum==6420]
+        phi = np.array(df.pi_Phi)*r2d
+        x,histo,x_err,histo_err = plot_step_hist( x_arr=phi,  bins=phi_bins , label='Data',  
+                                                 color='royalblue', 
+                                                 do_plot_errorbar=False, density=False, linewidth=3)
+        h['data-6420']     = histo
+        h_err['data-6420'] = histo_err
+        
+        # compute average "height" of the data in the plateau region
+        # here for the "plateau" we take the median and not median - 0.2std, 
+        # since the data is much "sharper" than the simulation
+        indices_in_plateau = np.where( histo > np.median(histo) - 0.*np.std(histo) )
+        mean_in_plateau = np.mean( histo[indices_in_plateau] );
+        ax.plot( x , mean_in_plateau*np.ones(len(x)) , '-', color='royalblue',
+                label=None , alpha=0.2, linewidth=10)
+
+        
+        # move average "height" of the data in the plateau region to average
+        mean_in_plateau_corrected = mean_in_plateau * AccCorrecHeight[pi_ch]
+        ax.plot( x , mean_in_plateau_corrected*np.ones(len(x)) , '-', color='k',
+                label=None , alpha=0.2, linewidth=10)
+
+        
+        # compute acceptance ccorrection weight in each \phi bin
+        AccCorrec[pi_ch]     = mean_in_plateau_corrected * (1./ h['data-6420'])
+        AccCorrec_err[pi_ch] = mean_in_plateau_corrected * (h_err['data-6420'] / (h['data-6420']*h['data-6420']))
+        
+        # print(AccCorrec[pi_ch])
+        # print(AccCorrec_err[pi_ch])
+        
+        # omit regions of the sharp drop in efficiency 
+        med_AccCorr_phi[pi_ch] = np.median( AccCorrec[pi_ch] )
+        std_AccCorr_phi[pi_ch] = np.std   ( AccCorrec[pi_ch] )
+        idx_bad_phi[pi_ch]     = np.where ( AccCorrec[pi_ch] > med_AccCorr_phi[pi_ch] + 0.2*std_AccCorr_phi[pi_ch] )
+        idx_bad_phi[pi_ch]     = np.array (idx_bad_phi[pi_ch]).flatten()
+        
+        for i in idx_bad_phi[pi_ch]: 
+            AccCorrec[pi_ch][i]     = 0
+            AccCorrec_err[pi_ch][i] = 0
+            
+        fraction_bad_phi[pi_ch] = float(len(idx_bad_phi[pi_ch])) / Nphi_pts
+        
+        # and account for this fraction as another scalar factor in acceptance correction
+        AccCorrec[pi_ch]     = AccCorrec[pi_ch]     / (1 - fraction_bad_phi[pi_ch])
+        AccCorrec_err[pi_ch] = AccCorrec_err[pi_ch] / (1 - fraction_bad_phi[pi_ch])
+        
+        # plot acceptance correction in right-axis
+        axR = ax.twinx()
+        # axR.errorbar( x , AccCorrec[pi_ch], AccCorrec_err[pi_ch], marker='.', color='salmon', linecolor=None )
+        axR.step( x , AccCorrec[pi_ch], color='salmon')
+        
+        # indicate "bad" (omitted) regions by shadow
+        ymax = 1.*np.max(AccCorrec[pi_ch])        
+        for i in idx_bad_phi[pi_ch]:
+            phi_min = phi_bins[i]
+            phi_max = phi_bins[i+1]
+            axR.fill_between( [phi_min,phi_max] , [ymax,ymax] , color='salmon' , alpha=0.2, edgecolor=None )
+
+                    
+        # cosmetics
+        set_axes(ax, '$\phi$ [deg.]', 'Counts [a.u.]' if pi_idx==1 else '',
+                 title="$(e,e'"+pi_label+')$',
+                 do_add_grid=True,
+                 remove_ticks_y=False,
+                 do_add_legend=False if pi_idx==2 else False,
+                 xlim=phi_xlim,
+                 xticks=phi_xticks)   
+
+        set_axes(axR, '', 'Acceptance correction' if pi_idx==2 else '', remove_ticks_y=True)   
+
+#}
+# ------------------------------------------------------------------------------------------------ #
+
+
+
 # ------------------------------------------------------------------------------------------------ #
 def apply_further_selection_cuts_to_data(fdebug=2):#{
     '''
+    e_e_pi_pass_cuts, e_e_pi_n_pass_cuts, e_e_pi_GEMC_pass_cuts = apply_further_selection_cuts_to_data(fdebug=2)
+    
     Apply selection cuts not previously imposed
     
     1. pi+/pi- acceptance matching cut in p-theta plane 
@@ -152,7 +314,7 @@ def apply_further_selection_cuts_to_data(fdebug=2):#{
             print(Nevents[pi_ch +' GEMC Mx cut'],'events after M_X cut (%.1f'%(100.*frac_Nevents[pi_ch + ' GEMC Mx cut']),'%)')
         #}        
     #}
-    
+    return e_e_pi_pass_cuts, e_e_pi_n_pass_cuts, e_e_pi_GEMC_pass_cuts
 #}
 # ------------------------------------------------------------------------------------------------ #
 
@@ -469,11 +631,11 @@ def ComputeAcceptanceCorrectionAsFunctionOfPhi( ):#{
 # ------------------------------------------------------------------------------------------------ #
 def Compute_acceptance_correction_weight( pi_charge_name, phi ):#{
     phi_bin = Find_phi_bin( phi )
-    # acceptance_correction_weight     = AccCorrec[pi_charge_name][phi_bin]
-    # acceptance_correction_weight_err = AccCorrec_err[pi_charge_name][phi_bin]
+    acceptance_correction_weight     = AccCorrec[pi_charge_name][phi_bin]
+    acceptance_correction_weight_err = AccCorrec_err[pi_charge_name][phi_bin]
     # areaCoverageCorrection           = 1./TightFiducialPhiAreaFraction[pi_charge_name]
-    acceptance_correction_weight     = AccCorrecTightFiducial[pi_charge_name][phi_bin]    
-    acceptance_correction_weight_err = AccCorrecTightFiducial_err[pi_charge_name][phi_bin]
+    # acceptance_correction_weight     = AccCorrecTightFiducial[pi_charge_name][phi_bin]    
+    # acceptance_correction_weight_err = AccCorrecTightFiducial_err[pi_charge_name][phi_bin]
     return acceptance_correction_weight
 #}
 # ------------------------------------------------------------------------------------------------ #
