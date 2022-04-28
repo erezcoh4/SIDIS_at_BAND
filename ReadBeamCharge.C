@@ -36,7 +36,6 @@ void ReadBeamCharge( int RunNumber=6420, int fdebug=0 ){
     
 
     TString inputFile = DataPath + "inc_" + RunNumberStr + ".hipo";
-    std::cout << "input file: " << inputFile.Data() << std::endl;
     
     TChain fake("hipo");
     fake.Add(inputFile.Data());
@@ -47,15 +46,17 @@ void ReadBeamCharge( int RunNumber=6420, int fdebug=0 ){
     for(Int_t i=0;i<files->GetEntries();i++){
         
         //create the event reader
-        if (fdebug) std::cout << "reading file " << i << std::endl;
-        std::cout << "input file title: " << files->At(i)->GetTitle() << std::endl;
+        if (fdebug) std::cout << "reading file " << i << std::endl << files->At(i)->GetTitle() << std::endl;
         
         clas12reader c12(files->At(i)->GetTitle(),{0});
         
         // process the run
+        auto scal          = c12.scalerReader();
         auto RunBeamCharge = c12.getRunBeamCharge();
-        if (fdebug)
-            std::cout << ", beam charge: " << RunBeamCharge << std::endl;
+        if (fdebug){
+            std::cout << "c12.getRunBeamCharge(): " << c12.getRunBeamCharge() << std::endl;
+            std::cout << "beam charge: " << RunBeamCharge << std::endl;
+        }
         
         // go to next events to ask for run number
         c12.next();
