@@ -54,7 +54,6 @@ void ReadBeamCharge( int RunNumber=6420, int fdebug=0 ){
         auto scal          = c12.scalerReader();
         auto RunBeamCharge = c12.getRunBeamCharge();
         if (fdebug){
-            std::cout << "c12.getRunBeamCharge(): " << c12.getRunBeamCharge() << std::endl;
             std::cout << "beam charge: " << RunBeamCharge << std::endl;
         }
         
