@@ -36,7 +36,7 @@ if fdebug>1:#{
         print(int(line.strip()), end =" ")
     #}
     print('')
-    print('processing %d runs, starting from run %d, event %d'%(Nruns-FirstRun,FirstRun, FirstEvent))
+    print('processing %d runs, starting from run %d'%(Nruns-FirstRun,FirstRun))
 #}
 
 runIdx = 0
