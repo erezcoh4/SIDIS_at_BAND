@@ -50,10 +50,11 @@ void ReadBeamCharge( int RunNumber=6420, int fdebug=0 ){
         
         // process the events...
         auto run           = c12.runconfig()->getRun();
+        if (fdebug) std::cout << "run " << run  << std::endl;
+        
         auto RunBeamCharge = c12.getRunBeamCharge();
         if (fdebug)
-            std::cout << "run " << run        
-            << ", beam charge: " << RunBeamCharge << std::endl;
+            std::cout << ", beam charge: " << RunBeamCharge << std::endl;
         
     } // end file loop
 }
