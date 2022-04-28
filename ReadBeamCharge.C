@@ -36,6 +36,8 @@ void ReadBeamCharge( int RunNumber=6420, int fdebug=0 ){
     
 
     TString inputFile = DataPath + "inc_" + RunNumberStr + ".hipo";
+    std::cout << "input file: " << inputFile.Data() << std::endl;
+    
     TChain fake("hipo");
     fake.Add(inputFile.Data());
     //get the hipo data
@@ -46,6 +48,8 @@ void ReadBeamCharge( int RunNumber=6420, int fdebug=0 ){
         
         //create the event reader
         if (fdebug) std::cout << "reading file " << i << std::endl;
+        std::cout << "input file title: " << files->At(i)->GetTitle() << std::endl;
+        
         clas12reader c12(files->At(i)->GetTitle(),{0});
         
         // process the events...
