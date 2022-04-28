@@ -52,13 +52,16 @@ void ReadBeamCharge( int RunNumber=6420, int fdebug=0 ){
         
         clas12reader c12(files->At(i)->GetTitle(),{0});
         
-        // process the events...
-        auto run           = c12.runconfig()->getRun();
-        if (fdebug) std::cout << "run " << run  << std::endl;
-        
+        // process the run
         auto RunBeamCharge = c12.getRunBeamCharge();
         if (fdebug)
             std::cout << ", beam charge: " << RunBeamCharge << std::endl;
+        
+        // go to next events to ask for run number
+        c12.next();
+        auto run           = c12.runconfig()->getRun();
+        if (fdebug) std::cout << "run " << run  << std::endl;
+        
         
     } // end file loop
 }
