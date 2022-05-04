@@ -31,7 +31,7 @@ std::vector<TLorentzVector>  piplus, piminus;
 std::ofstream                csvfile;
 int              NeventsMaxToProcess;
 
-void ReadBeamCharge(int RunNumber=6420,
+void ReadSpecificEventVariable(int RunNumber=6420,
                     int NeventsMax=-1,
                     TString variable="theta_pims",
                     int fdebug=0 ){
