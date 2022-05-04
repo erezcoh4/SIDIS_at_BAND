@@ -76,6 +76,7 @@ void ReadSpecificEventVariable(int RunNumber=6420,
                 }
             }
         }
+        event++;
     } // end file loop
     std::cout << "Done. see " << std::endl << outfilename << std::endl;
 }
