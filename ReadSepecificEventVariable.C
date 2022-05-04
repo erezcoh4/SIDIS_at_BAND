@@ -21,8 +21,8 @@
 #include "Auxiliary/SIDISatBAND_auxiliary.cpp"
 
 
-TString DataPath    = "/volatile/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train_20200610/inc/";
-TString outfilepath = "/volatile/clas12/users/ecohen/BAND/SIDIS_skimming/";
+TString  indatapath = "/volatile/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train_20200610/inc/";
+TString outdatapath = "/volatile/clas12/users/ecohen/BAND/SIDIS_skimming/";
 
 
 SIDISatBAND_auxiliary aux;
@@ -38,8 +38,8 @@ void ReadBeamCharge(int RunNumber=6420,
     
     
     TString RunNumberStr = aux.GetRunNumberSTR ( RunNumber );
-    TString   infilename = DataPath + "inc_" + RunNumberStr + ".hipo";
-    TString  outfilename = "skimmed_SIDIS_inc_" + RunNumberStr + variable;
+    TString   infilename = indatapath + "inc_" + RunNumberStr + ".hipo";
+    TString  outfilename = outdatapath + "skimmed_SIDIS_inc_" + RunNumberStr + "_" + variable + ".csv";
     aux.OpenCSVfile( csvfile, variable );
     
     
@@ -68,5 +68,6 @@ void ReadBeamCharge(int RunNumber=6420,
             }
         }
     } // end file loop
+    std::cout << "Done. see " << std::endl << outfilename << std::endl;
 }
 
