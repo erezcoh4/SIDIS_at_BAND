@@ -49,7 +49,7 @@ runIdx = 0
 for line in run_fileLines[FirstRun:]:#{
     runIdx += 1
     run = int(line.strip())
-    commandline = ("clas12root -l -q 'ReadSpecificVariable.C+(%d,%d,\"%s\",%d)'"%
+    commandline = ("clas12root -l -q 'ReadSpecificEventVariable.C+(%d,%d,\"%s\",%d)'"%
                     (run,NeventsMax,variable,fdebug))
     print('')
     print("processing run %d/%d"%(runIdx,Nruns))
