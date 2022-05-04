@@ -29,8 +29,12 @@ SIDISatBAND_auxiliary aux;
 std::vector<region_part_ptr> electrons, neutrons, protons, pipluses, piminuses;
 std::vector<TLorentzVector>  piplus, piminus;
 std::ofstream                csvfile;
+int              NeventsMaxToProcess;
 
-void ReadBeamCharge( int RunNumber=6420, TString variable="theta_pims", int fdebug=0 ){
+void ReadBeamCharge(int RunNumber=6420,
+                    int NeventsMax=-1,
+                    TString variable="theta_pims",
+                    int fdebug=0 ){
     
     
     TString RunNumberStr = aux.GetRunNumberSTR ( RunNumber );
@@ -47,6 +51,9 @@ void ReadBeamCharge( int RunNumber=6420, TString variable="theta_pims", int fdeb
     for(Int_t i=0;i<files->GetEntries();i++){
         
         clas12reader c12(files->At(i)->GetTitle(),{0});
+        NeventsMaxToProcess = NeventsMax;
+        if (NeventsMax<0) NeventsMaxToProcess = c12.getReader().getEntries();
+        int event = 0;
         
         while((c12.next()==true) && (event < NeventsMaxToProcess)){
             
