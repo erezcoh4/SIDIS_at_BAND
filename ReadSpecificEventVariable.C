@@ -61,20 +61,21 @@ void ReadSpecificEventVariable(int RunNumber=6420,
             piminuses = c12.getByID( -211 ); Npims = piminuses .size();
             
             if (Npims>0){
-                std::cout << "Npims: " << Npims << std::endl;
+                if (fdebug>1) std::cout << "Npims: " << Npims << std::endl;
                 for (int pimsIdx=0; pimsIdx < Npims; pimsIdx++) {
-                    std::cout << "pimsIdx: " << pimsIdx << std::endl;
+                    if (fdebug>1) std::cout << "pimsIdx: " << pimsIdx << std::endl;
                     TLorentzVector piminus(0,0,0,0.139570);
-                    std::cout << "piminus.M(): " << piminus.M() << std::endl;
+                    if (fdebug>1) std::cout << "piminus.M(): " << piminus.M() << std::endl;
                     
                     aux.SetParticle4Momentum( piminus  ,piminuses[pimsIdx]);
-                    std::cout << "piminus.Theta(): " << piminus.Theta() << std::endl;
+                    if (fdebug>1) std::cout << "piminus.Theta(): " << piminus.Theta() << std::endl;
                     
                     if (variable == "theta_pims"){
                         aux.StreamToCSVfile (csvfile, {piminus.Theta()} );
                     }
                 }
             }
+            if (event%10000==0) std::cout << "event " << event << std::cout;
             event++;
         }
     } // end file loop
