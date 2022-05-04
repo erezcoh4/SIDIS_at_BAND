@@ -34,7 +34,7 @@ int              NeventsMaxToProcess;
 
 void ReadSpecificEventVariable(int RunNumber=6420,
                     int NeventsMax=-1,
-                    TString variable="theta_pims",
+                    TString variable="p_pims,theta_pims",
                     int fdebug=0 ){
     
     
@@ -72,6 +72,8 @@ void ReadSpecificEventVariable(int RunNumber=6420,
                     
                     if (variable == "theta_pims"){
                         aux.StreamToCSVfile (csvfile, {piminus.Theta()} );
+                    } else if (variable == "p_pims,theta_pims"){
+                        aux.StreamToCSVfile (csvfile, {piminus.P(),piminus.Theta()} );
                     }
                 }
             }
