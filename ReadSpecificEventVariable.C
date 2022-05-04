@@ -42,7 +42,7 @@ void ReadSpecificEventVariable(int RunNumber=6420,
     TString RunNumberStr = aux.GetRunNumberSTR ( RunNumber );
     TString   infilename = indatapath + "inc_" + RunNumberStr + ".hipo";
     TString  outfilename = outdatapath + "skimmed_SIDIS_inc_" + RunNumberStr + "_" + variable + ".csv";
-    aux.OpenCSVfile( csvfile, outfilename, variable );
+    aux.OpenCSVfile( csvfile, outfilename, variable.Data() );
     
     
     TChain fake("hipo");
