@@ -65,6 +65,7 @@ void ReadSpecificEventVariable(int RunNumber=6420,
                 for (int pimsIdx=0; pimsIdx < Npims; pimsIdx++) {
                     std::cout << "pimsIdx: " << pimsIdx << std::endl;
                     aux.SetParticle4Momentum( piminus[pimsIdx]  ,piminuses[pimsIdx]);
+                    std::cout << "piminus[pimsIdx].Theta(): " << piminus[pimsIdx].Theta() << std::endl;
                     
                     if (variable == "theta_pims"){
                         aux.StreamToCSVfile (csvfile, {piminus[pimsIdx].Theta()} );
