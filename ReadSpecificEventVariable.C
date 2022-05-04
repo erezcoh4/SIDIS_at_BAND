@@ -29,7 +29,6 @@ TString outdatapath = "/volatile/clas12/users/ecohen/BAND/SIDIS_skimming/";
 SIDISatBAND_auxiliary aux;
 int                          Npims;
 std::vector<region_part_ptr> electrons, neutrons, protons, pipluses, piminuses;
-std::vector<TLorentzVector>  piplus, piminus;
 std::ofstream                csvfile;
 int              NeventsMaxToProcess;
 
@@ -59,19 +58,20 @@ void ReadSpecificEventVariable(int RunNumber=6420,
         
         while((c12.next()==true) && (event < NeventsMaxToProcess)){
             
-            piminus.clear(); piminuses = c12.getByID( -211 ); Npims = piminuses .size();
+            piminuses = c12.getByID( -211 ); Npims = piminuses .size();
             
             if (Npims>0){
                 std::cout << "Npims: " << Npims << std::endl;
                 for (int pimsIdx=0; pimsIdx < Npims; pimsIdx++) {
                     std::cout << "pimsIdx: " << pimsIdx << std::endl;
-                    piminus[pimsIdx] = TLorentzVector(0,0,0,0.139570);
-                    std::cout << "piminus[pimsIdx].M(): " << piminus[pimsIdx].M() << std::endl;
-                    aux.SetParticle4Momentum( piminus[pimsIdx]  ,piminuses[pimsIdx]);
-                    std::cout << "piminus[pimsIdx].Theta(): " << piminus[pimsIdx].Theta() << std::endl;
+                    TLorentzVector piminus(0,0,0,0.139570);
+                    std::cout << "piminus.M(): " << piminus.M() << std::endl;
+                    
+                    aux.SetParticle4Momentum( piminus  ,piminuses[pimsIdx]);
+                    std::cout << "piminus.Theta(): " << piminus.Theta() << std::endl;
                     
                     if (variable == "theta_pims"){
-                        aux.StreamToCSVfile (csvfile, {piminus[pimsIdx].Theta()} );
+                        aux.StreamToCSVfile (csvfile, {piminus.Theta()} );
                     }
                 }
             }
