@@ -17,6 +17,7 @@
 #include <TChain.h>
 #include <TCanvas.h>
 #include <TBenchmark.h>
+#define NMAXPIONS 20 // maximal allowed number of pions
 #include "clas12reader.h"
 #include "Auxiliary/SIDISatBAND_auxiliary.cpp"
 
@@ -26,6 +27,7 @@ TString outdatapath = "/volatile/clas12/users/ecohen/BAND/SIDIS_skimming/";
 
 
 SIDISatBAND_auxiliary aux;
+int                          Npims;
 std::vector<region_part_ptr> electrons, neutrons, protons, pipluses, piminuses;
 std::vector<TLorentzVector>  piplus, piminus;
 std::ofstream                csvfile;
