@@ -66,6 +66,7 @@ void ReadSpecificEventVariable(int RunNumber=6420,
                 for (int pimsIdx=0; pimsIdx < Npims; pimsIdx++) {
                     std::cout << "pimsIdx: " << pimsIdx << std::endl;
                     piminus[pimsIdx] = TLorentzVector(0,0,0,0.139570);
+                    std::cout << "piminus[pimsIdx].M(): " << piminus[pimsIdx].M() << std::endl;
                     aux.SetParticle4Momentum( piminus[pimsIdx]  ,piminuses[pimsIdx]);
                     std::cout << "piminus[pimsIdx].Theta(): " << piminus[pimsIdx].Theta() << std::endl;
                     
