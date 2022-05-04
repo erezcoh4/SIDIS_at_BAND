@@ -68,78 +68,18 @@ fraction_bad_phi                                   = dict()
 
 
 
+
 # ------------------------------------------------------------------------------------------------ #
-def compute_ratio_pips_to_pims(df_dict, var='xB', bins=np.linspace(0,1,10), z_min=0, z_max=1, 
-                               theta_min=0, theta_max=np.pi, 
-                               Mx_min=0, Mx_max=100,  
-                               is_eepi=True):#{
+def ComputeAcceptanceCorrectionFromBANDDataRun( run=6421 ):#{
     '''
-    last edit Apr-28, 2022
-    '''
-    # z_min,z_max are z limits on the pion outgoing momentum
-    df_pips = df_dict['piplus']
-    df_pims = df_dict['piminus']
-    # cut on z
-    df_pips = df_pips[ (z_min<df_pips.Zpi) & (df_pips.Zpi<z_max) 
-                      & (theta_min<df_pips.pi_Theta*r2d) & (df_pips.pi_Theta*r2d<theta_max) ]
+    last update May-4, 2022
     
-    df_pims = df_pims[  (z_min     < df_pims.Zpi)          & (df_pims.Zpi          < z_max) 
-                      & (theta_min< df_pims.pi_Theta*r2d) & (df_pims.pi_Theta*r2d < theta_max)]
-
-    # and cut on Mx if its (e,e'pi)
-    if is_eepi:#{
-        df_pips = df_pips[ (Mx_min < df_pips.M_X) & (df_pips.M_X < Mx_max)]    
-        df_pims = df_pims[ (Mx_min < df_pims.M_X) & (df_pims.M_X < Mx_max)]
-    #}
-    
-    pips = df_pips[var]
-    pims = df_pims[var]
-    R_pips_to_pims, R_pips_to_pims_err = [],[]
-    for x_min,x_max in zip(bins[:-1],bins[1:]):#{
-        
-        pips_in_bin  = pips[ (x_min < pips) & (pips < x_max) ]
-        Npips_in_bin = len(pips_in_bin)
-        pims_in_bin  = pims[ (x_min < pims) & (pims < x_max) ]
-        Npims_in_bin = len(pims_in_bin)    
-
-        R            = Npips_in_bin/np.max([Npims_in_bin,1])
-        R_err        = R * np.sqrt( 1./np.max([1,Npips_in_bin]) + 1./np.max([1,Npims_in_bin]) )
-
-        R_pips_to_pims    .append(R)
-        R_pips_to_pims_err.append(R_err)
-    #}    
-    R_pips_to_pims_errup,R_pips_to_pims_errdw = get_err_up_dw(R_pips_to_pims, R_pips_to_pims_err)
-    
-    return np.array(R_pips_to_pims),np.array(R_pips_to_pims_errup),np.array(R_pips_to_pims_errdw)
-#}
-# ------------------------------------------------------------------------------------------------ #
-
-
-
-# ------------------------------------------------------------------------------------------------ #
-def get_err_up_dw(x, xerr,lim_dw = 0,lim_up = 10):
-    '''
-    last edit Apr-28, 2022
-    '''
-    errup=xerr
-    errdw=xerr    
-    for i in range(len(x)):#{
-        if (x[i]+errup[i]) > lim_up:   errup[i] = lim_up-x[i]        
-        if lim_dw > (x[i]-errdw[i]):   errdw[i] = x[i]-lim_dw
-    #}
-    return errup,errdw
-#}
-# ------------------------------------------------------------------------------------------------ #
-
-
-
-# ------------------------------------------------------------------------------------------------ #
-def ComputeAcceptanceCorrectionFromRun6420( ):#{
-    '''
     Comments:
     
-    Compute the acceptance correction for pi+ and pi- using data from run 6420
+    Compute the acceptance correction for pi+ and pi- using data from a BAND data run 
   
+    input: data run
+    
     '''
     global e_e_pi_pass_cuts
     global idx_good_phi, idx_bad_phi
@@ -153,13 +93,13 @@ def ComputeAcceptanceCorrectionFromRun6420( ):#{
         ax = fig.add_subplot(1,2,pi_idx)
 
         df  = e_e_pi_pass_cuts[pi_ch];
-        df = df[df.runnum==6420]
+        df = df[df.runnum==run]
         phi = np.array(df.pi_Phi)*r2d
         x,histo,x_err,histo_err = plot_step_hist( x_arr=phi,  bins=phi_bins , label='Data',  
                                                  color='royalblue', 
                                                  do_plot_errorbar=False, density=False, linewidth=3)
-        h['data-6420']     = histo
-        h_err['data-6420'] = histo_err
+        h['data-%d'%run]     = histo
+        h_err['data-%d'%run] = histo_err
         
         # compute average "height" of the data in the plateau region
         # here for the "plateau" we take the median and not median - 0.2std, 
@@ -177,8 +117,8 @@ def ComputeAcceptanceCorrectionFromRun6420( ):#{
 
         
         # compute acceptance ccorrection weight in each \phi bin
-        AccCorrec[pi_ch]     = mean_in_plateau_corrected * (1./ h['data-6420'])
-        AccCorrec_err[pi_ch] = mean_in_plateau_corrected * (h_err['data-6420'] / (h['data-6420']*h['data-6420']))
+        AccCorrec[pi_ch]     = mean_in_plateau_corrected * (1./ h['data-%d'%run])
+        AccCorrec_err[pi_ch] = mean_in_plateau_corrected * (h_err['data-%d'%run] / (h['data-%d'%run]*h['data-%d'%run]))
         
         # print(AccCorrec[pi_ch])
         # print(AccCorrec_err[pi_ch])
@@ -225,6 +165,89 @@ def ComputeAcceptanceCorrectionFromRun6420( ):#{
 
 #}
 # ------------------------------------------------------------------------------------------------ #
+
+
+
+
+# ------------------------------------------------------------------------------------------------ #
+def compute_ratio_pips_to_pims(df_dict, 
+                               var='xB', bins=np.linspace(0,1,10), 
+                               weight_option = 'Acc. correction as f(phi)',
+                               z_min=0, z_max=1):#{
+    '''
+    last edit Apr-28, 2022
+    '''
+    # z_min,z_max are z limits on the pion outgoing momentum
+    df_pips = df_dict['piplus']
+    df_pims = df_dict['piminus']
+    
+    # cut on z
+    df_pips = df_pips[ (z_min < df_pips.Zpi) & (df_pips.Zpi < z_max) ]    
+    df_pims = df_pims[ (z_min < df_pims.Zpi) & (df_pims.Zpi < z_max) ]
+
+    pips = df_pips[var]
+    pims = df_pims[var]
+    if weight_option == 'Acc. correction as f(phi)':#{
+        phi_pips = np.array( df_pips.pi_Phi )*r2d
+        phi_pims = np.array( df_pims.pi_Phi )*r2d
+    #}
+        
+    R_pips_to_pims, R_pips_to_pims_err = [],[]
+    for x_min,x_max in zip(bins[:-1],bins[1:]):#{
+        
+
+        if weight_option == 'Acc. correction as f(phi)':#{
+            # each event is weighted by the acceptance correction weight
+            
+            phi_pips_in_bin = phi_pips[ (x_min < pips) & (pips < x_max) ]
+            W_pips_in_bin   = [ Compute_acceptance_correction_weight( 'piplus' , phi ) for phi in phi_pips_in_bin ]
+            Npips_in_bin    = np.sum( W_pips_in_bin )
+            
+            phi_pims_in_bin = phi_pims[ (x_min < pims) & (pims < x_max) ]
+            W_pims_in_bin   = [ Compute_acceptance_correction_weight( 'piminus', phi ) for phi in phi_pims_in_bin ]
+            Npims_in_bin    = np.sum( W_pims_in_bin )
+            
+        else: 
+            # no weight, no acceptance corrcetion            
+            
+            pips_in_bin  = pips[ (x_min < pips) & (pips < x_max) ]
+            Npips_in_bin = len(pips_in_bin)
+            pims_in_bin  = pims[ (x_min < pims) & (pims < x_max) ]
+            Npims_in_bin = len(pims_in_bin)    
+            
+        #}
+
+        R     = Npips_in_bin / np.max([Npims_in_bin,1])
+        R_err = R * np.sqrt( 1./np.max([1,Npips_in_bin]) + 1./np.max([1,Npims_in_bin]) )
+
+
+        R_pips_to_pims    .append(R)
+        R_pips_to_pims_err.append(R_err)
+    #}    
+    R_pips_to_pims_errup,R_pips_to_pims_errdw = get_err_up_dw(R_pips_to_pims, R_pips_to_pims_err)
+    
+    return np.array(R_pips_to_pims),np.array(R_pips_to_pims_errup),np.array(R_pips_to_pims_errdw)
+#}
+# ------------------------------------------------------------------------------------------------ #
+
+
+
+
+# ------------------------------------------------------------------------------------------------ #
+def get_err_up_dw(x, xerr,lim_dw = 0,lim_up = 10):
+    '''
+    last edit Apr-28, 2022
+    '''
+    errup=xerr
+    errdw=xerr    
+    for i in range(len(x)):#{
+        if (x[i]+errup[i]) > lim_up:   errup[i] = lim_up-x[i]        
+        if lim_dw > (x[i]-errdw[i]):   errdw[i] = x[i]-lim_dw
+    #}
+    return errup,errdw
+#}
+# ------------------------------------------------------------------------------------------------ #
+
 
 
 
@@ -626,10 +649,11 @@ def ComputeAcceptanceCorrectionAsFunctionOfPhi( ):#{
 
 
 
-
-
 # ------------------------------------------------------------------------------------------------ #
 def Compute_acceptance_correction_weight( pi_charge_name, phi ):#{
+    '''
+    last update May-4, 2022
+    '''
     phi_bin = Find_phi_bin( phi )
     acceptance_correction_weight     = AccCorrec[pi_charge_name][phi_bin]
     acceptance_correction_weight_err = AccCorrec_err[pi_charge_name][phi_bin]
@@ -639,6 +663,8 @@ def Compute_acceptance_correction_weight( pi_charge_name, phi ):#{
     return acceptance_correction_weight
 #}
 # ------------------------------------------------------------------------------------------------ #
+
+
 
 
 

@@ -194,3 +194,10 @@ void SIDISatBAND_auxiliary::StreamToCSVfile (std::ofstream& csvfile, std::vector
         std::cout << std::endl;
     }
 }
+
+
+
+// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+void SIDISatBAND_auxiliary::OpenCSVfile (std::ofstream& csvfile, std::string header){
+    csvfile << header << "," << std::endl;
+}

@@ -11,6 +11,13 @@ This repository is responsible for
     
 ## Revisions
 
+May-4, 2022    
+-------------
+1. Added a script to read a specific variable e.g. \theta(pi^-) ReadSpecificVariable.C read_specific_variable macro
+
+2. Updated good-run list from Efrain' email for 10.2 GeV: <good_runs_10-2-final.txt>
+ 
+
 Apr-28, 2022    
 -------------
 1. Added a script to read beam charge ReadBeamCharge.C and read_beam_charge macro
