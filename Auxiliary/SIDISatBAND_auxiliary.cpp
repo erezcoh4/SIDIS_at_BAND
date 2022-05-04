@@ -201,6 +201,6 @@ void SIDISatBAND_auxiliary::StreamToCSVfile (std::ofstream& csvfile, std::vector
 void SIDISatBAND_auxiliary::OpenCSVfile (std::ofstream& csvfile,
                                          TString filename,
                                          std::string header){
-    csvfile.open( outfilename );
+    csvfile.open( filename );
     csvfile << header << "," << std::endl;
 }
