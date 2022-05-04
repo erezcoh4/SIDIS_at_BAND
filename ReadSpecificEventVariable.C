@@ -62,6 +62,7 @@ void ReadSpecificEventVariable(int RunNumber=6420,
             piminus.clear(); piminuses = c12.getByID( -211 ); Npims = piminuses .size();
             
             if (Npims>0){
+                std::cout << "Npims: " << Npims << std::endl;
                 for (int pimsIdx=0; pimsIdx < Npims; pimsIdx++) {
                     std::cout << "pimsIdx: " << pimsIdx << std::endl;
                     aux.SetParticle4Momentum( piminus[pimsIdx]  ,piminuses[pimsIdx]);
