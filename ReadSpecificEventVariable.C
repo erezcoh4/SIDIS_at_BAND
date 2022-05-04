@@ -75,7 +75,7 @@ void ReadSpecificEventVariable(int RunNumber=6420,
                     }
                 }
             }
-            if (event%10000==0) std::cout << "event " << event << std::cout;
+            if (event%10000==0) std::cout << "event " << event << std::endl;
             event++;
         }
     } // end file loop
