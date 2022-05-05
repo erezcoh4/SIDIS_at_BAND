@@ -18,7 +18,7 @@ parser.add_argument("--fdebug",         type=int, default=1,
 parser.add_argument("--PrintProgress",  type=int, default=50000,
                     required=False, help="print progress (every N events)")
 parser.add_argument("--filelabel",      type=str, default="p_uniform_distribution",
-                    required=False, help="file label, e.g. p_uniform_distribution_rgb_spring2019")
+                    required=False, help="options: \n p_uniform_distribution \n p_uniform_distribution_default \ p_uniform_distribution_rgb_spring2019")
                     
 parser.add_argument('--only-pi+',   dest='only_pips', action='store_true', help="do only pi+ (and not pi-)")
 

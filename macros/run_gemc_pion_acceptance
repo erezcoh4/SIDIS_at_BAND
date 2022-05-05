@@ -62,9 +62,11 @@ if args.only_pips: #{
 main_data_path  = "/volatile/clas12/users/ecohen/GEMC/"
 main_subdir     = "/10.2/AcceptanceCorrection/"
 coatjava        = "/u/home/cohen/clas12-offline-software/coatjava/bin/"
-backgroundfile  =
-gcard           = "/group/clas12/gemc/4.4.1/config/clas12-default.gcard"
-yaml            = "/group/clas12/gemc/4.4.1/config/clas12-default.yaml"
+gcard           = "/group/clas12/gemc/4.4.1/config/rgb_spring2019.gcard"
+yaml            = "/group/clas12/gemc/4.4.1/config/rgb_spring2019.yaml"
+# default version:
+# gcard           = "/group/clas12/gemc/4.4.1/config/clas12-default.gcard"
+# yaml            = "/group/clas12/gemc/4.4.1/config/clas12-default.yaml"
 
 
 for file_idx in range(Nfiles):#{
