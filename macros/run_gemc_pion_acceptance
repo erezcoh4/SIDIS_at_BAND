@@ -125,7 +125,7 @@ for file_idx in range(Nfiles):#{
         os.system( commandline )
         
         
-        if args.merge_background == False:#{
+        if args.merge_background:#{
             print("merge background with file %s"%backgroundfile)
             # This implementation is not completed! Stopped in the middle (7 April-2022)
             commandline = ("%s/bg-merger "      %coatjava
