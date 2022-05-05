@@ -33,13 +33,12 @@ parser.add_argument("--Nevents",   type=int, default=-1,
                     required=False, help="Number of events to simulate")
 parser.add_argument("--fdebug",       type=int, default=1,
                     required=False, help="verbosity")
+                    
 parser.add_argument("--only-pi+",               dest="only_pips",
                     action='store_true', help="do only pi+ (and not pi-)")
 parser.add_argument("--only-reconstruction",    dest="only_reconstruction",
                     action='store_true', help="do only reconstruction (and no simulation)")
 parser.add_argument("--merge-background",       dest="merge_background",
-                    default=False,
-                    required=False,
                     action='store_true', help="Add random background to the simulated events")
 
 
@@ -127,6 +126,7 @@ for file_idx in range(Nfiles):#{
         
         
         if args.merge_background == False:#{
+            print("merge background with file %s"%backgroundfile)
             # This implementation is not completed! Stopped in the middle (7 April-2022)
             commandline = ("%s/bg-merger "      %coatjava
                             +"-b %s "           %backgroundfile
