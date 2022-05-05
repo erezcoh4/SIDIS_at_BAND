@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # read GEMC simulation results for the production of pion acceptance maps
-# last edit Jan-20, 2022 (EOC)
+# last edit May-4, 2022 (EOC)
 #
 # example execute:
 # ./macros/read_gemc_pion_acceptance --NeventsMax=10 --fdebug=5 --only-pi+
@@ -11,12 +11,15 @@ import sys, os, linecache
 import argparse
 
 parser = argparse.ArgumentParser(description='Read GEMC simulation results - pion acceptance maps')
-parser.add_argument("--NeventsMax",   type=int, default=-1,
+parser.add_argument("--NeventsMax",     type=int, default=-1,
                     required=False, help="maximal number of events to process")
-parser.add_argument("--fdebug",       type=int, default=1,
+parser.add_argument("--fdebug",         type=int, default=1,
                     required=False, help="verbosity")
-parser.add_argument("--PrintProgress",type=int, default=50000,
+parser.add_argument("--PrintProgress",  type=int, default=50000,
                     required=False, help="print progress (every N events)")
+parser.add_argument("--filelabel",      type=str, default="p_uniform_distribution",
+                    required=False, help="file label, e.g. p_uniform_distribution_rgb_spring2019")
+                    
 parser.add_argument('--only-pi+',   dest='only_pips', action='store_true', help="do only pi+ (and not pi-)")
 
 
@@ -25,6 +28,7 @@ args = parser.parse_args()
 NeventsMax    = args.NeventsMax
 fdebug        = args.fdebug
 PrintProgress = args.PrintProgress
+filelabel     = args.filelabel
 
 pi_charges = ['pips','pims']
 if args.only_pips: #{
@@ -32,8 +36,8 @@ if args.only_pips: #{
 #}
 
 for pi_charge in pi_charges:#{
-    commandline = ("clas12root -q 'Read_PiAcceptance_GEMCimulations.C+(\"%s\",%d,%d,%d)'"%
-                    (pi_charge,NeventsMax,fdebug,PrintProgress))
+    commandline = ("clas12root -q 'Read_PiAcceptance_GEMCimulations.C+(\"%s\",%d,%d,%d,\"%s\")'"%
+                    (pi_charge,NeventsMax,fdebug,PrintProgress,filelabel))
     print('')
     print("Readind %s acceptance simulations"%(pi_charge))
     print('')

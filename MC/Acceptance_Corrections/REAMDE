@@ -3,8 +3,17 @@
 Simulation using GEMC
 --------------------------------------------------
 
-Simulation of tagged (e,e'\pi) events - by Tyler K.
--------------------------
+Comments, May-4, 2022
+
+Specific GEMC settings for BAND 10.2 GeV data (RGB spring 2019)
+ /group/clas12/gemc/4.4.1/config/rgb_spring2019.gcard
+ /group/clas12/gemc/4.4.1/config/rgb_spring2019.yaml
+ 
+ 
+ 
+
+Simulation of tagged (e,e'\pi) events
+-----------------------------------------
 (1) set environement
 
 > source set_gemc_env.csh
@@ -26,6 +35,9 @@ FILE="LUND, /volatile/clas12/users/ecohen/GEMC/LUND/10.2/AcceptanceCorrection/pi
 
     > open different environement for cooking
     > source set_cook_env.csh
+	
+If an updated cooking is desired:
+
     > cd clas12-offline-software/
     > ./build-coatjava.sh
     

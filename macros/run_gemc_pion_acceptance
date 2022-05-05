@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # run GEMC simulation for the production of pion acceptance maps
-# last edit Feb-17, 2022 (EOC)
+# last edit May-4, 2022 (EOC)
 #
 # example execute:
 # ./macros/run_gemc_pion_acceptance --Nevents=100 --fdebug=5 --only-pi+

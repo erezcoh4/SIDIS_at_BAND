@@ -17,6 +17,8 @@ May-4, 2022
 
 2. Updated good-run list from Efrain' email for 10.2 GeV: <good_runs_10-2-final.txt>
  
+3. Updated GEMC for pion acceptance simulation, to use specific gcard and yaml cards for rg_spring2019
+ 
 
 Apr-28, 2022    
 -------------
