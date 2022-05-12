@@ -6,6 +6,7 @@
 #
 # example execute:
 # ./macros/run_gemc_pion_acceptance --Nevents=100 --fdebug=5 --only-pi+
+# ./macros/run_gemc_pion_acceptance --Nevents=100 --fdebug=1 --only-reconstruction --only-pi+
 
 #
 #

@@ -303,7 +303,7 @@ void Read_PiAcceptance_GEMCimulations(TString fPiCharge = "pips",
         TString inputFile = (DataPath + "/" + PiCharge
                              + "/ee" + PiCharge + "_" + FileLabel
                              + "_" + (TString)(std::to_string(fileIdx))
-                             + "_reconstructed.hipo");
+                             + "_reco.hipo");
         if (fdebug>2) std::cout << "inputFile: " << inputFile << std::endl;
         fake.Add(inputFile.Data());
     }
