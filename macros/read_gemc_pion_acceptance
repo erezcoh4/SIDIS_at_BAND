@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # read GEMC simulation results for the production of pion acceptance maps
-# last edit May-4, 2022 (EOC)
+# last edit May-12, 2022 (EOC)
 #
 # example execute:
 # ./macros/read_gemc_pion_acceptance --NeventsMax=10 --fdebug=5 --only-pi+
@@ -19,7 +19,11 @@ parser.add_argument("--PrintProgress",  type=int, default=50000,
                     required=False, help="print progress (every N events)")
 parser.add_argument("--filelabel",      type=str, default="p_uniform_distribution",
                     required=False, help="options: \n p_uniform_distribution \n p_uniform_distribution_default \ p_uniform_distribution_rgb_spring2019")
-                    
+parser.add_argument("--no-email",   dest="no_email",
+                    default=False,  required=False,
+                    action='store_true', help="do not send email")
+
+
 parser.add_argument('--only-pi+',   dest='only_pips', action='store_true', help="do only pi+ (and not pi-)")
 
 
@@ -50,4 +54,6 @@ print('')
 print('done.')
 print('')
 
-os.system('date | mail -s "Done processing read_gemc_pion_acceptance on ifarm" cohen.erez7@gmail.com')
+if args.no_email==False:#{
+    os.system('date | mail -s "Done processing read_gemc_pion_acceptance on ifarm" cohen.erez7@gmail.com')
+#}
