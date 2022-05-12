@@ -304,7 +304,7 @@ void Read_PiAcceptance_GEMCimulations(TString fPiCharge = "pips",
 //                             + "/ee" + PiCharge + "_" + FileLabel
 //                             + "_" + (TString)(std::to_string(fileIdx))
 //                             + "_reco.hipo");
-        TString inputFile = "/volatile/clas12/users/hauenst/erez_files/out_eepips_p_uniform_distribution_0.hipo"
+        TString inputFile = "/volatile/clas12/users/hauenst/erez_files/out_eepips_p_uniform_distribution_0.hipo";
         if (fdebug>2) std::cout << "inputFile: " << inputFile << std::endl;
         fake.Add(inputFile.Data());
     }
