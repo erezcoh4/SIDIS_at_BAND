@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # run GEMC simulation for the production of pion acceptance maps
-# last edit May-4, 2022 (EOC)
+# last edit May-26, 2022 (EOC)
 #
 # example execute:
 # ./macros/run_gemc_pion_acceptance --Nevents=100 --fdebug=5 --only-pi+
@@ -41,6 +41,9 @@ parser.add_argument("--only-reconstruction",    dest="only_reconstruction",
                     action='store_true', help="do only reconstruction (and no simulation)")
 parser.add_argument("--merge-background",       dest="merge_background",
                     action='store_true', help="Add random background to the simulated events")
+parser.add_argument("--no-email",   dest="no_email",
+                    default=False,  required=False,
+                    action='store_true', help="do not send email")
 
 
 args = parser.parse_args()
@@ -162,4 +165,6 @@ print('')
 print('done.')
 print('')
 
-os.system(email_str)
+if args.no_email==False:#{
+    os.system(email_str)
+#}

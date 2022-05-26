@@ -68,6 +68,194 @@ idx_good_phi,idx_bad_phi                           = dict(),dict()
 fraction_bad_phi                                   = dict()
 
 
+
+# ------------------------------------------------------------------------------------------------ #
+def compute_ratio_pips_to_pims(df_dict, 
+                               var='xB', bins=np.linspace(0,1,10), 
+                               weight_option = '',
+                               z_min=0, z_max=1):#{
+    '''
+    last edit May-26, 2022
+    
+    weight_option: None, 'Acc. correction as f(phi)'
+    '''
+    # z_min,z_max are z limits on the pion outgoing momentum
+    df_pips = df_dict['piplus']
+    df_pims = df_dict['piminus']
+    
+    # cut on z
+    df_pips = df_pips[ (z_min < df_pips.Zpi) & (df_pips.Zpi < z_max) ]    
+    df_pims = df_pims[ (z_min < df_pims.Zpi) & (df_pims.Zpi < z_max) ]
+
+    pips = df_pips[var]
+    pims = df_pims[var]
+    if weight_option == 'Acc. correction as f(phi)':#{
+        phi_pips = np.array( df_pips.pi_Phi )*r2d
+        phi_pims = np.array( df_pims.pi_Phi )*r2d
+    #}
+        
+    R_pips_to_pims, R_pips_to_pims_err = [],[]
+    for x_min,x_max in zip(bins[:-1],bins[1:]):#{
+        
+
+        if weight_option == 'Acc. correction as f(phi)':#{
+            # each event is weighted by the acceptance correction weight
+            
+            phi_pips_in_bin = phi_pips[ (x_min < pips) & (pips < x_max) ]
+            W_pips_in_bin   = [ Compute_acceptance_correction_weight( 'piplus' , phi ) for phi in phi_pips_in_bin ]
+            Npips_in_bin    = np.sum( W_pips_in_bin )
+            
+            phi_pims_in_bin = phi_pims[ (x_min < pims) & (pims < x_max) ]
+            W_pims_in_bin   = [ Compute_acceptance_correction_weight( 'piminus', phi ) for phi in phi_pims_in_bin ]
+            Npims_in_bin    = np.sum( W_pims_in_bin )
+            
+        else: 
+            # no weight, no acceptance correction
+            
+            pips_in_bin  = pips[ (x_min < pips) & (pips < x_max) ]
+            Npips_in_bin = len(pips_in_bin)
+            pims_in_bin  = pims[ (x_min < pims) & (pims < x_max) ]
+            Npims_in_bin = len(pims_in_bin)    
+            
+        #}
+
+        R     = Npips_in_bin / np.max([Npims_in_bin,1])
+        R_err = R * np.sqrt( 1./np.max([1,Npips_in_bin]) + 1./np.max([1,Npims_in_bin]) )
+
+
+        R_pips_to_pims    .append(R)
+        R_pips_to_pims_err.append(R_err)
+    #}    
+    R_pips_to_pims_errup,R_pips_to_pims_errdw = get_err_up_dw(R_pips_to_pims, R_pips_to_pims_err)
+    
+    return np.array(R_pips_to_pims),np.array(R_pips_to_pims_errup),np.array(R_pips_to_pims_errdw)
+#}
+# ------------------------------------------------------------------------------------------------ #
+
+
+
+
+# ------------------------------------------------------------------------------------------------ #
+def apply_further_selection_cuts_to_data(fdebug=2):#{
+    '''
+    e_e_pi_pass_cuts, e_e_pi_n_pass_cuts, e_e_pi_GEMC_pass_cuts = apply_further_selection_cuts_to_data(fdebug=2)
+    last edit May-26, 2022
+    
+    Apply selection cuts not previously imposed
+    
+    The cuts applied for (e,e'π) events:
+    1. pi+/pi- acceptance matching cut in p-theta plane 
+    2. Missing mass cut on (e,e'\pi) events
+    
+    The cuts applied for (e,e'πn) events:
+    1. pi+/pi- acceptance matching cut in p-theta plane 
+    
+    '''
+    global e_e_pi, e_e_pi_n, e_e_pi_GEMC
+    global e_e_pi_pass_cuts, e_e_pi_n_pass_cuts, e_e_pi_GEMC_pass_cuts
+    
+    
+    # (e,e'\pi n) SIDIS data complete this -  need to add sector ID in the (e,e'\pi n) data 
+    print('Applying selection cuts not previously imposed')
+    
+    # print number of events retained on every cut
+    if fdebug < 1: return
+    Nevents      = dict()
+    frac_Nevents = dict()
+    
+    # (1) Data    
+    print('(1) DATA')
+    if (e_e_pi=={}) is False:#{
+        print("(e,e'π)")
+        
+        # (e,e'\pi) SIDIS data
+        e_e_pi_after_p_theta_cut = apply_p_theta_acceptance_cut( e_e_pi )
+        e_e_pi_after_Mx_cut      = apply_Mx_cut( e_e_pi_after_p_theta_cut )
+        e_e_pi_pass_cuts         = e_e_pi_after_Mx_cut;
+
+        for pi_ch in pi_charge_names:#{
+            print('(e,e',pi_ch,')')
+
+            Nevents[pi_ch + ' original'] = len(e_e_pi[pi_ch])
+            frac_Nevents[pi_ch + ' original'] = 1        
+            print(Nevents[pi_ch + ' original'],'events before cut')    
+
+            Nevents[pi_ch +' p-theta cut'] = len(e_e_pi_after_p_theta_cut[pi_ch])
+            frac_Nevents[pi_ch + ' p-theta cut'] = float(Nevents[pi_ch +' p-theta cut'])/ Nevents[pi_ch + ' original']
+            print(Nevents[pi_ch +' p-theta cut'],'events after p-theta cut (%.1f'%(100.*frac_Nevents[pi_ch + ' p-theta cut']),'%)')    
+
+
+            Nevents[pi_ch +' Mx cut'] = len(e_e_pi_after_Mx_cut[pi_ch])
+            frac_Nevents[pi_ch + ' Mx cut'] = float(Nevents[pi_ch +' Mx cut'])/Nevents[pi_ch + ' original']
+            print(Nevents[pi_ch +' Mx cut'],'events after M_X cut (%.1f'%(100.*frac_Nevents[pi_ch + ' Mx cut']),'%)')
+        #}
+    #}
+    if (e_e_pi_n=={}) is False:#{
+        print("(e,e'πn)")
+        
+        # (e,e'\pi) SIDIS data
+        e_e_pi_n_after_p_theta_cut = apply_p_theta_acceptance_cut( e_e_pi_n )
+        e_e_pi_n_pass_cuts         = e_e_pi_n_after_p_theta_cut;
+
+        for pi_ch in pi_charge_names:#{
+            print('(e,e',pi_ch,')')
+
+            Nevents[pi_ch + 'n original'] = len(e_e_pi_n[pi_ch])
+            frac_Nevents[pi_ch + 'n original'] = 1        
+            print(Nevents[pi_ch + 'n original'],'events before cut')    
+
+            Nevents[pi_ch +'n p-theta cut'] = len(e_e_pi_n_after_p_theta_cut[pi_ch])
+            frac_Nevents[pi_ch + 'n p-theta cut'] = float(Nevents[pi_ch +'n p-theta cut'])/ Nevents[pi_ch + 'n original']
+            print(Nevents[pi_ch +'n p-theta cut'],'events after p-theta cut (%.1f'%(100.*frac_Nevents[pi_ch + 'n p-theta cut']),'%)')    
+        #}
+    #}
+    
+    # (2) MC
+    if (e_e_pi_GEMC=={}) is False:#{
+        print('(2) MC')
+        
+        # (e,e'\pi) - (uniform) MC for acceptance correction (uniform in e and \pi)
+        e_e_pi_GEMC_after_eepi_cuts       = dict()
+
+        # Apply (e,e'pi) SIDIS kinematical cuts while asking if pion was accepted, 
+        # externally (here, and not in the CLAS12ROOT script) since we
+        # want to retain and record also the events that did not pass these cuts, in the simulation
+        # whereas in data we just omit events that did not pass these cuts
+        for pi_ch in pi_charge_names:#{
+            e_e_pi_GEMC_after_eepi_cuts[pi_ch] = e_e_pi_GEMC[pi_ch][(e_e_pi_GEMC[pi_ch].pi_passed_cuts==1) & (e_e_pi_GEMC[pi_ch].eepiPastKinematicalCuts==1)];
+        #}
+        e_e_pi_GEMC_after_p_theta_cut = apply_p_theta_acceptance_cut( e_e_pi_GEMC_after_eepi_cuts )
+        e_e_pi_GEMC_after_Mx_cut      = apply_Mx_cut(  e_e_pi_GEMC_after_p_theta_cut )
+        e_e_pi_GEMC_pass_cuts         = e_e_pi_GEMC_after_Mx_cut;
+
+
+        
+        # print number of events retained on every cut in the uniform GEMC
+        if fdebug<2: return
+        for pi_ch in pi_charge_names:#{
+            print('(e,e',pi_ch,') in uniform GEMC simulation')
+
+            Nevents[pi_ch + ' GEMC original'] = len(e_e_pi_GEMC[pi_ch])
+            frac_Nevents[pi_ch + ' GEMC original'] = 1        
+            print(Nevents[pi_ch + ' GEMC original'],'events before cut')    
+
+            Nevents[pi_ch +' GEMC p-theta cut'] = len(e_e_pi_GEMC_after_p_theta_cut[pi_ch])
+            frac_Nevents[pi_ch + ' GEMC p-theta cut'] = float(Nevents[pi_ch +' GEMC p-theta cut'])/ Nevents[pi_ch + ' GEMC original']
+            print(Nevents[pi_ch +' GEMC p-theta cut'],'events after p-theta cut (%.1f'%(100.*frac_Nevents[pi_ch + ' GEMC p-theta cut']),'%)')    
+
+
+            Nevents[pi_ch +' GEMC Mx cut'] = len(e_e_pi_GEMC_after_Mx_cut[pi_ch])
+            frac_Nevents[pi_ch + ' GEMC Mx cut'] = float(Nevents[pi_ch +' GEMC Mx cut'])/Nevents[pi_ch + ' GEMC original']
+            print(Nevents[pi_ch +' GEMC Mx cut'],'events after M_X cut (%.1f'%(100.*frac_Nevents[pi_ch + ' GEMC Mx cut']),'%)')
+        #}        
+    #}
+    print('Done applying selection cuts not previously imposed')
+    return e_e_pi_pass_cuts, e_e_pi_n_pass_cuts, e_e_pi_GEMC_pass_cuts
+#}
+# ------------------------------------------------------------------------------------------------ #
+
+
+
 # ------------------------------------------------------------------------------------------------ #
 def load_SIDIS_data(runs_filename  = "good_runs_10-2.txt", 
                     main_data_path = '/Users/erezcohen/Desktop/data/BAND/',
@@ -287,68 +475,6 @@ def compute_acceptance_correction_as_function_of_phi_from_MC( ):#{
 
 
 
-# ------------------------------------------------------------------------------------------------ #
-def compute_ratio_pips_to_pims(df_dict, 
-                               var='xB', bins=np.linspace(0,1,10), 
-                               weight_option = 'Acc. correction as f(phi)',
-                               z_min=0, z_max=1):#{
-    '''
-    last edit Apr-28, 2022
-    '''
-    # z_min,z_max are z limits on the pion outgoing momentum
-    df_pips = df_dict['piplus']
-    df_pims = df_dict['piminus']
-    
-    # cut on z
-    df_pips = df_pips[ (z_min < df_pips.Zpi) & (df_pips.Zpi < z_max) ]    
-    df_pims = df_pims[ (z_min < df_pims.Zpi) & (df_pims.Zpi < z_max) ]
-
-    pips = df_pips[var]
-    pims = df_pims[var]
-    if weight_option == 'Acc. correction as f(phi)':#{
-        phi_pips = np.array( df_pips.pi_Phi )*r2d
-        phi_pims = np.array( df_pims.pi_Phi )*r2d
-    #}
-        
-    R_pips_to_pims, R_pips_to_pims_err = [],[]
-    for x_min,x_max in zip(bins[:-1],bins[1:]):#{
-        
-
-        if weight_option == 'Acc. correction as f(phi)':#{
-            # each event is weighted by the acceptance correction weight
-            
-            phi_pips_in_bin = phi_pips[ (x_min < pips) & (pips < x_max) ]
-            W_pips_in_bin   = [ Compute_acceptance_correction_weight( 'piplus' , phi ) for phi in phi_pips_in_bin ]
-            Npips_in_bin    = np.sum( W_pips_in_bin )
-            
-            phi_pims_in_bin = phi_pims[ (x_min < pims) & (pims < x_max) ]
-            W_pims_in_bin   = [ Compute_acceptance_correction_weight( 'piminus', phi ) for phi in phi_pims_in_bin ]
-            Npims_in_bin    = np.sum( W_pims_in_bin )
-            
-        else: 
-            # no weight, no acceptance corrcetion            
-            
-            pips_in_bin  = pips[ (x_min < pips) & (pips < x_max) ]
-            Npips_in_bin = len(pips_in_bin)
-            pims_in_bin  = pims[ (x_min < pims) & (pims < x_max) ]
-            Npims_in_bin = len(pims_in_bin)    
-            
-        #}
-
-        R     = Npips_in_bin / np.max([Npims_in_bin,1])
-        R_err = R * np.sqrt( 1./np.max([1,Npips_in_bin]) + 1./np.max([1,Npims_in_bin]) )
-
-
-        R_pips_to_pims    .append(R)
-        R_pips_to_pims_err.append(R_err)
-    #}    
-    R_pips_to_pims_errup,R_pips_to_pims_errdw = get_err_up_dw(R_pips_to_pims, R_pips_to_pims_err)
-    
-    return np.array(R_pips_to_pims),np.array(R_pips_to_pims_errup),np.array(R_pips_to_pims_errdw)
-#}
-# ------------------------------------------------------------------------------------------------ #
-
-
 
 
 # ------------------------------------------------------------------------------------------------ #
@@ -366,102 +492,6 @@ def get_err_up_dw(x, xerr,lim_dw = 0,lim_up = 10):
 #}
 # ------------------------------------------------------------------------------------------------ #
 
-
-
-
-# ------------------------------------------------------------------------------------------------ #
-def apply_further_selection_cuts_to_data(fdebug=2):#{
-    '''
-    e_e_pi_pass_cuts, e_e_pi_n_pass_cuts, e_e_pi_GEMC_pass_cuts = apply_further_selection_cuts_to_data(fdebug=2)
-    
-    Apply selection cuts not previously imposed
-    
-    1. pi+/pi- acceptance matching cut in p-theta plane 
-    2. Missing mass cut on (e,e'\pi) events
-    
-    '''
-    global e_e_pi, e_e_pi_n, e_e_pi_GEMC
-    global e_e_pi_pass_cuts, e_e_pi_n_pass_cuts, e_e_pi_GEMC_pass_cuts
-    
-    
-    # (e,e'\pi n) SIDIS data complete this -  need to add sector ID in the (e,e'\pi n) data 
-    print('Applying selection cuts not previously imposed')
-    
-    # print number of events retained on every cut
-    if fdebug < 1: return
-    Nevents      = dict()
-    frac_Nevents = dict()
-    
-    # (1) Data    
-    if (e_e_pi=={}) is False:#{
-        print('(1) DATA')
-        
-        # (e,e'\pi) SIDIS data
-        e_e_pi_after_p_theta_cut = apply_p_theta_acceptance_cut( e_e_pi )
-        e_e_pi_after_Mx_cut      = apply_Mx_cut( e_e_pi_after_p_theta_cut )
-        e_e_pi_pass_cuts         = e_e_pi_after_Mx_cut;
-
-        for pi_ch in pi_charge_names:#{
-            print('(e,e',pi_ch,')')
-
-            Nevents[pi_ch + ' original'] = len(e_e_pi[pi_ch])
-            frac_Nevents[pi_ch + ' original'] = 1        
-            print(Nevents[pi_ch + ' original'],'events before cut')    
-
-            Nevents[pi_ch +' p-theta cut'] = len(e_e_pi_after_p_theta_cut[pi_ch])
-            frac_Nevents[pi_ch + ' p-theta cut'] = float(Nevents[pi_ch +' p-theta cut'])/ Nevents[pi_ch + ' original']
-            print(Nevents[pi_ch +' p-theta cut'],'events after p-theta cut (%.1f'%(100.*frac_Nevents[pi_ch + ' p-theta cut']),'%)')    
-
-
-            Nevents[pi_ch +' Mx cut'] = len(e_e_pi_after_Mx_cut[pi_ch])
-            frac_Nevents[pi_ch + ' Mx cut'] = float(Nevents[pi_ch +' Mx cut'])/Nevents[pi_ch + ' original']
-            print(Nevents[pi_ch +' Mx cut'],'events after M_X cut (%.1f'%(100.*frac_Nevents[pi_ch + ' Mx cut']),'%)')
-        #}
-    #}
-    
-    # (2) MC
-    if (e_e_pi_GEMC=={}) is False:#{
-        print('(2) MC')
-        
-        # (e,e'\pi) - (uniform) MC for acceptance correction (uniform in e and \pi)
-        e_e_pi_GEMC_after_eepi_cuts       = dict()
-
-        # Apply (e,e'pi) SIDIS kinematical cuts while asking if pion was accepted, 
-        # externally (here, and not in the CLAS12ROOT script) since we
-        # want to retain and record also the events that did not pass these cuts, in the simulation
-        # whereas in data we just omit events that did not pass these cuts
-        for pi_ch in pi_charge_names:#{
-            e_e_pi_GEMC_after_eepi_cuts[pi_ch] = e_e_pi_GEMC[pi_ch][(e_e_pi_GEMC[pi_ch].pi_passed_cuts==1) & (e_e_pi_GEMC[pi_ch].eepiPastKinematicalCuts==1)];
-        #}
-        e_e_pi_GEMC_after_p_theta_cut = apply_p_theta_acceptance_cut( e_e_pi_GEMC_after_eepi_cuts )
-        e_e_pi_GEMC_after_Mx_cut      = apply_Mx_cut(  e_e_pi_GEMC_after_p_theta_cut )
-        e_e_pi_GEMC_pass_cuts         = e_e_pi_GEMC_after_Mx_cut;
-
-
-        
-        # print number of events retained on every cut in the uniform GEMC
-        if fdebug<2: return
-        for pi_ch in pi_charge_names:#{
-            print('(e,e',pi_ch,') in uniform GEMC simulation')
-
-            Nevents[pi_ch + ' GEMC original'] = len(e_e_pi_GEMC[pi_ch])
-            frac_Nevents[pi_ch + ' GEMC original'] = 1        
-            print(Nevents[pi_ch + ' GEMC original'],'events before cut')    
-
-            Nevents[pi_ch +' GEMC p-theta cut'] = len(e_e_pi_GEMC_after_p_theta_cut[pi_ch])
-            frac_Nevents[pi_ch + ' GEMC p-theta cut'] = float(Nevents[pi_ch +' GEMC p-theta cut'])/ Nevents[pi_ch + ' GEMC original']
-            print(Nevents[pi_ch +' GEMC p-theta cut'],'events after p-theta cut (%.1f'%(100.*frac_Nevents[pi_ch + ' GEMC p-theta cut']),'%)')    
-
-
-            Nevents[pi_ch +' GEMC Mx cut'] = len(e_e_pi_GEMC_after_Mx_cut[pi_ch])
-            frac_Nevents[pi_ch + ' GEMC Mx cut'] = float(Nevents[pi_ch +' GEMC Mx cut'])/Nevents[pi_ch + ' GEMC original']
-            print(Nevents[pi_ch +' GEMC Mx cut'],'events after M_X cut (%.1f'%(100.*frac_Nevents[pi_ch + ' GEMC Mx cut']),'%)')
-        #}        
-    #}
-    print('Done applying selection cuts not previously imposed')
-    return e_e_pi_pass_cuts, e_e_pi_n_pass_cuts, e_e_pi_GEMC_pass_cuts
-#}
-# ------------------------------------------------------------------------------------------------ #
 
 
 
@@ -657,7 +687,7 @@ def apply_p_theta_acceptance_cut( df_dict=None ):
         
     '''    
     import numpy as np
-    print("Apply a π+/π- acceptance matching cut on the in p-\theta plane")
+    print("Apply a π+/π- acceptance matching cut on the in p-theta plane")
     df_dict_after_cut = dict()
     for pi_charge_name in pi_charge_names:
         good_indices = np.array([])
