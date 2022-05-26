@@ -5,7 +5,7 @@
 # last edit May-12, 2022 (EOC)
 #
 # example execute:
-# ./macros/read_gemc_pion_acceptance --NeventsMax=100000 --fdebug=1 --only-pi+
+# ./macros/read_gemc_pion_acceptance --NeventsMax=100000 --fdebug=1 --only-pi+ --no-email
 # ./macros/read_gemc_pion_acceptance --NeventsMax=10 --fdebug=5 --only-pi+
 
 import sys, os, linecache

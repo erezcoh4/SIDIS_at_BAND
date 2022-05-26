@@ -569,7 +569,7 @@ void SetInputAndOutputTTrees (){
         SIDISTree -> SetBranchAddress("Vpiplus_X"                  ,&Vpiplus_X                );
         SIDISTree -> SetBranchAddress("Vpiplus_Y"                  ,&Vpiplus_Y                );
         SIDISTree -> SetBranchAddress("Vpiplus_Z"                  ,&Vpiplus_Z                );
-        SIDISTree -> SetBranchAddress("pips_DC_sector"             ,&pips_DC_sector           );
+        SIDISTree -> SetBranchAddress("pi_DC_sector"               ,&pips_DC_sector           );
     } else if (pionCharge=="pi-") {
         SIDISTree  -> SetBranchAddress("eepimsPastCutsInEvent"      ,&eepimsPastCutsInEvent     );
         SIDISTree  -> SetBranchAddress("eepimsPastKinematicalCuts"  ,&eepimsPastKinematicalCuts );
@@ -580,7 +580,7 @@ void SetInputAndOutputTTrees (){
         SIDISTree -> SetBranchAddress("Vpiminus_X"                  ,&Vpiminus_X                );
         SIDISTree -> SetBranchAddress("Vpiminus_Y"                  ,&Vpiminus_Y                );
         SIDISTree -> SetBranchAddress("Vpiminus_Z"                  ,&Vpiminus_Z                );
-        SIDISTree -> SetBranchAddress("pims_DC_sector"              ,&pims_DC_sector            );
+        SIDISTree -> SetBranchAddress("pi_DC_sector"                ,&pims_DC_sector            );
     }
     
     
@@ -828,20 +828,20 @@ void Stream_e_pi_n_line_to_CSV(int piIdx,
                                bool passed_cuts_e_pi_kinematics,
                                bool passed_cuts_n){
     
-    TLorentzVector  * pi;
+    TLorentzVector   * pi;
     TVector3        * Vpi;
-    double          Zpi;
-    int    pi_DC_sector;
+    double            Zpi;
+    double   pi_DC_sector;
     
     if (pionCharge=="pi+") {
         pi           = &piplus[piIdx];
         Vpi          = &Vpiplus[piIdx];
-        pi_DC_sector = &pips_DC_sector[piIdx];
+        pi_DC_sector = pips_DC_sector[piIdx];
     }
     else if (pionCharge=="pi-") {
         pi           = &piminus[piIdx];
         Vpi          = &Vpiminus[piIdx];
-        pi_DC_sector = &pims_DC_sector[piIdx];
+        pi_DC_sector = pims_DC_sector[piIdx];
     }
     else {
         std::cout << "pion charge ill defined at Stream_e_pi_line_to_CSV(), returning " << std::endl;

@@ -22,10 +22,13 @@ parser.add_argument("--NeventsMax",   type=int, default=-1,
 parser.add_argument("--fdebug",       type=int, default=1,
                     required=False, help="verbosity")
 parser.add_argument("--worker",       type=str, default="Erez-ifarm",
-                    required=False, help="verbosity")
+                    required=False, help="worker: Erez-ifarm/ErezMBP")
 parser.add_argument("--PrintProgress",type=int, default=50000,
                     required=False, help="print progress (every N events)")
 parser.add_argument('--only-pi+',   dest='only_pips', action='store_true', help="do only pi+ (and not pi-)")
+parser.add_argument("--no-email",   dest="no_email",
+                    default=False,  required=False,
+                    action='store_true', help="do not send email")
 
 args = parser.parse_args()
 
@@ -82,4 +85,6 @@ for line in run_fileLines[FirstRun:]:#{
 print('')
 print('Done processing merge_sidis_and_band_skims.')
 
-os.system('date | mail -s "Done processing merge_sidis_and_band_skims on ifarm" cohen.erez7@gmail.com')
+if args.no_email==False:#{
+    os.system('date | mail -s "Done processing merge_sidis_and_band_skims on ifarm" cohen.erez7@gmail.com')
+#}
