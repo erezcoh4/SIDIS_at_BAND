@@ -5,6 +5,7 @@
 # last edit Sep-30, 2021 (EOC)
 #
 # example execute:
+# ./macros/merge_sidis_and_band_skims --Nruns=1 --NeventsMax=10 --only-pi+ --no-email
 # ./macros/merge_sidis_and_band_skims --Nruns=1 --worker=ErezMBP --NeventsMax=10 --fdebug=5 --only-pi+
 #
 import sys, os, linecache, pandas as pd
