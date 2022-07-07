@@ -14,7 +14,7 @@ import argparse
 from termcolor import colored
 
 parser = argparse.ArgumentParser(description='merge SIDIS skimming of multiple runs')
-parser.add_argument("--Nruns",        type=int, default=1,
+parser.add_argument("--Nruns",        type=int, default=-1,
                     required=False, help="number of runs to combine ('-1' for all runs)")
 parser.add_argument("--FirstRun",     type=int, default=0,
                     required=False, help="first run to start from")
@@ -38,7 +38,7 @@ NeventsMax    = args.NeventsMax
 fdebug        = args.fdebug
 FirstRun      = args.FirstRun
 PrintProgress = args.PrintProgress
-runs_filename = "macros/runlists/good_runs_10-2.txt"
+runs_filename = "macros/runlists/good_runs_10-2-final.txt"
 
 pi_charges = ['pi+','pi-']
 if args.only_pips: #{

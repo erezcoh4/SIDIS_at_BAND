@@ -9,7 +9,53 @@ This repository is responsible for
     
     
     
-## Revisions
+## Revisions and release notes
+------------------------------------------------------------------------------
+
+July-7, 2022    
+-------------
+1. Added information about the neutron time of flight into MergeSIDISandBANDSkimmers()
+    The csv file now has two more ouput columns:
+    "n_E,n_ToF"
+
+
+June-10, 2022    
+-------------
+1. Updated good run list 
+from 
+    *good_runs_10-2.txt*        (Florian H., Sep-9, 2021, 101 runs) 
+to 
+    *good_runs_10-2-final.txt*  (Efrain S., May-4, 2022,  86 runs )
+    
+
+2. Updated load_SIDIS_data() in PythonAnalysis to speed things up:
+1 run (6420):
+apply_further_selection_cuts_to_data() time: 1.48 sec
+ 
+e_e_pi['piplus']:            167.2 MB  
+e_e_pi_pass_cuts['piplus']:  106.5 MB  
+e_e_pi['piminus']:           71.1  MB  
+e_e_pi_pass_cuts['piminus']: 65.5  MB  
+
+So, 100 runs may take only ~ 150 sec but will occupy about (167.2+106.5+71.1+65.5) x 100 = 41 GB, 
+which is extremely large and impedes the ability of Python to handle the data
+
+Reduced DataFrames occupies to about 1/5 of the sizes
+reduced_e_e_pi['piplus']:    33.2  MB  
+reduced_e_e_pi['piminus']:   14.1  MB  
+
+which will result in a total memory usage of about 41 GB / 5 = 8 GB
+
+The memory occupancy reduction was implemented in load_SIDIS_data() by adding these lines:
+eepi = pd.read_csv(...
+                    usecols=['runnum','evnum',...],
+                    dtype={'runnum':int,'evnum': int...}) 
+
+
+ *After change*
+ 1234060 events: 13.1 +/- sec (10 us/event)
+ 
+ 
 
 May-4, 2022    
 -------------

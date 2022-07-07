@@ -257,7 +257,7 @@ def apply_further_selection_cuts_to_data(fdebug=2):#{
 
 
 # ------------------------------------------------------------------------------------------------ #
-def load_SIDIS_data(runs_filename  = "good_runs_10-2.txt", 
+def load_SIDIS_data(runs_filename  = "good_runs_10-2-final.txt", 
                     main_data_path = '/Users/erezcohen/Desktop/data/BAND/',
                     Nruns          = 1,
                     do_e_e_pi      = True,

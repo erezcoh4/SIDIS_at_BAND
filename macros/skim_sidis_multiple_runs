@@ -33,7 +33,7 @@ fdebug        = args.fdebug
 PrintProgress = args.PrintProgress
 FirstRun      = args.FirstRun
 FirstEvent    = args.FirstEvent
-runs_filename = "macros/runlists/good_runs_10-2.txt"
+runs_filename = "macros/runlists/good_runs_10-2-final.txt"
 
 # Using readlines()
 runs_file = open(runs_filename, 'r')

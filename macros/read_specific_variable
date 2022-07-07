@@ -30,7 +30,7 @@ fdebug        = args.fdebug
 FirstRun      = args.FirstRun
 variable      = args.variable
 NeventsMax    = args.NeventsMax
-runs_filename = "macros/runlists/good_runs_10-2.txt"
+runs_filename = "macros/runlists/good_runs_10-2-final.txt"
 
 # Using readlines()
 runs_file = open(runs_filename, 'r')

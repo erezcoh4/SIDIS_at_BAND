@@ -45,7 +45,8 @@ TString            csvheader = ((TString)"status,runnum,evnum,beam_helicity,"
                                 +(TString)"omega,xF,y,"
                                 +(TString)"M_X_ee_pi,M_X_ee_pi_n,xPrime1,xPrime2,"
                                 +(TString)"theta_sq,WPrime,"
-                                +(TString)"e_DC_sector,pi_DC_sector,");
+                                +(TString)"e_DC_sector,pi_DC_sector,"
+                                +(TString)"n_E,n_ToF,");
 
 // Input root files and trees
 TFile * SIDISFile, * BANDFile;
@@ -89,6 +90,7 @@ Double_t                        Ps; // spectator momentum
 Double_t                  theta_sq; // spectator angle with respect to momentum transfer
 Double_t     M_X_ee_pi,M_X_ee_pi_n;
 Double_t                         y;
+Double_t                     n_ToF;
 
 
 
@@ -145,7 +147,7 @@ double        livetime = 0;
 double       starttime = 0;
 double         current = 0;
 double          weight = 0;
-
+                                
 double                    e_DC_sector;
 
 double           piplus_Px[NMAXPIONS];
@@ -684,9 +686,17 @@ void GetBANDData(int MergedEvtId){
     Band_e_Vect.SetMagThetaPhi ( this_eHit->getMomentum(), this_eHit->getTheta(), this_eHit->getPhi() );
     Band_data_e.SetVectM( Band_e_Vect , Me );
 
+    
+    // neutron ToF
+    n_ToF = this_nHit->getTof();
+
+    
     if (fdebug>1) {
-        std::cout << "p(n): " << Pn.P() << std::endl;
-    }
+        std::cout
+        << "p(n): "   << Pn.P() << " GeV/c" << std::endl
+        << "E(n): "   << Pn.E() << " GeV"   << std::endl
+        << "ToF(n): " << n_ToF  << " ns"    << std::endl;
+
     if (fdebug>3) {
         std::cout << "BANDTree->GetEntry("<<BANDEventIndicesToMerge[MergedEvtId]<<")" << std::endl;
         
@@ -703,6 +713,7 @@ void GetBANDData(int MergedEvtId){
         << "p(n): "                                         << Pn.P()                   << " GeV/c,"
         << "Pe: "                                           << e->P()                   << " GeV/c,"
         << std::endl;
+    }
     }
 }
 
@@ -899,6 +910,7 @@ void Stream_e_pi_n_line_to_CSV(int piIdx,
         theta_sq,
         WPrime,
         (double)e_DC_sector,                (double)pi_DC_sector,
+        Pn.E(),         n_ToF,
     };
     StreamToCSVfile(variables);
 }
@@ -914,6 +926,8 @@ void InitializeVariables(){
     xF          = y                     = -9999;
     M_X_ee_pi   = M_X_ee_pi_n           = -9999;
     Ve                                  = new TVector3();
+    n_ToF                               = -9999;
+    
     piplus      .clear();
     piminus     .clear();
     Vpiplus     .clear();
