@@ -12,11 +12,28 @@ This repository is responsible for
 ## Revisions and release notes
 ------------------------------------------------------------------------------
 
+July-12, 2022    
+-------------
+1. Added a flag to cancel acceptance matching cut in p-theta plane to apply_further_selection_cuts_to_data()
+  
+2. Splitted apply_p_theta_acceptance_cut() to subsets of up to 500k events. 
+ The reason is that it failed to apply the cut for N > 1M events. 
+ This is a bug; you should open a ticket on github. 
+ 1M is the monotonic index size cutoff for hash tables, 
+ and the logic beyond that is borked
+ See [https://stackoverflow.com/questions/33814223/strange-error-in-pandas-indexing-with-range-when-length-1-000-000]
+
+  
 July-7, 2022    
 -------------
 1. Added information about the neutron time of flight into MergeSIDISandBANDSkimmers()
     The csv file now has two more ouput columns:
     "n_E,n_ToF"
+    
+2. Added a flag of applying p(n)>275 MeV/c cut to apply_further_selection_cuts_to_data()
+    by removing this cut from load_SIDIS_data() and adding it as an independent function apply_minPn_cut() 
+
+3. Updated compute_ratio_pips_to_pims() to return also the number of events with pi+ and the one with pi-
 
 
 June-10, 2022    

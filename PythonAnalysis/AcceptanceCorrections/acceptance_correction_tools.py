@@ -70,11 +70,80 @@ fraction_bad_phi                                   = dict()
 
 
 
+
+
+
+
+
 # ------------------------------------------------------------------------------------------------ #
-def apply_further_selection_cuts_to_data(fdebug=2, NeventsMax=-1):#{
+def apply_p_theta_acceptance_cut( df_dict=None,
+                                 NeventsMax=-1,
+                                 NMaxPerSubset = 500000,
+                                 fdebug=1):
+    '''
+        df_dict_after_cut = apply_p_theta_acceptance_cut(df_dict)
+        
+        Apply a π+/π- acceptance matching cut on the in p-\theta plane
+        last update July-12, 2022
+        
+    '''
+    import numpy as np
+    print("Apply a π+/π- acceptance matching cut on the in p-theta plane")
+    df_dict_after_cut = dict()
+    
+    
+    for pi_ch in pi_charge_names:
+        
+        if NeventsMax > 0: NeventsMax = np.min( [NeventsMax, len(df_dict[pi_ch])] )
+        else:              NeventsMax = len(df_dict[pi_ch])
+        df = df_dict[pi_ch][0:NeventsMax]
+        if fdebug: print('Applying p-theta on cut for '+pi_ch+' on %d events'%NeventsMax)
+
+        # subdivide samples into sub-samples of no more than 1M events each
+        Nsubsets  = np.max([1,(int)(NeventsMax/NMaxPerSubset)]);
+        if fdebug>1: print('Subdividing into %d subsets up to %d events'%(Nsubsets,NMaxPerSubset))
+        
+        for subset_idx in range(Nsubsets):#{
+            i_min_subset = NMaxPerSubset*subset_idx
+            i_max_subset = np.min([NMaxPerSubset*(subset_idx+1), NeventsMax])
+            subset_df = df[i_min_subset:i_max_subset]
+            good_indices = np.array([])
+            if fdebug>1:
+                print('subset %d of index %d-%d'%(subset_idx,i_min_subset,i_max_subset-1))
+            
+            # focus on each sector and select the events that pass the p-theta cut
+            for sector in range(1,7):#{
+                df_in_sector   = subset_df[subset_df.pi_DC_sector == sector]
+                pi_P           = np.array(df_in_sector.pi_P)
+                theta_min_pi   = pi_min_theta_cut( pi_charge = 'any', sector=sector, p=pi_P )
+                good_indices_in_sector = []
+                good_indices_in_sector = df_in_sector[ df_in_sector.pi_Theta*r2d > theta_min_pi ].index
+                good_indices = np.concatenate([good_indices,good_indices_in_sector])
+            #}
+            good_indices = np.unique(good_indices)
+            subset_df_in_cut = subset_df.loc[good_indices]
+            if subset_idx==0: df_after_cut = subset_df_in_cut
+            else:             df_after_cut = pd.concat([df_after_cut , subset_df_in_cut])
+        #}
+        df_dict_after_cut[pi_ch] = df_after_cut
+    return df_dict_after_cut
+# ------------------------------------------------------------------------------------------------ #
+
+
+
+
+
+
+
+# ------------------------------------------------------------------------------------------------ #
+def apply_further_selection_cuts_to_data(fdebug=2,
+                                         NeventsMax=-1,
+                                         NMaxPerSubset = 500000,
+                                         doAcceptanceMatchingCut = True,
+                                         doApply_minPn_cut       = True):#{
     '''
     e_e_pi_pass_cuts, e_e_pi_n_pass_cuts, e_e_pi_GEMC_pass_cuts = apply_further_selection_cuts_to_data(fdebug=2)
-    last edit June-10, 2022
+    last edit July-12, 2022
     
     Apply selection cuts not previously imposed
     
@@ -104,14 +173,28 @@ def apply_further_selection_cuts_to_data(fdebug=2, NeventsMax=-1):#{
         print("(e,e'π)")
         
         # (e,e'\pi) SIDIS data
-        e_e_pi_after_p_theta_cut = apply_p_theta_acceptance_cut( e_e_pi, NeventsMax=NeventsMax )
+        if doAcceptanceMatchingCut:
+            e_e_pi_after_p_theta_cut = apply_p_theta_acceptance_cut( e_e_pi,
+                                                                    NeventsMax=NeventsMax,
+                                                                    NMaxPerSubset=NMaxPerSubset,
+                                                                    fdebug=fdebug )
+        else:
+            e_e_pi_after_p_theta_cut = dict()
+            for pi_ch,pi_print in zip(pi_charge_names,pi_prints):#{
+                df = e_e_pi[pi_ch]
+                e_e_pi_after_p_theta_cut[pi_ch] = df[0:NeventsMax]
+            #}
+            
+            
         e_e_pi_after_Mx_cut      = apply_Mx_cut( e_e_pi_after_p_theta_cut )
         e_e_pi_pass_cuts         = e_e_pi_after_Mx_cut;
 
         for pi_ch,pi_print in zip(pi_charge_names,pi_prints):#{
             print('(e,e',pi_print,')')
-
-            Nevents[pi_ch + ' original'] = len(e_e_pi[pi_ch])
+            if NeventsMax < 0:
+                Nevents[pi_ch + ' original'] = len(e_e_pi[pi_ch])
+            else:
+                Nevents[pi_ch + ' original'] = NeventsMax
             frac_Nevents[pi_ch + ' original'] = 1
             print(Nevents[pi_ch + ' original'],'events before cut')
 
@@ -129,17 +212,42 @@ def apply_further_selection_cuts_to_data(fdebug=2, NeventsMax=-1):#{
     if (e_e_pi_n=={}) is False:#{
         print("(e,e'πn)")
         
-        # (e,e'\pi) SIDIS data
-        e_e_pi_n_after_p_theta_cut = apply_p_theta_acceptance_cut( e_e_pi_n, NeventsMax=NeventsMax )
+        # tagged (e,e'\pi) SIDIS data
+        if doApply_minPn_cut:
+            e_e_pi_n_after_minPn_cut   = apply_minPn_cut( e_e_pi_n )
+        else:
+            e_e_pi_n_after_p_theta_cut = dict()
+            for pi_ch,pi_print in zip(pi_charge_names,pi_prints):#{
+                df = e_e_pi_n[pi_ch]
+                e_e_pi_n_after_p_theta_cut[pi_ch] = df[0:NeventsMax]
+            #}
+
+            
+        if doAcceptanceMatchingCut:
+            e_e_pi_n_after_p_theta_cut = apply_p_theta_acceptance_cut( e_e_pi_n_after_minPn_cut,
+                                                                      NeventsMax=NeventsMax,
+                                                                      NMaxPerSubset=NMaxPerSubset,
+                                                                      fdebug=fdebug )
+        else:
+            e_e_pi_n_after_p_theta_cut = e_e_pi_n_after_minPn_cut
+            
         e_e_pi_n_pass_cuts         = e_e_pi_n_after_p_theta_cut;
 
         for pi_ch,pi_print in zip(pi_charge_names,pi_prints):#{
             print('(e,e',pi_print,')')
-
-            Nevents[pi_ch + 'n original'] = len(e_e_pi_n[pi_ch])
+            if NeventsMax < 0:
+                Nevents[pi_ch + 'n original'] = len(e_e_pi_n[pi_ch])
+            else:
+                Nevents[pi_ch + 'n original'] = NeventsMax
+                
             frac_Nevents[pi_ch + 'n original'] = 1
             print(Nevents[pi_ch + 'n original'],'events before cut')
 
+            Nevents[pi_ch +'n min p(n) cut'] = len(e_e_pi_n_after_minPn_cut[pi_ch])
+            frac_Nevents[pi_ch + 'n min p(n) cut'] = float(Nevents[pi_ch +'n min p(n) cut'])/ Nevents[pi_ch + 'n original']
+            print(Nevents[pi_ch +'n min p(n) cut'],'events after min p(n) cut (%.1f'%(100.*frac_Nevents[pi_ch + 'n min p(n) cut']),'%)')
+
+            
             Nevents[pi_ch +'n p-theta cut'] = len(e_e_pi_n_after_p_theta_cut[pi_ch])
             frac_Nevents[pi_ch + 'n p-theta cut'] = float(Nevents[pi_ch +'n p-theta cut'])/ Nevents[pi_ch + 'n original']
             print(Nevents[pi_ch +'n p-theta cut'],'events after p-theta cut (%.1f'%(100.*frac_Nevents[pi_ch + 'n p-theta cut']),'%)')
@@ -194,65 +302,229 @@ def apply_further_selection_cuts_to_data(fdebug=2, NeventsMax=-1):#{
 
 
 
+
+
+
+
 # ------------------------------------------------------------------------------------------------ #
-def apply_p_theta_acceptance_cut( df_dict=None, NeventsMax=-1 ):
+def load_SIDIS_ratio_DataFrame(z_bins   = np.arange(0.3,0.8,0.1),
+                               z_widths = 0.01*np.ones(5),
+                               prefix   = 'Untagged_SIDIS_ratio_',
+                               suffix   = '',
+                               doPlotResults=False,
+                               data_path= '/Users/erezcohen/Desktop/data/BAND/Results/'):
     '''
-        df_dict_after_cut = apply_p_theta_acceptance_cut(df_dict)
+    Load SIDIS ratio results
+    last update July-12, 2022
+    
+    
+    '''
+    
+    SIDIS_results = dict()
+    for z_bin,z_width in zip(z_bins,z_widths):
+        z_min,z_max = z_bin-z_width,z_bin+z_width
+        filelabel = 'z_%.2f-%.2f'%(z_bin-z_width,z_bin+z_width)
+        filename  =  data_path + prefix + filelabel + suffix  + '.csv'
+        df = pd.read_csv(filename)
+        SIDIS_results[prefix + filelabel + suffix] = df
         
-        Apply a π+/π- acceptance matching cut on the in p-\theta plane
-        last update June-10, 2022
+        
+    if doPlotResults:#{
+        fig = plt.figure(figsize=(9,6))
+        ax  = fig.add_subplot(1,1,1)
+        for z_bin,z_width in zip(z_bins,z_widths):
+
+            z_min,z_max = z_bin-z_width,z_bin+z_width
+            filelabel = 'z_%.2f-%.2f'%(z_bin-z_width,z_bin+z_width)
+            filename  =  prefix + filelabel + suffix
+
+            df = SIDIS_results[filename]
+            y    = df['$R$']
+            y_err= (df['$\Delta R_{+}$'],df['$\Delta R_{-}$'])
+            # plot
+            l=ax.errorbar(x=x, xerr=x_err,  y=y, yerr=y_err,
+                        marker='o',markeredgecolor='k',
+                        label='$z=%.2f\pm%.2f$'%(z_bin,z_width))
+
+        set_axes(ax,xlabel,"$N(e,e'\pi^+)/N(e,e'\pi^-)$",
+                 title="$\pi^+/\pi^-$ ratio as a function of $x_B$ without a tagged neutron",
+                 do_add_grid=True, do_add_legend=True, fontsize=18,
+                );
+        plt.legend(bbox_to_anchor=(1,1.05),loc='best',fontsize=18)
+        
+    return SIDIS_results
+# ------------------------------------------------------------------------------------------------ #
+
+
+
+
+
+# ------------------------------------------------------------------------------------------------ #
+def save_SIDIS_ratio_DataFrame(df_dict  = None,
+                               x_var    = 'xB' ,
+                               x_bins   = np.linspace(0.2,0.6,11),
+                               z_bins   = np.arange(0.3,0.8,0.1),
+                               z_widths = 0.01*np.ones(5),
+                               data_path= '/Users/erezcohen/Desktop/data/BAND/Results/',
+                               fdebug   = 0,
+                               prefix   = 'Untagged_SIDIS_ratio_',
+                               suffix   = ''):
+    '''
+    Save SIDIS ratio results
+    last update July-12, 2022
+    
+    
+    '''
+    
+    x        = (x_bins[1:] + x_bins[:-1])/2
+    x_err    = (x_bins[1:] - x_bins[:-1])/2
+    results_data_path = data_path + '/' + 'Results' + '/'
+    for z_bin,z_width in zip(z_bins,z_widths):
+        z_min,z_max = z_bin-z_width,z_bin+z_width
+        (R,R_err_up,R_err_dw,
+         N_pips,N_pims) = compute_ratio_pips_to_pims(df_dict= df_dict ,
+                                                     var    = x_var,
+                                                     bins   = x_bins,
+                                                     z_min  = z_min,
+                                                     z_max  = z_max)
+
+        df_to_save = pd.DataFrame({"$x_B$":x,
+                                   "$\Delta x_B$":x_err,
+                                   '$N(\pi_{+})$':N_pips,
+                                   '$N(\pi_{-})$':N_pims,
+                                   '$R$':R,
+                                   '$\Delta R_{+}$':R_err_up,
+                                   '$\Delta R_{-}$':R_err_dw})
+        filelabel = 'z_%.2f-%.2f'%(z_bin-z_width,z_bin+z_width)
+        filename  =  data_path + prefix + filelabel + suffix  + '.csv'
+        df_to_save.to_csv(filename)
+        print('saved',filename)
+        if fdebug>1:
+            print('$z=%.2f\pm%.2f$'%(z_bin,z_width))
+            print(filename)
+            display(df_to_save)
+# ------------------------------------------------------------------------------------------------ #
+
+
+
+
+# ------------------------------------------------------------------------------------------------ #
+def load_SIDIS_data(runs_filename  = "good_runs_10-2-final.txt",
+                    main_data_path = '/Users/erezcohen/Desktop/data/BAND/',
+                    Nruns          = 1,
+                    do_e_e_pi      = True,
+                    do_e_e_pi_n    = True,
+                    fdebug         = 2):#{
+    '''
+    Load SIDIS data, and fill e_e_pi and e_e_pi_n with data
+    last update July-7, 2022
+    
+    input:
+    -------------
+    do_e_e_pi       flag to read (e,e'π) data - takes much time for a large number of runs
+    do_e_e_pi_n     flag to read (e,e'πn) data - takes less time
+    
+    Comments:
+    -------------
+    e_e_pi & e_e_pi_n are dict(), of the following keys: ['piplus','piminus']
+    e.g. :
+    e_e_pi['piplus'] = pandas.DataFrame( (e,e'π) events data )
+    
+    '''
+    global e_e_pi, e_e_pi_n;
+
+    e_e_pi_data_path   = main_data_path + 'SIDIS_skimming/'
+    e_e_pi_n_data_path = main_data_path + 'merged_SIDIS_and_BAND_skimming/'
+    runfile_path = "/Users/erezcohen/Desktop/Software/CLAS12/BAND/SIDIS_at_BAND/macros/runlists/";
+    
+    # Using readlines()
+    runs_file     = open( runfile_path + runs_filename, 'r')
+    run_fileLines = runs_file.readlines()
+    if Nruns==-1: Nruns = len(run_fileLines)
+
+
+    runs = []
+    for line in run_fileLines[0:Nruns]:#{
+        run = int(line.strip())
+        runs.append(run)
+    #}
+    runs = np.array(runs)
+
+    
+    for runnum,runIdx in zip(runs,range(len(runs))):
+        if fdebug>1: print('Run number ',runnum,'(%d/%d runs)'%(runIdx+1,len(runs)))
+        for pi_charge_name,pi_print in zip(pi_charge_names,pi_prints):
+            if do_e_e_pi:#{
+                eepi   = pd.read_csv(e_e_pi_data_path
+                                     +'skimmed_SIDIS_inc_00%d_e_%s_selected_eepi_kinematics.csv'%
+                                     (runnum,pi_charge_name),
+                                     usecols=['runnum','evnum',
+                                              'e_P','e_Theta','e_Phi',
+                                              'pi_P', 'pi_Theta', 'pi_Phi',
+                                              'Q2', 'W', 'xB', 'Zpi',
+                                              'M_X', 'e_DC_sector', 'pi_DC_sector'],
+                                     dtype={'runnum':int,'evnum': int,
+                                            'e_DC_sector':int, 'pi_DC_sector':int,
+                                            'e_P':np.half,'e_Theta':np.half,'e_Phi':np.half,
+                                            'pi_P':np.half,'pi_Theta':np.half, 'pi_Phi':np.half,
+                                            'Q2':np.half, 'W':np.half, 'xB':np.half, 'Zpi':np.half,
+                                            'M_X':np.half})
+                
+                if runIdx==0: e_e_pi[pi_charge_name] = eepi
+                else:         e_e_pi[pi_charge_name] = pd.concat([e_e_pi[pi_charge_name],eepi])
+
+                
+                if fdebug>1: print('Loaded',len(eepi)," (e,e'"+pi_print+") events")
+
+            #}
+            if do_e_e_pi_n:#{
+                eepin = pd.read_csv(e_e_pi_n_data_path
+                                +'skimmed_SIDIS_and_BAND_inc_00%d_e_%s_n.csv'%
+                                (runnum,pi_charge_name))
+                
+                if fdebug>1: print('Loaded',len(eepin)," (e,e'"+pi_print+"n) events")
+
+                if runIdx==0: e_e_pi_n[pi_charge_name] = eepin
+                else:         e_e_pi_n[pi_charge_name] = pd.concat([e_e_pi_n[pi_charge_name],eepin])
+            #}
+    print('Done loading files.')
+    if fdebug>0:
+        print('')
+        print('Total statistics:')
+        for pi_charge_name,pi_print in zip(pi_charge_names,pi_prints):
+            if do_e_e_pi:   print(len(e_e_pi[pi_charge_name])," (e,e'"+pi_print+") events")
+            if do_e_e_pi_n: print(len(e_e_pi_n[pi_charge_name])," (e,e'"+pi_print+"n) events")
+    #}
+#}
+# ------------------------------------------------------------------------------------------------ #
+
+
+
+
+
+
+
+# ------------------------------------------------------------------------------------------------ #
+def apply_minPn_cut( df_dict=None, Pn_min = 0.275 ): #{
+    '''
+        df_dict_after_cut = apply_minPn_cut( df_dict, Pn_min = 0.275)
+        
+        Apply a cut on the minimal neutron momentum
         
     '''
-    import numpy as np
-    print("Apply a π+/π- acceptance matching cut on the in p-theta plane")
+    print("Apply a cut on the minimal neutron momentum p > %g GeV/c"%Pn_min)
     df_dict_after_cut = dict()
-    
-    
-    for pi_ch in pi_charge_names:
-        good_indices = np.array([])
-        if NeventsMax > 0:
-            print('applying p-theta cut only to %d events'%NeventsMax)
-            NeventsMax = np.min( [NeventsMax, len(df_dict[pi_ch])] )
-        else:
-            NeventsMax = len(df_dict[pi_ch])
-        
-        df = df_dict[pi_ch][0:NeventsMax]
-        
-        for sector in range(1,7):#{
-            df_in_sector = df[df.pi_DC_sector == sector]
-            pi_P      = np.array(df_in_sector.pi_P)
-            # pi_Theta  = np.array(df_in_sector.pi_Theta)*r2d
-            # theta_min_pips = pi_min_theta_cut( pi_charge = 'pips', sector=sector, p=pi_P )
-            # theta_min_pims = pi_min_theta_cut( pi_charge = 'pims', sector=sector, p=pi_P )
-            # print('theta_min_pips:')
-            # print(theta_min_pips)
-            theta_min_pi   = pi_min_theta_cut( pi_charge = 'any', sector=sector, p=pi_P )
-            # print('theta_min_pi:')
-            # print(theta_min_pi)
-            
-            # print(len(df),sector,len(df_in_sector))
-            good_indices_in_sector = []
-            good_indices_in_sector = df_in_sector[ df_in_sector.pi_Theta*r2d > theta_min_pi ].index
-            # good_indices_in_sector.append(evt_idx)
-            # for evt_idx,step_idx in zip(df_in_sector.index,range(len(df_in_sector))):#{
-            #     # print( evt_idx, pi_P[step_idx], pi_Theta[step_idx] , theta_min[step_idx] )
-            #     if (pi_Theta[step_idx] > theta_min_pips[step_idx]) and (pi_Theta[step_idx] > theta_min_pims[step_idx]):#{
-            #         good_indices_in_sector.append(evt_idx)
-            #     #}
-            # #}
-            # print (pi_charge_name,sector,good_indices_in_sector)
-            good_indices = np.concatenate([good_indices,good_indices_in_sector])
-        #}
-        good_indices = np.unique(good_indices)
-        print(len(good_indices))
-        print(len(np.unique(good_indices)))
-        # print (pi_charge_name,good_indices)
-        df = df.loc[good_indices]
-        # print ('defined df of good indices in ', pi_charge_name)
-        df_dict_after_cut[pi_ch] = df
-        
+    for pi_charge_name in pi_charge_names:#{
+        df = df_dict[pi_charge_name]
+        df = df[ Pn_min < df.n_P ]
+        df_dict_after_cut[pi_charge_name] = df
+    #}
     return df_dict_after_cut
+#}
 # ------------------------------------------------------------------------------------------------ #
+
+
+
 
 
 # ------------------------------------------------------------------------------------------------ #
@@ -308,14 +580,13 @@ def pi_min_theta_cut( pi_charge = 'pips', sector=1, p=2 ):
 
 
 
-
 # ------------------------------------------------------------------------------------------------ #
-def compute_ratio_pips_to_pims(df_dict, 
-                               var='xB', bins=np.linspace(0,1,10), 
+def compute_ratio_pips_to_pims(df_dict,
+                               var='xB', bins=np.linspace(0,1,10),
                                weight_option = '',
                                z_min=0, z_max=1):#{
     '''
-    last edit May-26, 2022
+    last edit July-8, 2022
     
     weight_option: None, 'Acc. correction as f(phi)'
     '''
@@ -324,7 +595,7 @@ def compute_ratio_pips_to_pims(df_dict,
     df_pims = df_dict['piminus']
     
     # cut on z
-    df_pips = df_pips[ (z_min < df_pips.Zpi) & (df_pips.Zpi < z_max) ]    
+    df_pips = df_pips[ (z_min < df_pips.Zpi) & (df_pips.Zpi < z_max) ]
     df_pims = df_pims[ (z_min < df_pims.Zpi) & (df_pims.Zpi < z_max) ]
 
     pips = df_pips[var]
@@ -335,6 +606,7 @@ def compute_ratio_pips_to_pims(df_dict,
     #}
         
     R_pips_to_pims, R_pips_to_pims_err = [],[]
+    N_pips, N_pims = [],[]
     for x_min,x_max in zip(bins[:-1],bins[1:]):#{
         
 
@@ -349,127 +621,31 @@ def compute_ratio_pips_to_pims(df_dict,
             W_pims_in_bin   = [ Compute_acceptance_correction_weight( 'piminus', phi ) for phi in phi_pims_in_bin ]
             Npims_in_bin    = np.sum( W_pims_in_bin )
             
-        else: 
+        else:
             # no weight, no acceptance correction
             
             pips_in_bin  = pips[ (x_min < pips) & (pips < x_max) ]
             Npips_in_bin = len(pips_in_bin)
             pims_in_bin  = pims[ (x_min < pims) & (pims < x_max) ]
-            Npims_in_bin = len(pims_in_bin)    
+            Npims_in_bin = len(pims_in_bin)
             
         #}
 
         R     = Npips_in_bin / np.max([Npims_in_bin,1])
         R_err = R * np.sqrt( 1./np.max([1,Npips_in_bin]) + 1./np.max([1,Npims_in_bin]) )
 
-
+        N_pips            .append(Npips_in_bin)
+        N_pims            .append(Npims_in_bin)
         R_pips_to_pims    .append(R)
         R_pips_to_pims_err.append(R_err)
-    #}    
+    #}
     R_pips_to_pims_errup,R_pips_to_pims_errdw = get_err_up_dw(R_pips_to_pims, R_pips_to_pims_err)
     
-    return np.array(R_pips_to_pims),np.array(R_pips_to_pims_errup),np.array(R_pips_to_pims_errdw)
+    return np.array(R_pips_to_pims),np.array(R_pips_to_pims_errup),np.array(R_pips_to_pims_errdw),np.array(N_pips), np.array(N_pims)
 #}
 # ------------------------------------------------------------------------------------------------ #
 
 
-
-
-
-
-# ------------------------------------------------------------------------------------------------ #
-def load_SIDIS_data(runs_filename  = "good_runs_10-2-final.txt",
-                    main_data_path = '/Users/erezcohen/Desktop/data/BAND/',
-                    Nruns          = 1,
-                    do_e_e_pi      = True,
-                    do_e_e_pi_n    = True,
-                    fdebug         = 2):#{
-    '''
-    Load SIDIS data, and fill e_e_pi and e_e_pi_n with data
-    last update June-10, 2022
-    
-    input:
-    -------------
-    do_e_e_pi       flag to read (e,e'π) data - takes much time for a large number of runs
-    do_e_e_pi_n     flag to read (e,e'πn) data - takes less time
-    
-    Comments:
-    -------------
-    e_e_pi & e_e_pi_n are dict(), of the following keys: ['piplus','piminus']
-    e.g. :
-    e_e_pi['piplus'] = pandas.DataFrame( (e,e'π) events data )
-    
-    '''
-    global e_e_pi, e_e_pi_n;
-
-    e_e_pi_data_path   = main_data_path + 'SIDIS_skimming/'
-    e_e_pi_n_data_path = main_data_path + 'merged_SIDIS_and_BAND_skimming/'
-    runfile_path = "/Users/erezcohen/Desktop/Software/CLAS12/BAND/SIDIS_at_BAND/macros/runlists/";
-    
-    # Using readlines()
-    runs_file     = open( runfile_path + runs_filename, 'r')
-    run_fileLines = runs_file.readlines()
-    if Nruns==-1: Nruns = len(run_fileLines)
-
-
-    runs = []
-    for line in run_fileLines[0:Nruns]:#{
-        run = int(line.strip())
-        runs.append(run)
-    #}
-    runs = np.array(runs)
-
-    
-    for runnum,runIdx in zip(runs,range(len(runs))):
-        print('Run number ',runnum,'(%d/%d runs)'%(runIdx+1,len(runs)))
-        for pi_charge_name,pi_print in zip(pi_charge_names,pi_prints):
-            if do_e_e_pi:#{
-                eepi   = pd.read_csv(e_e_pi_data_path
-                                     +'skimmed_SIDIS_inc_00%d_e_%s_selected_eepi_kinematics.csv'%
-                                     (runnum,pi_charge_name),
-                                     usecols=['runnum','evnum',
-                                              'e_P','e_Theta','e_Phi',
-                                              'pi_P', 'pi_Theta', 'pi_Phi',
-                                              'Q2', 'W', 'xB', 'Zpi',
-                                              'M_X', 'e_DC_sector', 'pi_DC_sector'],
-                                     dtype={'runnum':int,'evnum': int,
-                                            'e_DC_sector':int, 'pi_DC_sector':int,
-                                            'e_P':np.half,'e_Theta':np.half,'e_Phi':np.half,
-                                            'pi_P':np.half,'pi_Theta':np.half, 'pi_Phi':np.half,
-                                            'Q2':np.half, 'W':np.half, 'xB':np.half, 'Zpi':np.half,
-                                            'M_X':np.half})
-                
-                if runIdx==0: e_e_pi[pi_charge_name] = eepi
-                else:         e_e_pi[pi_charge_name] = pd.concat([e_e_pi[pi_charge_name],eepi])
-
-                
-                if fdebug>1: print('Loaded',len(eepi)," (e,e'"+pi_print+") events")
-
-            #}
-            if do_e_e_pi_n:#{
-                eepin = pd.read_csv(e_e_pi_n_data_path
-                                +'skimmed_SIDIS_and_BAND_inc_00%d_e_%s_n.csv'%
-                                (runnum,pi_charge_name))
-                
-                if fdebug>1: print('Loaded',len(eepin)," (e,e'"+pi_print+"n) events")
-
-                # large momentum neutrons ( P(n) > 275 MeV/c )
-                eepin = eepin[eepin['n_P']>0.275]
-                if fdebug>1: print('retained',len(eepin),' events with Pn > 275 MeV/c')
-                
-                if runIdx==0: e_e_pi_n[pi_charge_name] = eepin
-                else:         e_e_pi_n[pi_charge_name] = pd.concat([e_e_pi_n[pi_charge_name],eepin])
-            #}
-    print('Done loading files.')
-    if fdebug>1:
-        print('')
-        print('Total statistics:')
-        for pi_charge_name,pi_print in zip(pi_charge_names,pi_prints):
-            if do_e_e_pi:   print(len(e_e_pi[pi_charge_name])," (e,e'"+pi_print+") events")
-            if do_e_e_pi_n: print(len(e_e_pi_n[pi_charge_name])," (e,e'"+pi_print+"n) events")
-    #}
-#}
-# ------------------------------------------------------------------------------------------------ #
 
 
 
