@@ -12,6 +12,20 @@ This repository is responsible for
 ## Revisions and release notes
 ------------------------------------------------------------------------------
 
+July-14, 2022    
+-------------
+1. Added cuts to match BAND skimming:
+    2 < Q2 < 10 (GeV/c)2
+    3 < p(e) < 10.6 GeV/c 
+     
+    both in SIDISc12rSkimmer.C and in event_election_tools.py
+
+2. Added a flad to check if (e,e'πn) passed event selection cuts in StreamToCSVfile()    
+    This was done since before this correction, (e,e'πn) lines were written to CSV file even if they did not pass the event selection cuts, and e.g. pion momentum was too low (for a pion which was not the leading one)
+    This does not impact the final results of the cross-section ratio, which were binned in z and minimally at z>0.3, but still relevant for e.g. kinematical distribution plots 
+
+
+
 July-12, 2022    
 -------------
 1. Added a flag to cancel acceptance matching cut in p-theta plane to apply_further_selection_cuts_to_data()

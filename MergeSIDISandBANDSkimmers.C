@@ -178,7 +178,7 @@ TClonesArray    * mcParts = new TClonesArray("genpart");
 
 void             OpenInputFiles (TString RunStr);
 void            OpenOutputFiles (TString RunStr);
-void            StreamToCSVfile (std::vector<Double_t> observables);
+void            StreamToCSVfile (std::vector<Double_t> observables, bool passed_cuts_e_pi_kinematics);
 void            CloseInputFiles ();
 void           CloseOutputFiles (TString OutDataPath);
 void    MergeSIDISandBANDevents (int NMAXeventsToMerge=10,
@@ -363,17 +363,27 @@ void CloseOutputFiles (TString OutDataPath){
 
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-void StreamToCSVfile (std::vector<Double_t> observables){
-    for (auto v:observables) CSVfile_e_pi_n << std::setprecision(9) << std::fixed << v << ",";
-    CSVfile_e_pi_n << std::endl;
+void StreamToCSVfile (std::vector<Double_t> observables, bool passed_cuts_e_pi_kinematics){
     
-    if (fdebug>3) {
-        std::cout << std::fixed;
-        std::cout << "StreamToCSVfile()" << std::endl;
-        std::cout << csvheader << std::endl;
-        for (auto v:observables) std::cout << std::fixed << v << ",";
-        std::cout << std::endl;
+    if (passed_cuts_e_pi_kinematics){
+        for (auto v:observables) {
+            CSVfile_e_pi_n << std::setprecision(9) << std::fixed << v << ",";
+        }
+        CSVfile_e_pi_n << std::endl;
+        if (fdebug>1) {
+            std::cout << std::fixed;
+            std::cout << "StreamToCSVfile()" << std::endl;
+            std::cout << csvheader << std::endl;
+            for (auto v:observables) std::cout << std::fixed << v << ",";
+            std::cout << std::endl;
+        }
     }
+    else {
+        if (fdebug>1) {
+            std::cout << "Did not pass cuts, not writing to file" << std::endl;
+        }
+    }
+    
 }
 
 
@@ -898,6 +908,21 @@ void Stream_e_pi_n_line_to_CSV(int piIdx,
     status      = 0;
 
     
+    if (fdebug>2){
+        if (pi->P() < 1.25) {
+            std::cout
+            << " pi->P() = " << pi->P() << " < 1.25 GeV/c!"
+            << std::endl
+            << "How the F**K is this possible??"
+            << std::endl
+            << "SIDISrunID: "                   << SIDISrunID
+            << ", event number "                << eventnumber
+            << ", piIdx "                       << piIdx
+            << ", passed_cuts_e_pi_kinematics " << passed_cuts_e_pi_kinematics
+            << std::endl;
+        }
+    }
+    
     // now stream data to CSV file
     std::vector<double> variables =
     {   (double)status, (double)SIDISrunID,   (double)eventnumber,    (double)beam_helicity,
@@ -912,7 +937,7 @@ void Stream_e_pi_n_line_to_CSV(int piIdx,
         (double)e_DC_sector,                (double)pi_DC_sector,
         Pn.E(),         n_ToF,
     };
-    StreamToCSVfile(variables);
+    StreamToCSVfile( variables, passed_cuts_e_pi_kinematics );
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

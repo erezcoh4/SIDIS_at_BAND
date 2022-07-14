@@ -10,7 +10,8 @@ SamplingFraction_min,0.17
 PCAL_ECIN_SF_min,0
 (Ve-Vpi)_z_max,20.0
 y_max,0.75
-Q2_min,1.0
+Q2_min,2.0
+Q2_max,10.0
 W_min,2.0
 Zpi_min,0.3
 Zpi_max,1.0
@@ -20,3 +21,5 @@ pi_theta_min,5.
 pi_theta_max,35.
 Ppi_min,1.25
 Ppi_max,5.0
+Pe_min,3
+Pe_max,10.6

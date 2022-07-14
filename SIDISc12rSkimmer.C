@@ -113,6 +113,7 @@ double cutValue_SamplingFraction_min;
 double     cutValue_PCAL_ECIN_SF_min;
 double        cutValue_Ve_Vpi_dz_max;
 double               cutValue_Q2_min;
+double               cutValue_Q2_max;
 double                cutValue_W_min;
 double                cutValue_y_max;
 double          cutValue_e_theta_min;
@@ -121,6 +122,8 @@ double         cutValue_pi_theta_min;
 double         cutValue_pi_theta_max;
 double              cutValue_Ppi_min;
 double              cutValue_Ppi_max;
+double               cutValue_Pe_min;
+double               cutValue_Pe_max;
 double              cutValue_Zpi_min;
 double              cutValue_Zpi_max;
 double        Pe_phi, q_phi, q_theta; // "q-frame" parameters
@@ -546,12 +549,13 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 bool eepiPassedKinematicalCriteria(TLorentzVector pi, int fdebug){
     double Zpi = pi.E()/omega;
-    if(   (      cutValue_Q2_min < Q2)
+    if(   (      cutValue_Q2_min < Q2             &&             Q2 < cutValue_Q2_max)
        && (       cutValue_W_min < W)
        && (                    y < cutValue_y_max )
        && ( cutValue_e_theta_min < e.Theta()*r2d  && e.Theta()*r2d  < cutValue_e_theta_max  )
        && (cutValue_pi_theta_min < pi.Theta()*r2d && pi.Theta()*r2d < cutValue_pi_theta_max )
        && (     cutValue_Ppi_min < pi.P()         &&         pi.P() < cutValue_Ppi_max      )
+       && (      cutValue_Pe_min < e.P()          &&          e.P() < cutValue_Pe_max      )
        && (     cutValue_Zpi_min < Zpi            &&            Zpi < cutValue_Zpi_max      )
        ) {
         if (fdebug>3) { std::cout << "succesfully passed (e,e'pi) kinematical cuts" << std::endl; }
@@ -797,6 +801,7 @@ void loadCutValues(TString cutValuesFilename, int fdebug){
     cutValue_PCAL_ECIN_SF_min       = FindCutValue("PCAL_ECIN_SF_min");
     cutValue_Ve_Vpi_dz_max          = FindCutValue("(Ve-Vpi)_z_max");
     cutValue_Q2_min                 = FindCutValue("Q2_min");
+    cutValue_Q2_max                 = FindCutValue("Q2_max");
     cutValue_W_min                  = FindCutValue("W_min");
     cutValue_y_max                  = FindCutValue("y_max");
     cutValue_e_theta_min            = FindCutValue("e_theta_min");
@@ -805,6 +810,8 @@ void loadCutValues(TString cutValuesFilename, int fdebug){
     cutValue_pi_theta_max           = FindCutValue("pi_theta_max");
     cutValue_Ppi_min                = FindCutValue("Ppi_min");
     cutValue_Ppi_max                = FindCutValue("Ppi_max");
+    cutValue_Pe_min                 = FindCutValue("Pe_min");
+    cutValue_Pe_max                 = FindCutValue("Pe_max");
     cutValue_Zpi_min                = FindCutValue("Zpi_min");
     cutValue_Zpi_max                = FindCutValue("Zpi_max");
 }
