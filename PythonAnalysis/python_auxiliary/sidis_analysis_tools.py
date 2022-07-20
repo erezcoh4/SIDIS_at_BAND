@@ -41,50 +41,82 @@ e_e_pi_GEMC_pass_cuts                              = dict()
 
 
 # ------------------------------------------------------------------------------------------------ #
-def load_SIDIS_ratio_DataFrame(z_bins   = np.arange(0.3,0.8,0.1),
-                               z_widths = 0.01*np.ones(5),
+def load_SIDIS_ratio(
+    # z_bins   = np.arange(0.3,0.8,0.1),
+    #                            z_widths = 0.01*np.ones(5),
                                xlabel   = "Bjorken $x$",
-                               x_bins   = np.linspace(0.2,0.6,11),
+                               # x_bins   = np.linspace(0.2,0.6,11),
                                prefix   = 'Untagged_SIDIS_ratio_',
                                suffix   = '',
                                doPlotResults=False,
                                data_path= '/Users/erezcohen/Desktop/data/BAND/Results/'):
     '''
     Load SIDIS ratio results
-    last update July-12, 2022
+    last update July-19, 2022
     
     
     '''
     
     SIDIS_results = dict()
-    for z_bin,z_width in zip(z_bins,z_widths):
-        z_min,z_max = z_bin-z_width,z_bin+z_width
-        filelabel = 'z_%.2f-%.2f'%(z_bin-z_width,z_bin+z_width)
-        filename  =  data_path + prefix + filelabel + suffix  + '.csv'
-        df = pd.read_csv(filename)
-        SIDIS_results[prefix + filelabel + suffix] = df
+    
+    z_min_arr, z_max_arr, Zavg_pips_arr, Zavg_pims_arr = [],[],[],[]
+    print('Reading files from ' + data_path)
+    filelist = os.listdir(data_path)
+    for filename in filelist:
+        if prefix in filename and suffix in filename:
+            print( 'reading',filename )
+            filenameparts = filename.split('_')
+            z_min     = float(filenameparts[3][4:8])
+            Zavg_pips = float(filenameparts[5][5:9])
+            Zavg_pims = float(filenameparts[6][5:9])
+            z_max     = float(filenameparts[7][4:8])
+            filelabel = 'Zmin%.3f_Zmean_pips%.3f_pims%.3f_Zmax%.3f'%(z_min,Zavg_pips,Zavg_pims,z_max)
+            # print( filelabel )
+            
+            df = pd.read_csv( data_path + '/' + filename )
+            SIDIS_results[filelabel] = df
+            z_min_arr.append(z_min)
+            z_max_arr.append(z_max)
+            Zavg_pips_arr.append(Zavg_pips)
+            Zavg_pims_arr.append(Zavg_pims)
+
+            # x_bins
+            
+    
+    
+    
+#     for z_bin,z_width in zip(z_bins,z_widths):
+#         z_min,z_max = z_bin-z_width,z_bin+z_width
+#         filelabel = 'z_%.3f-%.3f'%(z_bin-z_width,z_bin+z_width)
+#         filename  =  data_path + prefix + filelabel + suffix  + '.csv'
+#         df = pd.read_csv(filename)
+#         SIDIS_results[prefix + filelabel + suffix] = df
         
         
     if doPlotResults:#{
-        x     = (x_bins[1:] + x_bins[:-1])/2
-        x_err = (x_bins[1:] - x_bins[:-1])/2
+        x     = np.array(df["$x_B$"])
+        x_err = np.array(df["$\Delta x_B$"])
+        # x     = (x_bins[1:] + x_bins[:-1])/2
+        # x_err = (x_bins[1:] - x_bins[:-1])/2
 
 
         fig = plt.figure(figsize=(9,6))
         ax  = fig.add_subplot(1,1,1)
-        for z_bin,z_width in zip(z_bins,z_widths):
-
-            z_min,z_max = z_bin-z_width,z_bin+z_width
-            filelabel = 'z_%.2f-%.2f'%(z_bin-z_width,z_bin+z_width)
-            filename  =  prefix + filelabel + suffix
-
-            df = SIDIS_results[filename]
+        # for z_bin,z_width in zip(z_bins,z_widths):
+        for z_min,z_max,Zavg_pips,Zavg_pims in zip( z_min_arr, z_max_arr, Zavg_pips_arr, Zavg_pims_arr ):
+            Zavg = (Zavg_pips+Zavg_pims)/2.
+            # z_min,z_max = z_bin-z_width,z_bin+z_width
+            # filelabel = 'z_%.3f-%.3f'%(z_bin-z_width,z_bin+z_width)
+            # filename  =  prefix + filelabel + suffix
+            filelabel = 'Zmin%.3f_Zmean_pips%.3f_pims%.3f_Zmax%.3f'%(z_min,Zavg_pips,Zavg_pims,z_max)
+            
+            df = SIDIS_results[filelabel]
             y    = df['$R$']
             y_err= (df['$\Delta R_{+}$'],df['$\Delta R_{-}$'])
             # plot
             l=ax.errorbar(x=x, xerr=x_err,  y=y, yerr=y_err,
                         marker='o',markeredgecolor='k',
-                        label='$z=%.2f\pm%.2f$'%(z_bin,z_width))
+                        label='$%.3f<z<%.3f, \\bar{z}=%.3f$'%(z_min,z_max,Zavg))
 
         set_axes(ax,xlabel,"$N(e,e'\pi^+)/N(e,e'\pi^-)$",
                  title="$\pi^+/\pi^-$ ratio as a function of $x_B$ without a tagged neutron",
@@ -92,16 +124,15 @@ def load_SIDIS_ratio_DataFrame(z_bins   = np.arange(0.3,0.8,0.1),
                 );
         plt.legend(bbox_to_anchor=(1,1.05),loc='best',fontsize=18)
         
+    print('Done.')
     return SIDIS_results
 # ------------------------------------------------------------------------------------------------ #
 
 
 
 
-
-
 # ------------------------------------------------------------------------------------------------ #
-def save_SIDIS_ratio_DataFrame(df_dict  = None,
+def extract_SIDIS_ratio(df_dict  = None,
                                x_var    = 'xB' ,
                                x_bins   = np.linspace(0.2,0.6,11),
                                z_bins   = np.arange(0.3,0.8,0.1),
@@ -112,7 +143,7 @@ def save_SIDIS_ratio_DataFrame(df_dict  = None,
                                suffix   = ''):
     '''
     Save SIDIS ratio results
-    last update July-12, 2022
+    last update July-19, 2022
     
     
     '''
@@ -121,9 +152,13 @@ def save_SIDIS_ratio_DataFrame(df_dict  = None,
     x_err    = (x_bins[1:] - x_bins[:-1])/2
     results_data_path = data_path + '/' + 'Results' + '/'
     for z_bin,z_width in zip(z_bins,z_widths):
-        z_min,z_max = z_bin-z_width,z_bin+z_width
-        (R,R_err_up,R_err_dw,
-         N_pips,N_pims) = compute_ratio_pips_to_pims(df_dict= df_dict ,
+        z_min,z_max = z_bin-z_width, z_bin+z_width
+        
+        (R,
+         R_err_up,R_err_dw,
+         N_pips,N_pims,
+         Zavg_pips,
+         Zavg_pims) = compute_ratio_pips_to_pims(df_dict= df_dict ,
                                                      var    = x_var,
                                                      bins   = x_bins,
                                                      z_min  = z_min,
@@ -136,15 +171,134 @@ def save_SIDIS_ratio_DataFrame(df_dict  = None,
                                    '$R$':R,
                                    '$\Delta R_{+}$':R_err_up,
                                    '$\Delta R_{-}$':R_err_dw})
-        filelabel = 'z_%.2f-%.2f'%(z_bin-z_width,z_bin+z_width)
+        
+        filelabel = 'Zmin%.3f_Zmean_pips%.3f_pims%.3f_Zmax%.3f'%(z_min,Zavg_pips,Zavg_pims,z_max)
         filename  =  data_path + prefix + filelabel + suffix  + '.csv'
         df_to_save.to_csv(filename)
         print('saved',filename)
         if fdebug>1:
-            print('$z=%.2f\pm%.2f$'%(z_bin,z_width))
+            print('$z=%.3f\pm%.3f$'%(z_bin,z_width))
             print(filename)
             display(df_to_save)
 # ------------------------------------------------------------------------------------------------ #
+
+
+
+
+
+
+
+
+
+# ------------------------------------------------------------------------------------------------ #
+def compute_ratio_pips_to_pims(df_dict,
+                               var='xB', bins=np.linspace(0,1,10),
+                               weight_option = '',
+                               z_min=0, z_max=1):#{
+    '''
+    last edit July-19, 2022
+    
+    weight_option: None, 'Acc. correction as f(phi)'
+    
+    return:
+    -----------------
+    R_pips_to_pims         np.array()   number of π+ events in each x-bin / number of π-
+    R_pips_to_pims_errup   np.array()   err-up in number of π+ events in each x-bin / number of π-
+    R_pips_to_pims_errdw   np.array()   err-dw in number of π+ events in each x-bin / number of π-
+    N_pips                 np.array()   number of π+ events in each x-bin
+    N_pims,                np.array()   number of π- events in each x-bin
+    Zavg_pips              float        mean z-value in the range z_min < z < z_max for π+
+    Zavg_pims              float        mean z-value in the range z_min < z < z_max for π-
+    
+    '''
+    # z_min,z_max are z limits on the pion outgoing momentum
+    df_pips = df_dict['piplus']
+    df_pims = df_dict['piminus']
+    
+    # cut on z
+    df_pips = df_pips[ (z_min < df_pips.Zpi) & (df_pips.Zpi < z_max) ]
+    Zavg_pips = np.mean( np.array(df_pips.Zpi)  )
+    
+    df_pims = df_pims[ (z_min < df_pims.Zpi) & (df_pims.Zpi < z_max) ]
+    Zavg_pims = np.mean( np.array(df_pims.Zpi)  )
+
+
+    pips = df_pips[var]
+    pims = df_pims[var]
+    if weight_option == 'Acc. correction as f(phi)':#{
+        phi_pips = np.array( df_pips.pi_Phi )*r2d
+        phi_pims = np.array( df_pims.pi_Phi )*r2d
+    #}
+        
+    R_pips_to_pims, R_pips_to_pims_err = [],[]
+    N_pips, N_pims = [],[]
+    for x_min,x_max in zip(bins[:-1],bins[1:]):#{
+        
+
+        if weight_option == 'Acc. correction as f(phi)':#{
+            # each event is weighted by the acceptance correction weight
+            
+            phi_pips_in_bin = phi_pips[ (x_min < pips) & (pips < x_max) ]
+            W_pips_in_bin   = [ Compute_acceptance_correction_weight( 'piplus' , phi ) for phi in phi_pips_in_bin ]
+            Npips_in_bin    = np.sum( W_pips_in_bin )
+            
+            phi_pims_in_bin = phi_pims[ (x_min < pims) & (pims < x_max) ]
+            W_pims_in_bin   = [ Compute_acceptance_correction_weight( 'piminus', phi ) for phi in phi_pims_in_bin ]
+            Npims_in_bin    = np.sum( W_pims_in_bin )
+            
+        else:
+            # no weight, no acceptance correction
+            
+            pips_in_bin      = pips[ (x_min < pips) & (pips < x_max) ]
+            Npips_in_bin     = len(pips_in_bin)
+            
+            pims_in_bin      = pims[ (x_min < pims) & (pims < x_max) ]
+            Npims_in_bin     = len(pims_in_bin)
+        #}
+
+        R     = Npips_in_bin / np.max([Npims_in_bin,1])
+        R_err = R * np.sqrt( 1./np.max([1,Npips_in_bin]) + 1./np.max([1,Npims_in_bin]) )
+
+        N_pips            .append(Npips_in_bin)
+        N_pims            .append(Npims_in_bin)
+        R_pips_to_pims    .append(R)
+        R_pips_to_pims_err.append(R_err)
+    #}
+    R_pips_to_pims_errup,R_pips_to_pims_errdw = get_err_up_dw(R_pips_to_pims, R_pips_to_pims_err)
+    
+    return [np.array(R_pips_to_pims),
+            np.array(R_pips_to_pims_errup),
+            np.array(R_pips_to_pims_errdw),
+            np.array(N_pips),
+            np.array(N_pims),
+            Zavg_pips,
+            Zavg_pims]
+#}
+# ------------------------------------------------------------------------------------------------ #
+
+
+
+
+
+
+
+
+# ------------------------------------------------------------------------------------------------ #
+def get_err_up_dw(x, xerr,lim_dw = 0,lim_up = 10):
+    '''
+    last edit Apr-28, 2022
+    '''
+    errup=xerr
+    errdw=xerr
+    for i in range(len(x)):#{
+        if (x[i]+errup[i]) > lim_up:   errup[i] = lim_up-x[i]
+        if lim_dw > (x[i]-errdw[i]):   errdw[i] = x[i]-lim_dw
+    #}
+    return errup,errdw
+#}
+# ------------------------------------------------------------------------------------------------ #
+
+
 
 
 
@@ -241,74 +395,6 @@ def load_SIDIS_data(runs_filename  = "good_runs_10-2-final.txt",
 
 
 
-
-
-
-
-# ------------------------------------------------------------------------------------------------ #
-def compute_ratio_pips_to_pims(df_dict,
-                               var='xB', bins=np.linspace(0,1,10),
-                               weight_option = '',
-                               z_min=0, z_max=1):#{
-    '''
-    last edit July-8, 2022
-    
-    weight_option: None, 'Acc. correction as f(phi)'
-    '''
-    # z_min,z_max are z limits on the pion outgoing momentum
-    df_pips = df_dict['piplus']
-    df_pims = df_dict['piminus']
-    
-    # cut on z
-    df_pips = df_pips[ (z_min < df_pips.Zpi) & (df_pips.Zpi < z_max) ]
-    df_pims = df_pims[ (z_min < df_pims.Zpi) & (df_pims.Zpi < z_max) ]
-
-    pips = df_pips[var]
-    pims = df_pims[var]
-    if weight_option == 'Acc. correction as f(phi)':#{
-        phi_pips = np.array( df_pips.pi_Phi )*r2d
-        phi_pims = np.array( df_pims.pi_Phi )*r2d
-    #}
-        
-    R_pips_to_pims, R_pips_to_pims_err = [],[]
-    N_pips, N_pims = [],[]
-    for x_min,x_max in zip(bins[:-1],bins[1:]):#{
-        
-
-        if weight_option == 'Acc. correction as f(phi)':#{
-            # each event is weighted by the acceptance correction weight
-            
-            phi_pips_in_bin = phi_pips[ (x_min < pips) & (pips < x_max) ]
-            W_pips_in_bin   = [ Compute_acceptance_correction_weight( 'piplus' , phi ) for phi in phi_pips_in_bin ]
-            Npips_in_bin    = np.sum( W_pips_in_bin )
-            
-            phi_pims_in_bin = phi_pims[ (x_min < pims) & (pims < x_max) ]
-            W_pims_in_bin   = [ Compute_acceptance_correction_weight( 'piminus', phi ) for phi in phi_pims_in_bin ]
-            Npims_in_bin    = np.sum( W_pims_in_bin )
-            
-        else:
-            # no weight, no acceptance correction
-            
-            pips_in_bin  = pips[ (x_min < pips) & (pips < x_max) ]
-            Npips_in_bin = len(pips_in_bin)
-            pims_in_bin  = pims[ (x_min < pims) & (pims < x_max) ]
-            Npims_in_bin = len(pims_in_bin)
-            
-        #}
-
-        R     = Npips_in_bin / np.max([Npims_in_bin,1])
-        R_err = R * np.sqrt( 1./np.max([1,Npips_in_bin]) + 1./np.max([1,Npims_in_bin]) )
-
-        N_pips            .append(Npips_in_bin)
-        N_pims            .append(Npims_in_bin)
-        R_pips_to_pims    .append(R)
-        R_pips_to_pims_err.append(R_err)
-    #}
-    R_pips_to_pims_errup,R_pips_to_pims_errdw = get_err_up_dw(R_pips_to_pims, R_pips_to_pims_err)
-    
-    return np.array(R_pips_to_pims),np.array(R_pips_to_pims_errup),np.array(R_pips_to_pims_errdw),np.array(N_pips), np.array(N_pims)
-#}
-# ------------------------------------------------------------------------------------------------ #
 
 
 

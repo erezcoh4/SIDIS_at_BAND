@@ -12,6 +12,12 @@ This repository is responsible for
 ## Revisions and release notes
 ------------------------------------------------------------------------------
 
+July-19, 2022    
+-------------
+1. Added a script to read off RGA data-file produced by Igor: *ReadIgorRGAFile.C*
+
+
+
 July-14, 2022    
 -------------
 1. Added cuts to match BAND skimming:

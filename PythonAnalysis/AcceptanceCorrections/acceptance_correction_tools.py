@@ -223,23 +223,6 @@ def compute_acceptance_correction_as_function_of_phi_from_MC( ):#{
 
 
 
-# ------------------------------------------------------------------------------------------------ #
-def get_err_up_dw(x, xerr,lim_dw = 0,lim_up = 10):
-    '''
-    last edit Apr-28, 2022
-    '''
-    errup=xerr
-    errdw=xerr    
-    for i in range(len(x)):#{
-        if (x[i]+errup[i]) > lim_up:   errup[i] = lim_up-x[i]        
-        if lim_dw > (x[i]-errdw[i]):   errdw[i] = x[i]-lim_dw
-    #}
-    return errup,errdw
-#}
-# ------------------------------------------------------------------------------------------------ #
-
-
-
 
 
 
