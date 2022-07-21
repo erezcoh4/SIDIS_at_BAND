@@ -14,6 +14,7 @@ This repository is responsible for
 July-21, 2022    
 -------------
 1. Updated kinematical cut on W>2.5 instead of W>2 to match untagged data to the tagged one in *BANDcutValues.csv* and in the python method *apply_Kinematical_cuts()*
+    and corrected to read *BANDcutValues.csv* instead of the wrong file *cutValues.csv* 
 
 
 2. Added transverse (pT) and longitudinal (pL) pion momentum with respect to the virtual photon as outputs in *SIDISc12rSkimmer.C* 

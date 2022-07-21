@@ -772,7 +772,7 @@ void loadCutValues(TString cutValuesFilename, int fdebug){
     
     // read cut values csv file
     csv_reader csvr;
-    cutValues = csvr.read_csv("cutValues.csv");
+    cutValues = csvr.read_csv("macros/cuts/BANDcutValues.csv");
     if (fdebug>2) { printCutValues(); }
     
     // assign specific cut values - to speed things up
