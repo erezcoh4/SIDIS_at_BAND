@@ -1346,7 +1346,7 @@ void InitializeVariables(){
         Vpiplus_X[piIdx]    = Vpiplus_Y[piIdx]  = Vpiplus_Z[piIdx]  = -9999;
         Vpiminus_X[piIdx]   = Vpiminus_Y[piIdx] = Vpiminus_Z[piIdx] = -9999;
         piplus_qFrame_pT[piIdx]    = piplus_qFrame_pL[piIdx]   = -9999;
-        piminlus_qFrame_pT[piIdx]  = piminlus_qFrame_pL[piIdx] = -9999;
+        piminus_qFrame_pT[piIdx]   = piminus_qFrame_pL[piIdx] = -9999;
          
     }
     DC_layer                                        = -9999;
