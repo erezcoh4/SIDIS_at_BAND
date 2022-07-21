@@ -16,8 +16,21 @@ July-21, 2022
 1. Updated kinematical cut on W>2.5 instead of W>2 to match untagged data to the tagged one in *BANDcutValues.csv* and in the python method *apply_Kinematical_cuts()*
     and corrected to read *BANDcutValues.csv* instead of the wrong file *cutValues.csv* 
 
+2. Replaced "inclusive" files with "sidisdvcs" files as the original "raw" data files for this analysis
+   
+    Until today we used the inclusive train files for RGB SIDIS analysis, from the directory.
+    */volatile/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train_20200610/inc/*
+    On July-21, 2022 the inclusive train files that we were using for RGB SIDIS analysis were deleted. 
+    Florian:  volatile is just storage which from time to time clears old files which are not used.
+    The file system has no backup so the files are lost for now.
+    Also I believe these inclusive train files were only generated in the beginning of RGB without any backup.
+    The usual train files are at 
+    */cache/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train*
+    These have a sidisdvcs skim
+    However, we need first to get all files from long term storage mss back to cache via "jcache" command
+    
 
-2. Added transverse (pT) and longitudinal (pL) pion momentum with respect to the virtual photon as outputs in *SIDISc12rSkimmer.C* 
+3. Added transverse (pT) and longitudinal (pL) pion momentum with respect to the virtual photon as outputs in *SIDISc12rSkimmer.C* 
 
 
 
@@ -524,6 +537,47 @@ include/BCalorimeter.h
 banklib/BCalorimeter.cpp
 include/BBand.h
 banklib/BBand.cpp
+
+
+# Kinematical observables
+---------------------------------------
+
+DIS variables
+
+    y       = omega / Ebeam;
+
+
+
+Spectator energy-momentum and angle
+
+    Es      = Pn.E();
+    Ps      = Pn.P();
+    omega   = q->E();
+    theta_sq= Pn.Angle( q->Vect() );
+    
+
+W - hadronic invariant mass
+
+    W       = sqrt( Mp2 - Q2 + 2. * omega * Mp );
+
+    WPrime  = sqrt( Mp2 - Q2 + 2. * omega * (Md - Es) + 2. * Ps * sqrt(Q2 + w2) * cos( theta_sq ) );
+
+
+
+    // write a (e,e'pi) event-line to CSV file
+
+    // from Harut A., Aug-2, 2021:
+    //    1: status, 2: runnum, 3: evnum, 4: helicity, 5: e_p, 6: e_theta, 7: e_phi, 8: vz_e, 9: pi_p, 10: pi_theta, 11: pi_phi, 12: vz_pi, 13: P_p, 14: P_theta, 15: P_phi, 16: vz_P, 17: Q2, 18: W, 19: x, 20: y, 21: z_pi, 22: z_P, 23: Mx(e:pi:P:X), 24: Mx(e:pi:X), 25: Mx(e:P:X), 26: zeta, 27: Mh, 28: pT_pi, 29: pT_P, 30: pTpT, 31: xF_pi, 32: xF_P, 33: eta_pi, 34: eta_P, 35: Delta_eta, 36: phi_pi (gamma*N COM), 37: phi_P (gamma*N COM), 38: Delta_phi.
+    //
+    //    1: status is a number indicating the quality of the event with the non-0 number indicating something was not not good (ex. out of fiducial region, not within the final cuts on energies of particles, missing or invarian masses....) The final observables will be done using status==0, while sensitivity of the observable to different cuts could be studied for various values of status>0
+    //    2-3: run number and event number to identify the event
+    //    4: helicity of the electron +1 along the beam and -1 opposite to it
+    //    5,6,7,8 electron momentum,theta,phi_Lab, and z-vertex
+    //    9,10,11,12 the same for pi+
+    //    All other columns could be calculated from the first 16, but are included for cross check and minimizing the work in production of final observables. Some of them simple, like x,Q^2,W,y,  z=E\pion/nu, zome less trivial like Breit frame rapidities of pion (eta_pi) and proton eta_P, or corresponding values for X_Feynman variable xF_pi, xF_P.
+    //    Some, like azimuthal angles of pion (phi_pi) and proton (phi_p) in the CM frame may also be confusing.
+    //    In addition to the first 16 columns (mandatory) you can add as many columns as you are comfortable to fill, and consider relevant for your process.
+
 
 
 

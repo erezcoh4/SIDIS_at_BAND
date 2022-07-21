@@ -98,10 +98,25 @@ void              Stream_e_pi_line_to_CSV (TString pionCharge, int piIdx,
 TVector3            RotateVectorTo_qFrame (TVector3 V);
 void                        MoveTo_qFrame (int fdebug);
 void                         Print4Vector (TLorentzVector v, std::string label="" );
-
+void                          SetDataPath (TString fDataPath) {
+    if (DataPath=="" || DataPath=="sidisdvcs" || DataPath=="sidis dvcs"){
+        // sidis-dvcs train files, used since July 2022
+        // (the 'usual' train files)
+        DataPath = "/cache/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train/sidisdvcs";
+        prefix   = "sidisdvcs_";
+    }
+    else if (DataPath=="inclusive" || DataPath=="inc"){
+        // inclusive train files, used until July 2022
+        // (inclusive train files were only generated in the beginning of RGB without any backup)
+        DataPath = "/volatile/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train_20200610/inc/";
+        prefix   = "inc_";
+    }
+}
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 
 // globals
+TString DataPath = "";
+TString   prefix = "";
 auto db = TDatabasePDG::Instance();
 // cut values
 std::vector<std::pair<std::string, double>> cutValues;
@@ -277,6 +292,7 @@ std::vector<region_part_ptr>  electrons, neutrons, protons, pipluses, piminuses,
 
 
 
+
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 // Main functionality
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
@@ -286,21 +302,25 @@ void SIDISc12rSkimmer(int RunNumber=6420,
                       int PrintProgress=50000,
                       int FirstEvent=0, // first event to analyze
                       int NpipsMin=1, // minimal number of pi+
-                      TString DataPath = "/volatile/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train_20200610/inc/",
+                      TString fDataPath = "sidisdvcs",
                       int setInclusive=0 ){
+    
+    SetDataPath( fDataPath );
     TString RunNumberStr = GetRunNumberSTR(RunNumber,fdebug);
     // read cut values
     loadCutValues("cutValues.csv",fdebug);
 
+    
+    
     inclusive = setInclusive;
     if (inclusive == 1) std::cout << "Running as inclusive" << std::endl;
 
     // open result files
     TString outfilepath = "/volatile/clas12/users/ecohen/BAND/SIDIS_skimming/";
-    TString outfilename = "skimmed_SIDIS_inc_" + RunNumberStr;
+    TString outfilename = "skimmed_SIDIS_" + prefix + RunNumberStr;
     OpenResultFiles( outfilepath, outfilename );
 
-    TString inputFile = DataPath + "inc_" + RunNumberStr + ".hipo";
+    TString inputFile = DataPath + prefix + RunNumberStr + ".hipo";
     TChain fake("hipo");
     fake.Add(inputFile.Data());
     //get the hipo data
@@ -773,7 +793,7 @@ void loadCutValues(TString cutValuesFilename, int fdebug){
     // read cut values csv file
     csv_reader csvr;
     cutValues = csvr.read_csv("macros/cuts/BANDcutValues.csv");
-    if (fdebug>2) { printCutValues(); }
+    if (fdebug>3) { printCutValues(); }
     
     // assign specific cut values - to speed things up
     // by avoiding recalling FindCutValue() on every event

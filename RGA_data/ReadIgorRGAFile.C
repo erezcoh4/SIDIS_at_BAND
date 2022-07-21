@@ -134,6 +134,8 @@ void OpenOutputFiles (){
         << CSVFilename_e_e_pips  << ".csv "
         << " and "
         << CSVFilename_e_e_pims  << ".csv "
+        << std::endl
+        << csvheader
         << std::endl;
     }
     
@@ -141,7 +143,10 @@ void OpenOutputFiles (){
     CSVfile_e_e_pips.open( CSVFilename + ".csv" );
     CSVfile_e_e_pips << csvheader << std::endl;
     
-    if (fdebug>2) std::cout << csvheader << std::endl;
+    // Write csv header output csv files
+    CSVfile_e_e_pims.open( CSVFilename + ".csv" );
+    CSVfile_e_e_pims << csvheader << std::endl;
+        
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
@@ -160,7 +165,8 @@ void CloseInputFile (){
 void CloseOutputFiles (TString OutDataPath){
     
     // close output CSV
-    CSVfile_e_pi.close();
+    CSVfile_e_e_pips.close();
+    CSVfile_e_e_pims.close();
     
     std::cout << "Done producing output file. They are ready in " << std::endl << DataPath << std::endl;
     std::cout << "Wrote "

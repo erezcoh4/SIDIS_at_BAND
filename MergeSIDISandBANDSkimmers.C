@@ -44,10 +44,13 @@ TString            csvheader = ((TString)"status,runnum,evnum,beam_helicity,"
                                 +(TString)"Q2,W,xB,Zpi,"
                                 +(TString)"omega,xF,y,"
                                 +(TString)"M_X_ee_pi,M_X_ee_pi_n,xPrime1,xPrime2,"
-                                +(TString)"theta_sq,WPrime,"
+                                +(TString)"theta_sq,"
+                                +(TString)"WPrime,"
                                 +(TString)"e_DC_sector,pi_DC_sector,"
                                 +(TString)"n_E,n_ToF,"
-                                +(TString)"pi_pT_qFrame,pi_pL_qFrame,");
+                                +(TString)"pi_pT_qFrame,pi_pL_qFrame,"
+                                +(TString)"n_HitPos_X,n_HitPos_Y,n_HitPos_Z,");
+
 
 // Input root files and trees
 TFile * SIDISFile, * BANDFile;
@@ -120,7 +123,8 @@ TLorentzVector Band_data_e; // electron information in BAND TTree
 // reconstructed vertex position
 TVector3             *Ve=0;
 TVector3           Pn_Vect; // neutron 3-momentum
-TVector3       Band_e_Vect;
+TVector3       Band_e_Vect; // electron 3-momentum as written in BAND file
+TVector3          n_HitPos;
 
 std::vector<TVector3>               Vpiplus;
 std::vector<TVector3>              Vpiminus;
@@ -708,12 +712,17 @@ void GetBANDData(int MergedEvtId){
     // neutron ToF
     n_ToF = this_nHit->getTof();
 
+    // neutron hit position in BAND
+    n_HitPos = TVector3(this_nHit->getX(),this_nHit->getY(),this_nHit->getZ());
     
     if (fdebug>1) {
         std::cout
         << "p(n): "   << Pn.P() << " GeV/c" << std::endl
         << "E(n): "   << Pn.E() << " GeV"   << std::endl
-        << "ToF(n): " << n_ToF  << " ns"    << std::endl;
+        << "ToF(n): " << n_ToF  << " ns"    << std::endl
+        << "neutron hit position in BAND: ("
+        << std::setprecision(3)
+        << n_HitPos.X()  << "," << n_HitPos.Y()  << "," << n_HitPos.Z()  << ") cm"    << std::endl;
 
     if (fdebug>3) {
         std::cout << "BANDTree->GetEntry("<<BANDEventIndicesToMerge[MergedEvtId]<<")" << std::endl;
@@ -861,16 +870,22 @@ void Stream_e_pi_n_line_to_CSV(int piIdx,
     TVector3        * Vpi;
     double            Zpi;
     double   pi_DC_sector;
+    double   pi_pT_qFrame;
+    double   pi_pL_qFrame;
     
     if (pionCharge=="pi+") {
         pi           = &piplus[piIdx];
         Vpi          = &Vpiplus[piIdx];
         pi_DC_sector = pips_DC_sector[piIdx];
+        pi_pT_qFrame = piplus_qFrame_pT[piIdx];
+        pi_pL_qFrame = piplus_qFrame_pL[piIdx];
     }
     else if (pionCharge=="pi-") {
         pi           = &piminus[piIdx];
         Vpi          = &Vpiminus[piIdx];
         pi_DC_sector = pims_DC_sector[piIdx];
+        pi_pT_qFrame = piminus_qFrame_pT[piIdx];
+        pi_pL_qFrame = piminus_qFrame_pL[piIdx];
     }
     else {
         std::cout << "pion charge ill defined at Stream_e_pi_line_to_CSV(), returning " << std::endl;
@@ -892,20 +907,6 @@ void Stream_e_pi_n_line_to_CSV(int piIdx,
         << std::endl;
     }
     TLorentzVector pion = *pi;
-
-    // write a (e,e'pi) event-line to CSV file
-
-    // from Harut A., Aug-2, 2021:
-    //    1: status, 2: runnum, 3: evnum, 4: helicity, 5: e_p, 6: e_theta, 7: e_phi, 8: vz_e, 9: pi_p, 10: pi_theta, 11: pi_phi, 12: vz_pi, 13: P_p, 14: P_theta, 15: P_phi, 16: vz_P, 17: Q2, 18: W, 19: x, 20: y, 21: z_pi, 22: z_P, 23: Mx(e:pi:P:X), 24: Mx(e:pi:X), 25: Mx(e:P:X), 26: zeta, 27: Mh, 28: pT_pi, 29: pT_P, 30: pTpT, 31: xF_pi, 32: xF_P, 33: eta_pi, 34: eta_P, 35: Delta_eta, 36: phi_pi (gamma*N COM), 37: phi_P (gamma*N COM), 38: Delta_phi.
-    //
-    //    1: status is a number indicating the quality of the event with the non-0 number indicating something was not not good (ex. out of fiducial region, not within the final cuts on energies of particles, missing or invarian masses....) The final observables will be done using status==0, while sensitivity of the observable to different cuts could be studied for various values of status>0
-    //    2-3: run number and event number to identify the event
-    //    4: helicity of the electron +1 along the beam and -1 opposite to it
-    //    5,6,7,8 electron momentum,theta,phi_Lab, and z-vertex
-    //    9,10,11,12 the same for pi+
-    //    All other columns could be calculated from the first 16, but are included for cross check and minimizing the work in production of final observables. Some of them simple, like x,Q^2,W,y,  z=E\pion/nu, zome less trivial like Breit frame rapidities of pion (eta_pi) and proton eta_P, or corresponding values for X_Feynman variable xF_pi, xF_P.
-    //    Some, like azimuthal angles of pion (phi_pi) and proton (phi_p) in the CM frame may also be confusing.
-    //    In addition to the first 16 columns (mandatory) you can add as many columns as you are comfortable to fill, and consider relevant for your process.
 
     // ------------------------------------------------------------------------------------------------
     // compute kinematics that also relies on pion information
@@ -944,6 +945,8 @@ void Stream_e_pi_n_line_to_CSV(int piIdx,
         WPrime,
         (double)e_DC_sector,                (double)pi_DC_sector,
         Pn.E(),         n_ToF,
+        pi_pT_qFrame,   pi_pL_qFrame,
+        n_HitPos.X(),   n_HitPos.Y(),      n_HitPos.Z(),
     };
     StreamToCSVfile( variables, passed_cuts_e_pi_kinematics );
 }
@@ -960,6 +963,7 @@ void InitializeVariables(){
     M_X_ee_pi   = M_X_ee_pi_n           = -9999;
     Ve                                  = new TVector3();
     n_ToF                               = -9999;
+    n_HitPos                            = TVector3();
     
     piplus      .clear();
     piminus     .clear();
@@ -977,6 +981,8 @@ void InitializeVariables(){
         piminus_Px[piIdx]   = piminus_Py[piIdx] = piminus_Pz[piIdx] = piminus_E[piIdx]  = -9999;
         Vpiplus_X[piIdx]    = Vpiplus_Y[piIdx]  = Vpiplus_Z[piIdx]  = -9999;
         Vpiminus_X[piIdx]   = Vpiminus_Y[piIdx] = Vpiminus_Z[piIdx] = -9999;
+        piminus_qFrame_pT[piIdx] = piminus_qFrame_pL[piIdx]         = -9999;
+        piplus_qFrame_pT[piIdx]  = piplus_qFrame_pL[piIdx]          = -9999;
          
     }
     status                                          = 1; // 0 is good...

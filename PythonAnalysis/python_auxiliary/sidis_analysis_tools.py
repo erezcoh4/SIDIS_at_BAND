@@ -5,7 +5,7 @@ import sys; sys.path.insert(0, software_path + '/CLAS12/BAND/SIDIS_at_BAND/Pytho
 from my_tools               import *;
 from plot_tools             import *;
 from my_data_analysis_tools import *;
-from event_selection_tools  import *;
+#from event_selection_tools  import *;
 
 
 r2d = 180./np.pi
@@ -127,63 +127,6 @@ def load_SIDIS_ratio(
     print('Done.')
     return SIDIS_results
 # ------------------------------------------------------------------------------------------------ #
-
-
-
-
-# ------------------------------------------------------------------------------------------------ #
-def extract_SIDIS_ratio(df_dict  = None,
-                               x_var    = 'xB' ,
-                               x_bins   = np.linspace(0.2,0.6,11),
-                               z_bins   = np.arange(0.3,0.8,0.1),
-                               z_widths = 0.01*np.ones(5),
-                               data_path= '/Users/erezcohen/Desktop/data/BAND/Results/',
-                               fdebug   = 0,
-                               prefix   = 'Untagged_SIDIS_ratio_',
-                               suffix   = ''):
-    '''
-    Save SIDIS ratio results
-    last update July-19, 2022
-    
-    
-    '''
-    
-    x        = (x_bins[1:] + x_bins[:-1])/2
-    x_err    = (x_bins[1:] - x_bins[:-1])/2
-    results_data_path = data_path + '/' + 'Results' + '/'
-    for z_bin,z_width in zip(z_bins,z_widths):
-        z_min,z_max = z_bin-z_width, z_bin+z_width
-        
-        (R,
-         R_err_up,R_err_dw,
-         N_pips,N_pims,
-         Zavg_pips,
-         Zavg_pims) = compute_ratio_pips_to_pims(df_dict= df_dict ,
-                                                     var    = x_var,
-                                                     bins   = x_bins,
-                                                     z_min  = z_min,
-                                                     z_max  = z_max)
-
-        df_to_save = pd.DataFrame({"$x_B$":x,
-                                   "$\Delta x_B$":x_err,
-                                   '$N(\pi_{+})$':N_pips,
-                                   '$N(\pi_{-})$':N_pims,
-                                   '$R$':R,
-                                   '$\Delta R_{+}$':R_err_up,
-                                   '$\Delta R_{-}$':R_err_dw})
-        
-        filelabel = 'Zmin%.3f_Zmean_pips%.3f_pims%.3f_Zmax%.3f'%(z_min,Zavg_pips,Zavg_pims,z_max)
-        filename  =  data_path + prefix + filelabel + suffix  + '.csv'
-        df_to_save.to_csv(filename)
-        print('saved',filename)
-        if fdebug>1:
-            print('$z=%.3f\pm%.3f$'%(z_bin,z_width))
-            print(filename)
-            display(df_to_save)
-# ------------------------------------------------------------------------------------------------ #
-
-
-
 
 
 
