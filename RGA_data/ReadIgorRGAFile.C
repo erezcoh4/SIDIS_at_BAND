@@ -121,6 +121,7 @@ void OpenInputFile (){
 }
 
 //CONTINUE HERE!
+// ALso write a macro script that exexcutes this code
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void OpenOutputFiles (){

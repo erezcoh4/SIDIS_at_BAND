@@ -46,7 +46,8 @@ TString            csvheader = ((TString)"status,runnum,evnum,beam_helicity,"
                                 +(TString)"M_X_ee_pi,M_X_ee_pi_n,xPrime1,xPrime2,"
                                 +(TString)"theta_sq,WPrime,"
                                 +(TString)"e_DC_sector,pi_DC_sector,"
-                                +(TString)"n_E,n_ToF,");
+                                +(TString)"n_E,n_ToF,"
+                                +(TString)"pi_pT_qFrame,pi_pL_qFrame,");
 
 // Input root files and trees
 TFile * SIDISFile, * BANDFile;
@@ -125,6 +126,8 @@ std::vector<TVector3>               Vpiplus;
 std::vector<TVector3>              Vpiminus;
 std::vector<TLorentzVector>          piplus;
 std::vector<TLorentzVector>         piminus;
+std::vector<TLorentzVector>   piplus_qFrame;
+std::vector<TLorentzVector>  piminus_qFrame;
 
 bool                     eepiPastCutsInEvent;
 bool                   eepipsPastCutsInEvent;
@@ -158,6 +161,9 @@ double           Vpiplus_X[NMAXPIONS];
 double           Vpiplus_Y[NMAXPIONS];
 double           Vpiplus_Z[NMAXPIONS];
 double      pips_DC_sector[NMAXPIONS];
+double    piplus_qFrame_pT[NMAXPIONS]; // transverse momentum with respect to q
+double    piplus_qFrame_pL[NMAXPIONS]; // longitudinal momentum with respect to q
+
 
 double          piminus_Px[NMAXPIONS];
 double          piminus_Py[NMAXPIONS];
@@ -167,6 +173,8 @@ double          Vpiminus_X[NMAXPIONS];
 double          Vpiminus_Y[NMAXPIONS];
 double          Vpiminus_Z[NMAXPIONS];
 double      pims_DC_sector[NMAXPIONS];
+double   piminus_qFrame_pT[NMAXPIONS]; // transverse momentum with respect to q
+double   piminus_qFrame_pL[NMAXPIONS]; // longitudinal momentum with respect to q
 
 clashit *eHit             = new clashit;
 //TClonesArray      * eHit  = new TClonesArray("clashit"); // CLAS12 electrons in BAND analysis

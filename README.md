@@ -11,10 +11,18 @@ This repository is responsible for
     
 ## Revisions and release notes
 ------------------------------------------------------------------------------
+July-21, 2022    
+-------------
+1. Updated kinematical cut on W>2.5 instead of W>2 to match untagged data to the tagged one in *BANDcutValues.csv* and in the python method *apply_Kinematical_cuts()*
+
+
+2. Added transverse (pT) and longitudinal (pL) pion momentum with respect to the virtual photon as outputs in *SIDISc12rSkimmer.C* 
+
+
 
 July-19, 2022    
 -------------
-1. Added a script to read off RGA data-file produced by Igor: *ReadIgorRGAFile.C*
+1. Started to code a script to read off RGA data-file produced by Igor: *ReadIgorRGAFile.C*
 
 
 
