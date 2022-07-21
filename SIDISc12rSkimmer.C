@@ -397,7 +397,7 @@ void SetDataPath (TString fDataPath) {
     if (DataPath=="" || DataPath=="sidisdvcs" || DataPath=="sidis dvcs"){
         // sidis-dvcs train files, used since July 2022
         // (the 'usual' train files)
-        DataPath = "/cache/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train/sidisdvcs";
+        DataPath = "/cache/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train/sidisdvcs/";
         prefix   = "sidisdvcs_";
     }
     else if (DataPath=="inclusive" || DataPath=="inc"){
