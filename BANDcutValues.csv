@@ -21,5 +21,5 @@ pi_theta_min,5.
 pi_theta_max,35.
 Ppi_min,1.25
 Ppi_max,5.0
-Pe_min,3
+Pe_min,3.0
 Pe_max,10.6
