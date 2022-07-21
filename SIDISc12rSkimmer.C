@@ -98,20 +98,7 @@ void              Stream_e_pi_line_to_CSV (TString pionCharge, int piIdx,
 TVector3            RotateVectorTo_qFrame (TVector3 V);
 void                        MoveTo_qFrame (int fdebug);
 void                         Print4Vector (TLorentzVector v, std::string label="" );
-void                          SetDataPath (TString fDataPath) {
-    if (DataPath=="" || DataPath=="sidisdvcs" || DataPath=="sidis dvcs"){
-        // sidis-dvcs train files, used since July 2022
-        // (the 'usual' train files)
-        DataPath = "/cache/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train/sidisdvcs";
-        prefix   = "sidisdvcs_";
-    }
-    else if (DataPath=="inclusive" || DataPath=="inc"){
-        // inclusive train files, used until July 2022
-        // (inclusive train files were only generated in the beginning of RGB without any backup)
-        DataPath = "/volatile/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train_20200610/inc/";
-        prefix   = "inc_";
-    }
-}
+void                          SetDataPath (TString fDataPath) ;
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 
 // globals
@@ -405,7 +392,21 @@ void SIDISc12rSkimmer(int RunNumber=6420,
 }
 
 
-
+// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+void SetDataPath (TString fDataPath) {
+    if (DataPath=="" || DataPath=="sidisdvcs" || DataPath=="sidis dvcs"){
+        // sidis-dvcs train files, used since July 2022
+        // (the 'usual' train files)
+        DataPath = "/cache/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train/sidisdvcs";
+        prefix   = "sidisdvcs_";
+    }
+    else if (DataPath=="inclusive" || DataPath=="inc"){
+        // inclusive train files, used until July 2022
+        // (inclusive train files were only generated in the beginning of RGB without any backup)
+        DataPath = "/volatile/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train_20200610/inc/";
+        prefix   = "inc_";
+    }
+}
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 bool CheckIfElectronPassedSelectionCuts(Double_t e_PCAL_x, Double_t e_PCAL_y,
