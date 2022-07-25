@@ -1,7 +1,9 @@
 
 #ifdef __CINT__
 #pragma link C++ class std::vector<TVector3>+;
+#pragma link C++ class vector<TVector3>+;
 #pragma link C++ class std::vector<TLorentzVector>+;
+#pragma link C++ class vector<TLorentzVector>+;
 #endif
 
 #include <cstdlib>
