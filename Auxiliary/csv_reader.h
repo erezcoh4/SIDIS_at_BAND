@@ -53,7 +53,7 @@ public:
         while(std::getline(myFile, line)) {
             // Create a stringstream of the current line
             std::stringstream ss(line);
-            std::cout << ss.str() << std::endl;
+            // std::cout << ss.str() << std::endl;
             
             std::pair<std::string, double> cut;
             std::getline(ss, token, ',');

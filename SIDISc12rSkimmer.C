@@ -833,12 +833,10 @@ void loadCutValues(TString cutValuesFilename, int fdebug){
     cutValue_e_theta_max            = FindCutValue("e_theta_max");
     cutValue_pi_theta_min           = FindCutValue("pi_theta_min");
     cutValue_pi_theta_max           = FindCutValue("pi_theta_max");
-    if (fdebug>2) { std::cout << "after cutValue_pi_theta_max" << std::endl; }
     cutValue_Ppi_min                = FindCutValue("Ppi_min");
     cutValue_Ppi_max                = FindCutValue("Ppi_max");
     cutValue_Pe_min                 = FindCutValue("Pe_min");
     cutValue_Pe_max                 = FindCutValue("Pe_max");
-    if (fdebug>2) { std::cout << "after cutValue_Pe_max" << std::endl; }
     cutValue_Zpi_min                = FindCutValue("Zpi_min");
     cutValue_Zpi_max                = FindCutValue("Zpi_max");
     
