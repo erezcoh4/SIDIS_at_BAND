@@ -11,6 +11,13 @@ This repository is responsible for
     
 ## Revisions and release notes
 ------------------------------------------------------------------------------
+July-25, 2022    
+-------------
+1. changed NMAXPIONS from 20 to 5 (we do not need to account for events with too many pions as we are interested in pions with high-z and in such events all pions are soft) 
+
+2. Fixed a bug that wrote piplus_qFrame_pT and piminus_qFrame_pT wrongly as 0 to the TTree in SIDISc12rSkimmer()
+
+
 July-21, 2022    
 -------------
 1. Updated kinematical cut on W>2.5 instead of W>2 to match untagged data to the tagged one in *BANDcutValues.csv* and in the python method *apply_Kinematical_cuts()*
@@ -28,6 +35,28 @@ July-21, 2022
     */cache/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train*
     These have a sidisdvcs skim
     However, we need first to get all files from long term storage mss back to cache via "jcache" command
+    
+    The files are different. 
+    From cooking logbook https://github.com/zhaozhiwen/clas12_cooking_rgb/
+    GitHub - zhaozhiwen/clas12_cooking_rgb
+
+
+    sidisdvcs train:
+    forward: 11:X+,X-:Xn electron + any particle in FD
+    targetPDG: 2112 (not sure what this does to data filtering, probably only for cuts below)
+    electron: Q2>0.95 && W>1.95 &&  p>1 && vz>-25 && vz<20 extra electron kinematic cut
+
+    inclusive train:
+    forward: 11:X+,X-:Xn electron + any particle in FD
+    tagger: X+:X-:Xn any particle forward tagger
+    central: X+:X-:Xn any particle in CD
+    OR
+    forward: -11:X+,X-:Xn positron + any particle in FD
+    tagger: X+:X-:Xn any particle forward tagger
+    central: X+:X-:Xn any particle in CD
+
+    sidisdvcs skim has no positron filter and extra electron kinematic cuts + targetPDG.
+    
     
 
 3. Added transverse (pT) and longitudinal (pL) pion momentum with respect to the virtual photon as outputs in *SIDISc12rSkimmer.C* 

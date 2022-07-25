@@ -22,7 +22,7 @@
 #include "clas12reader.h"
 #include "Auxiliary/DCfid_SIDIS.cpp"
 #include "Auxiliary/csv_reader.h"
-#define NMAXPIONS 20 // maximal allowed number of pions
+#define NMAXPIONS 5 // maximal allowed number of pions
 #define r2d 180./3.1415 // radians to degrees
 using namespace clas12;
 
@@ -1100,15 +1100,15 @@ void SetOutputTTrees(){
     outTree_e_piminus_no_cuts->Branch("Nprotons"             ,&Np                    );
     outTree_e_piminus_no_cuts->Branch("Nneutrons"            ,&Nn                    );
 
-    outTree_e_piminus_no_cuts->Branch("piminus_Px"                ,&piminus_Px              , "piminus_Px[20]/D"    );
-    outTree_e_piminus_no_cuts->Branch("piminus_Py"                ,&piminus_Py              , "piminus_Py[20]/D"    );
-    outTree_e_piminus_no_cuts->Branch("piminus_Pz"                ,&piminus_Pz              , "piminus_Pz[20]/D"    );
-    outTree_e_piminus_no_cuts->Branch("piminus_E"                 ,&piminus_E               , "piminus_E[20]/D"    );
-    outTree_e_piminus_no_cuts->Branch("Vpiminus_X"                ,&Vpiminus_X              , "Vpiminus_X[20]/D"    );
-    outTree_e_piminus_no_cuts->Branch("Vpiminus_Y"                ,&Vpiminus_Y              , "Vpiminus_Y[20]/D"    );
-    outTree_e_piminus_no_cuts->Branch("Vpiminus_Z"                ,&Vpiminus_Z              , "Vpiminus_Z[20]/D"    );
-    outTree_e_piminus_no_cuts->Branch("piminus_qFrame_pT"         ,&piminus_qFrame_pT       , "piminus_qFrame_pT[20]/D");
-    outTree_e_piminus_no_cuts->Branch("piminus_qFrame_pL"         ,&piminus_qFrame_pL       , "piminus_qFrame_pL[20]/D");
+    outTree_e_piminus_no_cuts->Branch("piminus_Px"           ,&piminus_Px              , "piminus_Px[20]/D"    );
+    outTree_e_piminus_no_cuts->Branch("piminus_Py"           ,&piminus_Py              , "piminus_Py[20]/D"    );
+    outTree_e_piminus_no_cuts->Branch("piminus_Pz"           ,&piminus_Pz              , "piminus_Pz[20]/D"    );
+    outTree_e_piminus_no_cuts->Branch("piminus_E"            ,&piminus_E               , "piminus_E[20]/D"    );
+    outTree_e_piminus_no_cuts->Branch("Vpiminus_X"           ,&Vpiminus_X              , "Vpiminus_X[20]/D"    );
+    outTree_e_piminus_no_cuts->Branch("Vpiminus_Y"           ,&Vpiminus_Y              , "Vpiminus_Y[20]/D"    );
+    outTree_e_piminus_no_cuts->Branch("Vpiminus_Z"           ,&Vpiminus_Z              , "Vpiminus_Z[20]/D"    );
+    outTree_e_piminus_no_cuts->Branch("piminus_qFrame_pT"    ,&piminus_qFrame_pT       , "piminus_qFrame_pT[20]/D");
+    outTree_e_piminus_no_cuts->Branch("piminus_qFrame_pL"    ,&piminus_qFrame_pL       , "piminus_qFrame_pL[20]/D");
 
     
     
@@ -1368,10 +1368,10 @@ void InitializeVariables(){
         
         piplus_Px[piIdx]    = piplus_Py[piIdx]  = piplus_Pz[piIdx]  = piplus_E[piIdx]   = -9999;
         piminus_Px[piIdx]   = piminus_Py[piIdx] = piminus_Pz[piIdx] = piminus_E[piIdx]  = -9999;
-        Vpiplus_X[piIdx]    = Vpiplus_Y[piIdx]  = Vpiplus_Z[piIdx]  = -9999;
-        Vpiminus_X[piIdx]   = Vpiminus_Y[piIdx] = Vpiminus_Z[piIdx] = -9999;
-        piplus_qFrame_pT[piIdx]    = piplus_qFrame_pL[piIdx]   = -9999;
-        piminus_qFrame_pT[piIdx]   = piminus_qFrame_pL[piIdx] = -9999;
+        Vpiplus_X[piIdx]    = Vpiplus_Y[piIdx]  = Vpiplus_Z[piIdx]                      = -9999;
+        Vpiminus_X[piIdx]   = Vpiminus_Y[piIdx] = Vpiminus_Z[piIdx]                     = -9999;
+        piplus_qFrame_pT[piIdx]    = piplus_qFrame_pL[piIdx]                            = -9999;
+        piminus_qFrame_pT[piIdx]   = piminus_qFrame_pL[piIdx]                           = -9999;
          
     }
     DC_layer                                        = -9999;
@@ -1628,9 +1628,6 @@ void ExtractPipsInformation( int pipsIdx, int fdebug ){
     Vpiplus_X[pipsIdx] = Vpiplus[pipsIdx].X();
     Vpiplus_Y[pipsIdx] = Vpiplus[pipsIdx].Y();
     Vpiplus_Z[pipsIdx] = Vpiplus[pipsIdx].Z();
-    piplus_qFrame_pT[pipsIdx] = piplus_qFrame[pipsIdx].Pt();
-    piplus_qFrame_pL[pipsIdx] = piplus_qFrame[pipsIdx].Pz();
-    
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -1692,10 +1689,6 @@ void ExtractPimsInformation( int pimsIdx, int fdebug ){
     Vpiminus_X[pimsIdx]          = Vpiminus[pimsIdx].X();
     Vpiminus_Y[pimsIdx]          = Vpiminus[pimsIdx].Y();
     Vpiminus_Z[pimsIdx]          = Vpiminus[pimsIdx].Z();
-    piminus_qFrame_pT[pimsIdx]   = piminus_qFrame[pimsIdx].Pt();
-    piminus_qFrame_pL[pimsIdx]   = piminus_qFrame[pimsIdx].Pz();
-    
-
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -1844,18 +1837,20 @@ void MoveTo_qFrame(int fdebug){
     for (int piIdx=0; piIdx<Npips; piIdx++) {
         TVector3 Ppiplus = RotateVectorTo_qFrame( piplus.at(piIdx).Vect() );
         piplus_qFrame.at(piIdx).SetVectM( Ppiplus, Mpi  );
+        // fill variables that later go to TTree
+        piplus_qFrame_pT[piIdx] = piplus_qFrame.at(piIdx).Pt();
+        piplus_qFrame_pL[piIdx] = piplus_qFrame.at(piIdx).Pz();
+
+        if (fdebug>1) Print4Vector( piplus_qFrame.at(piIdx), "pi+(" + std::to_string(piIdx) + ")" );
         
-        if (fdebug>1){
-            Print4Vector( piplus_qFrame.at(piIdx), "pi+(" + std::to_string(piIdx) + ")" );
-        }
     }
     for (int piIdx=0; piIdx<Npims; piIdx++) {
         TVector3 Ppiminus = RotateVectorTo_qFrame( piminus.at(piIdx).Vect() );
         piminus_qFrame.at(piIdx).SetVectM( Ppiminus, Mpi );
-        
-        if (fdebug>1){
-            Print4Vector( piminus_qFrame.at(piIdx), "pi-(" + std::to_string(piIdx) + ")" );
-        }
+        // fill variables that later go to TTree
+        piminus_qFrame_pT[piIdx]   = piminus_qFrame.at(piIdx).Pt();
+        piminus_qFrame_pL[piIdx]   = piminus_qFrame.at(piIdx).Pz();
+        if (fdebug>1)Print4Vector( piminus_qFrame.at(piIdx), "pi-(" + std::to_string(piIdx) + ")" );
     }
     if (fdebug>2){
         std::cout
@@ -1863,6 +1858,7 @@ void MoveTo_qFrame(int fdebug){
         << "size(piminus_qFrame): " << piminus_qFrame.size()<< ","
         << std::endl;
     }
+    
 }
 
 

@@ -26,17 +26,12 @@
 
 
 #define NMAXEVENTS 5000000
-#define NMAXPIONS 20 // maximal allowed number of pions
+#define NMAXPIONS 5 // maximal allowed number of pions
 #define r2d 180./3.1415 // radians to degrees
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 // Globals
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-TString DataPath = "/volatile/clas12/users/ecohen/BAND/";
-TString   skimmedBANDFilename;
-TString  skimmedSIDISFilename;
-TString            pionCharge; // "pi+" or "pi-"
-TString               pionStr;
 TString            csvheader = ((TString)"status,runnum,evnum,beam_helicity,"
                                 +(TString)"e_P,e_Theta,e_Phi,e_Vz,"
                                 +(TString)"pi_P,pi_Theta,pi_Phi,pi_Vz,"
@@ -51,6 +46,12 @@ TString            csvheader = ((TString)"status,runnum,evnum,beam_helicity,"
                                 +(TString)"pi_pT_qFrame,pi_pL_qFrame,"
                                 +(TString)"n_HitPos_X,n_HitPos_Y,n_HitPos_Z,");
 
+TString DataPath = "/volatile/clas12/users/ecohen/BAND/";
+TString                            prefix = "sidisdvcs_";
+TString   skimmedBANDFilename;
+TString  skimmedSIDISFilename;
+TString            pionCharge; // "pi+" or "pi-"
+TString               pionStr;
 
 // Input root files and trees
 TFile * SIDISFile, * BANDFile;
@@ -222,6 +223,7 @@ void              SetPionCharge ( TString fpionCharge ) {
     }
 };
 void                SetDataPath ( TString fDataPath )   {DataPath = fDataPath + "/";};
+void                  SetPrefix ( TString fPrefix )     {prefix = fPrefix;};
 void               SetVerbosity ( int ffdebug )         {fdebug = ffdebug;};
 void                  PrintTime ( TString prefix ){
     std::cout << prefix << ", after "
@@ -239,11 +241,13 @@ void MergeSIDISandBANDSkimmers(int RunNumber=6420,
                                int NMAXeventsToMerge=-1,
                                int ffdebug=1,
                                int PrintProgress=1000,
-                               TString fDataPath="/volatile/clas12/users/ecohen/BAND/"){
+                               TString fDataPath="/volatile/clas12/users/ecohen/BAND/",
+                               TString fPrefix="sidisdvcs_"){
     
     SetPionCharge    ( fpionCharge );
     SetVerbosity     ( ffdebug );
     SetDataPath      ( fDataPath );
+    SetPrefix        ( fPrefix );
     char RunNumberStr[20];
     sprintf( RunNumberStr, "00%d", RunNumber );
     OpenInputFiles   ( (TString)RunNumberStr );
@@ -323,7 +327,7 @@ void OpenInputFiles (TString RunStr){
     BANDTree                      = (TTree*)BANDFile->Get("tagged");
     
     skimmedSIDISFilename = (DataPath + "SIDIS_skimming/"
-                            + "skimmed_SIDIS_inc_"  + RunStr + pionStr + ".root");
+                            + "skimmed_SIDIS_" + prefix + RunStr + pionStr + ".root");
     if (fdebug>2) std::cout << "Opening " << skimmedSIDISFilename << std::endl;
     SIDISFile                     = new TFile( skimmedSIDISFilename );
     SIDISTree                     = (TTree*)SIDISFile->Get("tree");
@@ -334,7 +338,7 @@ void OpenInputFiles (TString RunStr){
 void OpenOutputFiles (TString RunStr){
     
     TString skimmedMergedFilename = (DataPath + "merged_SIDIS_and_BAND_skimming/"
-                                     + "skimmed_SIDIS_and_BAND_inc_"  + RunStr + pionStr + "_n" );
+                                     + "skimmed_SIDIS_and_BAND_" + prefix + RunStr + pionStr + "_n" );
     
     if (fdebug>2) std::cout << "Opening output file: " << skimmedMergedFilename  << ".root/csv " << std::endl;
     
@@ -594,6 +598,8 @@ void SetInputAndOutputTTrees (){
         SIDISTree -> SetBranchAddress("Vpiplus_Y"                  ,&Vpiplus_Y                );
         SIDISTree -> SetBranchAddress("Vpiplus_Z"                  ,&Vpiplus_Z                );
         SIDISTree -> SetBranchAddress("pi_DC_sector"               ,&pips_DC_sector           );
+        SIDISTree -> SetBranchAddress("piplus_qFrame_pT"           ,&piplus_qFrame_pT         );
+        SIDISTree -> SetBranchAddress("piplus_qFrame_pL"           ,&piplus_qFrame_pL         );
     } else if (pionCharge=="pi-") {
         SIDISTree  -> SetBranchAddress("eepimsPastCutsInEvent"      ,&eepimsPastCutsInEvent     );
         SIDISTree  -> SetBranchAddress("eepimsPastKinematicalCuts"  ,&eepimsPastKinematicalCuts );
@@ -605,6 +611,9 @@ void SetInputAndOutputTTrees (){
         SIDISTree -> SetBranchAddress("Vpiminus_Y"                  ,&Vpiminus_Y                );
         SIDISTree -> SetBranchAddress("Vpiminus_Z"                  ,&Vpiminus_Z                );
         SIDISTree -> SetBranchAddress("pi_DC_sector"                ,&pims_DC_sector            );
+        SIDISTree -> SetBranchAddress("piminus_qFrame_pT"           ,&piminus_qFrame_pT         );
+        SIDISTree -> SetBranchAddress("piminus_qFrame_pL"           ,&piminus_qFrame_pL         );
+
     }
     
     
@@ -769,14 +778,28 @@ void GetSIDISData( int MergedEvtId ){
             << piplus_Py[pipsIdx]   <<","
             << piplus_Pz[pipsIdx]   <<","
             << piplus_E[pipsIdx]    <<")); "
+            << std::endl
+            << "piplus_qFrame_pT: " << piplus_qFrame_pT[pipsIdx]    <<","
+            << "piplus_qFrame_pL: " << piplus_qFrame_pL[pipsIdx]    <<","
             << std::endl;
         }
-        piplus.at(pipsIdx)   = TLorentzVector(piplus_Px[pipsIdx], piplus_Py[pipsIdx], piplus_Pz[pipsIdx], piplus_E[pipsIdx]) ;
-        Vpiplus.at(pipsIdx)  = TVector3(Vpiplus_X[pipsIdx], Vpiplus_Y[pipsIdx], Vpiplus_Z[pipsIdx]) ;
+        piplus.at(pipsIdx)   = TLorentzVector(piplus_Px[pipsIdx],
+                                              piplus_Py[pipsIdx],
+                                              piplus_Pz[pipsIdx],
+                                              piplus_E[pipsIdx]) ;
+        
+        Vpiplus.at(pipsIdx)  = TVector3(Vpiplus_X[pipsIdx],
+                                        Vpiplus_Y[pipsIdx],
+                                        Vpiplus_Z[pipsIdx]) ;
     }
     for (int pimsIdx=0; pimsIdx<Npims; pimsIdx++){
-        piminus.at(pimsIdx)  = TLorentzVector(piminus_Px[pimsIdx], piminus_Py[pimsIdx], piminus_Pz[pimsIdx], piminus_E[pimsIdx]) ;
-        Vpiminus.at(pimsIdx) = TVector3(Vpiminus_X[pimsIdx], Vpiminus_Y[pimsIdx], Vpiminus_Z[pimsIdx]) ;
+        piminus.at(pimsIdx)  = TLorentzVector(piminus_Px[pimsIdx],
+                                              piminus_Py[pimsIdx],
+                                              piminus_Pz[pimsIdx],
+                                              piminus_E[pimsIdx]) ;
+        Vpiminus.at(pimsIdx) = TVector3(Vpiminus_X[pimsIdx],
+                                        Vpiminus_Y[pimsIdx],
+                                        Vpiminus_Z[pimsIdx]) ;
     }
     if (fdebug>2) {
         std::cout
