@@ -1548,7 +1548,8 @@ void ComputeKinematics(){
     Q2      = -q.Mag2();
     omega   = q.E();
     xB      = Q2/(2. * Mp * q.E());
-    W2      = Mp2 - Q2 + 2. * omega * Mp;
+    
+    W2      = (target + q).Mag2(); //    W2      = Mp2 - Q2 + 2. * omega * Mp;
     W       = sqrt(W2);
     y       = omega / Ebeam;
 }
@@ -1777,6 +1778,7 @@ void Stream_e_pi_line_to_CSV( TString pionCharge, int piIdx,
     // ------------------------------------------------------------------------------------------------
     xF  = 2. * (pi.Dot(q)) / (q.Mag() * W);
     M_X = ( Beam + target - e - pi ).Mag();
+    
     // now stream data to CSV file
     std::vector<double> variables =
     {   (double)status, (double)runnum,     (double)evnum,      (double)beam_helicity,

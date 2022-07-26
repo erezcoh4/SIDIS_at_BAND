@@ -58,8 +58,10 @@ Long64_t                     evnum;
 int                     NMaxEvents;
 int                            nml;
 int                            nPi;
-
-
+int                           npiP;
+int                           npiM;
+int                      inclusive; // tag to look at inclusive run - all the events with no selection
+int       Ne, Nn, Np, Npips, Npims;
 
 TFile                    * RGAFile;
 TTree                    * RGATree;
@@ -102,6 +104,52 @@ Float_t          ePCAL_lw[NMAXNML];
 Float_t      eECIN_energy[NMAXNML];
 Float_t     eECOUT_energy[NMAXNML];
 
+
+Float_t                piPp[NMAXNML]; // electron momentum
+Float_t               piPpx[NMAXNML]; // electron momentum
+Float_t               piPpy[NMAXNML]; // electron momentum
+Float_t               piPpz[NMAXNML]; // electron momentum
+Float_t               piPvz[NMAXNML]; // electron vertex in z-direction
+Int_t                piPpid[NMAXNML]; // electron PID
+Int_t             piPsector[NMAXNML]; // electron sector
+Float_t            piPtheta[NMAXNML];
+Float_t              piPphi[NMAXNML];
+Int_t          piPfiducial1[NMAXNML];
+Int_t          piPfiducial2[NMAXNML];
+Int_t          piPfiducial3[NMAXNML];
+Float_t      piPPCAL_energy[NMAXNML];
+Float_t           piPPCAL_x[NMAXNML];
+Float_t           piPPCAL_y[NMAXNML];
+Float_t           piPPCAL_z[NMAXNML];
+Float_t          piPPCAL_lu[NMAXNML];
+Float_t          piPPCAL_lv[NMAXNML];
+Float_t          piPPCAL_lw[NMAXNML];
+Float_t      piPECIN_energy[NMAXNML];
+Float_t     piPECOUT_energy[NMAXNML];
+
+
+
+Float_t                piMp[NMAXNML]; // electron momentum
+Float_t               piMpx[NMAXNML]; // electron momentum
+Float_t               piMpy[NMAXNML]; // electron momentum
+Float_t               piMpz[NMAXNML]; // electron momentum
+Float_t               piMvz[NMAXNML]; // electron vertex in z-direction
+Int_t                piMpid[NMAXNML]; // electron PID
+Int_t             piMsector[NMAXNML]; // electron sector
+Float_t            piMtheta[NMAXNML];
+Float_t              piMphi[NMAXNML];
+Int_t          piMfiducial1[NMAXNML];
+Int_t          piMfiducial2[NMAXNML];
+Int_t          piMfiducial3[NMAXNML];
+Float_t      piMPCAL_energy[NMAXNML];
+Float_t           piMPCAL_x[NMAXNML];
+Float_t           piMPCAL_y[NMAXNML];
+Float_t           piMPCAL_z[NMAXNML];
+Float_t          piMPCAL_lu[NMAXNML];
+Float_t          piMPCAL_lv[NMAXNML];
+Float_t          piMPCAL_lw[NMAXNML];
+Float_t      piMECIN_energy[NMAXNML];
+Float_t     piMECOUT_energy[NMAXNML];
 Float_t                Nu[NMAXNML];
 Float_t                qx[NMAXNML];
 Float_t                qy[NMAXNML];
@@ -122,9 +170,11 @@ void                SetVerbosity (int ffdebug )          {fdebug = ffdebug;} ;
 void                 SetDataPath (TString fDataPath )    {DataPath = fDataPath;} ;
 void                 SetFileName (TString fFileName )    {Filename = fFileName;} ;
 void               SetNMaxEVents (int fNMAXevents )      {NMaxEvents = fNMAXevents;};
+void                SetInclusive (int fInclusive )       {inclusive = fInclusive;};
 void                  ReadEvents ();
 void               SetInputTTree ();
-
+void         InitializeVariables ();
+void                ReadRGAEvent (int event);
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 // Main functionality
@@ -133,13 +183,15 @@ void ReadIgorRGAFile(TString fFileName="ntupleNew",
                      int fNMAXevents=-1,
                      int ffdebug=1,
                      int PrintProgress=1000,
-                     TString fDataPath="/Users/erezcohen/Desktop/data/BAND/RGA_Free_proton/"
+                     TString fDataPath="/Users/erezcohen/Desktop/data/BAND/RGA_Free_proton/",
+                     int fInclusive=0
                      ){
     
     SetVerbosity          ( ffdebug );
     SetDataPath           ( fDataPath );
     SetFileName           ( fFileName );
     SetNMaxEVents         ( fNMAXevents );
+    SetInclusive          ( fInclusive );
     InitializeFileReading ();
     OpenInputFile         ();
     OpenOutputFiles       ();
@@ -151,58 +203,222 @@ void ReadIgorRGAFile(TString fFileName="ntupleNew",
 
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+void InitializeVariables (){
+    xB          = Q2        = omega     = -9999;
+//    xF          = y         = M_X       = -9999;
+//    e_E_ECIN    = e_E_ECOUT = e_E_PCAL  = -9999;
+//    e_PCAL_W    = e_PCAL_V              = -9999;
+//    e_PCAL_x    = e_PCAL_y  = e_PCAL_z  = -9999;
+//    e_PCAL_sector                       = -9999;
+//    e_DC_sector = e_DC_Chi2N            = -9999;
+//    for (int regionIdx=0; regionIdx<3; regionIdx++) {
+//        e_DC_x[regionIdx]               = -9999;
+//        e_DC_y[regionIdx]               = -9999;
+//        e_DC_z[regionIdx]               = -9999;
+//    }
+//    Pe_phi = q_phi = q_theta            = 0;
+//
+//    Ve                                  = TVector3();
+//    ePastCutsInEvent                    = false;
+//
+//    piplus          .clear();
+//    piminus         .clear();
+//    piplus_qFrame   .clear();
+//    piminus_qFrame  .clear();
+//    Vpiplus     .clear();
+//    Vpiminus    .clear();
+//    pipluses    .clear();
+//    piminuses   .clear();
+//    electrons   .clear();
+//    neutrons    .clear();
+//    protons     .clear();
+//    gammas      .clear();
+//    for (int piIdx=0; piIdx<NMAXPIONS; piIdx++) {
+//        pips_chi2PID[piIdx]                         = -9999;
+//        pips_DC_sector[piIdx]                       = -9999;
+//        pips_PCAL_sector[piIdx]                     = -9999;
+//        pips_PCAL_W[piIdx] = pips_PCAL_V[piIdx]     = -9999;
+//        pips_PCAL_x[piIdx] = pips_PCAL_y[piIdx]     = -9999;
+//        pips_PCAL_z[piIdx]                          = -9999;
+//        pips_E_PCAL[piIdx]                          = -9999;
+//        pips_E_ECIN[piIdx] = pips_E_ECOUT[piIdx]    = -9999;
+//
+//        pims_chi2PID[piIdx]                         = -9999;
+//        pims_DC_sector[piIdx]                       = -9999;
+//        pims_PCAL_sector[piIdx]                     = -9999;
+//        pims_PCAL_W[piIdx] = pims_PCAL_V[piIdx]     = -9999;
+//        pims_PCAL_x[piIdx] = pims_PCAL_y[piIdx]     = -9999;
+//        pims_PCAL_z[piIdx]                          = -9999;
+//        pims_E_PCAL[piIdx]                          = -9999;
+//        pims_E_ECIN[piIdx] = pims_E_ECOUT[piIdx]    = -9999;
+//        for (int regionIdx=0; regionIdx<3; regionIdx++) {
+//            pips_DC_x[piIdx][regionIdx]= pips_DC_y[piIdx][regionIdx]    = -9999;
+//            pips_DC_z[piIdx][regionIdx]                                 = -9999;
+//            pims_DC_x[piIdx][regionIdx]= pims_DC_y[piIdx][regionIdx]    = -9999;
+//            pims_DC_z[piIdx][regionIdx]                                 = -9999;
+//        }
+//        piplus       .push_back( TLorentzVector(0,0,0,db->GetParticle( 211 )->Mass()) );
+//        piplus_qFrame.push_back( TLorentzVector(0,0,0,db->GetParticle( 211 )->Mass()) );
+//        Vpiplus .push_back( TVector3() );
+//        pipsPastSelectionCuts[piIdx]                = false;
+//        eepipsPastKinematicalCuts[piIdx]            = false;
+//
+//        piminus       .push_back( TLorentzVector(0,0,0,db->GetParticle( -211 )->Mass()) );
+//        piminus_qFrame.push_back( TLorentzVector(0,0,0,db->GetParticle( -211 )->Mass()) );
+//        Vpiminus.push_back( TVector3() );
+//        pimsPastSelectionCuts[piIdx]                = false;
+//        eepimsPastKinematicalCuts[piIdx]            = false;
+//
+//        piplus_Px[piIdx]    = piplus_Py[piIdx]  = piplus_Pz[piIdx]  = piplus_E[piIdx]   = -9999;
+//        piminus_Px[piIdx]   = piminus_Py[piIdx] = piminus_Pz[piIdx] = piminus_E[piIdx]  = -9999;
+//        Vpiplus_X[piIdx]    = Vpiplus_Y[piIdx]  = Vpiplus_Z[piIdx]                      = -9999;
+//        Vpiminus_X[piIdx]   = Vpiminus_Y[piIdx] = Vpiminus_Z[piIdx]                     = -9999;
+//        piplus_qFrame_pT[piIdx]    = piplus_qFrame_pL[piIdx]                            = -9999;
+//        piminus_qFrame_pT[piIdx]   = piminus_qFrame_pL[piIdx]                           = -9999;
+//
+//    }
+//    DC_layer                                        = -9999;
+//    status                                          = 1; // 0 is good...
+//
+//    pipsPastCutsInEvent                             = false;
+//    eepipsPastCutsInEvent                           = false;
+//    pimsPastCutsInEvent                             = false;
+//    eepimsPastCutsInEvent                           = false;
+}
+
+
+// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+void ReadRGAEvent(int event){
+    RGATree->GetEntry(event);
+    Ne    = nml;
+    Npips = npiP;
+    Npims = npiM;
+}
+
+// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void ReadEvents (){
-    if (fdebug>1) std::cout << "ReadEvents (NeventsInRGATree="<<NeventsInRGATree<<")" << std::endl;
+    if (fdebug>1) {
+        std::cout << "ReadEvents (NeventsInRGATree="<<NeventsInRGATree<<")" << std::endl;
+        std::cout << "------------------------------------------------" << std::endl;
+    }
     
     for (int event=0; event < NeventsInRGATree ; event++) {
-        RGATree->GetEntry(event);
         
-        if (fdebug>1){
-            std::cout
-            << "run "    << runnum      << ","
-            << "event "  << evnum       << ","
-            << "nml: "   << nml         << ","
-            << "nPi: "   << nPi         << ","
-            << std::endl;
+        InitializeVariables ();
+        ReadRGAEvent        ( event );
+        
+        
+        
+        
+        // filter events, extract information, and compute event kinematics:
+        // we keep only d(e,e’pi+)X and d(e,e’pi-)X events
+        if(  0 < Ne // after studying some MC and data, we need to kill events with more than 1 electron
+           &&
+           (inclusive == 1 || (0 < Npips) || (0 < Npims)) // "inclusive" means (e,e') events
+           &&
+           (Npips < NMAXPIONS) && (Npims < NMAXPIONS) // we don't want to crash the memeory
+           ){
             
-            for (int e_idx=0; e_idx<nml; e_idx++) {
+            if (fdebug>1){
                 std::cout
-                << "Ep["<<e_idx<<"] "               << Ep[e_idx]            << ","
+                << "run "    << runnum      << ","
+                << "event "  << evnum       << ","
                 << std::endl
-                << "Epx["<<e_idx<<"] "              << Epx[e_idx]           << ","
-                << "Epy["<<e_idx<<"] "              << Epy[e_idx]           << ","
-                << "Epz["<<e_idx<<"] "              << Epz[e_idx]           << ","
-                << std::endl
-                << "Epid["<<e_idx<<"] "             << Epid[e_idx]          << ","
-                << "Esector["<<e_idx<<"] "          << Esector[e_idx]       << ","
-                << std::endl
-                << "Etheta["<<e_idx<<"] "           << Etheta[e_idx]        << ","
-                << "Ephi["<<e_idx<<"] "             << Ephi[e_idx]          << ","
-                << std::endl
-                << "Efiducial1["<<e_idx<<"] "       << Efiducial1[e_idx]    << ","
-                << "Efiducial2["<<e_idx<<"] "       << Efiducial2[e_idx]    << ","
-                << "Efiducial3["<<e_idx<<"] "       << Efiducial3[e_idx]    << ","
-                << std::endl
-                << "ePCAL_energy["<<e_idx<<"] "     << ePCAL_energy[e_idx]  << ","
-                << "eECIN_energy["<<e_idx<<"] "     << eECIN_energy[e_idx]  << ","
-                << "eECOUT_energy["<<e_idx<<"] "    << eECOUT_energy[e_idx] << ","
-                << std::endl
-                << "Nu["<<e_idx<<"] "               << Nu[e_idx]            << ","
-                << std::endl
-                << "qx["<<e_idx<<"] "              << qx[e_idx]           << ","
-                << "qy["<<e_idx<<"] "              << qy[e_idx]           << ","
-                << "qz["<<e_idx<<"] "              << qz[e_idx]           << ","
+                << "nml: "   << nml         << ","
+                << "nPi: "   << nPi         << ","
+                << "npiP: "  << npiP        << ","
+                << "npiM: "  << npiM        << ","
                 << std::endl;
+                
+                for (int e_idx=0; e_idx<nml; e_idx++) {
+                    std::cout
+                    << "Ep["<<e_idx<<"] "               << Ep[e_idx]            << ","
+                    << std::endl
+                    << "Epx["<<e_idx<<"] "              << Epx[e_idx]           << ","
+                    << "Epy["<<e_idx<<"] "              << Epy[e_idx]           << ","
+                    << "Epz["<<e_idx<<"] "              << Epz[e_idx]           << ","
+                    << std::endl
+                    << "Epid["<<e_idx<<"] "             << Epid[e_idx]          << ","
+                    << "Esector["<<e_idx<<"] "          << Esector[e_idx]       << ","
+                    << std::endl
+                    << "Etheta["<<e_idx<<"] "           << Etheta[e_idx]        << ","
+                    << "Ephi["<<e_idx<<"] "             << Ephi[e_idx]          << ","
+                    << std::endl
+                    << "Efiducial1["<<e_idx<<"] "       << Efiducial1[e_idx]    << ","
+                    << "Efiducial2["<<e_idx<<"] "       << Efiducial2[e_idx]    << ","
+                    << "Efiducial3["<<e_idx<<"] "       << Efiducial3[e_idx]    << ","
+                    << std::endl
+                    << "ePCAL_energy["<<e_idx<<"] "     << ePCAL_energy[e_idx]  << ","
+                    << "eECIN_energy["<<e_idx<<"] "     << eECIN_energy[e_idx]  << ","
+                    << "eECOUT_energy["<<e_idx<<"] "    << eECOUT_energy[e_idx] << ","
+                    << std::endl
+                    << "Nu["<<e_idx<<"] "               << Nu[e_idx]            << ","
+                    << std::endl
+                    << "qx["<<e_idx<<"] "              << qx[e_idx]           << ","
+                    << "qy["<<e_idx<<"] "              << qy[e_idx]           << ","
+                    << "qz["<<e_idx<<"] "              << qz[e_idx]           << ","
+                    << std::endl;
+                }
+                for (int pips_idx=0; pips_idx < npiP; pips_idx++) {
+                    std::cout
+                    << "piPp["<<pips_idx<<"] "               << piPp[pips_idx]            << ","
+                    << std::endl
+                    << "piPpx["<<pips_idx<<"] "              << piPpx[pips_idx]           << ","
+                    << "piPpy["<<pips_idx<<"] "              << piPpy[pips_idx]           << ","
+                    << "piPpz["<<pips_idx<<"] "              << piPpz[pips_idx]           << ","
+                    << std::endl
+                    << "piPpid["<<pips_idx<<"] "             << piPpid[pips_idx]          << ","
+                    << "piPsector["<<pips_idx<<"] "          << piPsector[pips_idx]       << ","
+                    << std::endl
+                    << "piPtheta["<<pips_idx<<"] "           << piPtheta[pips_idx]        << ","
+                    << "piPphi["<<pips_idx<<"] "             << piPphi[pips_idx]          << ","
+                    << std::endl
+                    << "piPfiducial1["<<pips_idx<<"] "       << piPfiducial1[pips_idx]    << ","
+                    << "piPfiducial2["<<pips_idx<<"] "       << piPfiducial2[pips_idx]    << ","
+                    << "piPfiducial3["<<pips_idx<<"] "       << piPfiducial3[pips_idx]    << ","
+                    << std::endl
+                    << "piPPCAL_energy["<<pips_idx<<"] "     << piPPCAL_energy[pips_idx]  << ","
+                    << "piPECIN_energy["<<pips_idx<<"] "     << piPECIN_energy[pips_idx]  << ","
+                    << "piPECOUT_energy["<<pips_idx<<"] "    << piPECOUT_energy[pips_idx] << ","
+                    << std::endl;
+                }
+                for (int pims_idx=0; pims_idx < npiM; pims_idx++) {
+                    std::cout
+                    << "piMp["<<pims_idx<<"] "               << piMp[pims_idx]            << ","
+                    << std::endl
+                    << "piMpx["<<pims_idx<<"] "              << piMpx[pims_idx]           << ","
+                    << "piMpy["<<pims_idx<<"] "              << piMpy[pims_idx]           << ","
+                    << "piMpz["<<pims_idx<<"] "              << piMpz[pims_idx]           << ","
+                    << std::endl
+                    << "piMpid["<<pims_idx<<"] "             << piMpid[pims_idx]          << ","
+                    << "piMsector["<<pims_idx<<"] "          << piMsector[pims_idx]       << ","
+                    << std::endl
+                    << "piMtheta["<<pims_idx<<"] "           << piMtheta[pims_idx]        << ","
+                    << "piMphi["<<pims_idx<<"] "             << piMphi[pims_idx]          << ","
+                    << std::endl
+                    << "piMfiducial1["<<pims_idx<<"] "       << piMfiducial1[pims_idx]    << ","
+                    << "piMfiducial2["<<pims_idx<<"] "       << piMfiducial2[pims_idx]    << ","
+                    << "piMfiducial3["<<pims_idx<<"] "       << piMfiducial3[pims_idx]    << ","
+                    << std::endl
+                    << "piMPCAL_energy["<<pims_idx<<"] "     << piMPCAL_energy[pims_idx]  << ","
+                    << "piMECIN_energy["<<pims_idx<<"] "     << piMECIN_energy[pims_idx]  << ","
+                    << "piMECOUT_energy["<<pims_idx<<"] "    << piMECOUT_energy[pims_idx] << ","
+                    << std::endl;
+                }
+                std::cout << "------------------------------------------------" << std::endl;
+            }
+            
+            
+        } else {
+            if (fdebug>1) {
+                std::cout << "Skipped computations in this event as there are not enough particles: "
+                << "Ne = " << Ne << ",Npips = " << Npips << ",Npims = " << Npims << std::endl ;
             }
         }
         
+        
 
-        if (fdebug>1) {
-            std::cout
-            << "event "
-            << event
-            << std::endl;
-        }
+        
         
         if ( (NMaxEvents>0) && (event>NMaxEvents) ){
             if (fdebug>1) { std::cout << std::endl << "Stop reading events at event " << event << std::endl;}
@@ -244,11 +460,59 @@ void SetInputTTree (){
     
     RGATree  -> SetBranchAddress("nPi"              ,&nPi              );
     
+    RGATree  -> SetBranchAddress("npiP"               ,&npiP               );
+    RGATree  -> SetBranchAddress("piPpid"             ,piPpid              );
+    RGATree  -> SetBranchAddress("piPp"               ,piPp                );
+    RGATree  -> SetBranchAddress("piPpx"              ,piPpx               );
+    RGATree  -> SetBranchAddress("piPpy"              ,piPpy               );
+    RGATree  -> SetBranchAddress("piPpz"              ,piPpz               );
+    RGATree  -> SetBranchAddress("piPvz"              ,piPvz               );
+    RGATree  -> SetBranchAddress("piPtheta"           ,piPtheta            );
+    RGATree  -> SetBranchAddress("piPphi"             ,piPphi              );
+    RGATree  -> SetBranchAddress("piPfiducial1"       ,piPfiducial1        );
+    RGATree  -> SetBranchAddress("piPfiducial2"       ,piPfiducial2        );
+    RGATree  -> SetBranchAddress("piPfiducial3"       ,piPfiducial3        );
+    RGATree  -> SetBranchAddress("piPfiducial3"       ,piPfiducial3        );
+    RGATree  -> SetBranchAddress("piPPCAL_energy"     ,piPPCAL_energy      );
+    RGATree  -> SetBranchAddress("piPPCAL_x"          ,piPPCAL_x           );
+    RGATree  -> SetBranchAddress("piPPCAL_y"          ,piPPCAL_y           );
+    RGATree  -> SetBranchAddress("piPPCAL_z"          ,piPPCAL_z           );
+    RGATree  -> SetBranchAddress("piPPCAL_lu"         ,piPPCAL_lu          );
+    RGATree  -> SetBranchAddress("piPPCAL_lv"         ,piPPCAL_lv          );
+    RGATree  -> SetBranchAddress("piPPCAL_lw"         ,piPPCAL_lw          );
+    RGATree  -> SetBranchAddress("piPECIN_energy"     ,piPECIN_energy      );
+    RGATree  -> SetBranchAddress("piPECOUT_energy"    ,piPECOUT_energy     );
+
+    RGATree  -> SetBranchAddress("npiM"               ,&npiM               );
+    RGATree  -> SetBranchAddress("piMpid"             ,piMpid              );
+    RGATree  -> SetBranchAddress("piMp"               ,piMp                );
+    RGATree  -> SetBranchAddress("piMpx"              ,piMpx               );
+    RGATree  -> SetBranchAddress("piMpy"              ,piMpy               );
+    RGATree  -> SetBranchAddress("piMpz"              ,piMpz               );
+    RGATree  -> SetBranchAddress("piMvz"              ,piMvz               );
+    RGATree  -> SetBranchAddress("piMtheta"           ,piMtheta            );
+    RGATree  -> SetBranchAddress("piMphi"             ,piMphi              );
+    RGATree  -> SetBranchAddress("piMfiducial1"       ,piMfiducial1        );
+    RGATree  -> SetBranchAddress("piMfiducial2"       ,piMfiducial2        );
+    RGATree  -> SetBranchAddress("piMfiducial3"       ,piMfiducial3        );
+    RGATree  -> SetBranchAddress("piMfiducial3"       ,piMfiducial3        );
+    RGATree  -> SetBranchAddress("piMPCAL_energy"     ,piMPCAL_energy      );
+    RGATree  -> SetBranchAddress("piMPCAL_x"          ,piMPCAL_x           );
+    RGATree  -> SetBranchAddress("piMPCAL_y"          ,piMPCAL_y           );
+    RGATree  -> SetBranchAddress("piMPCAL_z"          ,piMPCAL_z           );
+    RGATree  -> SetBranchAddress("piMPCAL_lu"         ,piMPCAL_lu          );
+    RGATree  -> SetBranchAddress("piMPCAL_lv"         ,piMPCAL_lv          );
+    RGATree  -> SetBranchAddress("piMPCAL_lw"         ,piMPCAL_lw          );
+    RGATree  -> SetBranchAddress("piMECIN_energy"     ,piMECIN_energy      );
+    RGATree  -> SetBranchAddress("piMECOUT_energy"    ,piMECOUT_energy     );
+
+    
+    
     RGATree  -> SetBranchAddress("Nu"               ,Nu                );
     RGATree  -> SetBranchAddress("qx"               ,qx                );
     RGATree  -> SetBranchAddress("qy"               ,qy                );
     RGATree  -> SetBranchAddress("qz"               ,qz                );
-    
+
 //    ******************************************************************************
 //    *Tree    :T         : e'pion                                                 *
 //    *Br    1 :runNum    : runNum/L                                               *

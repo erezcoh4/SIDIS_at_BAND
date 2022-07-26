@@ -395,7 +395,7 @@ void StreamToCSVfile (std::vector<Double_t> observables, bool passed_cuts_e_pi_k
         }
     }
     else {
-        if (fdebug>1) {
+        if (fdebug>2) {
             std::cout << "Did not pass cuts, not writing to file" << std::endl;
         }
     }
@@ -663,23 +663,25 @@ void SetInputAndOutputTTrees (){
     MergedTree->Branch("Nprotons"               ,&Np                    );
     MergedTree->Branch("Nneutrons"              ,&Nn                    );
     MergedTree->Branch("y"                      ,&y                     );
+
+    MergedTree->Branch("Npips"                    ,&Npips                  , "Npips/I"    );
+    MergedTree->Branch("piplus_Px"                ,&piplus_Px              , "piplus_Px[Npips]/D"    );
+    MergedTree->Branch("piplus_Py"                ,&piplus_Py              , "piplus_Py[Npips]/D"    );
+    MergedTree->Branch("piplus_Pz"                ,&piplus_Pz              , "piplus_Pz[Npips]/D"    );
+    MergedTree->Branch("piplus_E"                 ,&piplus_E               , "piplus_E[Npips]/D"    );
+    MergedTree->Branch("Vpiplus_X"                ,&Vpiplus_X              , "Vpiplus_X[Npips]/D"    );
+    MergedTree->Branch("Vpiplus_Y"                ,&Vpiplus_Y              , "Vpiplus_Y[Npips]/D"    );
+    MergedTree->Branch("Vpiplus_Z"                ,&Vpiplus_Z              , "Vpiplus_Z[Npips]/D"    );
     
-    MergedTree->Branch("piplus_Px"                ,&piplus_Px              , "piplus_Px[20]/D"    );
-    MergedTree->Branch("piplus_Py"                ,&piplus_Py              , "piplus_Py[20]/D"    );
-    MergedTree->Branch("piplus_Pz"                ,&piplus_Pz              , "piplus_Pz[20]/D"    );
-    MergedTree->Branch("piplus_E"                 ,&piplus_E               , "piplus_E[20]/D"    );
-    MergedTree->Branch("Vpiplus_X"                ,&Vpiplus_X              , "Vpiplus_X[20]/D"    );
-    MergedTree->Branch("Vpiplus_Y"                ,&Vpiplus_Y              , "Vpiplus_Y[20]/D"    );
-    MergedTree->Branch("Vpiplus_Z"                ,&Vpiplus_Z              , "Vpiplus_Z[20]/D"    );
     
-    
-    MergedTree->Branch("piminus_Px"                ,&piminus_Px              , "piminus_Px[20]/D"    );
-    MergedTree->Branch("piminus_Py"                ,&piminus_Py              , "piminus_Py[20]/D"    );
-    MergedTree->Branch("piminus_Pz"                ,&piminus_Pz              , "piminus_Pz[20]/D"    );
-    MergedTree->Branch("piminus_E"                 ,&piminus_E               , "piminus_E[20]/D"    );
-    MergedTree->Branch("Vpiminus_X"                ,&Vpiminus_X              , "Vpiminus_X[20]/D"    );
-    MergedTree->Branch("Vpiminus_Y"                ,&Vpiminus_Y              , "Vpiminus_Y[20]/D"    );
-    MergedTree->Branch("Vpiminus_Z"                ,&Vpiminus_Z              , "Vpiminus_Z[20]/D"    );
+    MergedTree->Branch("Npims"                     ,&Npims                   , "Npims/I"    );
+    MergedTree->Branch("piminus_Px"                ,&piminus_Px              , "piminus_Px[Npims]/D"    );
+    MergedTree->Branch("piminus_Py"                ,&piminus_Py              , "piminus_Py[Npims]/D"    );
+    MergedTree->Branch("piminus_Pz"                ,&piminus_Pz              , "piminus_Pz[Npims]/D"    );
+    MergedTree->Branch("piminus_E"                 ,&piminus_E               , "piminus_E[Npims]/D"    );
+    MergedTree->Branch("Vpiminus_X"                ,&Vpiminus_X              , "Vpiminus_X[Npims]/D"    );
+    MergedTree->Branch("Vpiminus_Y"                ,&Vpiminus_Y              , "Vpiminus_Y[Npims]/D"    );
+    MergedTree->Branch("Vpiminus_Z"                ,&Vpiminus_Z              , "Vpiminus_Z[Npims]/D"    );
     
     if (pionCharge=="pi+") {
         MergedTree->Branch("Z"                      ,Zpips                  );
@@ -848,12 +850,16 @@ void ComputeKinematics(){
     Q2      = -q->Mag2();
     omega   = q->E();
     
-    W2      = Mp2 - Q2 + 2. * omega * Mp;
+    W2      = (target + q).Mag2();
     W       = sqrt(W2);
     
-    // W' from [E12-11-003A proposal, p. 13]
-    W2prime = Mp2 - Q2 + 2. * omega * (Md - Es) + 2. * Ps * sqrt(Q2 + w2) * cos( theta_sq );
+    W2      = (-Pn + q).Mag2();
     WPrime  = sqrt(W2prime);
+    
+    // for a proton
+    // W2      = Mp2 - Q2 + 2. * omega * Mp;
+    // W' from [E12-11-003A proposal, p. 13]
+    // W2prime = Mp2 - Q2 + 2. * omega * (Md - Es) + 2. * Ps * sqrt(Q2 + w2) * cos( theta_sq );
 
     xB      = Q2 / (2. * Mp * omega);
     xPrime1 = Q2 / (2. * ((Md - Es) * omega + Pn_Vect*q->Vect() ));
@@ -941,7 +947,7 @@ void Stream_e_pi_n_line_to_CSV(int piIdx,
 
     
     if (fdebug>2){
-        if (pi->P() < 1.25) {
+        if ((pi->P() < 1.25) && (passed_cuts_e_pi_kinematics)){
             std::cout
             << " pi->P() = " << pi->P() << " < 1.25 GeV/c!"
             << std::endl

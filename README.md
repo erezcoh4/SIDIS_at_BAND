@@ -17,6 +17,13 @@ July-25, 2022
 
 2. Fixed a bug that wrote piplus_qFrame_pT and piminus_qFrame_pT wrongly as 0 to the TTree in SIDISc12rSkimmer()
 
+3. Corrected W and W' from quantities calculated on the proton
+    W       = sqrt( Mp2 - Q2 + 2. * omega * Mp );
+    WPrime  = sqrt( Mp2 - Q2 + 2. * omega * (Md - Es) + 2. * Ps * sqrt(Q2 + w2) * cos( theta_sq ) );
+to ones calculated on the deuteron
+    W       = sqrt((P+q)2)   = sqrt( (target + q).Mag2()) 
+    WPrime  = sqrt((p_i+q)2) = sqrt( (-p_n + q).Mag2() ) 
+
 
 July-21, 2022    
 -------------
@@ -587,12 +594,29 @@ Spectator energy-momentum and angle
 
 W - hadronic invariant mass
 
+    // for a proton
     W       = sqrt( Mp2 - Q2 + 2. * omega * Mp );
-
     WPrime  = sqrt( Mp2 - Q2 + 2. * omega * (Md - Es) + 2. * Ps * sqrt(Q2 + w2) * cos( theta_sq ) );
+    
+    
+    // for a deuteron
+    W       = sqrt((P+q)2)   = sqrt( Md2 -Q2 + 2. * omega * Md ) 
+    WPrime  = sqrt((p_i+q)2) = sqrt((-p_n+q)2) 
 
 
+M_X - invariant mass of the emerging hadron
 
+for (e,e'π)  
+
+    M_X_ee_pi = ( Beam + target - e - pi ).Mag();
+    
+for (e,e'πn)    
+    
+    M_X_ee_pi_n = ( Beam + target - e - pi - n ).Mag();
+    
+    
+    
+    
     // write a (e,e'pi) event-line to CSV file
 
     // from Harut A., Aug-2, 2021:
