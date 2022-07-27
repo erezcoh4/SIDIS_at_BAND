@@ -608,11 +608,11 @@ M_X - invariant mass of the emerging hadron
 
 for (e,e'π)  
 
-    M_X_ee_pi = ( Beam + target - e - pi ).Mag();
+    M_X_ee_pi = ( (Beam + target) - (e + pi) ).Mag();
     
 for (e,e'πn)    
     
-    M_X_ee_pi_n = ( Beam + target - e - pi - n ).Mag();
+    M_X_ee_pi_n = ( (Beam + target) - (e + pi + n) ).Mag();
     
     
     

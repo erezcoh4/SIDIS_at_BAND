@@ -40,6 +40,222 @@ e_e_pi_GEMC_pass_cuts                              = dict()
 
 
 
+
+
+
+# ------------------------------------------------------------------------------------------------ #
+def apply_further_selection_cuts_to_data(fdebug=2,
+                                         NeventsMax=-1,
+                                         NMaxPerSubset = 500000,
+                                         doAcceptanceMatchingCut = True,
+                                         doApply_minPn_cut       = True,
+                                         doApply_Mx_cut          = True,):#{
+    '''
+    e_e_pi_pass_cuts, e_e_pi_n_pass_cuts, e_e_pi_GEMC_pass_cuts = apply_further_selection_cuts_to_data(fdebug=2)
+    last edit July-26, 2022
+    
+    Apply selection cuts not previously imposed
+    
+    The cuts applied for (e,e'π) events:
+    1. pi+/pi- acceptance matching cut in p-theta plane
+    2. Missing mass cut on (e,e'\pi) events
+    
+    The cuts applied for (e,e'πn) events:
+    1. pi+/pi- acceptance matching cut in p-theta plane
+    
+    
+    input:
+    --------
+    doApply_*_cut      flag to apply the cut or not
+    
+    return:
+    --------
+    e_e_pi_pass_cuts, e_e_pi_n_pass_cuts, e_e_pi_GEMC_pass_cuts
+    
+    '''
+    global e_e_pi, e_e_pi_n, e_e_pi_GEMC
+    global e_e_pi_pass_cuts, e_e_pi_n_pass_cuts, e_e_pi_GEMC_pass_cuts
+    
+    
+    # (e,e'\pi n) SIDIS data complete this -  need to add sector ID in the (e,e'\pi n) data
+    print('Applying selection cuts not previously imposed')
+    
+    # print number of events retained on every cut
+    if fdebug < 1: return
+    Nevents      = dict()
+    frac_Nevents = dict()
+    
+    # (1) Data
+    if (e_e_pi=={}) is False:#{
+        print('(1) DATA')
+        print("(e,e'π)")
+        
+        # (e,e'\pi) SIDIS data
+        if doAcceptanceMatchingCut:#{
+            e_e_pi_after_p_theta_cut = apply_p_theta_acceptance_cut( e_e_pi,
+                                                                    NeventsMax=NeventsMax,
+                                                                    NMaxPerSubset=NMaxPerSubset,
+                                                                    fdebug=fdebug )
+        #}
+        else:#{
+            e_e_pi_after_p_theta_cut = dict()
+            for pi_ch,pi_print in zip(pi_charge_names,pi_prints):#{
+                df = e_e_pi[pi_ch]
+                e_e_pi_after_p_theta_cut[pi_ch] = df[0:NeventsMax]
+            #}
+        #}
+            
+        if doApply_Mx_cut:  #{
+            e_e_pi_after_Mx_cut      = apply_Mx_cut( e_e_pi_after_p_theta_cut )
+        #}
+        else: #{
+            e_e_pi_after_Mx_cut      = e_e_pi_after_p_theta_cut
+        #}
+        
+        e_e_pi_after_Kinematical_cuts = apply_Kinematical_cuts( e_e_pi_after_Mx_cut )
+        
+        e_e_pi_pass_cuts         = e_e_pi_after_Kinematical_cuts;
+
+        for pi_ch,pi_print in zip(pi_charge_names,pi_prints):#{
+            print('(e,e',pi_print,')')
+            Nevents,frac_Nevents = dict(),dict()
+            if NeventsMax < 0:
+                Nevents,frac_Nevents = get_Nevents(pi_ch, 'original',  e_e_pi, Nevents, frac_Nevents);
+            else:
+                Nevents[pi_ch + ' original cut'] = NeventsMax
+                frac_Nevents[pi_ch + ' original cut'] = 1
+                
+            Nevents,frac_Nevents = get_Nevents(pi_ch, 'p-theta',      e_e_pi_after_p_theta_cut,      Nevents, frac_Nevents);
+            Nevents,frac_Nevents = get_Nevents(pi_ch, 'Mx',           e_e_pi_after_Mx_cut,           Nevents, frac_Nevents);
+            Nevents,frac_Nevents = get_Nevents(pi_ch, 'Kinematical',  e_e_pi_after_Kinematical_cuts, Nevents, frac_Nevents);
+        #}
+        print(' ')
+    #}
+    if (e_e_pi_n=={}) is False:#{
+        print("(e,e'πn)")
+        
+        # tagged (e,e'\pi) SIDIS data
+        if doApply_minPn_cut:#{
+            e_e_pi_n_after_minPn_cut   = apply_minPn_cut( e_e_pi_n )
+        else:
+            e_e_pi_n_after_minPn_cut = dict()
+            for pi_ch,pi_print in zip(pi_charge_names,pi_prints):#{
+                df = e_e_pi_n[pi_ch]
+                e_e_pi_n_after_minPn_cut[pi_ch] = df[0:NeventsMax]
+            #}
+        #}
+
+            
+        if doAcceptanceMatchingCut:
+            e_e_pi_n_after_p_theta_cut = apply_p_theta_acceptance_cut( e_e_pi_n_after_minPn_cut,
+                                                                      NeventsMax=NeventsMax,
+                                                                      NMaxPerSubset=NMaxPerSubset,
+                                                                      fdebug=fdebug )
+        else:
+            e_e_pi_n_after_p_theta_cut = e_e_pi_n_after_minPn_cut
+            
+        e_e_pi_n_after_Kinematical_cuts = apply_Kinematical_cuts( e_e_pi_n_after_p_theta_cut )
+        e_e_pi_n_pass_cuts  = e_e_pi_n_after_Kinematical_cuts;
+
+        for pi_ch,pi_print in zip(pi_charge_names,pi_prints):#{
+            print('(e,e',pi_print,')')
+            Nevents,frac_Nevents = dict(),dict()
+            if NeventsMax < 0:
+                Nevents,frac_Nevents = get_Nevents(pi_ch, 'original',  e_e_pi_n, Nevents, frac_Nevents);
+            else:
+                Nevents[pi_ch + 'original cut'] = NeventsMax
+                frac_Nevents[pi_ch + 'original cut'] = 1
+                
+            Nevents,frac_Nevents = get_Nevents(pi_ch, 'p-theta',      e_e_pi_n_after_p_theta_cut,      Nevents, frac_Nevents);
+            Nevents,frac_Nevents = get_Nevents(pi_ch, 'Kinematical',  e_e_pi_n_after_Kinematical_cuts, Nevents, frac_Nevents);
+        #}
+        print(' ')
+    #}
+    
+    # (2) MC
+    if (e_e_pi_GEMC=={}) is False:#{
+        print('(2) MC')
+        
+        # (e,e'\pi) - (uniform) MC for acceptance correction (uniform in e and \pi)
+        e_e_pi_GEMC_after_eepi_cuts       = dict()
+
+        # Apply (e,e'pi) SIDIS kinematical cuts while asking if pion was accepted,
+        # externally (here, and not in the CLAS12ROOT script) since we
+        # want to retain and record also the events that did not pass these cuts, in the simulation
+        # whereas in data we just omit events that did not pass these cuts
+        for pi_ch in pi_charge_names:#{
+            e_e_pi_GEMC_after_eepi_cuts[pi_ch] = e_e_pi_GEMC[pi_ch][(e_e_pi_GEMC[pi_ch].pi_passed_cuts==1) & (e_e_pi_GEMC[pi_ch].eepiPastKinematicalCuts==1)];
+        #}
+        e_e_pi_GEMC_after_p_theta_cut = apply_p_theta_acceptance_cut( e_e_pi_GEMC_after_eepi_cuts )
+        e_e_pi_GEMC_after_Mx_cut      = apply_Mx_cut(  e_e_pi_GEMC_after_p_theta_cut )
+        e_e_pi_GEMC_pass_cuts         = e_e_pi_GEMC_after_Mx_cut;
+
+
+        
+        # print number of events retained on every cut in the uniform GEMC
+        if fdebug<2: return
+        for pi_ch,pi_print in zip(pi_charge_names,pi_prints):#{
+            print('(e,e',pi_print,') in uniform GEMC simulation')
+
+            Nevents[pi_ch + ' GEMC original'] = len(e_e_pi_GEMC[pi_ch])
+            frac_Nevents[pi_ch + ' GEMC original'] = 1
+            print(Nevents[pi_ch + ' GEMC original'],'events before cut')
+
+            Nevents[pi_ch +' GEMC p-theta cut'] = len(e_e_pi_GEMC_after_p_theta_cut[pi_ch])
+            frac_Nevents[pi_ch + ' GEMC p-theta cut'] = float(Nevents[pi_ch +' GEMC p-theta cut'])/ Nevents[pi_ch + ' GEMC original']
+            print(Nevents[pi_ch +' GEMC p-theta cut'],'events after p-theta cut (%.1f'%(100.*frac_Nevents[pi_ch + ' GEMC p-theta cut']),'%)')
+
+
+            Nevents[pi_ch +' GEMC Mx cut'] = len(e_e_pi_GEMC_after_Mx_cut[pi_ch])
+            frac_Nevents[pi_ch + ' GEMC Mx cut'] = float(Nevents[pi_ch +' GEMC Mx cut'])/Nevents[pi_ch + ' GEMC original']
+            print(Nevents[pi_ch +' GEMC Mx cut'],'events after M_X cut (%.1f'%(100.*frac_Nevents[pi_ch + ' GEMC Mx cut']),'%)')
+        #}
+        print(' ')
+    #}
+    print('Done applying selection cuts not previously imposed')
+    return e_e_pi_pass_cuts, e_e_pi_n_pass_cuts, e_e_pi_GEMC_pass_cuts
+#}
+# ------------------------------------------------------------------------------------------------ #
+
+
+
+
+
+
+
+
+# ------------------------------------------------------------------------------------------------ #
+def get_Nevents(pi_ch='piplus',
+                cut_name='p-theta',
+                df_dict = None,
+                Nevents = dict(),
+                frac_Nevents = dict()):
+    '''
+    last update July-26, 2022
+    
+    input:
+    --------
+    cut name
+    
+    return:
+    --------
+    Nevents,frac_Nevents
+    
+    '''
+    df_after_cut = df_dict[pi_ch]
+    if pi_ch+' original cut' not in Nevents.keys(): #{
+        Nevents[pi_ch + ' original cut']      = len(df_after_cut)
+        frac_Nevents[pi_ch + ' original cut'] = 1
+    #}
+
+    label = pi_ch +' ' + cut_name + ' cut'
+    Nevents[label] = len(df_after_cut)
+    frac_Nevents[label] = float(Nevents[label])/ Nevents[pi_ch + ' original cut']
+    print(Nevents[label],'events after '+cut_name+' cut (%.1f'%(100.*frac_Nevents[label]),'%)')
+    return Nevents,frac_Nevents
+# ------------------------------------------------------------------------------------------------ #
+
+
 # ------------------------------------------------------------------------------------------------ #
 def extract_SIDIS_ratio(df_dict  = None,
                         x_var    = 'xB' ,
@@ -364,7 +580,7 @@ def load_SIDIS_data(runs_filename  = "good_runs_10-2-final.txt",
                                               'e_P','e_Theta','e_Phi',
                                               'pi_P', 'pi_Theta', 'pi_Phi',
                                               'Q2', 'W', 'xB', 'Zpi',
-                                              'M_X', 'e_DC_sector', 'pi_DC_sector'],
+                                              'M_X', 'e_DC_sector', 'pi_DC_sector','pi_pT_qFrame','pi_pL_qFrame'],
                                      dtype={'runnum':int,'evnum': int,
                                             'e_DC_sector':int, 'pi_DC_sector':int,
                                             'e_P':np.half,'e_Theta':np.half,'e_Phi':np.half,
@@ -401,6 +617,7 @@ def load_SIDIS_data(runs_filename  = "good_runs_10-2-final.txt",
     #}
 #}
 # ------------------------------------------------------------------------------------------------ #
+
 
 
 
