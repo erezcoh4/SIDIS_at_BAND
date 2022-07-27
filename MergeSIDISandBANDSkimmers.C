@@ -853,7 +853,7 @@ void ComputeKinematics(){
     W2      = (*target + *q).Mag2();
     W       = sqrt(W2);
     
-    W2      = (-Pn + *q).Mag2();
+    W2      = ((-Pn) + *q).Mag2();
     WPrime  = sqrt(W2prime);
     
     // for a proton
@@ -876,9 +876,10 @@ void ComputeKinematics(){
         << std::endl
         << "Pe: "       << e->P()   << " GeV/c,"
         << "x: "        << xB       << ","
-        << "x'(1): "       << xPrime1   << ","
-        << "x'(2): "       << xPrime2   << ","
+        << "x'(1): "    << xPrime1   << ","
+        << "x'(2): "    << xPrime2   << ","
         << std::endl
+        << "-Pn: "      << (-Pn)->P() << " GeV/c,"
         << "W: "        << W        << " GeV/c2,"
         << "W': "       << WPrime   << " GeV/c2,"
         << std::endl;
