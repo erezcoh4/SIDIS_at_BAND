@@ -875,9 +875,14 @@ void ComputeKinematics(){
         << "ComputeKinematics()"
         << std::endl
         << "Pe: "       << e->P()   << " GeV/c,"
-        << "x: "        << xB       << ","
+        << "x: "        << xB        << ","
         << "x'(1): "    << xPrime1   << ","
         << "x'(2): "    << xPrime2   << ","
+        << std::endl
+        << "((-Pn) + *q).Px()" << ((-Pn) + *q).Px() << ","
+        << "((-Pn) + *q).Py()" << ((-Pn) + *q).Py() << ","
+        << "((-Pn) + *q).Pz()" << ((-Pn) + *q).Pz() << ","
+        << "((-Pn) + *q).E()"  << ((-Pn) + *q).E()  << ","
         << std::endl
         << "-Pn: "      << (-Pn).P() << " GeV/c,"
         << "W: "        << W        << " GeV/c2,"
