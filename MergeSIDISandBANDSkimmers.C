@@ -878,6 +878,9 @@ void ComputeKinematics(){
         << "x: "        << xB       << ","
         << "x'(1): "       << xPrime1   << ","
         << "x'(2): "       << xPrime2   << ","
+        << std::endl
+        << "W: "        << W        << " GeV/c2,"
+        << "W': "       << WPrime   << " GeV/c2,"
         << std::endl;
     }
     
