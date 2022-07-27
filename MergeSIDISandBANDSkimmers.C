@@ -121,6 +121,7 @@ TLorentzVector        *e=0;
 TLorentzVector        *q=0;
 TLorentzVector          Pn; // neutron momentum
 TLorentzVector Band_data_e; // electron information in BAND TTree
+TLorentzVector       Pmiss;
 // reconstructed vertex position
 TVector3             *Ve=0;
 TVector3           Pn_Vect; // neutron 3-momentum
@@ -842,6 +843,7 @@ void ComputeKinematics(){
     
     Es      = Pn.E();
     Ps      = Pn.P();
+    Pmiss   = TLorentzVector( -Pn.P(), Pn.E() );
     omega   = q->E();
     w2      = omega * omega;
     y       = omega / Ebeam;
@@ -853,7 +855,7 @@ void ComputeKinematics(){
     W2      = (*target + *q).Mag2();
     W       = sqrt(W2);
     
-    W2      = ((-Pn) + *q).Mag2();
+    W2      = (Pmiss + *q).Mag2();
     WPrime  = sqrt(W2prime);
     
     // for a proton
@@ -879,11 +881,12 @@ void ComputeKinematics(){
         << "x'(1): "    << xPrime1   << ","
         << "x'(2): "    << xPrime2   << ","
         << std::endl
-        << "((-Pn) + *q).Px(): " << ((-Pn) + *q).Px() << ","
-        << "((-Pn) + *q).Py(): " << ((-Pn) + *q).Py() << ","
-        << "((-Pn) + *q).Pz(): " << ((-Pn) + *q).Pz() << ","
-        << "((-Pn) + *q).E(): "  << ((-Pn) + *q).E()  << ","
-        << "((-Pn) + *q).Mag(): "<< ((-Pn) + *q).Mag()  << ","
+        << "(Pmiss + *q).Px(): " << (Pmiss + *q).Px() << ","
+        << "(Pmiss + *q).Py(): " << (Pmiss + *q).Py() << ","
+        << "(Pmiss + *q).Pz(): " << (Pmiss + *q).Pz() << ","
+        << "(Pmiss + *q).E(): "  << (Pmiss + *q).E()  << ","
+        << "(Pmiss + *q).Mag(): "<< (Pmiss + *q).Mag()  << ","
+        << "(Pmiss + *q).Mag2(): "<< (Pmiss + *q).Mag2()  << ","
         << std::endl
         << "-Pn: "      << (-Pn).P() << " GeV/c,"
         << "W: "        << W        << " GeV/c2,"
