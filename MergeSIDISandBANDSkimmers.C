@@ -843,7 +843,7 @@ void ComputeKinematics(){
     
     Es      = Pn.E();
     Ps      = Pn.P();
-    Pmiss   = TLorentzVector( -Pn.vector(), Pn.E() );
+    Pmiss   = TLorentzVector( -Pn.Vect(), Pn.E() );
     omega   = q->E();
     w2      = omega * omega;
     y       = omega / Ebeam;
