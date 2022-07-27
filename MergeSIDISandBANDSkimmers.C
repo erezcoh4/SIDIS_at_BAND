@@ -855,7 +855,7 @@ void ComputeKinematics(){
     W2      = (*target + *q).Mag2();
     W       = sqrt(W2);
     
-    W2      = (Pmiss + *q).Mag2();
+    W2prime = (Pmiss + *q).Mag2();
     WPrime  = sqrt(W2prime);
     
     // for a proton
