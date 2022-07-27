@@ -879,7 +879,7 @@ void ComputeKinematics(){
         << "x'(1): "    << xPrime1   << ","
         << "x'(2): "    << xPrime2   << ","
         << std::endl
-        << "-Pn: "      << (-Pn)->P() << " GeV/c,"
+        << "-Pn: "      << (-Pn).P() << " GeV/c,"
         << "W: "        << W        << " GeV/c2,"
         << "W': "       << WPrime   << " GeV/c2,"
         << std::endl;
