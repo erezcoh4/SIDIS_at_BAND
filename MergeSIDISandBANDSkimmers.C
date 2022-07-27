@@ -850,10 +850,10 @@ void ComputeKinematics(){
     Q2      = -q->Mag2();
     omega   = q->E();
     
-    W2      = (target + q).Mag2();
+    W2      = (target + *q).Mag2();
     W       = sqrt(W2);
     
-    W2      = (-Pn + q).Mag2();
+    W2      = (-Pn + *q).Mag2();
     WPrime  = sqrt(W2prime);
     
     // for a proton
