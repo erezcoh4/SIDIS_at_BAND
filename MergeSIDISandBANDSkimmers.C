@@ -44,7 +44,8 @@ TString            csvheader = ((TString)"status,runnum,evnum,beam_helicity,"
                                 +(TString)"e_DC_sector,pi_DC_sector,"
                                 +(TString)"n_E,n_ToF,"
                                 +(TString)"pi_pT_qFrame,pi_pL_qFrame,"
-                                +(TString)"n_HitPos_X,n_HitPos_Y,n_HitPos_Z,");
+                                +(TString)"n_HitPos_X,n_HitPos_Y,n_HitPos_Z,"
+                                +(TString)"pi_Theta_qFrame,pi_Phi_qFrame,");
 
 TString DataPath = "/volatile/clas12/users/ecohen/BAND/";
 TString                            prefix = "sidisdvcs_";
@@ -169,26 +170,26 @@ double           Vpiplus_Z[NMAXPIONS];
 double      pips_DC_sector[NMAXPIONS];
 double    piplus_qFrame_pT[NMAXPIONS]; // transverse momentum with respect to q
 double    piplus_qFrame_pL[NMAXPIONS]; // longitudinal momentum with respect to q
+double piplus_Theta_qFrame[NMAXPIONS];
+double   piplus_Phi_qFrame[NMAXPIONS];
 
-
-double          piminus_Px[NMAXPIONS];
-double          piminus_Py[NMAXPIONS];
-double          piminus_Pz[NMAXPIONS];
-double           piminus_E[NMAXPIONS];
-double          Vpiminus_X[NMAXPIONS];
-double          Vpiminus_Y[NMAXPIONS];
-double          Vpiminus_Z[NMAXPIONS];
-double      pims_DC_sector[NMAXPIONS];
-double   piminus_qFrame_pT[NMAXPIONS]; // transverse momentum with respect to q
-double   piminus_qFrame_pL[NMAXPIONS]; // longitudinal momentum with respect to q
+double           piminus_Px[NMAXPIONS];
+double           piminus_Py[NMAXPIONS];
+double           piminus_Pz[NMAXPIONS];
+double            piminus_E[NMAXPIONS];
+double           Vpiminus_X[NMAXPIONS];
+double           Vpiminus_Y[NMAXPIONS];
+double           Vpiminus_Z[NMAXPIONS];
+double       pims_DC_sector[NMAXPIONS];
+double    piminus_qFrame_pT[NMAXPIONS]; // transverse momentum with respect to q
+double    piminus_qFrame_pL[NMAXPIONS]; // longitudinal momentum with respect to q
+double piminus_Theta_qFrame[NMAXPIONS];
+double   piminus_Phi_qFrame[NMAXPIONS];
 
 clashit *eHit             = new clashit;
-//TClonesArray      * eHit  = new TClonesArray("clashit"); // CLAS12 electrons in BAND analysis
 TClonesArray      * nHits = new TClonesArray("bandhit"); // BAND neutrons in BAND analysis
 TClonesArray    * mcParts = new TClonesArray("genpart");
-// TClonesArray  &save_e_Hit = *eHit;
-// TClonesArray     &saveHit = *nHits;
-// TClonesArray      &saveMC = *mcParts;
+
 
 void             OpenInputFiles (TString RunStr);
 void            OpenOutputFiles (TString RunStr);
@@ -908,26 +909,33 @@ void Stream_e_pi_n_line_to_CSV(int piIdx,
                                bool passed_cuts_e_pi_kinematics,
                                bool passed_cuts_n){
     
-    TLorentzVector   * pi;
-    TVector3        * Vpi;
-    double            Zpi;
-    double   pi_DC_sector;
-    double   pi_pT_qFrame;
-    double   pi_pL_qFrame;
+    TLorentzVector     * pi;
+    TVector3          * Vpi;
+    double              Zpi;
+    double     pi_DC_sector;
+    double     pi_pT_qFrame;
+    double     pi_pL_qFrame;
+    double  pi_Theta_qFrame;
+    double    pi_Phi_qFrame;
     
     if (pionCharge=="pi+") {
-        pi           = &piplus[piIdx];
-        Vpi          = &Vpiplus[piIdx];
-        pi_DC_sector = pips_DC_sector[piIdx];
-        pi_pT_qFrame = piplus_qFrame_pT[piIdx];
-        pi_pL_qFrame = piplus_qFrame_pL[piIdx];
+        pi              = &piplus               [piIdx];
+        Vpi             = &Vpiplus              [piIdx];
+        pi_DC_sector    = pips_DC_sector        [piIdx];
+        pi_pT_qFrame    = piplus_qFrame_pT      [piIdx];
+        pi_pL_qFrame    = piplus_qFrame_pL      [piIdx];
+        pi_Theta_qFrame = piplus_Theta_qFrame   [piIdx];
+        pi_Phi_qFrame   = piplus_Phi_qFrame     [piIdx];
     }
     else if (pionCharge=="pi-") {
-        pi           = &piminus[piIdx];
-        Vpi          = &Vpiminus[piIdx];
-        pi_DC_sector = pims_DC_sector[piIdx];
-        pi_pT_qFrame = piminus_qFrame_pT[piIdx];
-        pi_pL_qFrame = piminus_qFrame_pL[piIdx];
+        pi              = &piminus              [piIdx];
+        Vpi             = &Vpiminus             [piIdx];
+        pi_DC_sector    = pims_DC_sector        [piIdx];
+        pi_pT_qFrame    = piminus_qFrame_pT     [piIdx];
+        pi_pL_qFrame    = piminus_qFrame_pL     [piIdx];
+        pi_Theta_qFrame = piminus_Theta_qFrame  [piIdx];
+        pi_Phi_qFrame   = piminus_Phi_qFrame    [piIdx];
+
     }
     else {
         std::cout << "pion charge ill defined at Stream_e_pi_line_to_CSV(), returning " << std::endl;
@@ -950,9 +958,9 @@ void Stream_e_pi_n_line_to_CSV(int piIdx,
     }
     TLorentzVector pion = *pi;
 
-    // ------------------------------------------------------------------------------------------------
+    // ---------------------------------------------------------------
     // compute kinematics that also relies on pion information
-    // ------------------------------------------------------------------------------------------------
+    // ---------------------------------------------------------------
     xF          = 2. * (pion.Dot(*q)) / (q->Mag() * W);
     M_X_ee_pi   = ( (*Beam + *target) - (*e + *pi) ).Mag(); // missing mass of (e,e'pi)
     M_X_ee_pi_n = ( (*Beam + *target) - (*e + *pi + Pn) ).Mag(); // missing mass of (e,e'pi n)
@@ -989,6 +997,7 @@ void Stream_e_pi_n_line_to_CSV(int piIdx,
         Pn.E(),         n_ToF,
         pi_pT_qFrame,   pi_pL_qFrame,
         n_HitPos.X(),   n_HitPos.Y(),      n_HitPos.Z(),
+        pi_Theta_qFrame,                    pi_Phi_qFrame,
     };
     StreamToCSVfile( variables, passed_cuts_e_pi_kinematics );
 }

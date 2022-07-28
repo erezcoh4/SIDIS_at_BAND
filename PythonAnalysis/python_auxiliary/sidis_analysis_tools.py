@@ -529,11 +529,12 @@ def load_SIDIS_data(runs_filename  = "good_runs_10-2-final.txt",
                     Nruns          = 1,
                     do_e_e_pi      = True,
                     do_e_e_pi_n    = True,
+                    do_all_vars    = False,
                     fdebug         = 2,
                     prefix         = "sidisdvcs_"):#{
     '''
     Load SIDIS data, and fill e_e_pi and e_e_pi_n with data
-    last update July-26, 2022
+    last update July-28, 2022
     
     input:
     -------------
@@ -572,7 +573,14 @@ def load_SIDIS_data(runs_filename  = "good_runs_10-2-final.txt",
         if fdebug>1: print('Run number ',runnum,'(%d/%d runs)'%(runIdx+1,len(runs)))
         for pi_charge_name,pi_print in zip(pi_charge_names,pi_prints):
             if do_e_e_pi:#{
-                eepi   = pd.read_csv(e_e_pi_data_path
+                if do_all_vars:
+                    eepi   = pd.read_csv(e_e_pi_data_path
+                                     +'skimmed_SIDIS_'
+                                     +prefix
+                                     +'00%d_e_%s_selected_eepi_kinematics.csv'%(runnum,pi_charge_name))
+
+                else: # more economic
+                    eepi   = pd.read_csv(e_e_pi_data_path
                                      +'skimmed_SIDIS_'
                                      +prefix
                                      +'00%d_e_%s_selected_eepi_kinematics.csv'%(runnum,pi_charge_name),
@@ -617,6 +625,7 @@ def load_SIDIS_data(runs_filename  = "good_runs_10-2-final.txt",
     #}
 #}
 # ------------------------------------------------------------------------------------------------ #
+
 
 
 

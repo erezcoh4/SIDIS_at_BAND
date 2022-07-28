@@ -213,8 +213,10 @@ double            piplus_E[NMAXPIONS];
 double           Vpiplus_X[NMAXPIONS];
 double           Vpiplus_Y[NMAXPIONS];
 double           Vpiplus_Z[NMAXPIONS];
-double    piplus_qFrame_pT[NMAXPIONS]; // transverse momentum relative to q
-double    piplus_qFrame_pL[NMAXPIONS]; // longitudinal momentum relative to q
+double       piplus_qFrame_pT[NMAXPIONS]; // transverse momentum relative to q
+double       piplus_qFrame_pL[NMAXPIONS]; // longitudinal momentum relative to q
+double    piplus_qFrame_Theta[NMAXPIONS];
+double      piplus_qFrame_Phi[NMAXPIONS];
 
 
 // negative pions
@@ -237,15 +239,17 @@ double         pims_E_ECIN[NMAXPIONS];
 double        pims_E_ECOUT[NMAXPIONS];
 double               Zpims[NMAXPIONS]; // hadron rest-frame energy
 
-double           piminus_Px[NMAXPIONS];
-double           piminus_Py[NMAXPIONS];
-double           piminus_Pz[NMAXPIONS];
-double            piminus_E[NMAXPIONS];
-double           Vpiminus_X[NMAXPIONS];
-double           Vpiminus_Y[NMAXPIONS];
-double           Vpiminus_Z[NMAXPIONS];
-double    piminus_qFrame_pT[NMAXPIONS]; // transverse momentum relative to q
-double    piminus_qFrame_pL[NMAXPIONS]; // longitudinal momentum relative to q
+double              piminus_Px[NMAXPIONS];
+double              piminus_Py[NMAXPIONS];
+double              piminus_Pz[NMAXPIONS];
+double               piminus_E[NMAXPIONS];
+double              Vpiminus_X[NMAXPIONS];
+double              Vpiminus_Y[NMAXPIONS];
+double              Vpiminus_Z[NMAXPIONS];
+double       piminus_qFrame_pT[NMAXPIONS]; // transverse momentum relative to q
+double       piminus_qFrame_pL[NMAXPIONS]; // longitudinal momentum relative to q
+double    piminus_qFrame_Theta[NMAXPIONS];
+double      piminus_qFrame_Phi[NMAXPIONS];
 
 
 // Output root file and tree
@@ -971,6 +975,9 @@ void SetOutputTTrees(){
     outTree_e_piplus_no_cuts->Branch("Vpiplus_Z"                ,&Vpiplus_Z              , "Vpiplus_Z[Npi]/D"       );
     outTree_e_piplus_no_cuts->Branch("piplus_qFrame_pT"         ,&piplus_qFrame_pT       , "piplus_qFrame_pT[Npi]/D");
     outTree_e_piplus_no_cuts->Branch("piplus_qFrame_pL"         ,&piplus_qFrame_pL       , "piplus_qFrame_pL[Npi]/D");
+    outTree_e_piplus_no_cuts->Branch("piplus_qFrame_Theta"      ,&piplus_qFrame_Theta    , "piplus_qFrame_Theta[Npi]/D");
+    outTree_e_piplus_no_cuts->Branch("piplus_qFrame_Phi"        ,&piplus_qFrame_Phi      , "piplus_qFrame_Phi[Npi]/D");
+
 
     // pi+
     outTree_e_piplus->Branch("eventnumber"          ,&evnum                 );
@@ -1042,7 +1049,9 @@ void SetOutputTTrees(){
     outTree_e_piplus->Branch("Vpiplus_Z"                ,&Vpiplus_Z              , "Vpiplus_Z[Npi]/D"    );
     outTree_e_piplus->Branch("piplus_qFrame_pT"         ,&piplus_qFrame_pT       , "piplus_qFrame_pT[Npi]/D");
     outTree_e_piplus->Branch("piplus_qFrame_pL"         ,&piplus_qFrame_pL       , "piplus_qFrame_pL[Npi]/D");
-
+    outTree_e_piplus->Branch("piplus_qFrame_Theta"      ,&piplus_qFrame_Theta    , "piplus_qFrame_Theta[Npi]/D");
+    outTree_e_piplus->Branch("piplus_qFrame_Phi"        ,&piplus_qFrame_Phi      , "piplus_qFrame_Phi[Npi]/D");
+    
     // pi-
     outTree_e_piminus_no_cuts->Branch("eventnumber"          ,&evnum                 );
     outTree_e_piminus_no_cuts->Branch("runnum"               ,&runnum                );
@@ -1112,8 +1121,8 @@ void SetOutputTTrees(){
     outTree_e_piminus_no_cuts->Branch("Vpiminus_Z"           ,&Vpiminus_Z              , "Vpiminus_Z[Npi]/D"    );
     outTree_e_piminus_no_cuts->Branch("piminus_qFrame_pT"    ,&piminus_qFrame_pT       , "piminus_qFrame_pT[Npi]/D");
     outTree_e_piminus_no_cuts->Branch("piminus_qFrame_pL"    ,&piminus_qFrame_pL       , "piminus_qFrame_pL[Npi]/D");
-
-    
+    outTree_e_piminus_no_cuts->Branch("piminus_qFrame_Theta" ,&piminus_qFrame_Theta    , "piminus_qFrame_Theta[Npi]/D");
+    outTree_e_piminus_no_cuts->Branch("piminus_qFrame_Phi"   ,&piminus_qFrame_Phi      , "piminus_qFrame_Phi[Npi]/D");
     
     // pi-
     outTree_e_piminus->Branch("eventnumber"          ,&evnum                 );
