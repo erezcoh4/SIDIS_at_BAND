@@ -1385,6 +1385,8 @@ void InitializeVariables(){
         Vpiminus_X[piIdx]   = Vpiminus_Y[piIdx] = Vpiminus_Z[piIdx]                     = -9999;
         piplus_qFrame_pT[piIdx]    = piplus_qFrame_pL[piIdx]                            = -9999;
         piminus_qFrame_pT[piIdx]   = piminus_qFrame_pL[piIdx]                           = -9999;
+        piplus_qFrame_Theta[piIdx] = piplus_qFrame_Phi[piIdx]                           = -9999;
+        piminus_qFrame_Theta[piIdx]= piminus_qFrame_Phi[piIdx]                          = -9999;
          
     }
     DC_layer                                        = -9999;
@@ -1853,9 +1855,11 @@ void MoveTo_qFrame(int fdebug){
         TVector3 Ppiplus = RotateVectorTo_qFrame( piplus.at(piIdx).Vect() );
         piplus_qFrame.at(piIdx).SetVectM( Ppiplus, Mpi  );
         // fill variables that later go to TTree
-        piplus_qFrame_pT[piIdx] = piplus_qFrame.at(piIdx).Pt();
-        piplus_qFrame_pL[piIdx] = piplus_qFrame.at(piIdx).Pz();
-
+        piplus_qFrame_pT[piIdx]   = piplus_qFrame.at(piIdx).Pt();
+        piplus_qFrame_pL[piIdx]   = piplus_qFrame.at(piIdx).Pz();
+        piplus_qFrame_Theta[piIdx]= piplus_qFrame.at(piIdx).Theta();
+        piplus_qFrame_Phi[piIdx]  = piplus_qFrame.at(piIdx).Phi();
+        
         if (fdebug>1) Print4Vector( piplus_qFrame.at(piIdx), "pi+(" + std::to_string(piIdx) + ")" );
         
     }
@@ -1865,6 +1869,8 @@ void MoveTo_qFrame(int fdebug){
         // fill variables that later go to TTree
         piminus_qFrame_pT[piIdx]   = piminus_qFrame.at(piIdx).Pt();
         piminus_qFrame_pL[piIdx]   = piminus_qFrame.at(piIdx).Pz();
+        piminus_qFrame_Theta[piIdx]= piminus_qFrame.at(piIdx).Theta();
+        piminus_qFrame_Phi[piIdx]  = piminus_qFrame.at(piIdx).Phi();
         if (fdebug>1)Print4Vector( piminus_qFrame.at(piIdx), "pi-(" + std::to_string(piIdx) + ")" );
     }
     if (fdebug>2){
