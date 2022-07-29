@@ -19,6 +19,8 @@ July-28, 2022
  W_standing_d = sqrt((standing_d + q).Mag2());
  W_standing_p = sqrt((standing_p + q).Mag2());
  
+ 
+3. Rotated neutron to q-Frame
 
 July-25, 2022    
 -------------

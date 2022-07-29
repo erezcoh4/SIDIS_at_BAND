@@ -133,6 +133,15 @@ TLorentzVector       Pmiss;
 TLorentzVector *standing_d = new TLorentzVector(0, 0, 0, Md );
 TLorentzVector *standing_p = new TLorentzVector(0, 0, 0, Mp );
 
+// "q-frame" parameters
+double              Pe_phi;
+double      q_phi, q_theta;
+// vectors in q-frame
+TLorentzVector    e_qFrame;
+TLorentzVector    q_qFrame;
+TLorentzVector   Pn_qFrame;
+
+
 // reconstructed vertex position
 TVector3             *Ve=0;
 TVector3           Pn_Vect; // neutron 3-momentum
@@ -305,6 +314,9 @@ void MergeSIDISandBANDevents (int NMAXeventsToMerge=10,
         
         // compute kinematical variables, also for the neutron
         ComputeKinematics   ();
+        
+        // move to q-frame and define the pion and neutron momentum with respect to q
+        MoveTo_qFrame       ();
         
         // merge information about the event from both sources
         MergeEventData      ();
@@ -1092,4 +1104,95 @@ void MergeEventData(){
         }
     }
     if (fdebug>2) { std::cout << "-----------------------------------------------------------------" << std::endl; }
+}
+
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+void MoveTo_qFrame(){
+    if (fdebug>1){
+        std::cout << "Moving to q-Frame" <<std::endl;
+    }
+    //    Move to the "q-frame" and define the pion momentum in this frame
+    //    q-frame is defined as follows:
+    //    z axis is defined by the q - parallel to q
+    //    x axis is defined by the e' - such that p(e') resides in the x-z plane
+
+    // (1) define q-angles
+    q_phi   = q.Phi();
+    q_theta = q.Theta();
+
+    // (2) rotate Pe and q according to q angles
+    TVector3 Pe = e.Vect();
+    TVector3 Pq = q.Vect();
+    
+    Pe       .RotateZ(-q_phi);
+    Pe       .RotateY(-q_theta);
+    Pe_phi = Pe.Phi();
+    Pe       .RotateZ(-Pe_phi);
+    Pq       .RotateZ(-q_phi);
+    Pq       .RotateY(-q_theta);
+
+    
+    // (3) verify on q and Pe that the frame-change is done correctly
+    //    RotateVectorTo_qFrame( &Pe );
+    e_qFrame.SetVectM( Pe, Me );
+    //    RotateVectorTo_qFrame( &Pq );
+    q_qFrame.SetVectM( Pq, q.M() );
+    
+    if (fdebug>2){
+        Print4Vector( e, "e" );
+        Print4Vector( e_qFrame, "e in q-Frame" );
+        Print4Vector( q , "q");
+        Print4Vector( q_qFrame, "q in q-Frame" );
+    }
+    
+    
+    // (4) rotate pions to this q-frame
+    for (int piIdx=0; piIdx<Npips; piIdx++) {
+        TVector3 Ppiplus = RotateVectorTo_qFrame( piplus.at(piIdx).Vect() );
+        piplus_qFrame.at(piIdx).SetVectM( Ppiplus, Mpi  );
+//        // fill variables that later go to TTree
+//        piplus_qFrame_pT[piIdx]   = piplus_qFrame.at(piIdx).Pt();
+//        piplus_qFrame_pL[piIdx]   = piplus_qFrame.at(piIdx).Pz();
+//        piplus_qFrame_Theta[piIdx]= piplus_qFrame.at(piIdx).Theta();
+//        piplus_qFrame_Phi[piIdx]  = piplus_qFrame.at(piIdx).Phi();
+//
+//        if (fdebug>1) Print4Vector( piplus_qFrame.at(piIdx), "pi+(" + std::to_string(piIdx) + ")" );
+        
+    }
+    for (int piIdx=0; piIdx<Npims; piIdx++) {
+        TVector3 Ppiminus = RotateVectorTo_qFrame( piminus.at(piIdx).Vect() );
+        piminus_qFrame.at(piIdx).SetVectM( Ppiminus, Mpi );
+        // fill variables that later go to TTree
+//        piminus_qFrame_pT[piIdx]   = piminus_qFrame.at(piIdx).Pt();
+//        piminus_qFrame_pL[piIdx]   = piminus_qFrame.at(piIdx).Pz();
+//        piminus_qFrame_Theta[piIdx]= piminus_qFrame.at(piIdx).Theta();
+//        piminus_qFrame_Phi[piIdx]  = piminus_qFrame.at(piIdx).Phi();
+//        if (fdebug>1)Print4Vector( piminus_qFrame.at(piIdx), "pi-(" + std::to_string(piIdx) + ")" );
+    }
+    
+    
+    // rotate neutron to q-Frame
+    TVector3 Pn_3Vector = RotateVectorTo_qFrame( Pn.Vect() );
+    Pn_qFrame.SetVectM( Pn_3Vector, Mn );
+
+    
+    if (fdebug>2){
+        std::cout
+        << "size(piplus_qFrame): "  << piplus_qFrame.size() << ","
+        << "size(piminus_qFrame): " << piminus_qFrame.size()<< ","
+        << std::endl;
+    }
+    
+}
+
+
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+TVector3 RotateVectorTo_qFrame( TVector3 v ){
+    // move to q-Pe system: q is the z axis, Pe is in x-z plane: Pe=(Pe[x],0,Pe[q])
+    v.RotateZ( -q_phi  );
+    v.RotateY( -q_theta);
+    v.RotateZ( -Pe_phi );
+    return v;
 }
