@@ -1058,6 +1058,9 @@ void InitializeVariables(){
     piminus     .clear();
     Vpiplus     .clear();
     Vpiminus    .clear();
+    piplus_qFrame  .clear();
+    piminus_qFrame .clear();
+    
     for (int piIdx=0; piIdx<NMAXPIONS; piIdx++) {
         piplus  .push_back( TLorentzVector(0,0,0,Mpips) );
         Vpiplus .push_back( TVector3() );
