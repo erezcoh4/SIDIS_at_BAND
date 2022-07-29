@@ -585,13 +585,13 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 bool eepiPassedKinematicalCriteria(TLorentzVector pi, int fdebug){
     double Zpi = pi.E()/omega;
-    if(   (      cutValue_Q2_min < Q2             &&             Q2 < cutValue_Q2_max)
-       && (       cutValue_W_min < W)
-       && (                    y < cutValue_y_max )
+    if(   (      cutValue_Q2_min < Q2             &&             Q2 < cutValue_Q2_max       )
+       && (       cutValue_W_min < W_standing_d                                             )
+       && (                    y < cutValue_y_max                                           )
        && ( cutValue_e_theta_min < e.Theta()*r2d  && e.Theta()*r2d  < cutValue_e_theta_max  )
        && (cutValue_pi_theta_min < pi.Theta()*r2d && pi.Theta()*r2d < cutValue_pi_theta_max )
        && (     cutValue_Ppi_min < pi.P()         &&         pi.P() < cutValue_Ppi_max      )
-       && (      cutValue_Pe_min < e.P()          &&          e.P() < cutValue_Pe_max      )
+       && (      cutValue_Pe_min < e.P()          &&          e.P() < cutValue_Pe_max       )
        && (     cutValue_Zpi_min < Zpi            &&            Zpi < cutValue_Zpi_max      )
        ) {
         if (fdebug>3) { std::cout << "succesfully passed (e,e'pi) kinematical cuts" << std::endl; }
@@ -1574,8 +1574,6 @@ void ComputeKinematics(int fdebug){
     omega           = q.E();
     xB              = Q2/(2. * Mp * q.E());
     
-//    W2           = (target + q).Mag2(); //    W2      = Mp2 - Q2 + 2. * omega * Mp;
-//    W            = sqrt(W2);
     W_standing_d    = sqrt((standing_d + q).Mag2());
     W_standing_p    = sqrt((standing_p + q).Mag2());
     y               = omega / Ebeam;
