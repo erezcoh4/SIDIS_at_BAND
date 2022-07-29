@@ -170,8 +170,8 @@ double           Vpiplus_Z[NMAXPIONS];
 double      pips_DC_sector[NMAXPIONS];
 double    piplus_qFrame_pT[NMAXPIONS]; // transverse momentum with respect to q
 double    piplus_qFrame_pL[NMAXPIONS]; // longitudinal momentum with respect to q
-double piplus_Theta_qFrame[NMAXPIONS];
-double   piplus_Phi_qFrame[NMAXPIONS];
+double piplus_qFrame_Theta[NMAXPIONS];
+double   piplus_qFrame_Phi[NMAXPIONS];
 
 double           piminus_Px[NMAXPIONS];
 double           piminus_Py[NMAXPIONS];
@@ -183,8 +183,8 @@ double           Vpiminus_Z[NMAXPIONS];
 double       pims_DC_sector[NMAXPIONS];
 double    piminus_qFrame_pT[NMAXPIONS]; // transverse momentum with respect to q
 double    piminus_qFrame_pL[NMAXPIONS]; // longitudinal momentum with respect to q
-double piminus_Theta_qFrame[NMAXPIONS];
-double   piminus_Phi_qFrame[NMAXPIONS];
+double piminus_qFrame_Theta[NMAXPIONS];
+double   piminus_qFrame_Phi[NMAXPIONS];
 
 clashit *eHit             = new clashit;
 TClonesArray      * nHits = new TClonesArray("bandhit"); // BAND neutrons in BAND analysis
@@ -602,6 +602,8 @@ void SetInputAndOutputTTrees (){
         SIDISTree -> SetBranchAddress("pi_DC_sector"               ,&pips_DC_sector           );
         SIDISTree -> SetBranchAddress("piplus_qFrame_pT"           ,&piplus_qFrame_pT         );
         SIDISTree -> SetBranchAddress("piplus_qFrame_pL"           ,&piplus_qFrame_pL         );
+        SIDISTree -> SetBranchAddress("piplus_qFrame_Theta"        ,&piplus_qFrame_Theta      );
+        SIDISTree -> SetBranchAddress("piplus_qFrame_Phi"          ,&piplus_qFrame_Phi        );
     } else if (pionCharge=="pi-") {
         SIDISTree  -> SetBranchAddress("eepimsPastCutsInEvent"      ,&eepimsPastCutsInEvent     );
         SIDISTree  -> SetBranchAddress("eepimsPastKinematicalCuts"  ,&eepimsPastKinematicalCuts );
@@ -615,6 +617,8 @@ void SetInputAndOutputTTrees (){
         SIDISTree -> SetBranchAddress("pi_DC_sector"                ,&pims_DC_sector            );
         SIDISTree -> SetBranchAddress("piminus_qFrame_pT"           ,&piminus_qFrame_pT         );
         SIDISTree -> SetBranchAddress("piminus_qFrame_pL"           ,&piminus_qFrame_pL         );
+        SIDISTree -> SetBranchAddress("piminus_qFrame_Theta"        ,&piminus_qFrame_Theta      );
+        SIDISTree -> SetBranchAddress("piminus_qFrame_Phi"          ,&piminus_qFrame_Phi        );
 
     }
     
@@ -924,8 +928,8 @@ void Stream_e_pi_n_line_to_CSV(int piIdx,
         pi_DC_sector    = pips_DC_sector        [piIdx];
         pi_pT_qFrame    = piplus_qFrame_pT      [piIdx];
         pi_pL_qFrame    = piplus_qFrame_pL      [piIdx];
-        pi_Theta_qFrame = piplus_Theta_qFrame   [piIdx];
-        pi_Phi_qFrame   = piplus_Phi_qFrame     [piIdx];
+        pi_Theta_qFrame = piplus_qFrame_Theta   [piIdx];
+        pi_Phi_qFrame   = piplus_qFrame_Phi     [piIdx];
     }
     else if (pionCharge=="pi-") {
         pi              = &piminus              [piIdx];
@@ -933,8 +937,8 @@ void Stream_e_pi_n_line_to_CSV(int piIdx,
         pi_DC_sector    = pims_DC_sector        [piIdx];
         pi_pT_qFrame    = piminus_qFrame_pT     [piIdx];
         pi_pL_qFrame    = piminus_qFrame_pL     [piIdx];
-        pi_Theta_qFrame = piminus_Theta_qFrame  [piIdx];
-        pi_Phi_qFrame   = piminus_Phi_qFrame    [piIdx];
+        pi_Theta_qFrame = piminus_qFrame_Theta  [piIdx];
+        pi_Phi_qFrame   = piminus_qFrame_Phi    [piIdx];
 
     }
     else {

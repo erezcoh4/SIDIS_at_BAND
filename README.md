@@ -11,6 +11,11 @@ This repository is responsible for
     
 ## Revisions and release notes
 ------------------------------------------------------------------------------
+July-28, 2022    
+-------------
+1. Updated ReadIgorRGAFile.C script
+
+
 July-25, 2022    
 -------------
 1. changed NMAXPIONS from 20 to 5 (we do not need to account for events with too many pions as we are interested in pions with high-z and in such events all pions are soft) 
