@@ -36,8 +36,9 @@ TString            csvheader = ((TString)"status,runnum,evnum,beam_helicity,"
                                 +(TString)"e_P,e_Theta,e_Phi,e_Vz,"
                                 +(TString)"pi_P,pi_Theta,pi_Phi,pi_Vz,"
                                 +(TString)"n_P,n_Theta,n_Phi,n_Vz,"
-                                +(TString)"Q2,W,xB,Zpi,"
-                                +(TString)"omega,xF,y,"
+                                +(TString)"Q2,W_standing_d,W_standing_p,"
+                                +(TString)"xB,Zpi,omega,"
+                                +(TString)"xF,y,"
                                 +(TString)"M_X_ee_pi,M_X_ee_pi_n,xPrime1,xPrime2,"
                                 +(TString)"theta_sq,"
                                 +(TString)"WPrime,"
@@ -45,7 +46,10 @@ TString            csvheader = ((TString)"status,runnum,evnum,beam_helicity,"
                                 +(TString)"n_E,n_ToF,"
                                 +(TString)"pi_pT_qFrame,pi_pL_qFrame,"
                                 +(TString)"n_HitPos_X,n_HitPos_Y,n_HitPos_Z,"
-                                +(TString)"pi_Theta_qFrame,pi_Phi_qFrame,");
+                                +(TString)"pi_Theta_qFrame,pi_Phi_qFrame,"
+                                +(TString)"Emiss,"
+                                +(TString)"n_pT_qFrame,n_pL_qFrame,"
+                                +(TString)"n_Theta_qFrame,n_Phi_qFrame,");
 
 TString DataPath = "/volatile/clas12/users/ecohen/BAND/";
 TString                            prefix = "sidisdvcs_";
@@ -84,6 +88,9 @@ Double_t                        w2; // omega^2
 Double_t          Zpips[NMAXPIONS]; // energy fraction rest frame
 Double_t          Zpims[NMAXPIONS]; // energy fraction rest frame
 Double_t                     W, W2; // energy of the hadronic system
+Double_t              W_standing_p;
+Double_t              W_standing_d;
+Double_t                     Emiss;
 Double_t                   alpha_s; // light cone fraction of momentum of the recoil neutron
 Double_t           WPrime, W2prime;  // moving proton
 Double_t                   xPrime1; // moving proton defined as
@@ -123,6 +130,9 @@ TLorentzVector        *q=0;
 TLorentzVector          Pn; // neutron momentum
 TLorentzVector Band_data_e; // electron information in BAND TTree
 TLorentzVector       Pmiss;
+TLorentzVector *standing_d = new TLorentzVector(0, 0, 0, Md );
+TLorentzVector *standing_p = new TLorentzVector(0, 0, 0, Mp );
+
 // reconstructed vertex position
 TVector3             *Ve=0;
 TVector3           Pn_Vect; // neutron 3-momentum
@@ -848,17 +858,22 @@ void ComputeKinematics(){
     
     Es      = Pn.E();
     Ps      = Pn.P();
-    Pmiss   = TLorentzVector( -Pn.Vect(), Pn.E() );
     omega   = q->E();
     w2      = omega * omega;
     y       = omega / Ebeam;
     theta_sq= Pn.Angle( q->Vect() );
-    
     Q2      = -q->Mag2();
-    omega   = q->E();
+    
+    Emiss   = Md + q.E() - Pn.E(); // energy of the proton in the final state
+    Pmiss   . SetPxPyPzE( -Pn.Px(), -Pn.Py(), -Pn.Pz(), Emiss );
+    
+
     
     W2      = (*target + *q).Mag2();
     W       = sqrt(W2);
+    
+    W_standing_d    = sqrt((*standing_d + *q).Mag2());
+    W_standing_p    = sqrt((*standing_p + *q).Mag2());
     
     W2prime = (Pmiss + *q).Mag2();
     WPrime  = sqrt(W2prime);
@@ -992,16 +1007,20 @@ void Stream_e_pi_n_line_to_CSV(int piIdx,
         e->P(),         e->Theta(),         e->Phi(),             Ve->Z(),
         pi->P(),        pi->Theta(),        pi->Phi(),            Vpi->Z(),
         Pn.P(),         Pn.Theta(),         Pn.Phi(),             Ve->Z(),
-        Q2,             W,                  xB,                   Zpi,
+        Q2,             W,
+        xB,             Zpi,
         omega,          xF,                 y,
         M_X_ee_pi,      M_X_ee_pi_n,        xPrime1,              xPrime2,
         theta_sq,
         WPrime,
         (double)e_DC_sector,                (double)pi_DC_sector,
         Pn.E(),         n_ToF,
-        pi_pT_qFrame,   pi_pL_qFrame,
-        n_HitPos.X(),   n_HitPos.Y(),      n_HitPos.Z(),
+        pi_pT_qFrame,                       pi_pL_qFrame,
+        n_HitPos.X(),   n_HitPos.Y(),       n_HitPos.Z(),
         pi_Theta_qFrame,                    pi_Phi_qFrame,
+        Emiss,
+        Pn_qFrame.Pt(),                     Pn_qFrame.Pz(),
+        Pn_qFrame.Theta(),                  Pn_qFrame.Phi()
     };
     StreamToCSVfile( variables, passed_cuts_e_pi_kinematics );
 }
