@@ -1579,6 +1579,13 @@ void ComputeKinematics(){
     W_standing_d    = sqrt((standing_d + q).Mag2());
     W_standing_p    = sqrt((standing_p + q).Mag2());
     y               = omega / Ebeam;
+    
+    if (fdebug>2){
+        std::cout
+        << "W(standing d): " << W_standing_d << ","
+        << "W(standing p): " << W_standing_p << ","
+        std::endl;
+    }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
