@@ -879,8 +879,8 @@ void ComputeKinematics(){
     theta_sq= Pn.Angle( q->Vect() );
     Q2      = -q->Mag2();
     
-    Emiss   = Md + q->E() - Pn.E(); // energy of the proton in the final state
-    Pmiss   . SetPxPyPzE( -Pn.Px(), -Pn.Py(), -Pn.Pz(), Emiss );
+    Emiss   = Md + q->E() - Pn.E(); // energy of the proton in the nucleus
+    Pmiss   .SetPxPyPzE( -Pn.Px(), -Pn.Py(), -Pn.Pz(), Emiss );
     
 
     
@@ -890,7 +890,7 @@ void ComputeKinematics(){
     W_standing_d    = sqrt((*standing_d + *q).Mag2());
     W_standing_p    = sqrt((*standing_p + *q).Mag2());
     
-    W2prime = (Pmiss + *q).Mag2();
+    W2prime = ( TLorentzVector((Pmiss.Vect() + *q.Vect()), Emiss) ).Mag2();
     WPrime  = sqrt(W2prime);
     
     // for a proton
@@ -1078,10 +1078,10 @@ void InitializeVariables(){
         piminus_qFrame_pT[piIdx] = piminus_qFrame_pL[piIdx]         = -9999;
         piplus_qFrame_pT[piIdx]  = piplus_qFrame_pL[piIdx]          = -9999;
         
-        piplus        .push_back( TLorentzVector(0,0,0,db->GetParticle( 211 )->Mass()) );
-        piplus_qFrame .push_back( TLorentzVector(0,0,0,db->GetParticle( 211 )->Mass()) );
-        piminus       .push_back( TLorentzVector(0,0,0,db->GetParticle( 211 )->Mass()) );
-        piminus_qFrame.push_back( TLorentzVector(0,0,0,db->GetParticle( 211 )->Mass()) );
+        piplus        .push_back( TLorentzVector(0,0,0,Mpips) );
+        piplus_qFrame .push_back( TLorentzVector(0,0,0,Mpips) );
+        piminus       .push_back( TLorentzVector(0,0,0,Mpims) );
+        piminus_qFrame.push_back( TLorentzVector(0,0,0,Mpims) );
 
          
     }
