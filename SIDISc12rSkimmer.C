@@ -1584,7 +1584,7 @@ void ComputeKinematics(){
         std::cout
         << "W(standing d): " << W_standing_d << ","
         << "W(standing p): " << W_standing_p << ","
-        std::endl;
+        << std::endl;
     }
 }
 
