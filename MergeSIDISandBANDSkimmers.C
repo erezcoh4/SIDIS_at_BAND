@@ -74,6 +74,7 @@ clock_t tStart = clock();
 
 // globals
 Double_t       Me  = 0.00051099895; // GeV/c2
+Double_t            Mpi = 0.139570; // GeV/c2
 Double_t       Mpims  = 0.13957039; // GeV/c2
 Double_t       Mpips  = 0.13957039; // GeV/c2
 Double_t            Mp  = 0.938272; // GeV/c2
@@ -251,7 +252,9 @@ void                  PrintTime ( TString prefix ){
     << double(clock() - tStart) / (double)CLOCKS_PER_SEC
     << " sec "<< std::endl;
 }
-
+void              MoveTo_qFrame ();
+TVector3  RotateVectorTo_qFrame ( TVector3 v );
+void               Print4Vector ( TLorentzVector v, std::string label )
 
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
@@ -876,7 +879,7 @@ void ComputeKinematics(){
     theta_sq= Pn.Angle( q->Vect() );
     Q2      = -q->Mag2();
     
-    Emiss   = Md + q.E() - Pn.E(); // energy of the proton in the final state
+    Emiss   = Md + q->E() - Pn.E(); // energy of the proton in the final state
     Pmiss   . SetPxPyPzE( -Pn.Px(), -Pn.Py(), -Pn.Pz(), Emiss );
     
 
@@ -1118,12 +1121,12 @@ void MoveTo_qFrame(){
     //    x axis is defined by the e' - such that p(e') resides in the x-z plane
 
     // (1) define q-angles
-    q_phi   = q.Phi();
-    q_theta = q.Theta();
+    q_phi   = q->Phi();
+    q_theta = q->Theta();
 
     // (2) rotate Pe and q according to q angles
-    TVector3 Pe = e.Vect();
-    TVector3 Pq = q.Vect();
+    TVector3 Pe = e->Vect();
+    TVector3 Pq = q->Vect();
     
     Pe       .RotateZ(-q_phi);
     Pe       .RotateY(-q_theta);
@@ -1137,7 +1140,7 @@ void MoveTo_qFrame(){
     //    RotateVectorTo_qFrame( &Pe );
     e_qFrame.SetVectM( Pe, Me );
     //    RotateVectorTo_qFrame( &Pq );
-    q_qFrame.SetVectM( Pq, q.M() );
+    q_qFrame.SetVectM( Pq, q->M() );
     
     if (fdebug>2){
         Print4Vector( e, "e" );
@@ -1195,4 +1198,15 @@ TVector3 RotateVectorTo_qFrame( TVector3 v ){
     v.RotateY( -q_theta);
     v.RotateZ( -Pe_phi );
     return v;
+}
+
+
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+void Print4Vector( TLorentzVector v, std::string label ){
+    std::cout << label << " 4-vector:"<<std::endl;
+    std::cout
+    << "(Px,Py,Pz,E) = (" << v.Px() << "," << v.Py() << "," << v.Pz() << "," << v.E()
+    << "), M = " << v.Mag()
+    << std::endl;
 }
