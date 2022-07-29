@@ -1058,7 +1058,9 @@ void InitializeVariables(){
     piminus     .clear();
     Vpiplus     .clear();
     Vpiminus    .clear();
+    piplus         .clear();
     piplus_qFrame  .clear();
+    piminus        .clear();
     piminus_qFrame .clear();
     
     for (int piIdx=0; piIdx<NMAXPIONS; piIdx++) {
@@ -1075,6 +1077,12 @@ void InitializeVariables(){
         Vpiminus_X[piIdx]   = Vpiminus_Y[piIdx] = Vpiminus_Z[piIdx] = -9999;
         piminus_qFrame_pT[piIdx] = piminus_qFrame_pL[piIdx]         = -9999;
         piplus_qFrame_pT[piIdx]  = piplus_qFrame_pL[piIdx]          = -9999;
+        
+        piplus        .push_back( TLorentzVector(0,0,0,db->GetParticle( 211 )->Mass()) );
+        piplus_qFrame .push_back( TLorentzVector(0,0,0,db->GetParticle( 211 )->Mass()) );
+        piminus       .push_back( TLorentzVector(0,0,0,db->GetParticle( 211 )->Mass()) );
+        piminus_qFrame.push_back( TLorentzVector(0,0,0,db->GetParticle( 211 )->Mass()) );
+
          
     }
     status                                          = 1; // 0 is good...
