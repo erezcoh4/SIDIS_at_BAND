@@ -15,6 +15,10 @@ July-28, 2022
 -------------
 1. Updated ReadIgorRGAFile.C script
 
+2. Changed *W* variable in *SIDISc12rSkimmer* to  
+ W_standing_d = sqrt((standing_d + q).Mag2());
+ W_standing_p = sqrt((standing_p + q).Mag2());
+ 
 
 July-25, 2022    
 -------------
@@ -600,11 +604,12 @@ Spectator energy-momentum and angle
 W - hadronic invariant mass
 
     // for a proton
-    W       = sqrt( Mp2 - Q2 + 2. * omega * Mp );
-    WPrime  = sqrt( Mp2 - Q2 + 2. * omega * (Md - Es) + 2. * Ps * sqrt(Q2 + w2) * cos( theta_sq ) );
+    W_standing_p = sqrt((standing_p + q).Mag2()); 
+    
     
     
     // for a deuteron
+    W_standing_d = sqrt((standing_d + q).Mag2());
     W       = sqrt((P+q)2)   = sqrt( Md2 -Q2 + 2. * omega * Md ) 
     WPrime  = sqrt((p_i+q)2) = sqrt((-p_n+q)2) 
 
