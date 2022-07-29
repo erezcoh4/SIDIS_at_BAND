@@ -90,7 +90,7 @@ void           ExtractElectronInformation (int fdebug);
 void              ExtractPionsInformation (int fdebug);
 void               ExtractPipsInformation (int pipsIdx, int fdebug );
 void               ExtractPimsInformation (int pimsIdx, int fdebug );
-void                    ComputeKinematics ();
+void                    ComputeKinematics (int fdebug);
 void                   WriteEventToOutput (int fdebug);
 void                        FinishProgram (TString outfilepath, TString outfilename);
 void                   GetParticlesByType (int evnum, int fdebug );
@@ -374,7 +374,7 @@ void SIDISc12rSkimmer(int RunNumber=6420,
                    ){
                     
                     ExtractElectronInformation  (fdebug);
-                    ComputeKinematics           ();
+                    ComputeKinematics           (fdebug);
                     ExtractPionsInformation     (fdebug);
                     WriteEventToOutput          (fdebug);
                     
@@ -1567,7 +1567,7 @@ void FinishProgram(TString outfilepath, TString outfilename){
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-void ComputeKinematics(){
+void ComputeKinematics(int fdebug){
     // compute event kinematics (from e-only information)
     q               = Beam - e;
     Q2              = -q.Mag2();
