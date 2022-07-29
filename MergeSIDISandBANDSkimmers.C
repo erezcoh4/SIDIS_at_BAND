@@ -254,7 +254,7 @@ void                  PrintTime ( TString prefix ){
 }
 void              MoveTo_qFrame ();
 TVector3  RotateVectorTo_qFrame ( TVector3 v );
-void               Print4Vector ( TLorentzVector v, std::string label )
+void               Print4Vector ( TLorentzVector v, std::string label );
 
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
@@ -1143,9 +1143,9 @@ void MoveTo_qFrame(){
     q_qFrame.SetVectM( Pq, q->M() );
     
     if (fdebug>2){
-        Print4Vector( e, "e" );
+        Print4Vector( *e, "e" );
         Print4Vector( e_qFrame, "e in q-Frame" );
-        Print4Vector( q , "q");
+        Print4Vector( *q , "q");
         Print4Vector( q_qFrame, "q in q-Frame" );
     }
     
