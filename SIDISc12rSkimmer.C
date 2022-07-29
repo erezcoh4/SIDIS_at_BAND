@@ -32,7 +32,8 @@ using namespace clas12;
 TString csvheader = ( (TString)"status,runnum,evnum,beam_helicity,"
                      +(TString)"e_P,e_Theta,e_Phi,e_Vz,"
                      +(TString)"pi_P,pi_Theta,pi_Phi,pi_Vz,"
-                     +(TString)"Q2,W,xB,Zpi,omega,"
+                     +(TString)"Q2,W_standing_d,W_standing_p,"
+                     +(TString)"xB,Zpi,omega,"
                      +(TString)"xF,y,M_X,"
                      +(TString)"Npips,Npims,Nelectrons,Ngammas,Nprotons,Nneutrons,Ndeuterons,"
                      +(TString)"e_DC_sector,pi_DC_sector,"
@@ -263,6 +264,7 @@ std::ofstream   CSVfile_e_piplus,  SelectedEventsCSVfile_e_piplus,  SelectedEven
 std::ofstream   CSVfile_e_piminus, SelectedEventsCSVfile_e_piminus, SelectedEventsCSVfile_e_piminus_kinematics;
 // vectors in lab-frame
 TLorentzVector          Beam, target, e, q;
+TLorentzVector      standing_d, standing_p;
 std::vector<TLorentzVector>         piplus; // positive pions
 std::vector<TLorentzVector>        piminus; // negative pions
 // reconstructed vertex position
@@ -271,7 +273,10 @@ std::vector<TVector3>              Vpiplus;
 std::vector<TVector3>             Vpiminus;
 
 // kinematics
-Double_t     Ebeam, xB, Q2, omega, W, W2, xF, y, M_X;
+Double_t          Ebeam, omega, xF, y, M_X;
+Double_t                            xB, Q2;
+Double_t                             W, W2;
+Double_t        W_standing_p, W_standing_d;
 
 
 // vectors in q-frame
@@ -950,7 +955,8 @@ void SetOutputTTrees(){
     outTree_e_piplus_no_cuts->Branch("xB"                   ,&xB                    );
     outTree_e_piplus_no_cuts->Branch("Q2"                   ,&Q2                    );
     outTree_e_piplus_no_cuts->Branch("omega"                ,&omega                 );
-    outTree_e_piplus_no_cuts->Branch("W"                    ,&W                     );
+    outTree_e_piplus_no_cuts->Branch("W_standing_d"         ,&W_standing_d          );
+    outTree_e_piplus_no_cuts->Branch("W_standing_p"         ,&W_standing_p          );
     outTree_e_piplus_no_cuts->Branch("Z"                    ,Zpips                  );
     outTree_e_piplus_no_cuts->Branch("y"                    ,&y                     );
 
@@ -1024,7 +1030,8 @@ void SetOutputTTrees(){
     outTree_e_piplus->Branch("xB"                   ,&xB                    );
     outTree_e_piplus->Branch("Q2"                   ,&Q2                    );
     outTree_e_piplus->Branch("omega"                ,&omega                 );
-    outTree_e_piplus->Branch("W"                    ,&W                     );
+    outTree_e_piplus->Branch("W_standing_d"         ,&W_standing_d          );
+    outTree_e_piplus->Branch("W_standing_p"         ,&W_standing_p          );
     outTree_e_piplus->Branch("Z"                    ,Zpips                  );
     outTree_e_piplus->Branch("y"                    ,&y                     );
 
@@ -1097,7 +1104,8 @@ void SetOutputTTrees(){
     outTree_e_piminus_no_cuts->Branch("xB"                  ,&xB                    );
     outTree_e_piminus_no_cuts->Branch("Q2"                  ,&Q2                    );
     outTree_e_piminus_no_cuts->Branch("omega"               ,&omega                 );
-    outTree_e_piminus_no_cuts->Branch("W"                   ,&W                     );
+    outTree_e_piminus_no_cuts->Branch("W_standing_d"        ,&W_standing_d          );
+    outTree_e_piminus_no_cuts->Branch("W_standing_p"        ,&W_standing_p          );
     outTree_e_piminus_no_cuts->Branch("Z"                    ,Zpims                  );
 
     outTree_e_piminus_no_cuts->Branch("EventPassedCuts"      ,&EventPassedCuts       );
@@ -1169,7 +1177,8 @@ void SetOutputTTrees(){
     outTree_e_piminus->Branch("xB"                  ,&xB                    );
     outTree_e_piminus->Branch("Q2"                  ,&Q2                    );
     outTree_e_piminus->Branch("omega"               ,&omega                 );
-    outTree_e_piminus->Branch("W"                   ,&W                     );
+    outTree_e_piminus->Branch("W_standing_d"        ,&W_standing_d          );
+    outTree_e_piminus->Branch("W_standing_p"        ,&W_standing_p          );
     outTree_e_piminus->Branch("Z"                   ,Zpims                  );
 
     outTree_e_piminus->Branch("EventPassedCuts"      ,&EventPassedCuts       );
@@ -1296,6 +1305,8 @@ void InitializeFileReading(int NeventsMax, int c12Nentries, int fdebug){
     Ebeam   = GetBeamEnergy( fdebug );
     Beam    .SetPxPyPzE (0, 0, Ebeam, Ebeam );
     target  .SetXYZM    (0, 0, 0,     Md    );
+    standing_d.SetXYZM  (0, 0, 0,     Md    );
+    standing_p.SetXYZM  (0, 0, 0,     Mp    );
     
     NeventsMaxToProcess = NeventsMax;
     if (NeventsMax<0) NeventsMaxToProcess = c12Nentries;
@@ -1318,6 +1329,7 @@ void InitializeVariables(){
     
     xB          = Q2        = omega     = -9999;
     xF          = y         = M_X       = -9999;
+    W_standing_d= W_standing_p          = -9999;
     e_E_ECIN    = e_E_ECOUT = e_E_PCAL  = -9999;
     e_PCAL_W    = e_PCAL_V              = -9999;
     e_PCAL_x    = e_PCAL_y  = e_PCAL_z  = -9999;
@@ -1557,14 +1569,16 @@ void FinishProgram(TString outfilepath, TString outfilename){
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void ComputeKinematics(){
     // compute event kinematics (from e-only information)
-    q       = Beam - e;
-    Q2      = -q.Mag2();
-    omega   = q.E();
-    xB      = Q2/(2. * Mp * q.E());
+    q               = Beam - e;
+    Q2              = -q.Mag2();
+    omega           = q.E();
+    xB              = Q2/(2. * Mp * q.E());
     
-    W2      = (target + q).Mag2(); //    W2      = Mp2 - Q2 + 2. * omega * Mp;
-    W       = sqrt(W2);
-    y       = omega / Ebeam;
+//    W2           = (target + q).Mag2(); //    W2      = Mp2 - Q2 + 2. * omega * Mp;
+//    W            = sqrt(W2);
+    W_standing_d    = sqrt((standing_d + q).Mag2());
+    W_standing_p    = sqrt((standing_p + q).Mag2());
+    y               = omega / Ebeam;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -1797,7 +1811,8 @@ void Stream_e_pi_line_to_CSV( TString pionCharge, int piIdx,
     {   (double)status, (double)runnum,     (double)evnum,      (double)beam_helicity,
         e.P(),          e.Theta(),          e.Phi(),            Ve.Z(),
         pi.P(),         pi.Theta(),         pi.Phi(),           Vpi.Z(),
-        Q2,             W,                  xB,                 Zpi,
+        Q2,             W_standing_d,       W_standing_p,
+        xB,             Zpi,
         omega,          xF,                 y,                  M_X,
         (double)Npips, (double)Npims,       (double)Ne,         (double)Ngammas,
         (double)Np,    (double)Nn,          (double)Nd,
