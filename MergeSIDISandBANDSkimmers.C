@@ -890,7 +890,7 @@ void ComputeKinematics(){
     W_standing_d    = sqrt((*standing_d + *q).Mag2());
     W_standing_p    = sqrt((*standing_p + *q).Mag2());
     
-    W2prime = ( TLorentzVector((Pmiss.Vect() + *q.Vect()), Emiss) ).Mag2();
+    W2prime = ( TLorentzVector((Pmiss.Vect() + q->Vect()), Emiss) ).Mag2();
     WPrime  = sqrt(W2prime);
     
     // for a proton
