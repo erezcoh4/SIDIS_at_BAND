@@ -1022,9 +1022,9 @@ void Stream_e_pi_n_line_to_CSV(int piIdx,
         e->P(),         e->Theta(),         e->Phi(),             Ve->Z(),
         pi->P(),        pi->Theta(),        pi->Phi(),            Vpi->Z(),
         Pn.P(),         Pn.Theta(),         Pn.Phi(),             Ve->Z(),
-        Q2,             W,
-        xB,             Zpi,
-        omega,          xF,                 y,
+        Q2,             W_standing_d,       W_standing_p,
+        xB,             Zpi,                omega,
+        xF,             y,
         M_X_ee_pi,      M_X_ee_pi_n,        xPrime1,              xPrime2,
         theta_sq,
         WPrime,
@@ -1035,7 +1035,7 @@ void Stream_e_pi_n_line_to_CSV(int piIdx,
         pi_Theta_qFrame,                    pi_Phi_qFrame,
         Emiss,
         Pn_qFrame.Pt(),                     Pn_qFrame.Pz(),
-        Pn_qFrame.Theta(),                  Pn_qFrame.Phi()
+        Pn_qFrame.Theta(),                  Pn_qFrame.Phi()        
     };
     StreamToCSVfile( variables, passed_cuts_e_pi_kinematics );
 }
