@@ -601,19 +601,21 @@ Spectator energy-momentum and angle
     Ps      = Pn.P();
     omega   = q->E();
     theta_sq= Pn.Angle( q->Vect() );
-    
+
+Pmiss Momentum and energy of the proton in the nucleus
+
+    Emiss   = Md + q->E() - Pn.E();     
+    Pmiss   = ( -Pn.Px(), -Pn.Py(), -Pn.Pz(), Emiss );
 
 W - hadronic invariant mass
 
     // for a proton
-    W_standing_p = sqrt((standing_p + q).Mag2()); 
-    
-    
-    
+    W_standing_p = sqrt((standing_p + q).Mag2());
+     
     // for a deuteron
     W_standing_d = sqrt((standing_d + q).Mag2());
-    W       = sqrt((P+q)2)   = sqrt( Md2 -Q2 + 2. * omega * Md ) 
-    WPrime  = sqrt((p_i+q)2) = sqrt((-p_n+q)2) 
+
+    WPrime  = sqrt((p_miss+q)2)  
 
 
 M_X - invariant mass of the emerging hadron

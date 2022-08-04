@@ -615,13 +615,15 @@ def load_SIDIS_data(runs_filename  = "good_runs_10-2-final.txt",
                                      usecols=['runnum','evnum',
                                               'e_P','e_Theta','e_Phi',
                                               'pi_P', 'pi_Theta', 'pi_Phi',
-                                              'Q2', 'W', 'xB', 'Zpi',
+                                              'Q2', 'W_standing_d', 'W_standing_p',
+                                              'xB', 'Zpi',
                                               'M_X', 'e_DC_sector', 'pi_DC_sector','pi_pT_qFrame','pi_pL_qFrame'],
                                      dtype={'runnum':int,'evnum': int,
                                             'e_DC_sector':int, 'pi_DC_sector':int,
                                             'e_P':np.half,'e_Theta':np.half,'e_Phi':np.half,
                                             'pi_P':np.half,'pi_Theta':np.half, 'pi_Phi':np.half,
-                                            'Q2':np.half, 'W':np.half, 'xB':np.half, 'Zpi':np.half,
+                                            'Q2':np.half, 'W_standing_d':np.half, 'W_standing_p':np.half,
+                                            'xB':np.half, 'Zpi':np.half,
                                             'M_X':np.half,
                                             'pi_pT_qFrame':np.half,'pi_pL_qFrame':np.half})
                 
@@ -653,6 +655,7 @@ def load_SIDIS_data(runs_filename  = "good_runs_10-2-final.txt",
     #}
 #}
 # ------------------------------------------------------------------------------------------------ #
+
 
 
 

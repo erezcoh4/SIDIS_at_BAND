@@ -326,24 +326,40 @@ std::vector<TLorentzVector>      piminus_qFrame;
 
 
 // methods
-void                   PrintDone ();
-void               OpenInputFile ();
-void              CloseInputFile ();
-void             OpenOutputFiles ();
-void            CloseOutputFiles ();
-void       InitializeFileReading ();
+void                            PrintDone ();
+void                        OpenInputFile ();
+void                       CloseInputFile ();
+void                      OpenOutputFiles ();
+void                     CloseOutputFiles ();
+void                InitializeFileReading ();
 //void            StreamToCSVfile (std::vector<Double_t> observables, bool passed_cuts_e_pi_kinematics);
-void                SetVerbosity (int ffdebug )          {fdebug = ffdebug;} ;
-void                 SetDataPath (TString fDataPath )    {DataPath = fDataPath;} ;
-void                 SetFileName (TString fFileName )    {Filename = fFileName;} ;
-void               SetNMaxEVents (int fNMAXevents )      {NMaxEvents = fNMAXevents;};
-void                SetInclusive (int fInclusive )       {inclusive = fInclusive;};
-void                  ReadEvents ();
-void               SetInputTTree ();
-void         InitializeVariables ();
-void                ReadRGAEvent (int event);
-void           ComputeKinematics ();
+void                         SetVerbosity (int ffdebug )          {fdebug = ffdebug;} ;
+void                          SetDataPath (TString fDataPath )    {DataPath = fDataPath;} ;
+void                          SetFileName (TString fFileName )    {Filename = fFileName;} ;
+void                        SetNMaxEVents (int fNMAXevents )      {NMaxEvents = fNMAXevents;};
+void                         SetInclusive (int fInclusive )       {inclusive = fInclusive;};
+void                           ReadEvents ();
+void                        SetInputTTree ();
+void                  InitializeVariables ();
+void                         ReadRGAEvent (int event);
+void                    ComputeKinematics ();
+void           ExtractElectronInformation ();
+void              ExtractPionsInformation ();
+void                   WriteEventToOutput ();
+bool   CheckIfElectronPassedSelectionCuts (Int_t fid1,
+                                           Int_t fid2,
+                                           Int_t fid3,
+                                           TLorentzVector e,
+                                           TVector3 Ve);
 
+bool      CheckIfPionPassedSelectionCuts (TString pionCharge, // "pi+" or "pi-"
+                                          Int_t fid1,
+                                          Int_t fid2,
+                                          Int_t fid3,
+                                          Double_t chi2PID,
+                                          Double_t p,
+                                          TVector3 Ve,
+                                          TVector3 Vpi);
 
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
@@ -989,48 +1005,53 @@ void ExtractElectronInformation(){
         }
     }
     e.SetXYZM( Epx[e_idx], Epx[e_idx], Epx[e_idx], Me );
-    // CONTINUE HERE!
-    // set leading electron vertex
-    Ve              = GetParticleVertex( electrons[leading_e_index] );
+    Ve = TVector3( 0, 0, Evz[e_idx] );
     
-    // detector information on electron
-    auto e_PCAL_info= electrons[leading_e_index]->cal(PCAL);
-    e_E_PCAL        = e_PCAL_info->getEnergy();
-    e_PCAL_sector   = e_PCAL_info->getSector();
-    e_PCAL_V        = e_PCAL_info->getLv();
-    e_PCAL_W        = e_PCAL_info->getLw();
-    e_E_ECIN        = electrons[leading_e_index]->cal(ECIN)->getEnergy();
-    e_E_ECOUT       = electrons[leading_e_index]->cal(ECOUT)->getEnergy();
+//    // detector information on electron
+//    auto e_PCAL_info= electrons[leading_e_index]->cal(PCAL);
+//    e_E_PCAL        = e_PCAL_info->getEnergy();
+//    e_PCAL_sector   = e_PCAL_info->getSector();
+//    e_PCAL_V        = e_PCAL_info->getLv();
+//    e_PCAL_W        = e_PCAL_info->getLw();
+//    e_E_ECIN        = electrons[leading_e_index]->cal(ECIN)->getEnergy();
+//    e_E_ECOUT       = electrons[leading_e_index]->cal(ECOUT)->getEnergy();
+//
+//    // hit position in PCAL
+//    e_PCAL_x        = e_PCAL_info->getX();
+//    e_PCAL_y        = e_PCAL_info->getY();
+//    e_PCAL_z        = e_PCAL_info->getZ();
+//
+//    // Drift Chamber tracking system
+//    auto e_DC_info  = electrons[leading_e_index]->trk(DC);
+//    e_DC_sector     = e_DC_info->getSector(); // tracking sector
+//    e_DC_Chi2N      = e_DC_info->getChi2N();  // tracking chi^2/NDF
+//
+//    for (int regionIdx=0; regionIdx<3; regionIdx++) {
+//        int DC_layer = DC_layers[regionIdx];
+//        e_DC_x[regionIdx] = electrons[leading_e_index]->traj(DC,DC_layer)->getX();
+//        e_DC_y[regionIdx] = electrons[leading_e_index]->traj(DC,DC_layer)->getY();
+//        e_DC_z[regionIdx] = electrons[leading_e_index]->traj(DC,DC_layer)->getZ();
+//    }
     
-    // hit position in PCAL
-    e_PCAL_x        = e_PCAL_info->getX();
-    e_PCAL_y        = e_PCAL_info->getY();
-    e_PCAL_z        = e_PCAL_info->getZ();
-    
-    // Drift Chamber tracking system
-    auto e_DC_info  = electrons[leading_e_index]->trk(DC);
-    e_DC_sector     = e_DC_info->getSector(); // tracking sector
-    e_DC_Chi2N      = e_DC_info->getChi2N();  // tracking chi^2/NDF
-    
-    for (int regionIdx=0; regionIdx<3; regionIdx++) {
-        int DC_layer = DC_layers[regionIdx];
-        e_DC_x[regionIdx] = electrons[leading_e_index]->traj(DC,DC_layer)->getX();
-        e_DC_y[regionIdx] = electrons[leading_e_index]->traj(DC,DC_layer)->getY();
-        e_DC_z[regionIdx] = electrons[leading_e_index]->traj(DC,DC_layer)->getZ();
-    }
-    if (fdebug > 2) std::cout << "extracted electron information and computed kinematics" << std::endl;
+//    if (fdebug > 2) std::cout << "extracted electron information and computed kinematics" << std::endl;
     
     // ------------------------------------------------------------------------------------------------
     // now, check if electron passed event selection requirements
     // ------------------------------------------------------------------------------------------------
-    ePastCutsInEvent = CheckIfElectronPassedSelectionCuts(e_PCAL_x, e_PCAL_y,
-                                                              e_PCAL_W, e_PCAL_V,
-                                                              e_E_PCAL, e_E_ECIN,
-                                                              e_E_ECOUT,
-                                                              e, Ve,
-                                                              e_PCAL_sector, // e_PCAL_sector should be consistent with e_DC_sector
-                                                              e_DC_x, e_DC_y, e_DC_z,
-                                                              torusBending );
+//    ePastCutsInEvent = CheckIfElectronPassedSelectionCuts(e_PCAL_x, e_PCAL_y,
+//                                                              e_PCAL_W, e_PCAL_V,
+//                                                              e_E_PCAL, e_E_ECIN,
+//                                                              e_E_ECOUT,
+//                                                              e, Ve,
+//                                                              e_PCAL_sector, // e_PCAL_sector should be consistent with e_DC_sector
+//                                                              e_DC_x, e_DC_y, e_DC_z,
+//                                                              torusBending );
+    ePastCutsInEvent = CheckIfElectronPassedSelectionCuts(Efiducial1[e_idx],
+                                                          Efiducial2[e_idx],
+                                                          Efiducial3[e_idx],
+                                                          e,
+                                                          Ve);
+    
     if (ePastCutsInEvent)  Nevents_passed_e_cuts++ ;
 }
 
@@ -1101,7 +1122,6 @@ void WriteEventToOutput(){
 }
 
 
-
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void ExtractPipsInformation( int pipsIdx ){
     if (fdebug>2)
@@ -1115,59 +1135,69 @@ void ExtractPipsInformation( int pipsIdx ){
                                Mpips);
     
     Zpips[pipsIdx]              = piplus[pipsIdx].E() / omega;
-    Vpiplus[pipsIdx]            = GetParticleVertex( pipluses[pipsIdx] );
-    pips_chi2PID[pipsIdx]       = pipluses[pipsIdx]->par()->getChi2Pid();
-    
-    // EC in and out
-    pips_E_ECIN[pipsIdx]        = pipluses[pipsIdx]->cal(ECIN)->getEnergy();
-    pips_E_ECOUT[pipsIdx]       = pipluses[pipsIdx]->cal(ECOUT)->getEnergy();
-    // PCAL
-    auto pips_PCAL_info         = pipluses[pipsIdx]->cal(PCAL);
-    pips_E_PCAL[pipsIdx]        = pips_PCAL_info->getEnergy();
-    pips_PCAL_sector[pipsIdx]   = pips_PCAL_info->getSector();
-    pips_PCAL_V[pipsIdx]        = pips_PCAL_info->getLv();
-    pips_PCAL_W[pipsIdx]        = pips_PCAL_info->getLw();
-    pips_PCAL_x[pipsIdx]        = pips_PCAL_info->getX();
-    pips_PCAL_y[pipsIdx]        = pips_PCAL_info->getY();
-    pips_PCAL_z[pipsIdx]        = pips_PCAL_info->getZ();
-    // DC
-    auto pips_DC_info           = pipluses[pipsIdx]->trk(DC);
-    pips_DC_sector[pipsIdx]     = pips_DC_info->getSector(); // tracking sector
-    pips_Chi2N[pipsIdx]         = pips_DC_info->getChi2N();  // tracking chi^2/NDF
-    for (int regionIdx=0; regionIdx<3; regionIdx++) {
-        DC_layer = DC_layers[regionIdx];
-        pips_DC_x[pipsIdx][regionIdx] = pipluses[pipsIdx]->traj(DC,DC_layer)->getX();
-        pips_DC_y[pipsIdx][regionIdx] = pipluses[pipsIdx]->traj(DC,DC_layer)->getY();
-        pips_DC_z[pipsIdx][regionIdx] = pipluses[pipsIdx]->traj(DC,DC_layer)->getZ();
-        if (fdebug>3) {
-            std::cout
-            << "pips_DC_sector[pipsIdx="<<pipsIdx<<"]="
-            << pips_DC_sector[pipsIdx]
-            << ", DC_layer = " << DC_layer
-            << std::endl
-            << "pips_DC_x[pipsIdx="<<pipsIdx<<"][regionIdx="<<regionIdx<<"]="
-            << pips_DC_x[pipsIdx][regionIdx]
-            << std::endl
-            << "pips_DC_y[pipsIdx="<<pipsIdx<<"][regionIdx="<<regionIdx<<"]="
-            << pips_DC_y[pipsIdx][regionIdx]
-            << std::endl
-            << "pips_DC_z[pipsIdx="<<pipsIdx<<"][regionIdx="<<regionIdx<<"]="
-            << pips_DC_z[pipsIdx][regionIdx]
-            << std::endl;
-        }
-    }
+    Vpiplus[pipsIdx]            = TVector3( 0, 0 , piPvz[pipsIdx] );
+//    Vpiplus[pipsIdx]            = GetParticleVertex( pipluses[pipsIdx] );
+//    pips_chi2PID[pipsIdx]       = pipluses[pipsIdx]->par()->getChi2Pid();
+//
+//    // EC in and out
+//    pips_E_ECIN[pipsIdx]        = pipluses[pipsIdx]->cal(ECIN)->getEnergy();
+//    pips_E_ECOUT[pipsIdx]       = pipluses[pipsIdx]->cal(ECOUT)->getEnergy();
+//    // PCAL
+//    auto pips_PCAL_info         = pipluses[pipsIdx]->cal(PCAL);
+//    pips_E_PCAL[pipsIdx]        = pips_PCAL_info->getEnergy();
+//    pips_PCAL_sector[pipsIdx]   = pips_PCAL_info->getSector();
+//    pips_PCAL_V[pipsIdx]        = pips_PCAL_info->getLv();
+//    pips_PCAL_W[pipsIdx]        = pips_PCAL_info->getLw();
+//    pips_PCAL_x[pipsIdx]        = pips_PCAL_info->getX();
+//    pips_PCAL_y[pipsIdx]        = pips_PCAL_info->getY();
+//    pips_PCAL_z[pipsIdx]        = pips_PCAL_info->getZ();
+//    // DC
+//    auto pips_DC_info           = pipluses[pipsIdx]->trk(DC);
+//    pips_DC_sector[pipsIdx]     = pips_DC_info->getSector(); // tracking sector
+//    pips_Chi2N[pipsIdx]         = pips_DC_info->getChi2N();  // tracking chi^2/NDF
+//    for (int regionIdx=0; regionIdx<3; regionIdx++) {
+//        DC_layer = DC_layers[regionIdx];
+//        pips_DC_x[pipsIdx][regionIdx] = pipluses[pipsIdx]->traj(DC,DC_layer)->getX();
+//        pips_DC_y[pipsIdx][regionIdx] = pipluses[pipsIdx]->traj(DC,DC_layer)->getY();
+//        pips_DC_z[pipsIdx][regionIdx] = pipluses[pipsIdx]->traj(DC,DC_layer)->getZ();
+//        if (fdebug>3) {
+//            std::cout
+//            << "pips_DC_sector[pipsIdx="<<pipsIdx<<"]="
+//            << pips_DC_sector[pipsIdx]
+//            << ", DC_layer = " << DC_layer
+//            << std::endl
+//            << "pips_DC_x[pipsIdx="<<pipsIdx<<"][regionIdx="<<regionIdx<<"]="
+//            << pips_DC_x[pipsIdx][regionIdx]
+//            << std::endl
+//            << "pips_DC_y[pipsIdx="<<pipsIdx<<"][regionIdx="<<regionIdx<<"]="
+//            << pips_DC_y[pipsIdx][regionIdx]
+//            << std::endl
+//            << "pips_DC_z[pipsIdx="<<pipsIdx<<"][regionIdx="<<regionIdx<<"]="
+//            << pips_DC_z[pipsIdx][regionIdx]
+//            << std::endl;
+//        }
+//    }
     // ------------------------------------------------------------------------------------------------
     // now, check if pion passed event selection requirements
     // ------------------------------------------------------------------------------------------------
-    pipsPastSelectionCuts[pipsIdx] = CheckIfPionPassedSelectionCuts("pi+",
-                                                                     pips_DC_sector[pipsIdx],
-                                                                     pips_DC_x[pipsIdx],
-                                                                     pips_DC_y[pipsIdx],
-                                                                     pips_DC_z[pipsIdx],
-                                                                     pips_chi2PID[pipsIdx],  piplus[pipsIdx].P(),
-                                                                     Ve,
-                                                                     Vpiplus[pipsIdx],
-                                                                     fdebug);
+    //    pipsPastSelectionCuts[pipsIdx] = CheckIfPionPassedSelectionCuts("pi+",
+    //                                                                     pips_DC_sector[pipsIdx],
+    //                                                                     pips_DC_x[pipsIdx],
+    //                                                                     pips_DC_y[pipsIdx],
+    //                                                                     pips_DC_z[pipsIdx],
+    //                                                                     pips_chi2PID[pipsIdx],  piplus[pipsIdx].P(),
+    //                                                                     Ve,
+    //                                                                     Vpiplus[pipsIdx],
+    //                                                                     fdebug);
+
+    pipsPastSelectionCuts[pimsIdx] = CheckIfPionPassedSelectionCuts("pi+",
+                                                                    piPfiducial1[pipsIdx],
+                                                                    piPfiducial2[pipsIdx],
+                                                                    piPfiducial3[pipsIdx],
+                                                                    piplus[pipsIdx].P(),
+                                                                    Ve,
+                                                                    Vpiplus[pipsIdx]);
+    
     eepipsPastKinematicalCuts[pipsIdx] = eepiPassedKinematicalCriteria(piplus[pipsIdx],
                                                                        fdebug);
     if (pipsPastSelectionCuts[pipsIdx]) {
@@ -1198,43 +1228,57 @@ void ExtractPimsInformation( int pimsIdx ){
 
     
     Zpims[pimsIdx]              = piminus[pimsIdx].E() / omega;
-    Vpiminus[pimsIdx]           = GetParticleVertex( piminuses[pimsIdx] );
-    pims_chi2PID[pimsIdx]       = piminuses[pimsIdx]->par()->getChi2Pid();
-    
-    // EC in and out
-    pims_E_ECIN[pimsIdx]        = piminuses[pimsIdx]->cal(ECIN)->getEnergy();
-    pims_E_ECOUT[pimsIdx]       = piminuses[pimsIdx]->cal(ECOUT)->getEnergy();
-    // PCAL
-    auto pims_PCAL_info         = piminuses[pimsIdx]->cal(PCAL);
-    pims_E_PCAL[pimsIdx]        = pims_PCAL_info->getEnergy();
-    pims_PCAL_sector[pimsIdx]   = pims_PCAL_info->getSector();
-    pims_PCAL_V[pimsIdx]        = pims_PCAL_info->getLv();
-    pims_PCAL_W[pimsIdx]        = pims_PCAL_info->getLw();
-    pims_PCAL_x[pimsIdx]        = pims_PCAL_info->getX();
-    pims_PCAL_y[pimsIdx]        = pims_PCAL_info->getY();
-    pims_PCAL_z[pimsIdx]        = pims_PCAL_info->getZ();
-    // DC
-    auto pims_DC_info           = piminuses[pimsIdx]->trk(DC);
-    pims_DC_sector[pimsIdx]     = pims_DC_info->getSector(); // tracking sector
-    pims_Chi2N[pimsIdx]         = pims_DC_info->getChi2N();  // tracking chi^2/NDF
-    for (int regionIdx=0; regionIdx<3; regionIdx++) {
-        DC_layer = DC_layers[regionIdx];
-        pims_DC_x[pimsIdx][regionIdx] = piminuses[pimsIdx]->traj(DC,DC_layer)->getX();
-        pims_DC_y[pimsIdx][regionIdx] = piminuses[pimsIdx]->traj(DC,DC_layer)->getY();
-        pims_DC_z[pimsIdx][regionIdx] = piminuses[pimsIdx]->traj(DC,DC_layer)->getZ();
-    }
+//    Vpiminus[pimsIdx]           = GetParticleVertex( piminuses[pimsIdx] );
+    Vpiminus[pimsIdx]           = TVector3( 0, 0 , piMvz[pipsIdx] );
+//    pims_chi2PID[pimsIdx]       = piminuses[pimsIdx]->par()->getChi2Pid();
+//
+//    // EC in and out
+//    pims_E_ECIN[pimsIdx]        = piminuses[pimsIdx]->cal(ECIN)->getEnergy();
+//    pims_E_ECOUT[pimsIdx]       = piminuses[pimsIdx]->cal(ECOUT)->getEnergy();
+//    // PCAL
+//    auto pims_PCAL_info         = piminuses[pimsIdx]->cal(PCAL);
+//    pims_E_PCAL[pimsIdx]        = pims_PCAL_info->getEnergy();
+//    pims_PCAL_sector[pimsIdx]   = pims_PCAL_info->getSector();
+//    pims_PCAL_V[pimsIdx]        = pims_PCAL_info->getLv();
+//    pims_PCAL_W[pimsIdx]        = pims_PCAL_info->getLw();
+//    pims_PCAL_x[pimsIdx]        = pims_PCAL_info->getX();
+//    pims_PCAL_y[pimsIdx]        = pims_PCAL_info->getY();
+//    pims_PCAL_z[pimsIdx]        = pims_PCAL_info->getZ();
+//    // DC
+//    auto pims_DC_info           = piminuses[pimsIdx]->trk(DC);
+//    pims_DC_sector[pimsIdx]     = pims_DC_info->getSector(); // tracking sector
+//    pims_Chi2N[pimsIdx]         = pims_DC_info->getChi2N();  // tracking chi^2/NDF
+//    for (int regionIdx=0; regionIdx<3; regionIdx++) {
+//        DC_layer = DC_layers[regionIdx];
+//        pims_DC_x[pimsIdx][regionIdx] = piminuses[pimsIdx]->traj(DC,DC_layer)->getX();
+//        pims_DC_y[pimsIdx][regionIdx] = piminuses[pimsIdx]->traj(DC,DC_layer)->getY();
+//        pims_DC_z[pimsIdx][regionIdx] = piminuses[pimsIdx]->traj(DC,DC_layer)->getZ();
+//    }
     // ------------------------------------------------------------------------------------------------
     // now, check if pion passed event selection requirements
     // ------------------------------------------------------------------------------------------------
+//    pimsPastSelectionCuts[pimsIdx] = CheckIfPionPassedSelectionCuts("pi-",
+//                                                                     pims_DC_sector[pimsIdx],
+//                                                                     pims_DC_x[pimsIdx],
+//                                                                     pims_DC_y[pimsIdx],
+//                                                                     pims_DC_z[pimsIdx],
+//                                                                     pims_chi2PID[pimsIdx],  piminus[pimsIdx].P(),
+//                                                                     Ve,
+//                                                                     Vpiminus[pimsIdx],
+//                                                                     fdebug);
+    
+    // CONTINUE HERE!
+    pims_chi2PID[pimsIdx] =
+    
     pimsPastSelectionCuts[pimsIdx] = CheckIfPionPassedSelectionCuts("pi-",
-                                                                     pims_DC_sector[pimsIdx],
-                                                                     pims_DC_x[pimsIdx],
-                                                                     pims_DC_y[pimsIdx],
-                                                                     pims_DC_z[pimsIdx],
-                                                                     pims_chi2PID[pimsIdx],  piminus[pimsIdx].P(),
-                                                                     Ve,
-                                                                     Vpiminus[pimsIdx],
-                                                                     fdebug);
+                                                                    piMfiducial1[pimsIdx],
+                                                                    piMfiducial2[pimsIdx],
+                                                                    piMfiducial3[pimsIdx],
+                                                                    pims_chi2PID[pimsIdx],
+                                                                    piminus[pimsIdx].P(),
+                                                                    Ve,
+                                                                    Vpiminus[pimsIdx]);
+    
     eepimsPastKinematicalCuts[pimsIdx] = eepiPassedKinematicalCriteria(piminus[pimsIdx],
                                                                        fdebug);
     if (pimsPastSelectionCuts[pimsIdx]) {
@@ -1253,3 +1297,78 @@ void ExtractPimsInformation( int pimsIdx ){
 //    Vpiminus_Y[pimsIdx]          = Vpiminus[pimsIdx].Y();
 //    Vpiminus_Z[pimsIdx]          = Vpiminus[pimsIdx].Z();
 }
+
+
+
+
+// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+bool CheckIfElectronPassedSelectionCuts(Int_t fid1,
+                                        Int_t fid2,
+                                        Int_t fid3,
+                                        TLorentzVector e,
+                                        TVector3 Ve){
+        
+    bool DC_fid = fid1 && fid2 && fid3;
+    if (DC_fid == false) return false;
+    
+    if(!(true
+       // Cut on z-vertex position: in-bending torus field -13.0 cm < Vz < +12.0 cm
+       // Spring 19 and Spring 2020 in-bending.
+       // Fall 2019 (without low-energy-run) was out-bending.
+       &&  ((cutValue_Vz_min < Ve.Z()) && (Ve.Z() < cutValue_Vz_max))
+       )) return false;
+    
+    return true;
+}
+
+// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
+                                    Int_t fid1,
+                                    Int_t fid2,
+                                    Int_t fid3,
+                                    Double_t chi2PID,
+                                    Double_t p,
+                                    TVector3 Ve,
+                                    TVector3 Vpi){
+    
+    // decide if pion (pi+ or pi-) passed event selection cuts
+    //
+    // input:
+    // --------
+    // p            pi momentum    (pi.P())
+    //
+    // comments
+    // ---------------
+    // DC - fiducial cuts on DC
+    
+    bool DC_fid = fid1 && fid2 && fid3;
+    if (DC_fid == false) return false;
+
+    
+    if (fdebug>3) {
+        std::cout << "in CheckIfPionPassedSelectionCuts()"<< std::endl
+        << "pion charge: "          << pionCharge               << ","
+        << "DC_x[0]: "              << DC_x[0]                  << ","
+        << "chi2PID:"               << chi2PID                  << ","
+        << "Chi2PID_pion_lowerBound( p="<<p<<", C="<<C<<" ): "  << Chi2PID_pion_lowerBound( p, C ) << ","
+        << "Chi2PID_pion_upperBound( p="<<p<<", C="<<C<<" ): "  << Chi2PID_pion_upperBound( p, C ) << ","
+        << "fabs((Ve-Vpi).Z()): "   << fabs((Ve-Vpi).Z())       << ","
+        << std::endl;
+    }
+    if(!
+       // pi+ Identification Refinement - chi2PID vs. momentum
+       (( Chi2PID_pion_lowerBound( p, C ) < chi2PID && chi2PID < Chi2PID_pion_upperBound( p , C ) )
+       
+       // Cut on the z-Vertex Difference Between Electrons and Hadrons.
+       &&  ( fabs((Ve-Vpi).Z()) < cutValue_Ve_Vpi_dz_max )
+       )) {
+        return false;
+    }
+    if (fdebug>3) {
+        std::cout
+        << "succesfully passed CheckIfPionPassedSelectionCuts(), return true"
+        << std::endl;
+    }
+    return true;
+}
+
