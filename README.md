@@ -11,6 +11,24 @@ This repository is responsible for
     
 ## Revisions and release notes
 ------------------------------------------------------------------------------
+
+Aug-4, 2022    
+-------------
+1. Replaced *ComputeKinematics* in SIDISc12rSkimmer by *ComputeElecctronKinematics* 
+
+2. Added a computation of the following variables
+
+Z_LC = (Ppi_q.E() - Ppi_q.Pz()) / (q.E() - q.P()); // z on the light-cone
+
+3. Replaced the cut on W from 
+   W_d = sqrt((standing_d + q).Mag2()) > 2.5 GeV/c2
+   to
+   W_p = sqrt((standing_p + q).Mag2()) > 2.5 GeV/c2
+   in *apply_Kinematical_cuts* and *SIDISc12rSkimmer*
+
+
+
+
 July-28, 2022    
 -------------
 1. Updated ReadIgorRGAFile.C script
@@ -588,11 +606,23 @@ banklib/BBand.cpp
 
 # Kinematical observables
 ---------------------------------------
+[SIDIS_analysis_note_final-5721534-2021-01-11-v15.pdf, p.1-2]
+[THayward_thesis.pdf p.8]
 
+rapidity: [https://www.jlab.org/conferences/radiative2016/talks/wednesday/weiss.pdf]
+ 
 DIS variables
 
-    y       = omega / Ebeam;
-
+    // QE y-variable
+    y         = omega / Ebeam;
+    // Feynman x 
+    x_F        = 2 * (pi.P().Dot(q.P())) / (q.Mag() * W_standing_p)
+    
+SIDIS variables
+    // barion rapidity  η_br = log(Pπ+/Pπ−) / 2
+    eta_pi     = 0.5 * log( (pi_qFrame().E()+pi_qFrame().Pz())
+                            /
+                            (pi_qFrame().E()-pi_qFrame().Pz()))
 
 
 Spectator energy-momentum and angle
@@ -602,10 +632,16 @@ Spectator energy-momentum and angle
     omega   = q->E();
     theta_sq= Pn.Angle( q->Vect() );
 
-Pmiss Momentum and energy of the proton in the nucleus
+proton initial state (in the nucleus)
 
-    Emiss   = Md + q->E() - Pn.E();     
-    Pmiss   = ( -Pn.Px(), -Pn.Py(), -Pn.Pz(), Emiss );
+<!--    Emiss   = Md + q->E() - Pn.E();     -->
+<!--    Pmiss   = ( -Pn.Px(), -Pn.Py(), -Pn.Pz(), Emiss );-->
+    
+    Einit            = Md - Pn.E();
+    Pinit            = ( 0 - Pn.Vect(), Md - Pn.E() );
+    Pinit_qFrame     = ( RotateVectorTo_qFrame( Pinit.Vect() ) , M_d - Pn.E() ); 
+    Pinit_virtuality = Pinit_qFrame.Mag2() - Mp2; 
+
 
 W - hadronic invariant mass
 
@@ -615,18 +651,41 @@ W - hadronic invariant mass
     // for a deuteron
     W_standing_d = sqrt((standing_d + q).Mag2());
 
-    WPrime  = sqrt((p_miss+q)2)  
+    // for a tagged proton in the nucleus
+    // equivalent to |p_miss + q|
+    // if careful not to double count omega in the energy component 
+    WPrime  = sqrt( (q.Px()-Pn.Px(), q.Py()-Pn.Py(), q.Pz()-Pn.Pz(), Emiss )2)   
 
 
-M_X - invariant mass of the emerging hadron
+Mx - missing mass of the emerging hadron
 
 for (e,e'π)  
 
-    M_X_ee_pi = ( (Beam + target) - (e + pi) ).Mag();
+    Mx_standing_d_ee_pi = ( (Beam + standing_d) - (e + pi) ).Mag();
+    Mx_standing_p_ee_pi = ( (Beam + standing_p) - (e + pi) ).Mag();
     
 for (e,e'πn)    
     
-    M_X_ee_pi_n = ( (Beam + target) - (e + pi + n) ).Mag();
+    Mx_standing_d_ee_pi_n = ( (Beam + standing_d) - (e + pi + n) ).Mag();
+    Mx_standing_p_ee_pi_n = ( (Beam + standing_p) - (e + pi + n) ).Mag();
+    MxPrime_ee_pi_n       = ( (Beam + p_miss) - (e + pi + n) ).Mag();
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     
     

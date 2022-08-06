@@ -53,13 +53,13 @@ def apply_Kinematical_cuts( df_dict,
         df_dict_after_cut = apply_Kinematical_cuts(df_dict)
         
         Apply kinematical cuts to match BAND neutron skimming
-        last update July-30, 2022
+        last update Aug-4, 2022
         
     '''
     df_dict_after_cut = dict()
     for pi_charge_name in pi_charge_names:#{
         df = df_dict[pi_charge_name]
-        df = df[ (W_min < df.W_standing_d)      & (df.W_standing_d < W_max)     ]
+        df = df[ (W_min < df.W_standing_p)      & (df.W_standing_p < W_max)     ]
         df = df[ (Q2_min < df.Q2)               & (df.Q2 < Q2_max)   ]
         df = df[ (Pe_min < df.e_P)              & (df.e_P < Pe_max)  ]
         df = df[ (Ppi_min < df.pi_P)            & (df.pi_P < Ppi_max)]
