@@ -616,7 +616,7 @@ DIS variables
     // QE y-variable
     y         = omega / Ebeam;
     // Feynman x 
-    x_F        = 2 * (pi.P().Dot(q.P())) / (q.Mag() * W_standing_p)
+    xF  = 2. * (pi.Dot(q)) / (q.P() * W)
     
 SIDIS variables
     // barion rapidity  η_br = log(Pπ+/Pπ−) / 2
