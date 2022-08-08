@@ -24,39 +24,43 @@
 #include "Auxiliary/genpart.cpp"
 
 
-
 #define NMAXEVENTS 5000000
-#define NMAXPIONS 5 // maximal allowed number of pions
-#define r2d 180./3.1415 // radians to degrees
+//#define NMAXPIONS 5 // maximal allowed number of pions
+//#define r2d 180./3.1415 // radians to degrees
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 // Globals
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-TString            csvheader = ((TString)"status,runnum,evnum,beam_helicity,"
-                                +(TString)"e_P,e_Theta,e_Phi,e_Vz,"
-                                +(TString)"pi_P,pi_Theta,pi_Phi,pi_Vz,"
-                                +(TString)"n_P,n_Theta,n_Phi,n_Vz,"
-                                +(TString)"Q2,W_standing_d,W_standing_p,"
-                                +(TString)"xB,Zpi,omega,"
-                                +(TString)"xF,y,"
-                                +(TString)"M_X_ee_pi,M_X_ee_pi_n,xPrime1,xPrime2,"
-                                +(TString)"theta_sq,"
-                                +(TString)"WPrime,"
-                                +(TString)"e_DC_sector,pi_DC_sector,"
-                                +(TString)"n_E,n_ToF,"
-                                +(TString)"pi_pT_qFrame,pi_pL_qFrame,"
-                                +(TString)"n_HitPos_X,n_HitPos_Y,n_HitPos_Z,"
-                                +(TString)"pi_Theta_qFrame,pi_Phi_qFrame,"
-                                +(TString)"Emiss,"
-                                +(TString)"n_pT_qFrame,n_pL_qFrame,"
-                                +(TString)"n_Theta_qFrame,n_Phi_qFrame,");
+TString csvheader = ((TString)"status,runnum,evnum,beam_helicity,"
+                     +(TString)"e_P,e_Theta,e_Phi,e_Vz,"
+                     +(TString)"pi_P,pi_Theta,pi_Phi,pi_Vz,"
+                     +(TString)"n_P,n_Theta,n_Phi,n_Vz,"
+                     +(TString)"n_HitPos_X,n_HitPos_Y,n_HitPos_Z,"
+                     +(TString)"n_E,alpha_n,"
+                     +(TString)"Q2,xB,omega,y,"
+                     +(TString)"e_DC_sector,pi_DC_sector,"
+                     +(TString)"pi_qFrame_Theta,pi_qFrame_Phi,"
+                     +(TString)"pi_qFrame_pT,pi_qFrame_pL,"
+                     +(TString)"n_Theta_qFrame,n_Phi_qFrame,"
+                     +(TString)"n_pT_qFrame,n_pL_qFrame,"
+                     +(TString)"E_init,P_init,alpha_init,"
+                     +(TString)"Zpi,Zpi_LC,"
+                     +(TString)"Zpi_LC_Prime,"
+                     +(TString)"W,M_x,"
+                     +(TString)"xF,eta_pi,"
+                     +(TString)"W_Prime,M_x_Prime,"
+                     +(TString)"xF_Prime,"
+                     +(TString)"xB_Prime1,xB_Prime2,"
+                     );
+
+
 
 TString DataPath = "/volatile/clas12/users/ecohen/BAND/";
 TString                            prefix = "sidisdvcs_";
-TString   skimmedBANDFilename;
-TString  skimmedSIDISFilename;
-TString            pionCharge; // "pi+" or "pi-"
-TString               pionStr;
+TString                              skimmedBANDFilename;
+TString                             skimmedSIDISFilename;
+TString                                       pionCharge; // "pi+" or "pi-"
+TString                                          pionStr;
 
 // Input root files and trees
 TFile * SIDISFile, * BANDFile;
@@ -73,75 +77,81 @@ std::ofstream   CSVfile_e_pi_n;
 clock_t tStart = clock();
 
 // globals
-Double_t       Me  = 0.00051099895; // GeV/c2
-Double_t            Mpi = 0.139570; // GeV/c2
-Double_t       Mpims  = 0.13957039; // GeV/c2
-Double_t       Mpips  = 0.13957039; // GeV/c2
-Double_t            Mp  = 0.938272; // GeV/c2
-Double_t             Mn = 0.939565; // GeV/c2
-Double_t                Md = 1.875; // GeV/c2
-Double_t             Mp2 = Mp * Mp;
+//Double_t       Me  = 0.00051099895; // GeV/c2
+//Double_t            Mpi = 0.139570; // GeV/c2
+//Double_t       Mpims  = 0.13957039; // GeV/c2
+//Double_t       Mpips  = 0.13957039; // GeV/c2
+//Double_t            Mp  = 0.938272; // GeV/c2
+//Double_t             Mn = 0.939565; // GeV/c2
+//Double_t                Md = 1.875; // GeV/c2
+//Double_t             Mp2 = Mp * Mp;
 Double_t                        xB; // Bjorken x
-Double_t                        xF; // Feynman x
+Double_t                         y; // QE y-variable
 Double_t                        Q2;
 Double_t                     omega;
 Double_t                        w2; // omega^2
 Double_t          Zpips[NMAXPIONS]; // energy fraction rest frame
+Double_t       Zpips_LC[NMAXPIONS]; // energy fraction rest frame on the light cone
 Double_t          Zpims[NMAXPIONS]; // energy fraction rest frame
+Double_t       Zpims_LC[NMAXPIONS]; // energy fraction rest frame on the light cone
 Double_t                     W, W2; // energy of the hadronic system
-Double_t              W_standing_p;
-Double_t              W_standing_d;
-Double_t                     Emiss;
-Double_t                   alpha_s; // light cone fraction of momentum of the recoil neutron
-Double_t           WPrime, W2prime;  // moving proton
-Double_t                   xPrime1; // moving proton defined as
+//Double_t              W_p_rest;
+//Double_t              W_d_rest;
+//Double_t                     Emiss;
+Double_t                    E_init; // proton initial state energy 
+Double_t                   alpha_n; // light cone fraction of momentum of the recoil neutron
+Double_t                alpha_init; // light cone fraction of momentum of the initial proton
+Double_t          W_Prime, W2prime; // moving proton
+Double_t                        xF; // Feynman x for a standing proton
+Double_t                  xF_Prime; // Feynman x for a moving proton
+
+Double_t                   xB_Prime1; // moving proton defined as
 // x' = Q2 / (2. * ((Md - Es) * omega + Pn_Vect*q->Vect() ));
-Double_t                   xPrime2; // moving proton defined as
+Double_t                   xB_Prime2; // moving proton defined as
 // x' = Q2 / (W'^2 - mN^2 + Q2)
 
 Double_t                        Es; // spectator energy
 Double_t                        Ps; // spectator momentum
 Double_t                  theta_sq; // spectator angle with respect to momentum transfer
-Double_t     M_X_ee_pi,M_X_ee_pi_n;
-Double_t                         y;
+Double_t            M_x, M_x_Prime;
 Double_t                     n_ToF;
 
 
 
-Int_t                       NeventsToMerge;
-Int_t               BANDrunID, BANDeventID;
-Int_t             SIDISrunID, SIDISeventID;
-Int_t          EventIDsToMerge[NMAXEVENTS];
-Int_t                 Npions, Npips, Npims;
-Int_t                  Ne, Np, Nn, Ngammas;
-Int_t                               status;
-std::vector<Int_t>                   BANDeventIDs;
-std::vector<Int_t>                  SIDISeventIDs;
-std::vector<Int_t>               BANDeventIndices;
-std::vector<Int_t>              SIDISeventIndices;
-std::vector<Int_t>            EventNumbersToMerge;
-std::vector<std::size_t>  BANDEventIndicesToMerge;
-std::vector<std::size_t> SIDISEventIndicesToMerge;
+Int_t                               NeventsToMerge;
+Int_t                       BANDrunID, BANDeventID;
+Int_t                     SIDISrunID, SIDISeventID;
+Int_t                  EventIDsToMerge[NMAXEVENTS];
+Int_t                         Npions, Npips, Npims;
+Int_t                          Ne, Np, Nn, Ngammas;
+Int_t                                       status;
+std::vector<Int_t>                    BANDeventIDs;
+std::vector<Int_t>                   SIDISeventIDs;
+std::vector<Int_t>                BANDeventIndices;
+std::vector<Int_t>               SIDISeventIndices;
+std::vector<Int_t>             EventNumbersToMerge;
+std::vector<std::size_t>   BANDEventIndicesToMerge;
+std::vector<std::size_t>  SIDISEventIndicesToMerge;
 
 // SIDIS Tree
-TLorentzVector     *target = new TLorentzVector(0, 0, 0, Md );
+TLorentzVector     *target = new TLorentzVector(0, 0, 0, aux.Md );
 TLorentzVector     *Beam=0;
 TLorentzVector        *e=0;
 TLorentzVector        *q=0;
 TLorentzVector          Pn; // neutron momentum
 TLorentzVector Band_data_e; // electron information in BAND TTree
-TLorentzVector       Pmiss;
-TLorentzVector *standing_d = new TLorentzVector(0, 0, 0, Md );
-TLorentzVector *standing_p = new TLorentzVector(0, 0, 0, Mp );
+TLorentzVector      p_init;
+TLorentzVector *d_rest = new TLorentzVector(0, 0, 0, aux.Md );
+TLorentzVector *p_rest = new TLorentzVector(0, 0, 0, aux.Mp );
 
 // "q-frame" parameters
 double              Pe_phi;
 double      q_phi, q_theta;
 // vectors in q-frame
-TLorentzVector    e_qFrame;
-TLorentzVector    q_qFrame;
-TLorentzVector   Pn_qFrame;
-
+TLorentzVector       e_qFrame;
+TLorentzVector       q_qFrame;
+TLorentzVector      Pn_qFrame;
+TLorentzVector  P_init_qFrame;
 
 // reconstructed vertex position
 TVector3             *Ve=0;
@@ -231,7 +241,7 @@ void               GetSIDISData ( int MergedEvtId );
 void                GetBANDData ( int MergedEvtId );
 void             MergeEventData ();
 void    SetInputAndOutputTTrees ();
-void          ComputeKinematics ();
+void          ComputeElectronKinematics ();
 void                  PrintDone ();
 void          PrintMonitorHello ();
 void              SetPionCharge ( TString fpionCharge ) {
@@ -254,7 +264,7 @@ void                  PrintTime ( TString prefix ){
 }
 void              MoveTo_qFrame ();
 TVector3  RotateVectorTo_qFrame ( TVector3 v );
-void               Print4Vector ( TLorentzVector v, std::string label );
+//void               Print4Vector ( TLorentzVector v, std::string label );
 
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
@@ -313,10 +323,11 @@ void MergeSIDISandBANDevents (int NMAXeventsToMerge=10,
         GetSIDISData( MergedEvtId );
         
         // grab neturon information from BAND
-        GetBANDData( MergedEvtId );
-        
+        GetBANDData ( MergedEvtId );
+                
         // compute kinematical variables, also for the neutron
-        ComputeKinematics   ();
+        ComputeElectronKinematics         ();
+        ComputeNeutronAndProtonKinematics ();
         
         // move to q-frame and define the pion and neutron momentum with respect to q
         MoveTo_qFrame       ();
@@ -367,8 +378,11 @@ void OpenOutputFiles (TString RunStr){
     TString skimmedMergedFilename = (DataPath + "merged_SIDIS_and_BAND_skimming/"
                                      + "skimmed_SIDIS_and_BAND_" + prefix + RunStr + pionStr + "_n" );
     
-    if (fdebug>2) std::cout << "Opening output file: " << skimmedMergedFilename  << ".root/csv " << std::endl;
-    
+    if (fdebug>2) {
+        std::cout
+        << "Opening output file: " << skimmedMergedFilename
+        << ".root/csv " << std::endl;
+    }
     
     // Create output tree
     MergedFile = new TFile( skimmedMergedFilename + ".root" ,"RECREATE");
@@ -578,14 +592,14 @@ Int_t CreateListOfEventsToMerge(TTree * BANDTree,
     return NmergedEvents;
 }
 
-
-// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-Double_t ComputeLightConeFraction( TLorentzVector p ){
-    // compute light-cone momentum fraction
-    Double_t m = p.Mag();
-    Double_t alpha = (p.E() - p.Z())/m;
-    return alpha;
-}
+//
+//// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+//Double_t ComputeLightConeFraction( TLorentzVector p ){
+//    // compute light-cone momentum fraction
+//    Double_t m = p.Mag();
+//    Double_t alpha = (p.E() - p.Z())/m;
+//    return alpha;
+//}
 
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
@@ -595,56 +609,66 @@ void SetInputAndOutputTTrees (){
     }
     
     // SIDIS input tree branches
-    SIDISTree  -> SetBranchAddress("eventnumber"                ,&SIDISeventID          );
-    SIDISTree  -> SetBranchAddress("runnum"                     ,&SIDISrunID            );
-    SIDISTree  -> SetBranchAddress("e"                          ,&e                     );
-    SIDISTree  -> SetBranchAddress("Ve"                         ,&Ve                    );
-    SIDISTree  -> SetBranchAddress("Beam"                       ,&Beam                  );
-    SIDISTree  -> SetBranchAddress("beam_helicity"              ,&beam_helicity         );
-    SIDISTree  -> SetBranchAddress("q"                          ,&q                     );
-    SIDISTree  -> SetBranchAddress("omega"                     ,&omega                  );
-    SIDISTree  -> SetBranchAddress("Nelectrons"                ,&Ne                     );
-    SIDISTree  -> SetBranchAddress("Ngammas"                   ,&Ngammas                );
-    SIDISTree  -> SetBranchAddress("Nprotons"                  ,&Np                     );
-    SIDISTree  -> SetBranchAddress("Nneutrons"                 ,&Nn                     );
-    SIDISTree  -> SetBranchAddress("Npips"                     ,&Npips                  );
-    SIDISTree  -> SetBranchAddress("Npims"                     ,&Npims                  );
-    SIDISTree  -> SetBranchAddress("e_DC_sector"               ,&e_DC_sector            );
-
+    SIDISTree  -> SetBranchAddress("eventnumber"            ,&SIDISeventID          );
+    SIDISTree  -> SetBranchAddress("runnum"                 ,&SIDISrunID            );
+    SIDISTree  -> SetBranchAddress("e"                      ,&e                     );
+    SIDISTree  -> SetBranchAddress("Ve"                     ,&Ve                    );
+    SIDISTree  -> SetBranchAddress("Beam"                   ,&Beam                  );
+    SIDISTree  -> SetBranchAddress("beam_helicity"          ,&beam_helicity         );
+    SIDISTree  -> SetBranchAddress("q"                      ,&q                     );
+    SIDISTree  -> SetBranchAddress("Nelectrons"             ,&Ne                     );
+    SIDISTree  -> SetBranchAddress("Ngammas"                ,&Ngammas                );
+    SIDISTree  -> SetBranchAddress("Nprotons"               ,&Np                     );
+    SIDISTree  -> SetBranchAddress("Nneutrons"              ,&Nn                     );
+    SIDISTree  -> SetBranchAddress("Npips"                  ,&Npips                  );
+    SIDISTree  -> SetBranchAddress("Npims"                  ,&Npims                  );
+    SIDISTree  -> SetBranchAddress("e_DC_sector"            ,&e_DC_sector            );
+    SIDISTree  -> SetBranchAddress("omega"                  ,&omega                  );
+    SIDISTree  -> SetBranchAddress("xB"                     ,&xB                     );
+    SIDISTree  -> SetBranchAddress("Q2"                     ,&Q2                     );
+    SIDISTree  -> SetBranchAddress("y"                      ,&y                      );
+    SIDISTree  -> SetBranchAddress("W"                         ,&W                      );
     
-    
-    //    // branches that depend on pion charge
+    // branches that depend on pion charge
     if (pionCharge=="pi+") {
-        SIDISTree  -> SetBranchAddress("eepipsPastCutsInEvent"     ,&eepipsPastCutsInEvent    );
-        SIDISTree  -> SetBranchAddress("eepipsPastKinematicalCuts" ,&eepipsPastKinematicalCuts);
-        SIDISTree -> SetBranchAddress("piplus_Px"                  ,&piplus_Px                );
-        SIDISTree -> SetBranchAddress("piplus_Py"                  ,&piplus_Py                );
-        SIDISTree -> SetBranchAddress("piplus_Pz"                  ,&piplus_Pz                );
-        SIDISTree -> SetBranchAddress("piplus_E"                   ,&piplus_E                 );
-        SIDISTree -> SetBranchAddress("Vpiplus_X"                  ,&Vpiplus_X                );
-        SIDISTree -> SetBranchAddress("Vpiplus_Y"                  ,&Vpiplus_Y                );
-        SIDISTree -> SetBranchAddress("Vpiplus_Z"                  ,&Vpiplus_Z                );
-        SIDISTree -> SetBranchAddress("pi_DC_sector"               ,&pips_DC_sector           );
-        SIDISTree -> SetBranchAddress("piplus_qFrame_pT"           ,&piplus_qFrame_pT         );
-        SIDISTree -> SetBranchAddress("piplus_qFrame_pL"           ,&piplus_qFrame_pL         );
-        SIDISTree -> SetBranchAddress("piplus_qFrame_Theta"        ,&piplus_qFrame_Theta      );
-        SIDISTree -> SetBranchAddress("piplus_qFrame_Phi"          ,&piplus_qFrame_Phi        );
+        SIDISTree  -> SetBranchAddress("eepipsPastCutsInEvent"
+                                                            ,&eepipsPastCutsInEvent    );
+        SIDISTree  -> SetBranchAddress("eepipsPastKinematicalCuts"
+                                                            ,&eepipsPastKinematicalCuts);
+        SIDISTree -> SetBranchAddress("piplus_Px"           ,&piplus_Px                );
+        SIDISTree -> SetBranchAddress("piplus_Py"           ,&piplus_Py                );
+        SIDISTree -> SetBranchAddress("piplus_Pz"           ,&piplus_Pz                );
+        SIDISTree -> SetBranchAddress("piplus_E"            ,&piplus_E                 );
+        SIDISTree -> SetBranchAddress("Vpiplus_X"           ,&Vpiplus_X                );
+        SIDISTree -> SetBranchAddress("Vpiplus_Y"           ,&Vpiplus_Y                );
+        SIDISTree -> SetBranchAddress("Vpiplus_Z"           ,&Vpiplus_Z                );
+        SIDISTree -> SetBranchAddress("pi_DC_sector"        ,&pips_DC_sector           );
+        SIDISTree -> SetBranchAddress("piplus_qFrame_pT"    ,&piplus_qFrame_pT         );
+        SIDISTree -> SetBranchAddress("piplus_qFrame_pL"    ,&piplus_qFrame_pL         );
+        SIDISTree -> SetBranchAddress("piplus_qFrame_Theta" ,&piplus_qFrame_Theta      );
+        SIDISTree -> SetBranchAddress("piplus_qFrame_Phi"   ,&piplus_qFrame_Phi        );
+        SIDISTree -> SetBranchAddress("Z"                   ,&Zpips        );
+        SIDISTree -> SetBranchAddress("Z_LC"                ,&Zpips_LC        );
+        
     } else if (pionCharge=="pi-") {
-        SIDISTree  -> SetBranchAddress("eepimsPastCutsInEvent"      ,&eepimsPastCutsInEvent     );
-        SIDISTree  -> SetBranchAddress("eepimsPastKinematicalCuts"  ,&eepimsPastKinematicalCuts );
-        SIDISTree -> SetBranchAddress("piminus_Px"                  ,&piminus_Px                );
-        SIDISTree -> SetBranchAddress("piminus_Py"                  ,&piminus_Py                );
-        SIDISTree -> SetBranchAddress("piminus_Pz"                  ,&piminus_Pz                );
-        SIDISTree -> SetBranchAddress("piminus_E"                   ,&piminus_E                 );
-        SIDISTree -> SetBranchAddress("Vpiminus_X"                  ,&Vpiminus_X                );
-        SIDISTree -> SetBranchAddress("Vpiminus_Y"                  ,&Vpiminus_Y                );
-        SIDISTree -> SetBranchAddress("Vpiminus_Z"                  ,&Vpiminus_Z                );
-        SIDISTree -> SetBranchAddress("pi_DC_sector"                ,&pims_DC_sector            );
-        SIDISTree -> SetBranchAddress("piminus_qFrame_pT"           ,&piminus_qFrame_pT         );
-        SIDISTree -> SetBranchAddress("piminus_qFrame_pL"           ,&piminus_qFrame_pL         );
-        SIDISTree -> SetBranchAddress("piminus_qFrame_Theta"        ,&piminus_qFrame_Theta      );
-        SIDISTree -> SetBranchAddress("piminus_qFrame_Phi"          ,&piminus_qFrame_Phi        );
-
+        SIDISTree  -> SetBranchAddress("eepimsPastCutsInEvent"
+                                                            ,&eepimsPastCutsInEvent     );
+        SIDISTree  -> SetBranchAddress("eepimsPastKinematicalCuts"
+                                                            ,&eepimsPastKinematicalCuts );
+        SIDISTree -> SetBranchAddress("piminus_Px"          ,&piminus_Px                );
+        SIDISTree -> SetBranchAddress("piminus_Py"          ,&piminus_Py                );
+        SIDISTree -> SetBranchAddress("piminus_Pz"          ,&piminus_Pz                );
+        SIDISTree -> SetBranchAddress("piminus_E"           ,&piminus_E                 );
+        SIDISTree -> SetBranchAddress("Vpiminus_X"          ,&Vpiminus_X                );
+        SIDISTree -> SetBranchAddress("Vpiminus_Y"          ,&Vpiminus_Y                );
+        SIDISTree -> SetBranchAddress("Vpiminus_Z"          ,&Vpiminus_Z                );
+        SIDISTree -> SetBranchAddress("pi_DC_sector"        ,&pims_DC_sector            );
+        SIDISTree -> SetBranchAddress("piminus_qFrame_pT"   ,&piminus_qFrame_pT         );
+        SIDISTree -> SetBranchAddress("piminus_qFrame_pL"   ,&piminus_qFrame_pL         );
+        SIDISTree -> SetBranchAddress("piminus_qFrame_Theta",&piminus_qFrame_Theta      );
+        SIDISTree -> SetBranchAddress("piminus_qFrame_Phi"  ,&piminus_qFrame_Phi        );
+        SIDISTree -> SetBranchAddress("Z"                   ,&Zpims        );
+        SIDISTree -> SetBranchAddress("Z_LC"                ,&Zpims_LC        );
     }
     
     
@@ -749,7 +773,6 @@ void GetBANDData(int MergedEvtId){
     clashit* this_eHit = (clashit*)eHit;
     Band_e_Vect.SetMagThetaPhi ( this_eHit->getMomentum(), this_eHit->getTheta(), this_eHit->getPhi() );
     Band_data_e.SetVectM( Band_e_Vect , Me );
-
     
     // neutron ToF
     n_ToF = this_nHit->getTof();
@@ -804,6 +827,14 @@ void GetSIDISData( int MergedEvtId ){
         Npions = Npims;
     }
     for (int pipsIdx=0; pipsIdx<Npips; pipsIdx++){
+        piplus.at(pipsIdx)   = TLorentzVector(piplus_Px[pipsIdx],
+                                              piplus_Py[pipsIdx],
+                                              piplus_Pz[pipsIdx],
+                                              piplus_E[pipsIdx]) ;
+        
+        Vpiplus.at(pipsIdx)  = TVector3(Vpiplus_X[pipsIdx],
+                                        Vpiplus_Y[pipsIdx],
+                                        Vpiplus_Z[pipsIdx]) ;
         if (fdebug>4) {
             std::cout
             << "piplus.at(pipsIdx) = TLorentzVector("
@@ -814,16 +845,11 @@ void GetSIDISData( int MergedEvtId ){
             << std::endl
             << "piplus_qFrame_pT: " << piplus_qFrame_pT[pipsIdx]    <<","
             << "piplus_qFrame_pL: " << piplus_qFrame_pL[pipsIdx]    <<","
+            << std::endl
+            << "Z: "                << Zpips[pipsIdx]               <<","
+            << "Z_LC: "             << Zpips_LC[pipsIdx]            <<","
             << std::endl;
         }
-        piplus.at(pipsIdx)   = TLorentzVector(piplus_Px[pipsIdx],
-                                              piplus_Py[pipsIdx],
-                                              piplus_Pz[pipsIdx],
-                                              piplus_E[pipsIdx]) ;
-        
-        Vpiplus.at(pipsIdx)  = TVector3(Vpiplus_X[pipsIdx],
-                                        Vpiplus_Y[pipsIdx],
-                                        Vpiplus_Z[pipsIdx]) ;
     }
     for (int pimsIdx=0; pimsIdx<Npims; pimsIdx++){
         piminus.at(pimsIdx)  = TLorentzVector(piminus_Px[pimsIdx],
@@ -866,70 +892,72 @@ void GetSIDISData( int MergedEvtId ){
 
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-void ComputeKinematics(){
+void ComputeElectronKinematics(){
     // compute kinematics
     // SIDISc12rSkimmer.C already computes few of the kinematical variables:
-    //     xB,  Q2, omega, W, Z, y
+    //     xB,  Q2, omega, W, Z, y, Z_LC
+}
+
+// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+void ComputeNeutronAndProtonKinematics(){
     
+    // detected neutron
     Es      = Pn.E();
     Ps      = Pn.P();
-    omega   = q->E();
-    w2      = omega * omega;
-    y       = omega / Ebeam;
     theta_sq= Pn.Angle( q->Vect() );
-    Q2      = -q->Mag2();
-    
-    Emiss   = Md + q->E() - Pn.E(); // energy of the proton in the nucleus
-    Pmiss   .SetPxPyPzE( -Pn.Px(), -Pn.Py(), -Pn.Pz(), Emiss );
     
 
-    
-    W2      = (*target + *q).Mag2();
-    W       = sqrt(W2);
-    
-    W_standing_d    = sqrt((*standing_d + *q).Mag2());
-    W_standing_p    = sqrt((*standing_p + *q).Mag2());
-    
-    W2prime = ( TLorentzVector((Pmiss.Vect() + q->Vect()), Emiss) ).Mag2();
-    WPrime  = sqrt(W2prime);
-    
-    // for a proton
-    // W2      = Mp2 - Q2 + 2. * omega * Mp;
-    // W' from [E12-11-003A proposal, p. 13]
-    // W2prime = Mp2 - Q2 + 2. * omega * (Md - Es) + 2. * Ps * sqrt(Q2 + w2) * cos( theta_sq );
+    // initial state of the virtual moving proton in the nucleus
+    E_init  = aux.Md - Pn.E();
+    p_init  = d_rest - Pn;
+}
 
-    xB      = Q2 / (2. * Mp * omega);
-    xPrime1 = Q2 / (2. * ((Md - Es) * omega + Pn_Vect*q->Vect() ));
-    xPrime2 = Q2 / (W2prime - Mp2 + Q2);
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+void ComputePionKinematics(TLorentzVector pi, double Zpi_LC){
     
-    // move to q-frame
-    // compute light-cone fraction of momentum
-    // alpha_s = ComputeLightConeFraction( Pn_qFrame );
+    // pion energy fraction on the light-cone
+    Zpi_LC_Prime = Zpi_LC / alpha_n;
     
+    // Kinematics assuming scattering off a proton at rest
+    // W is read off the SIDIS TTree
+    //    W   = ( p_rest + q ).Mag();
+    M_x = ( p_rest + q - pi ).Mag();
+    xF  = 2. * (pi.Dot(q)) / (q.P() * W);
+    eta_pi =
+    
+    // Kinematics for the virtual moving proton
+    W_Prime   = ( p_init + q ).Mag();
+    M_x_Prime = ( p_init + q - pi ).Mag();
+    xF_Prime  = 2. * (pi.Dot(q)) / (q.P() * W_Prime);
+    
+    // xB is read off the SIDIS TTree
+    //    xB      = Q2 / (2. * aux.Mp * omega);
+    xB_Prime1 = Q2 / (2. * ((aux.Md - En) * omega + Pn_Vect*q->Vect() ));
+    xB_Prime2 = Q2 / (W_Prime*W_Prime - aux.Mp2 + Q2);
     
     if (fdebug>3) {
         std::cout
-        << "ComputeKinematics()"
+        << "ComputeElectronKinematics()"
         << std::endl
         << "Pe: "       << e->P()   << " GeV/c,"
         << "x: "        << xB        << ","
-        << "x'(1): "    << xPrime1   << ","
-        << "x'(2): "    << xPrime2   << ","
+        << "x'(1): "    << xB_Prime1   << ","
+        << "x'(2): "    << xB_Prime2   << ","
         << std::endl
-        << "(Pmiss + *q).Px(): " << (Pmiss + *q).Px() << ","
-        << "(Pmiss + *q).Py(): " << (Pmiss + *q).Py() << ","
-        << "(Pmiss + *q).Pz(): " << (Pmiss + *q).Pz() << ","
-        << "(Pmiss + *q).E(): "  << (Pmiss + *q).E()  << ","
-        << "(Pmiss + *q).Mag(): "<< (Pmiss + *q).Mag()  << ","
-        << "(Pmiss + *q).Mag2(): "<< (Pmiss + *q).Mag2()  << ","
+        << "(p_init + *q).Px(): " << (p_init + *q).Px() << ","
+        << "(p_init + *q).Py(): " << (p_init + *q).Py() << ","
+        << "(p_init + *q).Pz(): " << (p_init + *q).Pz() << ","
+        << "(p_init + *q).E(): "  << (p_init + *q).E()  << ","
+        << "(p_init + *q).Mag(): "<< (p_init + *q).Mag()  << ","
+        << "(p_init + *q).Mag2(): "<< (p_init + *q).Mag2()  << ","
         << std::endl
         << "-Pn: "      << (-Pn).P() << " GeV/c,"
         << "W: "        << W        << " GeV/c2,"
-        << "W': "       << WPrime   << " GeV/c2,"
+        << "W': "       << W_Prime   << " GeV/c2,"
         << std::endl;
     }
-    
 }
+
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void PrintDone(){
@@ -942,66 +970,89 @@ void PrintDone(){
 void Stream_e_pi_n_line_to_CSV(int piIdx,
                                bool passed_cuts_e_pi_kinematics,
                                bool passed_cuts_n){
-    
+    status = 0;
     TLorentzVector     * pi;
     TVector3          * Vpi;
-    double              Zpi;
+    double      Zpi, Zpi_LC;
     double     pi_DC_sector;
-    double     pi_pT_qFrame;
-    double     pi_pL_qFrame;
-    double  pi_Theta_qFrame;
-    double    pi_Phi_qFrame;
+    double     pi_qFrame_pT;
+    double     pi_qFrame_pL;
+    double  pi_qFrame_Theta;
+    double    pi_qFrame_Phi;
     
     if (pionCharge=="pi+") {
         pi              = &piplus               [piIdx];
         Vpi             = &Vpiplus              [piIdx];
+        Zpi             = Zpips                 [piIdx];
+        Zpi_LC          = Zpips_LC              [piIdx];
+
         pi_DC_sector    = pips_DC_sector        [piIdx];
-        pi_pT_qFrame    = piplus_qFrame_pT      [piIdx];
-        pi_pL_qFrame    = piplus_qFrame_pL      [piIdx];
-        pi_Theta_qFrame = piplus_qFrame_Theta   [piIdx];
-        pi_Phi_qFrame   = piplus_qFrame_Phi     [piIdx];
+        pi_qFrame_pT    = piplus_qFrame_pT      [piIdx];
+        pi_qFrame_pL    = piplus_qFrame_pL      [piIdx];
+        pi_qFrame_Theta = piplus_qFrame_Theta   [piIdx];
+        pi_qFrame_Phi   = piplus_qFrame_Phi     [piIdx];
     }
     else if (pionCharge=="pi-") {
         pi              = &piminus              [piIdx];
         Vpi             = &Vpiminus             [piIdx];
+        Zpi             = Zpims                 [piIdx];
+        Zpi_LC          = Zpims_LC              [piIdx];
         pi_DC_sector    = pims_DC_sector        [piIdx];
-        pi_pT_qFrame    = piminus_qFrame_pT     [piIdx];
-        pi_pL_qFrame    = piminus_qFrame_pL     [piIdx];
-        pi_Theta_qFrame = piminus_qFrame_Theta  [piIdx];
-        pi_Phi_qFrame   = piminus_qFrame_Phi    [piIdx];
-
+        pi_qFrame_pT    = piminus_qFrame_pT     [piIdx];
+        pi_qFrame_pL    = piminus_qFrame_pL     [piIdx];
+        pi_qFrame_Theta = piminus_qFrame_Theta  [piIdx];
+        pi_qFrame_Phi   = piminus_qFrame_Phi    [piIdx];
     }
     else {
-        std::cout << "pion charge ill defined at Stream_e_pi_line_to_CSV(), returning " << std::endl;
+        std::cout << "bad pion charge in Stream_e_pi_line_to_CSV()!" << std::endl;
         return;
     }
-    Zpi = pi->E()/omega;
-    if (fdebug>3) {
+        
+    ComputePionKinematics( pi, Zpi_LC );
+    
+    std::vector<double> variables =
+    {   (double)status, (double)SIDISrunID, (double)eventnumber,    (double)beam_helicity,
+        e->P(),         e->Theta(),         e->Phi(),               Ve->Z(),
+        pi->P(),        pi->Theta(),        pi->Phi(),              Vpi->Z(),
+        Pn.P(),         Pn.Theta(),         Pn.Phi(),               Ve->Z(),
+        n_HitPos.X(),   n_HitPos.Y(),       n_HitPos.Z(),
+        Pn.E(),         alpha_n,
+        Q2,             xB,                 omega,                  y,
+        (double)e_DC_sector,                (double)pi_DC_sector,
+        pi_qFrame_Theta,                    pi_qFrame_Phi,
+        pi_qFrame_pT,                       pi_qFrame_pL,
+        Pn_qFrame.Theta(),                  Pn_qFrame.Phi()
+        Pn_qFrame.Pt(),                     Pn_qFrame.Pz(),
+        E_init,         p_init.P(),         alpha_init,
+        Zpi,            Zpi_LC,
+        Zpi_LC_Prime,
+        W,              M_x,
+        xF,             eta_pi,
+        W_Prime,        M_x_Prime,
+        xF_Prime,
+        xB_Prime1,      xB_Prime2,
+    };
+    
+    StreamToCSVfile( variables, passed_cuts_e_pi_kinematics );
+    
+    if (fdebug>2){
         std::cout
-        << "Stream_e_pi_n_line_to_CSV(" << piIdx  << "," << passed_cuts_e_pi_kinematics << "," << passed_cuts_n << ")"
+        << "Stream_e_pi_n_line_to_CSV(" << piIdx  << "),"
+        << "passed_cuts_e_pi_kinematics: :" << passed_cuts_e_pi_kinematics << ","
+        << passed_cuts_n << ")"
         << std::endl
-        << "piIdx: "    << piIdx << ","
-        << "Zpi: "      << Zpi   << ","
-        << "passed_cuts_e_pi_kinematics: " << passed_cuts_e_pi_kinematics << ","
-        << "passed_cuts_n: " << passed_cuts_n << ","
+        << "piIdx: "        << piIdx            << ","
+        << "Zpi: "          << Zpi              << ","
+        << "Zpi_LC: "       << Zpi_LC           << ","
+        << "Zpi_LC_Prime: " << Zpi_LC_Prime     << ","
+        << "passed_cuts_e_pi_kinematics: "      << passed_cuts_e_pi_kinematics << ","
+        << "passed_cuts_n: " << passed_cuts_n   << ","
         << std::endl;
         std::cout
         << "*pi.X(): "  << pi->X()      << ","
         << "Pe: "       << e->P()       << " GeV/c,"
         << std::endl;
-    }
-    TLorentzVector pion = *pi;
 
-    // ---------------------------------------------------------------
-    // compute kinematics that also relies on pion information
-    // ---------------------------------------------------------------
-    xF          = 2. * (pion.Dot(*q)) / (q->Mag() * W);
-    M_X_ee_pi   = ( (*Beam + *target) - (*e + *pi) ).Mag(); // missing mass of (e,e'pi)
-    M_X_ee_pi_n = ( (*Beam + *target) - (*e + *pi + Pn) ).Mag(); // missing mass of (e,e'pi n)
-    status      = 0;
-
-    
-    if (fdebug>2){
         if ((pi->P() < 1.25) && (passed_cuts_e_pi_kinematics)){
             std::cout
             << " pi->P() = " << pi->P() << " < 1.25 GeV/c!"
@@ -1015,29 +1066,6 @@ void Stream_e_pi_n_line_to_CSV(int piIdx,
             << std::endl;
         }
     }
-    
-    // now stream data to CSV file
-    std::vector<double> variables =
-    {   (double)status, (double)SIDISrunID,   (double)eventnumber,    (double)beam_helicity,
-        e->P(),         e->Theta(),         e->Phi(),             Ve->Z(),
-        pi->P(),        pi->Theta(),        pi->Phi(),            Vpi->Z(),
-        Pn.P(),         Pn.Theta(),         Pn.Phi(),             Ve->Z(),
-        Q2,             W_standing_d,       W_standing_p,
-        xB,             Zpi,                omega,
-        xF,             y,
-        M_X_ee_pi,      M_X_ee_pi_n,        xPrime1,              xPrime2,
-        theta_sq,
-        WPrime,
-        (double)e_DC_sector,                (double)pi_DC_sector,
-        Pn.E(),         n_ToF,
-        pi_pT_qFrame,                       pi_pL_qFrame,
-        n_HitPos.X(),   n_HitPos.Y(),       n_HitPos.Z(),
-        pi_Theta_qFrame,                    pi_Phi_qFrame,
-        Emiss,
-        Pn_qFrame.Pt(),                     Pn_qFrame.Pz(),
-        Pn_qFrame.Theta(),                  Pn_qFrame.Phi()        
-    };
-    StreamToCSVfile( variables, passed_cuts_e_pi_kinematics );
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -1048,8 +1076,10 @@ void InitializeVariables(){
     Band_data_e = TLorentzVector( 0, 0, 0, Me );
     
     xB          = Q2        = omega     = -9999;
-    xF          = y                     = -9999;
-    M_X_ee_pi   = M_X_ee_pi_n           = -9999;
+    y                                   = -9999;
+    M_x         = M_x_Prime             = -9999;
+    W           = W_Prime               = -9999;
+    xF          = xF_Prime              = -9999;
     Ve                                  = new TVector3();
     n_ToF                               = -9999;
     n_HitPos                            = TVector3();
@@ -1064,26 +1094,30 @@ void InitializeVariables(){
     piminus_qFrame .clear();
     
     for (int piIdx=0; piIdx<NMAXPIONS; piIdx++) {
-        piplus  .push_back( TLorentzVector(0,0,0,Mpips) );
+        piplus  .push_back( TLorentzVector(0,0,0,aux.Mpips) );
         Vpiplus .push_back( TVector3() );
         eepipsPastKinematicalCuts[piIdx]            = false;
-        piminus .push_back( TLorentzVector(0,0,0,Mpims) );
+        piminus .push_back( TLorentzVector(0,0,0,aux.Mpims) );
         Vpiminus.push_back( TVector3() );
         pimsPastSelectionCuts[piIdx]                = false;
         eepimsPastKinematicalCuts[piIdx]            = false;
-        piplus_Px[piIdx]    = piplus_Py[piIdx]  = piplus_Pz[piIdx]  = piplus_E[piIdx]   = -9999;
-        piminus_Px[piIdx]   = piminus_Py[piIdx] = piminus_Pz[piIdx] = piminus_E[piIdx]  = -9999;
-        Vpiplus_X[piIdx]    = Vpiplus_Y[piIdx]  = Vpiplus_Z[piIdx]  = -9999;
-        Vpiminus_X[piIdx]   = Vpiminus_Y[piIdx] = Vpiminus_Z[piIdx] = -9999;
-        piminus_qFrame_pT[piIdx] = piminus_qFrame_pL[piIdx]         = -9999;
-        piplus_qFrame_pT[piIdx]  = piplus_qFrame_pL[piIdx]          = -9999;
+        piplus_Px[piIdx]    = piplus_Py[piIdx]  = -9999;
+        piplus_Pz[piIdx]    = piplus_E[piIdx]   = -9999;
+        piminus_Px[piIdx]   = piminus_Py[piIdx] = -9999;
+        piminus_Pz[piIdx]   = piminus_E[piIdx]  = -9999;
+        Vpiplus_X[piIdx]    = Vpiplus_Y[piIdx]  = -9999;
+        Vpiplus_Z[piIdx]                        = -9999;
+        Vpiminus_X[piIdx]   = Vpiminus_Y[piIdx] = -9999;
+        Vpiminus_Z[piIdx]                       = -9999;
+        piminus_qFrame_pT[piIdx] = piminus_qFrame_pL[piIdx] = -9999;
+        piplus_qFrame_pT[piIdx]  = piplus_qFrame_pL[piIdx]  = -9999;
         
-        piplus        .push_back( TLorentzVector(0,0,0,Mpips) );
-        piplus_qFrame .push_back( TLorentzVector(0,0,0,Mpips) );
-        piminus       .push_back( TLorentzVector(0,0,0,Mpims) );
-        piminus_qFrame.push_back( TLorentzVector(0,0,0,Mpims) );
-
-         
+        piplus        .push_back( TLorentzVector(0,0,0,aux.Mpips) );
+        piplus_qFrame .push_back( TLorentzVector(0,0,0,aux.Mpips) );
+        piminus       .push_back( TLorentzVector(0,0,0,aux.Mpims) );
+        piminus_qFrame.push_back( TLorentzVector(0,0,0,aux.Mpims) );
+        Pn_qFrame     .push_back( TLorentzVector(0,0,0,aux.Mn) );
+        P_init_qFrame .push_back( TLorentzVector(0,0,0,aux.Mp) );
     }
     status                                          = 1; // 0 is good...
 }
@@ -1126,10 +1160,11 @@ void MoveTo_qFrame(){
     if (fdebug>1){
         std::cout << "Moving to q-Frame" <<std::endl;
     }
-    //    Move to the "q-frame" and define the pion momentum in this frame
-    //    q-frame is defined as follows:
-    //    z axis is defined by the q - parallel to q
-    //    x axis is defined by the e' - such that p(e') resides in the x-z plane
+    // Move to the "q-frame" and define the pion momentum in this frame
+    // This is not boost, only 3D rotation
+    // q-frame is defined as follows:
+    // z axis is defined by the q - parallel to q
+    // x axis is defined by the e' - such that p(e') resides in the x-z plane
 
     // (1) define q-angles
     q_phi   = q->Phi();
@@ -1154,50 +1189,36 @@ void MoveTo_qFrame(){
     q_qFrame.SetVectM( Pq, q->M() );
     
     if (fdebug>2){
-        Print4Vector( *e, "e" );
-        Print4Vector( e_qFrame, "e in q-Frame" );
-        Print4Vector( *q , "q");
-        Print4Vector( q_qFrame, "q in q-Frame" );
+        aux.Print4Vector( *e, "e" );
+        aux.Print4Vector( e_qFrame, "e in q-Frame" );
+        aux.Print4Vector( *q , "q");
+        aux.Print4Vector( q_qFrame, "q in q-Frame" );
     }
     
     
     // (4) rotate pions to this q-frame
     for (int piIdx=0; piIdx<Npips; piIdx++) {
         TVector3 Ppiplus = RotateVectorTo_qFrame( piplus.at(piIdx).Vect() );
-        piplus_qFrame.at(piIdx).SetVectM( Ppiplus, Mpi  );
-//        // fill variables that later go to TTree
-//        piplus_qFrame_pT[piIdx]   = piplus_qFrame.at(piIdx).Pt();
-//        piplus_qFrame_pL[piIdx]   = piplus_qFrame.at(piIdx).Pz();
-//        piplus_qFrame_Theta[piIdx]= piplus_qFrame.at(piIdx).Theta();
-//        piplus_qFrame_Phi[piIdx]  = piplus_qFrame.at(piIdx).Phi();
-//
-//        if (fdebug>1) Print4Vector( piplus_qFrame.at(piIdx), "pi+(" + std::to_string(piIdx) + ")" );
-        
+        piplus_qFrame.at(piIdx).SetVectM( Ppiplus, aux.Mpi  );
+        // Double_t variables like piplus_qFrame_pT are read-off from SIDIS TTree
     }
     for (int piIdx=0; piIdx<Npims; piIdx++) {
         TVector3 Ppiminus = RotateVectorTo_qFrame( piminus.at(piIdx).Vect() );
-        piminus_qFrame.at(piIdx).SetVectM( Ppiminus, Mpi );
-        // fill variables that later go to TTree
-//        piminus_qFrame_pT[piIdx]   = piminus_qFrame.at(piIdx).Pt();
-//        piminus_qFrame_pL[piIdx]   = piminus_qFrame.at(piIdx).Pz();
-//        piminus_qFrame_Theta[piIdx]= piminus_qFrame.at(piIdx).Theta();
-//        piminus_qFrame_Phi[piIdx]  = piminus_qFrame.at(piIdx).Phi();
-//        if (fdebug>1)Print4Vector( piminus_qFrame.at(piIdx), "pi-(" + std::to_string(piIdx) + ")" );
+        piminus_qFrame.at(piIdx).SetVectM( Ppiminus, aux.Mpi );
+        // Double_t variables like piminus_qFrame_pT are read-off from SIDIS TTree
     }
     
     
     // rotate neutron to q-Frame
     TVector3 Pn_3Vector = RotateVectorTo_qFrame( Pn.Vect() );
-    Pn_qFrame.SetVectM( Pn_3Vector, Mn );
+    Pn_qFrame.SetVectM( Pn_3Vector, aux.Mn );
+    alpha_n     = aux.ComputeLightConeFraction( Pn_qFrame );
+    
+    // rotate (initial) virtual moving proton to the q-Frame
+    TVector3 P_init_3Vector = RotateVectorTo_qFrame( P_init.Vect() );
+    P_init_qFrame.SetVectM( P_init_3Vector, E_init );
+    alpha_init  = aux.ComputeLightConeFraction( p_init_qFrame );
 
-    
-    if (fdebug>2){
-        std::cout
-        << "size(piplus_qFrame): "  << piplus_qFrame.size() << ","
-        << "size(piminus_qFrame): " << piminus_qFrame.size()<< ","
-        << std::endl;
-    }
-    
 }
 
 
@@ -1212,12 +1233,12 @@ TVector3 RotateVectorTo_qFrame( TVector3 v ){
 }
 
 
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-void Print4Vector( TLorentzVector v, std::string label ){
-    std::cout << label << " 4-vector:"<<std::endl;
-    std::cout
-    << "(Px,Py,Pz,E) = (" << v.Px() << "," << v.Py() << "," << v.Pz() << "," << v.E()
-    << "), M = " << v.Mag()
-    << std::endl;
-}
+//
+////....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+//void Print4Vector( TLorentzVector v, std::string label ){
+//    std::cout << label << " 4-vector:"<<std::endl;
+//    std::cout
+//    << "(Px,Py,Pz,E) = (" << v.Px() << "," << v.Py() << "," << v.Pz() << "," << v.E()
+//    << "), M = " << v.Mag()
+//    << std::endl;
+//}

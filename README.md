@@ -26,7 +26,7 @@ Z_LC = (Ppi_q.E() - Ppi_q.Pz()) / (q.E() - q.P()); // z on the light-cone
    W_p = sqrt((standing_p + q).Mag2()) > 2.5 GeV/c2
    in *apply_Kinematical_cuts* and *SIDISc12rSkimmer*
 
-
+4. Moved several generic routines from *SIDISc12rSkimmer* and *MergeSIDISandBANDSkimmers* to *SIDISatBAND_auxiliary*
 
 
 July-28, 2022    
@@ -615,6 +615,7 @@ DIS variables
 
     // QE y-variable
     y         = omega / Ebeam;
+    
     // Feynman x 
     xF  = 2. * (pi.Dot(q)) / (q.P() * W)
     

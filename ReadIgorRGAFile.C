@@ -43,8 +43,8 @@ TString csvheader = ( (TString)"status,runnum,evnum,beam_helicity,"
                      +(TString)"Npips,Npims,Nelectrons,Ngammas,Nprotons,Nneutrons,Ndeuterons,"
                      +(TString)"e_DC_sector,pi_DC_sector,"
                      +(TString)"e_Theta_qFrame,e_Phi_qFrame,"
-                     +(TString)"pi_Theta_qFrame,pi_Phi_qFrame,"
-                     +(TString)"pi_pT_qFrame,pi_pL_qFrame,");
+                     +(TString)"pi_qFrame_Theta,pi_qFrame_Phi,"
+                     +(TString)"pi_qFrame_pT,pi_qFrame_pL,");
 
 
 TString                   DataPath;

@@ -24,9 +24,12 @@
 #include "clas12reader.h"
 #include "Auxiliary/DCfid_SIDIS.cpp"
 #include "Auxiliary/csv_reader.h"
-#define NMAXPIONS 5 // maximal allowed number of pions
-#define r2d 180./3.1415 // radians to degrees
+#include "Auxiliary/SIDISatBAND_auxiliary.cpp"
+
+//#define NMAXPIONS 5 // maximal allowed number of pions
+//#define r2d 180./3.1415 // radians to degrees
 using namespace clas12;
+SIDISatBAND_auxiliary aux;
 
 // Results in CSV file
 TString csvheader = ( (TString)"status,runnum,evnum,beam_helicity,"
@@ -35,10 +38,11 @@ TString csvheader = ( (TString)"status,runnum,evnum,beam_helicity,"
                      +(TString)"Q2,xB,omega,y,"
                      +(TString)"e_DC_sector,pi_DC_sector,"
                      +(TString)"e_Theta_qFrame,e_Phi_qFrame,"
-                     +(TString)"pi_Theta_qFrame,pi_Phi_qFrame,"
-                     +(TString)"pi_pT_qFrame,pi_pL_qFrame,"
+                     +(TString)"pi_qFrame_Theta,pi_qFrame_Phi,"
+                     +(TString)"pi_qFrame_pT,pi_qFrame_pL,"
                      +(TString)"Zpi,Zpi_LC,"
-                     +(TString)"W,M_x,xF,");
+                     +(TString)"W,M_x,"
+                     +(TString)"xF,eta_pi,");
 
 
 
@@ -101,7 +105,7 @@ void              Stream_e_pi_line_to_CSV (TString pionCharge, int piIdx,
                                            int fdebug );
 TVector3            RotateVectorTo_qFrame (TVector3 V);
 void                        MoveTo_qFrame (int fdebug);
-void                         Print4Vector (TLorentzVector v, std::string label="" );
+//void                         Print4Vector (TLorentzVector v, std::string label="" );
 void                          SetDataPath (TString fDataPath) ;
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 
@@ -165,13 +169,13 @@ int                   inclusive; // tag to look at inclusive run - all the event
 int         Ne, Nn, Np, Npips, Npims, Ngammas;
 int                          Nd; // number of detected deuterons
 
-// masses in GeV/c2
-double          Me = 0.000510999;
-double         Mpi = 0.139570;
-double          Mp = 0.938656;
-double          Mn = 0.939272;
-double          Mp2 = Mp * Mp;
-double          Md = 1.875612; // NIST
+//// masses in GeV/c2
+//double          Me = 0.000510999;
+//double         Mpi = 0.139570;
+//double          Mp = 0.938656;
+//double          Mn = 0.939272;
+//double          Mp2 = Mp * Mp;
+//double          Md = 1.875612; // NIST
 // leading electron
 double            e_E_PCAL; // electron energy deposit in PCAL [GeV]
 double            e_E_ECIN; // electron energy deposit in ECAL_in [GeV]
@@ -1182,10 +1186,10 @@ void SetOutputTTrees(){
     outTree_e_piminus->Branch("xB"                  ,&xB                    );
     outTree_e_piminus->Branch("Q2"                  ,&Q2                    );
     outTree_e_piminus->Branch("omega"               ,&omega                 );
-    outTree_e_piminus->Branch("W_d_rest"        ,&W_d_rest          );
-    outTree_e_piminus->Branch("W"        ,&W          );
+//    outTree_e_piminus->Branch("W_d_rest"            ,&W_d_rest          );
+    outTree_e_piminus->Branch("W"                   ,&W                     );
     outTree_e_piminus->Branch("Z"                   ,Zpims                  );
-    outTree_e_piminus->Branch("Z_LC"                ,ZpimsLC                );
+    outTree_e_piminus->Branch("Z_LC"                ,ZpimsLC                );    
 
     outTree_e_piminus->Branch("EventPassedCuts"      ,&EventPassedCuts       );
     outTree_e_piminus->Branch("ePastCutsInEvent"     ,&ePastCutsInEvent      );
@@ -1199,7 +1203,7 @@ void SetOutputTTrees(){
     outTree_e_piminus->Branch("Nprotons"             ,&Np                    );
     outTree_e_piminus->Branch("Nneutrons"            ,&Nn                    );
 
-    outTree_e_piminus->Branch("piminus_Px"                ,&piminus_Px              , "piminus_Px[Npi]/D"    );
+    outTree_e_piminus->Branch("piminus_Px"           ,&piminus_Px              , "piminus_Px[Npi]/D"    );
     outTree_e_piminus->Branch("piminus_Py"                ,&piminus_Py              , "piminus_Py[Npi]/D"    );
     outTree_e_piminus->Branch("piminus_Pz"                ,&piminus_Pz              , "piminus_Pz[Npi]/D"    );
     outTree_e_piminus->Branch("piminus_E"                 ,&piminus_E               , "piminus_E[Npi]/D"    );
@@ -1207,9 +1211,9 @@ void SetOutputTTrees(){
     outTree_e_piminus->Branch("Vpiminus_Y"                ,&Vpiminus_Y              , "Vpiminus_Y[Npi]/D"    );
     outTree_e_piminus->Branch("Vpiminus_Z"                ,&Vpiminus_Z              , "Vpiminus_Z[Npi]/D"    );
     outTree_e_piminus->Branch("piminus_qFrame_pT"         ,&piminus_qFrame_pT       , "piminus_qFrame_pT[Npi]/D");
-    outTree_e_piminus->Branch("piminus_qFrame_pL"         ,&piminus_qFrame_pL       , "piminus_qFrame_pL[Npi]/D");
-    outTree_e_piminus->Branch("piminus_qFrame_Theta"      ,&piminus_qFrame_Theta    , "piminus_qFrame_Theta[Npi]/D");
-    outTree_e_piminus->Branch("piminus_qFrame_Phi"        ,&piminus_qFrame_Phi      , "piminus_qFrame_Phi[Npi]/D");
+    outTree_e_piminus->Branch("piminus_qFrame_pL"       ,&piminus_qFrame_pL       , "piminus_qFrame_pL[Npi]/D");
+    outTree_e_piminus->Branch("piminus_qFrame_Theta"    ,&piminus_qFrame_Theta    , "piminus_qFrame_Theta[Npi]/D");
+    outTree_e_piminus->Branch("piminus_qFrame_Phi"      ,&piminus_qFrame_Phi      , "piminus_qFrame_Phi[Npi]/D");
     
     
 }
@@ -1310,9 +1314,9 @@ void InitializeFileReading(int NeventsMax, int c12Nentries, int fdebug){
     }
     Ebeam   = GetBeamEnergy ( fdebug );
     Beam    .SetPxPyPzE (0, 0, Ebeam, Ebeam );
-    target  .SetXYZM    (0, 0, 0,     Md    );
-    d_rest  .SetXYZM    (0, 0, 0,     Md    );
-    p_rest  .SetXYZM    (0, 0, 0,     Mp    );
+    target  .SetXYZM    (0, 0, 0,     aux.Md    );
+    d_rest  .SetXYZM    (0, 0, 0,     aux.Md    );
+    p_rest  .SetXYZM    (0, 0, 0,     aux.Mp    );
     
     NeventsMaxToProcess = NeventsMax;
     if (NeventsMax<0) NeventsMaxToProcess = c12Nentries;
@@ -1579,30 +1583,22 @@ void ComputeElectronKinematics(int fdebug){
     q          = Beam - e;
     Q2         = -q.Mag2();
     omega      = q.E();
-    xB         = Q2/(2. * Mp * q.E());
-    
-    W_d_rest   = sqrt((d_rest + q).Mag2());
-    W   = sqrt((p_rest + q).Mag2());
+    xB         = Q2/(2. * aux.Mp * q.E());
     y          = omega / Ebeam;
     
-    
-    
-    if (fdebug>2){
-        std::cout
-        << "W(standing d): " << W_d_rest << ","
-        << "W(standing p): " << W << ","
-        << std::endl;
-    }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-void ComputePionKinematics(){
+void ComputePionKinematics(TLorentzVector pi){
     
-    // compute kinematics that also relies on pion information
+    // additional kinematical variables 
     // assuming scattering off a proton at rest
-    
+    //    W_d_rest   = sqrt((d_rest + q).Mag2()); // irrelevant
+    W   = sqrt((p_rest + q).Mag2());    
     M_x = ( q + p_rest - pi ).Mag();
     xF  = 2. * (pi.Dot(q)) / (q.P() * W);
+    eta_pi = 0.5 * log((pi_qFrame().E()+pi_qFrame().Pz()) /
+                       (pi_qFrame().E()-pi_qFrame().Pz()));
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -1813,7 +1809,7 @@ void Stream_e_pi_line_to_CSV( TString pionCharge, int piIdx,
         return;
     }
     
-    ComputePionKinematics();
+    ComputePionKinematics( pi );
     
     // now stream data to CSV file
     std::vector<double> variables =
@@ -1825,8 +1821,9 @@ void Stream_e_pi_line_to_CSV( TString pionCharge, int piIdx,
         e_qFrame.Theta(),                   e_qFrame.Phi(),
         pi_qFrame.Theta(),                  pi_qFrame.Phi(),
         pi_qFrame.Pt(),                     pi_qFrame.Pz(),
-        Zpi,                                Zpi_LC,
-        W,                                  M_x,                xF,
+        Zpi,            Zpi_LC,
+        W,              M_x,
+        xF,             eta_pi,
     };
     StreamToCSVfile( pionCharge, variables ,
                     passed_cuts_e_pi, passed_cuts_e_pi_kinematics,
@@ -1861,15 +1858,15 @@ void MoveTo_qFrame(int fdebug){
     
     // (3) verify on q and Pe that the frame-change is done correctly
     //    RotateVectorTo_qFrame( &Pe );
-    e_qFrame.SetVectM( Pe, Me );
+    e_qFrame.SetVectM( Pe, aux.Me );
     //    RotateVectorTo_qFrame( &Pq );
     q_qFrame.SetVectM( Pq, q.M() );
     
     if (fdebug>2){
-        Print4Vector( e, "e" );
-        Print4Vector( e_qFrame, "e in q-Frame" );
-        Print4Vector( q , "q");
-        Print4Vector( q_qFrame, "q in q-Frame" );
+        aux.Print4Vector( e, "e" );
+        aux.Print4Vector( e_qFrame, "e in q-Frame" );
+        aux.Print4Vector( q , "q");
+        aux.Print4Vector( q_qFrame, "q in q-Frame" );
     }
     
     
@@ -1877,7 +1874,7 @@ void MoveTo_qFrame(int fdebug){
     // pi+ int the q-Frame
     for (int piIdx=0; piIdx<Npips; piIdx++) {
         TVector3 Ppiplus = RotateVectorTo_qFrame( piplus.at(piIdx).Vect() );
-        piplus_qFrame.at(piIdx).SetVectM( Ppiplus, Mpi  );
+        piplus_qFrame.at(piIdx).SetVectM( Ppiplus, aux.Mpi  );
         TLorentzVector Ppi_q = piplus_qFrame.at(piIdx);
         // fill variables that later go to TTree
         piplus_qFrame_pT[piIdx]   = Ppi_q.Pt();
@@ -1888,13 +1885,13 @@ void MoveTo_qFrame(int fdebug){
         // z on the light-cone
         ZpipsLC[pipsIdx]          = (Ppi_q.E() - Ppi_q.Pz()) / (q.E() - q.P());
         
-        if (fdebug>1) Print4Vector( Ppi_q, "pi+(" + std::to_string(piIdx) + ")" );
+        if (fdebug>1) aux.Print4Vector( Ppi_q, "pi+(" + std::to_string(piIdx) + ")" );
         
     }
     // pi- int the q-Frame
     for (int piIdx=0; piIdx<Npims; piIdx++) {
         TVector3 Ppiminus = RotateVectorTo_qFrame( piminus.at(piIdx).Vect() );
-        piminus_qFrame.at(piIdx).SetVectM( Ppiminus, Mpi );
+        piminus_qFrame.at(piIdx).SetVectM( Ppiminus, aux.Mpi );
         TLorentzVector Ppi_q = piminus_qFrame.at(piIdx);
         // fill variables that later go to TTree
         piminus_qFrame_pT[piIdx]   = Ppi_q.Pt();
@@ -1904,7 +1901,7 @@ void MoveTo_qFrame(int fdebug){
         // z on the light-cone
         ZpimsLC[pipsIdx]           = (Ppi_q.E() - Ppi_q.Pz()) / (q.E() - q.P());
         
-        if (fdebug>1) Print4Vector( Ppi_q, "pi-(" + std::to_string(piIdx) + ")" );
+        if (fdebug>1) aux.Print4Vector( Ppi_q, "pi-(" + std::to_string(piIdx) + ")" );
     }
     if (fdebug>2){
         std::cout
@@ -1924,11 +1921,11 @@ TVector3 RotateVectorTo_qFrame( TVector3 v ){
     return v;
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-void Print4Vector( TLorentzVector v, std::string label ){
-    std::cout << label << " 4-vector:"<<std::endl;
-    std::cout
-    << "(Px,Py,Pz,E) = (" << v.Px() << "," << v.Py() << "," << v.Pz() << "," << v.E()
-    << "), M = " << v.Mag()
-    << std::endl;
-}
+////....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+//void Print4Vector( TLorentzVector v, std::string label ){
+//    std::cout << label << " 4-vector:"<<std::endl;
+//    std::cout
+//    << "(Px,Py,Pz,E) = (" << v.Px() << "," << v.Py() << "," << v.Pz() << "," << v.E()
+//    << "), M = " << v.Mag()
+//    << std::endl;
+//}

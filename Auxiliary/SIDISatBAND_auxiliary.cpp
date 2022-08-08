@@ -1,5 +1,19 @@
 // Erez O. C., Oct-6, 2021
 #include "SIDISatBAND_auxiliary.h"
+#define NMAXPIONS 5 // maximal allowed number of pions
+#define r2d 180./3.1415 // radians to degrees
+
+
+
+Double_t       Me  = 0.00051099895; // GeV/c2
+Double_t            Mpi = 0.139570; // GeV/c2
+Double_t       Mpims  = 0.13957039; // GeV/c2
+Double_t       Mpips  = 0.13957039; // GeV/c2
+Double_t            Mp  = 0.938272; // GeV/c2
+Double_t             Mn = 0.939565; // GeV/c2
+Double_t                Md = 1.875; // GeV/c2
+Double_t             Mp2 = Mp * Mp;
+
 
 SIDISatBAND_auxiliary::SIDISatBAND_auxiliary(int _fdebug_, int _torusBending_){
     SetVerbosity    (_fdebug_);
@@ -201,4 +215,25 @@ void SIDISatBAND_auxiliary::OpenCSVfile (std::ofstream& csvfile,
                                          std::string header){
     csvfile.open( filename );
     csvfile << header << "," << std::endl;
+}
+
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+void SIDISatBAND_auxiliary::Print4Vector( TLorentzVector v, std::string label ){
+    std::cout << label << " 4-vector:"<<std::endl;
+    std::cout
+    << "(Px,Py,Pz,E) = (" << v.Px() << "," << v.Py() << "," << v.Pz() << "," << v.E()
+    << "), M = " << v.Mag()
+    << std::endl;
+}
+
+
+
+
+// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+double ComputeLightConeFraction( TLorentzVector p ){
+    // compute light-cone momentum fraction
+    double m = p.Mag();
+    double alpha = (p.E() - p.Z())/m;
+    return alpha;
 }
