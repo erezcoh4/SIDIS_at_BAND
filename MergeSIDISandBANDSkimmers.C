@@ -104,6 +104,8 @@ Double_t                alpha_init; // light cone fraction of momentum of the in
 Double_t          W_Prime, W2prime; // moving proton
 Double_t                        xF; // Feynman x for a standing proton
 Double_t                  xF_Prime; // Feynman x for a moving proton
+Double_t                    eta_pi; // rapidity
+
 
 Double_t                   xB_Prime1; // moving proton defined as
 // x' = Q2 / (2. * ((Md - Es) * omega + Pn_Vect*q->Vect() ));
@@ -241,7 +243,8 @@ void               GetSIDISData ( int MergedEvtId );
 void                GetBANDData ( int MergedEvtId );
 void             MergeEventData ();
 void    SetInputAndOutputTTrees ();
-void          ComputeElectronKinematics ();
+void  ComputeElectronKinematics ();
+void      ComputePionKinematics (TLorentzVector pi, TLorentzVector pi_qFrame, double Zpi_LC);
 void                  PrintDone ();
 void          PrintMonitorHello ();
 void              SetPionCharge ( TString fpionCharge ) {
@@ -913,7 +916,7 @@ void ComputeNeutronAndProtonKinematics(){
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-void ComputePionKinematics(TLorentzVector pi, double Zpi_LC){
+void ComputePionKinematics(TLorentzVector pi, TLorentzVector pi_qFrame, double Zpi_LC){
     
     // pion energy fraction on the light-cone
     Zpi_LC_Prime = Zpi_LC / alpha_n;
@@ -921,9 +924,10 @@ void ComputePionKinematics(TLorentzVector pi, double Zpi_LC){
     // Kinematics assuming scattering off a proton at rest
     // W is read off the SIDIS TTree
     //    W   = ( p_rest + q ).Mag();
-    M_x = ( p_rest + q - pi ).Mag();
-    xF  = 2. * (pi.Dot(q)) / (q.P() * W);
-    eta_pi =
+    M_x    = ( p_rest + q - pi ).Mag();
+    xF     = 2. * (pi.Dot(q)) / (q.P() * W);
+    eta_pi = 0.5 * log((pi_qFrame().E()+pi_qFrame().Pz()) /
+                       (pi_qFrame().E()-pi_qFrame().Pz()));
     
     // Kinematics for the virtual moving proton
     W_Prime   = ( p_init + q ).Mag();
@@ -971,14 +975,15 @@ void Stream_e_pi_n_line_to_CSV(int piIdx,
                                bool passed_cuts_e_pi_kinematics,
                                bool passed_cuts_n){
     status = 0;
-    TLorentzVector     * pi;
-    TVector3          * Vpi;
-    double      Zpi, Zpi_LC;
-    double     pi_DC_sector;
-    double     pi_qFrame_pT;
-    double     pi_qFrame_pL;
-    double  pi_qFrame_Theta;
-    double    pi_qFrame_Phi;
+    TLorentzVector       * pi;
+    TLorentzVector  pi_qFrame;
+    TVector3            * Vpi;
+    double        Zpi, Zpi_LC;
+    double       pi_DC_sector;
+    double       pi_qFrame_pT;
+    double       pi_qFrame_pL;
+    double    pi_qFrame_Theta;
+    double      pi_qFrame_Phi;
     
     if (pionCharge=="pi+") {
         pi              = &piplus               [piIdx];
@@ -1007,8 +1012,9 @@ void Stream_e_pi_n_line_to_CSV(int piIdx,
         std::cout << "bad pion charge in Stream_e_pi_line_to_CSV()!" << std::endl;
         return;
     }
+    pi_qFrame.SetVectM( RotateVectorTo_qFrame( pi->Vect() ), aux.Mpi );
         
-    ComputePionKinematics( pi, Zpi_LC );
+    ComputePionKinematics( pi, pi_qFrame, Zpi_LC );
     
     std::vector<double> variables =
     {   (double)status, (double)SIDISrunID, (double)eventnumber,    (double)beam_helicity,

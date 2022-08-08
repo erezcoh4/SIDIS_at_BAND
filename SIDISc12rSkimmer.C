@@ -95,7 +95,7 @@ void              ExtractPionsInformation (int fdebug);
 void               ExtractPipsInformation (int pipsIdx, int fdebug );
 void               ExtractPimsInformation (int pimsIdx, int fdebug );
 void            ComputeElectronKinematics (int fdebug);
-void                ComputePionKinematics ();
+void                ComputePionKinematics (TLorentzVector pi, TLorentzVector pi_qFrame);
 void                   WriteEventToOutput (int fdebug);
 void                        FinishProgram (TString outfilepath, TString outfilename);
 void                   GetParticlesByType (int evnum, int fdebug );
@@ -282,6 +282,7 @@ std::vector<TVector3>             Vpiminus;
 // kinematics
 Double_t           Ebeam, omega, y, xB, Q2;
 Double_t                                xF;
+Double_t                            eta_pi;
 Double_t                             W, W2;
 Double_t                          W_d_rest;
 Double_t                               M_x;
@@ -1589,7 +1590,7 @@ void ComputeElectronKinematics(int fdebug){
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-void ComputePionKinematics(TLorentzVector pi){
+void ComputePionKinematics(TLorentzVector pi, TLorentzVector pi_qFrame){
     
     // additional kinematical variables 
     // assuming scattering off a proton at rest
@@ -1597,6 +1598,7 @@ void ComputePionKinematics(TLorentzVector pi){
     W   = sqrt((p_rest + q).Mag2());    
     M_x = ( q + p_rest - pi ).Mag();
     xF  = 2. * (pi.Dot(q)) / (q.P() * W);
+    
     eta_pi = 0.5 * log((pi_qFrame().E()+pi_qFrame().Pz()) /
                        (pi_qFrame().E()-pi_qFrame().Pz()));
 }
@@ -1809,7 +1811,7 @@ void Stream_e_pi_line_to_CSV( TString pionCharge, int piIdx,
         return;
     }
     
-    ComputePionKinematics( pi );
+    ComputePionKinematics( pi, pi_qFrame );
     
     // now stream data to CSV file
     std::vector<double> variables =
