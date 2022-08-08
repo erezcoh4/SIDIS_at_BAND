@@ -4,16 +4,16 @@
 #define r2d 180./3.1415 // radians to degrees
 
 
-
-Double_t       Me  = 0.00051099895; // GeV/c2
-Double_t            Mpi = 0.139570; // GeV/c2
-Double_t       Mpims  = 0.13957039; // GeV/c2
-Double_t       Mpips  = 0.13957039; // GeV/c2
-Double_t            Mp  = 0.938272; // GeV/c2
-Double_t             Mn = 0.939565; // GeV/c2
-Double_t                Md = 1.875; // GeV/c2
-Double_t             Mp2 = Mp * Mp;
-
+//
+//Double_t       Me  = 0.00051099895; // GeV/c2
+//Double_t            Mpi = 0.139570; // GeV/c2
+//Double_t       Mpims  = 0.13957039; // GeV/c2
+//Double_t       Mpips  = 0.13957039; // GeV/c2
+//Double_t            Mp  = 0.938272; // GeV/c2
+//Double_t             Mn = 0.939565; // GeV/c2
+//Double_t                Md = 1.875; // GeV/c2
+//Double_t             Mp2 = Mp * Mp;
+//
 
 SIDISatBAND_auxiliary::SIDISatBAND_auxiliary(int _fdebug_, int _torusBending_){
     SetVerbosity    (_fdebug_);

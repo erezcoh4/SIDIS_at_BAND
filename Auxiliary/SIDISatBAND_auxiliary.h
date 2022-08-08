@@ -55,6 +55,19 @@ public:
     double              cutValue_Zpi_min;
     double              cutValue_Zpi_max;
     
+    
+    
+    
+    double       Me  = 0.00051099895; // GeV/c2
+    double            Mpi = 0.139570; // GeV/c2
+    double       Mpims  = 0.13957039; // GeV/c2
+    double       Mpips  = 0.13957039; // GeV/c2
+    double            Mp  = 0.938272; // GeV/c2
+    double             Mn = 0.939565; // GeV/c2
+    double                Md = 1.875; // GeV/c2
+    double             Mp2 = Mp * Mp;
+
+
 protected:
     
     
