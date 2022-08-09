@@ -596,6 +596,9 @@ bool eepiPassedKinematicalCriteria(TLorentzVector pi, int fdebug){
     double Zpi = pi.E()/omega;
     if (fdebug>2) {
         std::cout
+        << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+        << "eepiPassedKinematicalCriteria()"
+        << std::endl
         << "Q2: "       << Q2 << " (GeV/c)2,"
         << "W: "        << W << " GeV/c2,"
         << "y: "        << y << ","
@@ -607,6 +610,8 @@ bool eepiPassedKinematicalCriteria(TLorentzVector pi, int fdebug){
         << "p(pi): "    << pi.P()           << " GeV/c,"
         << std::endl
         << "z(pi): "    << Zpi              << ","
+        << std::endl
+        << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
         << std::endl;
     }
     if(   (      cutValue_Q2_min < Q2             &&             Q2 < cutValue_Q2_max       )
@@ -618,7 +623,9 @@ bool eepiPassedKinematicalCriteria(TLorentzVector pi, int fdebug){
        && (      cutValue_Pe_min < e.P()          &&          e.P() < cutValue_Pe_max       )
        && (     cutValue_Zpi_min < Zpi            &&            Zpi < cutValue_Zpi_max      )
        ) {
-        if (fdebug>3) { std::cout << "succesfully passed (e,e'pi) kinematical cuts" << std::endl; }
+        if (fdebug>3) {
+            std::cout << "succesfully passed (e,e'pi) kinematical cuts" << std::endl;
+        }
         return true;
     }
     return false;
