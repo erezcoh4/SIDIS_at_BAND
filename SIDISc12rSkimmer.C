@@ -597,6 +597,7 @@ bool eepiPassedKinematicalCriteria(TLorentzVector pi, int fdebug){
     if (fdebug>2) {
         std::cout
         << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+        << std::endl
         << "eepiPassedKinematicalCriteria()"
         << std::endl
         << "Q2: "       << Q2 << " (GeV/c)2,"
@@ -1603,12 +1604,13 @@ void FinishProgram(TString outfilepath, TString outfilename){
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void ComputeElectronKinematics(int fdebug){
     // compute event kinematics (from e-only information)
-    q          = Beam - e;
-    Q2         = -q.Mag2();
-    omega      = q.E();
-    xB         = Q2/(2. * aux.Mp * q.E());
-    y          = omega / Ebeam;
-    
+    q     = Beam - e;
+    Q2    = -q.Mag2();
+    omega = q.E();
+    xB    = Q2/(2. * aux.Mp * q.E());
+    y     = omega / Ebeam;
+    W     = sqrt((p_rest + q).Mag2());
+    //    W_d_rest   = sqrt((d_rest + q).Mag2()); // irrelevant
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -1616,11 +1618,8 @@ void ComputePionKinematics(TLorentzVector pi, TLorentzVector pi_qFrame){
     
     // additional kinematical variables 
     // assuming scattering off a proton at rest
-    //    W_d_rest   = sqrt((d_rest + q).Mag2()); // irrelevant
-    W   = sqrt((p_rest + q).Mag2());    
     M_x = ( q + p_rest - pi ).Mag();
     xF  = 2. * (pi.Dot(q)) / (q.P() * W);
-    
     eta_pi = 0.5 * log((pi_qFrame.E()+pi_qFrame.Pz()) /
                        (pi_qFrame.E()-pi_qFrame.Pz()));
 }
