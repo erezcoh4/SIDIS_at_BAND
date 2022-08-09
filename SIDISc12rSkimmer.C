@@ -594,10 +594,25 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 bool eepiPassedKinematicalCriteria(TLorentzVector pi, int fdebug){
     double Zpi = pi.E()/omega;
+    if (fdebug>2) {
+        std::cout
+        << "Q2: "       << Q2 << " (GeV/c)2,"
+        << "W: "        << W << " GeV/c2,"
+        << "y: "        << y << ","
+        << std::endl
+        << "theta(e): " << e.Theta()*r2d    << " deg,"
+        << "p(e): "     << e.P()            << " GeV/c,"
+        << std::endl
+        << "theta(pi): "<< pi.Theta()*r2d   << " deg,"
+        << "p(pi): "    << pi.P()           << " GeV/c,"
+        << std::endl
+        << "z(pi): "    << Zpi              << ","
+        std::endl;
+    }
     if(   (      cutValue_Q2_min < Q2             &&             Q2 < cutValue_Q2_max       )
-       && (       cutValue_W_min < W                                             )
-       && (                    y < cutValue_y_max                                           )
-       && ( cutValue_e_theta_min < e.Theta()*r2d  && e.Theta()*r2d  < cutValue_e_theta_max  )
+       && (       cutValue_W_min < W                                                        )
+       && (                                                       y < cutValue_y_max        )
+       && ( cutValue_e_theta_min < e.Theta()*r2d  &&  e.Theta()*r2d < cutValue_e_theta_max  )
        && (cutValue_pi_theta_min < pi.Theta()*r2d && pi.Theta()*r2d < cutValue_pi_theta_max )
        && (     cutValue_Ppi_min < pi.P()         &&         pi.P() < cutValue_Ppi_max      )
        && (      cutValue_Pe_min < e.P()          &&          e.P() < cutValue_Pe_max       )
@@ -1657,14 +1672,15 @@ void ExtractPipsInformation( int pipsIdx, int fdebug ){
     // now, check if pion passed event selection requirements
     // ------------------------------------------------------------------------------------------------
     pipsPastSelectionCuts[pipsIdx] = CheckIfPionPassedSelectionCuts("pi+",
-                                                                     pips_DC_sector[pipsIdx],
-                                                                     pips_DC_x[pipsIdx],
-                                                                     pips_DC_y[pipsIdx],
-                                                                     pips_DC_z[pipsIdx],
-                                                                     pips_chi2PID[pipsIdx],  piplus[pipsIdx].P(),
-                                                                     Ve,
-                                                                     Vpiplus[pipsIdx],
-                                                                     fdebug);
+                                                                    pips_DC_sector[pipsIdx],
+                                                                    pips_DC_x[pipsIdx],
+                                                                    pips_DC_y[pipsIdx],
+                                                                    pips_DC_z[pipsIdx],
+                                                                    pips_chi2PID[pipsIdx],
+                                                                    piplus[pipsIdx].P(),
+                                                                    Ve,
+                                                                    Vpiplus[pipsIdx],
+                                                                    fdebug);
     eepipsPastKinematicalCuts[pipsIdx] = eepiPassedKinematicalCriteria(piplus[pipsIdx],
                                                                        fdebug);
     if (pipsPastSelectionCuts[pipsIdx]) {
