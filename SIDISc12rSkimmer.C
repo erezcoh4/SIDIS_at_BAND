@@ -607,7 +607,7 @@ bool eepiPassedKinematicalCriteria(TLorentzVector pi, int fdebug){
         << "p(pi): "    << pi.P()           << " GeV/c,"
         << std::endl
         << "z(pi): "    << Zpi              << ","
-        std::endl;
+        << std::endl;
     }
     if(   (      cutValue_Q2_min < Q2             &&             Q2 < cutValue_Q2_max       )
        && (       cutValue_W_min < W                                                        )
