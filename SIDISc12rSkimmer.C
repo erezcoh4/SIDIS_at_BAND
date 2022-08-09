@@ -755,11 +755,11 @@ void CloseOutputFiles (TString OutDataPath, TString outfilename){
     << std::endl
     << "wrote "  << Nentires_e_piplus  << " to (e,e'pi+) root file, "
     << std::endl << outFile_e_piplus -> GetName()
-    << std::endl << OutDataPath + outfilename + "_e_piplus_selected_*.csv"
+    << std::endl << OutDataPath + outfilename + "_e_piplus_selected_eepi_kinematics.csv"
     << std::endl
     << "and "    << Nentires_e_piminus << " to (e,e'pi-) root file. "
     << std::endl << outFile_e_piminus -> GetName()
-    << std::endl << OutDataPath + outfilename + "_e_piminus_selected_*.csv"
+    << std::endl << OutDataPath + outfilename + "_e_piminus_selected_eepi_kinematics.csv"
     << std::endl;
 }
 
