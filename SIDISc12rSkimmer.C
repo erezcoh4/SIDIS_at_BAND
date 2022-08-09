@@ -1599,8 +1599,8 @@ void ComputePionKinematics(TLorentzVector pi, TLorentzVector pi_qFrame){
     M_x = ( q + p_rest - pi ).Mag();
     xF  = 2. * (pi.Dot(q)) / (q.P() * W);
     
-    eta_pi = 0.5 * log((pi_qFrame().E()+pi_qFrame().Pz()) /
-                       (pi_qFrame().E()-pi_qFrame().Pz()));
+    eta_pi = 0.5 * log((pi_qFrame.E()+pi_qFrame.Pz()) /
+                       (pi_qFrame.E()-pi_qFrame.Pz()));
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -1885,7 +1885,7 @@ void MoveTo_qFrame(int fdebug){
         piplus_qFrame_Phi[piIdx]  = Ppi_q.Phi();
         
         // z on the light-cone
-        ZpipsLC[pipsIdx]          = (Ppi_q.E() - Ppi_q.Pz()) / (q.E() - q.P());
+        ZpipsLC[piIdx]            = (Ppi_q.E() - Ppi_q.Pz()) / (q.E() - q.P());
         
         if (fdebug>1) aux.Print4Vector( Ppi_q, "pi+(" + std::to_string(piIdx) + ")" );
         
@@ -1901,7 +1901,7 @@ void MoveTo_qFrame(int fdebug){
         piminus_qFrame_Theta[piIdx]= Ppi_q.Theta();
         piminus_qFrame_Phi[piIdx]  = Ppi_q.Phi();
         // z on the light-cone
-        ZpimsLC[pipsIdx]           = (Ppi_q.E() - Ppi_q.Pz()) / (q.E() - q.P());
+        ZpimsLC[piIdx]             = (Ppi_q.E() - Ppi_q.Pz()) / (q.E() - q.P());
         
         if (fdebug>1) aux.Print4Vector( Ppi_q, "pi-(" + std::to_string(piIdx) + ")" );
     }

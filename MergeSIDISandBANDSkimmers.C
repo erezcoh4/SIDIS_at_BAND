@@ -926,8 +926,8 @@ void ComputePionKinematics(TLorentzVector pi, TLorentzVector pi_qFrame, double Z
     //    W   = ( p_rest + q ).Mag();
     M_x    = ( p_rest + q - pi ).Mag();
     xF     = 2. * (pi.Dot(q)) / (q.P() * W);
-    eta_pi = 0.5 * log((pi_qFrame().E()+pi_qFrame().Pz()) /
-                       (pi_qFrame().E()-pi_qFrame().Pz()));
+    eta_pi = 0.5 * log((pi_qFrame.E()+pi_qFrame.Pz()) /
+                       (pi_qFrame.E()-pi_qFrame.Pz()));
     
     // Kinematics for the virtual moving proton
     W_Prime   = ( p_init + q ).Mag();
