@@ -22,11 +22,14 @@
 #include "Auxiliary/bandhit.cpp"
 #include "Auxiliary/clashit.cpp"
 #include "Auxiliary/genpart.cpp"
+#include "Auxiliary/SIDISatBAND_auxiliary.cpp"
 
 
 #define NMAXEVENTS 5000000
 //#define NMAXPIONS 5 // maximal allowed number of pions
 //#define r2d 180./3.1415 // radians to degrees
+SIDISatBAND_auxiliary aux;
+
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 // Globals
@@ -43,15 +46,24 @@ TString csvheader = ((TString)"status,runnum,evnum,beam_helicity,"
                      +(TString)"pi_qFrame_pT,pi_qFrame_pL,"
                      +(TString)"n_Theta_qFrame,n_Phi_qFrame,"
                      +(TString)"n_pT_qFrame,n_pL_qFrame,"
-                     +(TString)"E_init,P_init,alpha_init,"
+                     +(TString)"E_init,P_init,alpha_init,v_init,"
                      +(TString)"Zpi,Zpi_LC,"
                      +(TString)"Zpi_LC_Prime,"
                      +(TString)"W,M_x,"
                      +(TString)"xF,eta_pi,"
                      +(TString)"W_Prime,M_x_Prime,"
                      +(TString)"xF_Prime,"
-                     +(TString)"xB_Prime1,xB_Prime2,"
+                     +(TString)"xB_Prime"
                      );
+std::vector<int> csvprecisions = {0,0,0,0,
+    9,9,9,9,
+    9,9,9,9,
+    9,9,9,9,
+    9,9,9,
+    9,9,
+    9,9,9,9,
+    0,0,
+};
 
 
 
@@ -101,22 +113,24 @@ Double_t                     W, W2; // energy of the hadronic system
 Double_t                    E_init; // proton initial state energy 
 Double_t                   alpha_n; // light cone fraction of momentum of the recoil neutron
 Double_t                alpha_init; // light cone fraction of momentum of the initial proton
+Double_t                    v_init; // virtuality of the initial proton
 Double_t          W_Prime, W2prime; // moving proton
 Double_t                        xF; // Feynman x for a standing proton
 Double_t                  xF_Prime; // Feynman x for a moving proton
 Double_t                    eta_pi; // rapidity
 
 
-Double_t                   xB_Prime1; // moving proton defined as
+Double_t                   xB_Prime; // moving proton: x' = Q2 / (W'^2 - mN^2 + Q2)
+//Double_t                   xB_Prime2; // moving proton defined as
 // x' = Q2 / (2. * ((Md - Es) * omega + Pn_Vect*q->Vect() ));
-Double_t                   xB_Prime2; // moving proton defined as
-// x' = Q2 / (W'^2 - mN^2 + Q2)
 
+Double_t                        En; // (spectator) neutron energy
 Double_t                        Es; // spectator energy
 Double_t                        Ps; // spectator momentum
 Double_t                  theta_sq; // spectator angle with respect to momentum transfer
 Double_t            M_x, M_x_Prime;
 Double_t                     n_ToF;
+Double_t Zpi, Zpi_LC, Zpi_LC_Prime;
 
 
 
@@ -136,15 +150,15 @@ std::vector<std::size_t>   BANDEventIndicesToMerge;
 std::vector<std::size_t>  SIDISEventIndicesToMerge;
 
 // SIDIS Tree
-TLorentzVector     *target = new TLorentzVector(0, 0, 0, aux.Md );
+//TLorentzVector     *target = new TLorentzVector(0, 0, 0, aux.Md );
 TLorentzVector     *Beam=0;
 TLorentzVector        *e=0;
 TLorentzVector        *q=0;
 TLorentzVector          Pn; // neutron momentum
 TLorentzVector Band_data_e; // electron information in BAND TTree
 TLorentzVector      p_init;
-TLorentzVector *d_rest = new TLorentzVector(0, 0, 0, aux.Md );
-TLorentzVector *p_rest = new TLorentzVector(0, 0, 0, aux.Mp );
+TLorentzVector d_rest(0, 0, 0, aux.Md );
+TLorentzVector p_rest(0, 0, 0, aux.Mp );
 
 // "q-frame" parameters
 double              Pe_phi;
@@ -152,8 +166,9 @@ double      q_phi, q_theta;
 // vectors in q-frame
 TLorentzVector       e_qFrame;
 TLorentzVector       q_qFrame;
+TLorentzVector      pi_qFrame;
 TLorentzVector      Pn_qFrame;
-TLorentzVector  P_init_qFrame;
+TLorentzVector  p_init_qFrame;
 
 // reconstructed vertex position
 TVector3             *Ve=0;
@@ -223,31 +238,31 @@ TClonesArray      * nHits = new TClonesArray("bandhit"); // BAND neutrons in BAN
 TClonesArray    * mcParts = new TClonesArray("genpart");
 
 
-void             OpenInputFiles (TString RunStr);
-void            OpenOutputFiles (TString RunStr);
-void            StreamToCSVfile (std::vector<Double_t> observables, bool passed_cuts_e_pi_kinematics);
-void            CloseInputFiles ();
-void           CloseOutputFiles (TString OutDataPath);
-void    MergeSIDISandBANDevents (int NMAXeventsToMerge=10,
-                                 int PrintProgress=5000);
-Int_t CreateListOfEventsToMerge (TTree * BANDTree,
-                                 TTree * SIDISTree,
-                                 int NMAXeventsToMerge=-1);
-void  Stream_e_pi_n_line_to_CSV (int piIdx,
-                                 bool passed_cuts_e_pi_kinematics,
-                                 bool passed_cuts_n);
+void                      OpenInputFiles (TString RunStr);
+void                     OpenOutputFiles (TString RunStr);
+//void                     StreamToCSVfile (std::vector<Double_t> observables);
+void                     CloseInputFiles ();
+void                    CloseOutputFiles (TString OutDataPath);
+void            MergeSIDISandBANDevents  (int NMAXeventsToMerge=10,
+                                          int PrintProgress=5000);
+Int_t          CreateListOfEventsToMerge (TTree * BANDTree,
+                                          TTree * SIDISTree,
+                                          int NMAXeventsToMerge=-1);
+void           Stream_e_pi_n_line_to_CSV (int piIdx,
+                                          bool passed_cuts_e_pi_kinematics,
+                                          bool passed_cuts_n);
 
-
-void        InitializeVariables ();
-void               GetSIDISData ( int MergedEvtId );
-void                GetBANDData ( int MergedEvtId );
-void             MergeEventData ();
-void    SetInputAndOutputTTrees ();
-void  ComputeElectronKinematics ();
-void      ComputePionKinematics (TLorentzVector pi, TLorentzVector pi_qFrame, double Zpi_LC);
-void                  PrintDone ();
-void          PrintMonitorHello ();
-void              SetPionCharge ( TString fpionCharge ) {
+void                 InitializeVariables ();
+void                        GetSIDISData ( int MergedEvtId );
+void                         GetBANDData ( int MergedEvtId );
+void                      MergeEventData ();
+void             SetInputAndOutputTTrees ();
+//void           ComputeElectronKinematics ();
+//void               ComputePionKinematics (TLorentzVector pi,
+//                                          TLorentzVector pi_qFrame);
+void                           PrintDone ();
+//void                    PrintMonitorHello ();
+void                       SetPionCharge ( TString fpionCharge ) {
     pionCharge = fpionCharge;
     if (pionCharge=="pi+") {
         pionStr = "_e_piplus";
@@ -257,16 +272,17 @@ void              SetPionCharge ( TString fpionCharge ) {
         pionStr = "_no_pion_charge_info";
     }
 };
-void                SetDataPath ( TString fDataPath )   {DataPath = fDataPath + "/";};
-void                  SetPrefix ( TString fPrefix )     {prefix = fPrefix;};
-void               SetVerbosity ( int ffdebug )         {fdebug = ffdebug;};
-void                  PrintTime ( TString prefix ){
+void                         SetDataPath ( TString fDataPath )   {DataPath = fDataPath + "/";};
+void                           SetPrefix ( TString fPrefix )     {prefix = fPrefix;};
+void                        SetVerbosity ( int ffdebug )         {fdebug = ffdebug;};
+void                           PrintTime ( TString prefix ){
     std::cout << prefix << ", after "
     << double(clock() - tStart) / (double)CLOCKS_PER_SEC
     << " sec "<< std::endl;
 }
-void              MoveTo_qFrame ();
-TVector3  RotateVectorTo_qFrame ( TVector3 v );
+void                       MoveTo_qFrame ();
+TVector3           RotateVectorTo_qFrame ( TVector3 v );
+void                   ComputeKinematics (TLorentzVector pi);
 //void               Print4Vector ( TLorentzVector v, std::string label );
 
 
@@ -321,20 +337,15 @@ void MergeSIDISandBANDevents (int NMAXeventsToMerge=10,
         // initialize
         InitializeVariables ();
 
-
         // grab electron and pion information from SIDIS TTree
         GetSIDISData( MergedEvtId );
         
         // grab neturon information from BAND
         GetBANDData ( MergedEvtId );
                 
-        // compute kinematical variables, also for the neutron
-        ComputeElectronKinematics         ();
-        ComputeNeutronAndProtonKinematics ();
-        
         // move to q-frame and define the pion and neutron momentum with respect to q
         MoveTo_qFrame       ();
-        
+
         // merge information about the event from both sources
         MergeEventData      ();
         
@@ -422,29 +433,32 @@ void CloseOutputFiles (TString OutDataPath){
 }
 
 
-// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-void StreamToCSVfile (std::vector<Double_t> observables, bool passed_cuts_e_pi_kinematics){
-    
-    if (passed_cuts_e_pi_kinematics){
-        for (auto v:observables) {
-            CSVfile_e_pi_n << std::setprecision(9) << std::fixed << v << ",";
-        }
-        CSVfile_e_pi_n << std::endl;
-        if (fdebug>1) {
-            std::cout << std::fixed;
-            std::cout << "StreamToCSVfile()" << std::endl;
-            std::cout << csvheader << std::endl;
-            for (auto v:observables) std::cout << std::fixed << v << ",";
-            std::cout << std::endl;
-        }
-    }
-    else {
-        if (fdebug>2) {
-            std::cout << "Did not pass cuts, not writing to file" << std::endl;
-        }
-    }
-    
-}
+//// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+//void StreamToCSVfile (std::vector<Double_t> observables){
+//    
+//    
+////    for (auto v:observables) {
+////        CSVfile_e_pi_n << std::setprecision(9) << std::fixed << v << ",";
+////    }
+////    CSVfile_e_pi_n << std::endl;
+//    
+//    for (int j=0; j < observables.size(); j++){
+//        int precision = 9;
+//        if (j < csvprecisions.size()) precision = csvprecisions.at(j);
+//        auto v = observables.at(j);
+//        CSVfile_e_pi_n << std::setprecision(precision) << std::fixed << v << ",";
+//    }
+//    CSVfile_e_pi_n << std::endl;
+//    
+//    
+//    if (fdebug>1) {
+//        std::cout << std::fixed;
+//        std::cout << "StreamToCSVfile()" << std::endl;
+//        std::cout << csvheader << std::endl;
+//        for (auto v:observables) std::cout << std::fixed << v << ",";
+//        std::cout << std::endl;
+//    }
+//}
 
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
@@ -752,17 +766,6 @@ void SetInputAndOutputTTrees (){
 }
 
 
-// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-void PrintMonitorHello(){
-    std::cout << "Hello..." << std::endl;
-    std::cout << "Is it me you're looking for?..." << std::endl;
-    std::cout << "I can see it in your eyes..." << std::endl;
-    std::cout << "I can see it in your smile..." << std::endl;
-    std::cout << "You're all I've ever wanted, and your arms are open wide..." << std::endl;
-    std::cout << "Cause you know just what to say, and you know just what to do..." << std::endl;
-    std::cout << "And I want to tell you so much, I love you" << std::endl;
-    std::cout << "I long to see the sunlight in your hair" << std::endl;
-}
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void GetBANDData(int MergedEvtId){
@@ -770,12 +773,12 @@ void GetBANDData(int MergedEvtId){
     
     bandhit* this_nHit = (bandhit*)nHits->At(nleadindex);
     Pn_Vect = this_nHit->getMomentumN();
-    Pn.SetVectM( Pn_Vect , Mn );
+    Pn.SetVectM( Pn_Vect , aux.Mn );
     
     // get first electron from BAND TTree to compare with our electron
     clashit* this_eHit = (clashit*)eHit;
     Band_e_Vect.SetMagThetaPhi ( this_eHit->getMomentum(), this_eHit->getTheta(), this_eHit->getPhi() );
-    Band_data_e.SetVectM( Band_e_Vect , Me );
+    Band_data_e.SetVectM( Band_e_Vect , aux.Me );
     
     // neutron ToF
     n_ToF = this_nHit->getTof();
@@ -894,59 +897,80 @@ void GetSIDISData( int MergedEvtId ){
 }
 
 
-// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-void ComputeElectronKinematics(){
-    // compute kinematics
-    // SIDISc12rSkimmer.C already computes few of the kinematical variables:
-    //     xB,  Q2, omega, W, Z, y, Z_LC
-}
+//// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+//void ComputeElectronKinematics(){
+//    // compute kinematics
+//    // SIDISc12rSkimmer.C already computes few of the kinematical variables:
+//    //     xB,  Q2, omega, W, Z, y, Z_LC
+//}
 
-// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-void ComputeNeutronAndProtonKinematics(){
+//// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+//void ComputeNeutronAndProtonKinematics(){
+//
+//}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+void ComputeKinematics(TLorentzVector pi){
+    
+    // SIDISc12rSkimmer.C already computes few of the kinematical variables:
+    //     xB,  Q2, omega, W, y
     
     // detected neutron
+    En      = Pn.E();
     Es      = Pn.E();
     Ps      = Pn.P();
     theta_sq= Pn.Angle( q->Vect() );
     
-
+    // rotate neutron to q-Frame
+    TVector3 Pn_3Vector = RotateVectorTo_qFrame( Pn.Vect() );
+    Pn_qFrame.SetVectM( Pn_3Vector, aux.Mn );
+    alpha_n  = aux.ComputeLightConeFraction( Pn_qFrame );
+    
     // initial state of the virtual moving proton in the nucleus
     E_init  = aux.Md - Pn.E();
     p_init  = d_rest - Pn;
-}
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-void ComputePionKinematics(TLorentzVector pi, TLorentzVector pi_qFrame, double Zpi_LC){
+    v_init  = p_init.Mag2() - aux.Mp2;
+    // rotate (initial) virtual moving proton to the q-Frame
+    TVector3 p_init_3Vector = RotateVectorTo_qFrame( p_init.Vect() );
+    p_init_qFrame.SetVectM( p_init_3Vector, E_init );
+    alpha_init  = aux.ComputeLightConeFraction( p_init_qFrame );
     
-    // pion energy fraction on the light-cone
+    // pion
+    // move to q-Frame
+    pi_qFrame.SetVectM( RotateVectorTo_qFrame( pi.Vect() ), aux.Mpi );
+    
+    // pion energy fraction    
+    Zpi          = pi.E()/omega;
+    Zpi_LC       = (pi_qFrame.E() - pi_qFrame.Pz()) / (q->E() - q->P());
     Zpi_LC_Prime = Zpi_LC / alpha_n;
     
     // Kinematics assuming scattering off a proton at rest
     // W is read off the SIDIS TTree
-    //    W   = ( p_rest + q ).Mag();
-    M_x    = ( p_rest + q - pi ).Mag();
-    xF     = 2. * (pi.Dot(q)) / (q.P() * W);
-    eta_pi = 0.5 * log((pi_qFrame.E()+pi_qFrame.Pz()) /
-                       (pi_qFrame.E()-pi_qFrame.Pz()));
-    
     // Kinematics for the virtual moving proton
-    W_Prime   = ( p_init + q ).Mag();
-    M_x_Prime = ( p_init + q - pi ).Mag();
-    xF_Prime  = 2. * (pi.Dot(q)) / (q.P() * W_Prime);
+    //      W = ( p_rest + q ).Mag();
+    W_Prime   = ( p_init + *q ).Mag();
+        
+    M_x       = ( p_rest + *q - pi ).Mag();
+    M_x_Prime = ( p_init + *q - pi ).Mag();
+        
+    xF        = 2. * (pi.Vect().Dot(q->Vect())) / (q->P() * W);
+    xF_Prime  = 2. * (pi.Vect().Dot(q->Vect())) / (q->P() * W_Prime);
     
+    eta_pi    = 0.5 * log((pi_qFrame.E()+pi_qFrame.Pz()) /
+                          (pi_qFrame.E()-pi_qFrame.Pz()));
+        
     // xB is read off the SIDIS TTree
-    //    xB      = Q2 / (2. * aux.Mp * omega);
-    xB_Prime1 = Q2 / (2. * ((aux.Md - En) * omega + Pn_Vect*q->Vect() ));
-    xB_Prime2 = Q2 / (W_Prime*W_Prime - aux.Mp2 + Q2);
+    //     xB = Q2 / (2. * aux.Mp * omega);
+    xB_Prime  = Q2 / (W_Prime*W_Prime - aux.Mp2 + Q2);
+    
     
     if (fdebug>3) {
         std::cout
         << "ComputeElectronKinematics()"
         << std::endl
-        << "Pe: "       << e->P()   << " GeV/c,"
-        << "x: "        << xB        << ","
-        << "x'(1): "    << xB_Prime1   << ","
-        << "x'(2): "    << xB_Prime2   << ","
+        << "Pe: "       << e->P()     << " GeV/c,"
+        << "xB: "       << xB         << ","
+        << "xB': "      << xB_Prime   << ","
         << std::endl
         << "(p_init + *q).Px(): " << (p_init + *q).Px() << ","
         << "(p_init + *q).Py(): " << (p_init + *q).Py() << ","
@@ -976,9 +1000,8 @@ void Stream_e_pi_n_line_to_CSV(int piIdx,
                                bool passed_cuts_n){
     status = 0;
     TLorentzVector       * pi;
-    TLorentzVector  pi_qFrame;
+//    TLorentzVector  pi_qFrame;
     TVector3            * Vpi;
-    double        Zpi, Zpi_LC;
     double       pi_DC_sector;
     double       pi_qFrame_pT;
     double       pi_qFrame_pL;
@@ -988,9 +1011,6 @@ void Stream_e_pi_n_line_to_CSV(int piIdx,
     if (pionCharge=="pi+") {
         pi              = &piplus               [piIdx];
         Vpi             = &Vpiplus              [piIdx];
-        Zpi             = Zpips                 [piIdx];
-        Zpi_LC          = Zpips_LC              [piIdx];
-
         pi_DC_sector    = pips_DC_sector        [piIdx];
         pi_qFrame_pT    = piplus_qFrame_pT      [piIdx];
         pi_qFrame_pL    = piplus_qFrame_pL      [piIdx];
@@ -1000,8 +1020,6 @@ void Stream_e_pi_n_line_to_CSV(int piIdx,
     else if (pionCharge=="pi-") {
         pi              = &piminus              [piIdx];
         Vpi             = &Vpiminus             [piIdx];
-        Zpi             = Zpims                 [piIdx];
-        Zpi_LC          = Zpims_LC              [piIdx];
         pi_DC_sector    = pims_DC_sector        [piIdx];
         pi_qFrame_pT    = piminus_qFrame_pT     [piIdx];
         pi_qFrame_pL    = piminus_qFrame_pL     [piIdx];
@@ -1012,9 +1030,9 @@ void Stream_e_pi_n_line_to_CSV(int piIdx,
         std::cout << "bad pion charge in Stream_e_pi_line_to_CSV()!" << std::endl;
         return;
     }
-    pi_qFrame.SetVectM( RotateVectorTo_qFrame( pi->Vect() ), aux.Mpi );
         
-    ComputePionKinematics( pi, pi_qFrame, Zpi_LC );
+    ComputeKinematics( *pi );
+
     
     std::vector<double> variables =
     {   (double)status, (double)SIDISrunID, (double)eventnumber,    (double)beam_helicity,
@@ -1027,38 +1045,34 @@ void Stream_e_pi_n_line_to_CSV(int piIdx,
         (double)e_DC_sector,                (double)pi_DC_sector,
         pi_qFrame_Theta,                    pi_qFrame_Phi,
         pi_qFrame_pT,                       pi_qFrame_pL,
-        Pn_qFrame.Theta(),                  Pn_qFrame.Phi()
+        Pn_qFrame.Theta(),                  Pn_qFrame.Phi(),
         Pn_qFrame.Pt(),                     Pn_qFrame.Pz(),
-        E_init,         p_init.P(),         alpha_init,
+        E_init,         p_init.P(),         alpha_init,             v_init,
         Zpi,            Zpi_LC,
         Zpi_LC_Prime,
         W,              M_x,
         xF,             eta_pi,
         W_Prime,        M_x_Prime,
         xF_Prime,
-        xB_Prime1,      xB_Prime2,
+        xB_Prime,
     };
-    
-    StreamToCSVfile( variables, passed_cuts_e_pi_kinematics );
     
     if (fdebug>2){
         std::cout
-        << "Stream_e_pi_n_line_to_CSV(" << piIdx  << "),"
-        << "passed_cuts_e_pi_kinematics: :" << passed_cuts_e_pi_kinematics << ","
-        << passed_cuts_n << ")"
-        << std::endl
-        << "piIdx: "        << piIdx            << ","
-        << "Zpi: "          << Zpi              << ","
-        << "Zpi_LC: "       << Zpi_LC           << ","
-        << "Zpi_LC_Prime: " << Zpi_LC_Prime     << ","
-        << "passed_cuts_e_pi_kinematics: "      << passed_cuts_e_pi_kinematics << ","
-        << "passed_cuts_n: " << passed_cuts_n   << ","
+        << "Stream_e_pi_n_line_to_CSV(piIdx "         << piIdx  << "), "
         << std::endl;
+        if (passed_cuts_e_pi_kinematics)
+            std::cout << "passed (e,e'π) kinematical cuts" << std::endl;
+        if (passed_cuts_n)
+            std::cout << "passed (e,e'πn) cuts" << std::endl;
+        
         std::cout
-        << "*pi.X(): "  << pi->X()      << ","
-        << "Pe: "       << e->P()       << " GeV/c,"
+        << "E(π): "         << pi->E()          << " GeV, "
+        << "Z(π): "         << Zpi              << ", "
+        << "Z(π)_LC: "      << Zpi_LC           << ", "
+        << "Z'(π)_LC: "     << Zpi_LC_Prime     << ", "
         << std::endl;
-
+        
         if ((pi->P() < 1.25) && (passed_cuts_e_pi_kinematics)){
             std::cout
             << " pi->P() = " << pi->P() << " < 1.25 GeV/c!"
@@ -1072,14 +1086,22 @@ void Stream_e_pi_n_line_to_CSV(int piIdx,
             << std::endl;
         }
     }
+    
+    if (passed_cuts_e_pi_kinematics){
+        aux.StreamToCSVfile( CSVfile_e_pi_n, variables, csvprecisions );
+    } else {
+        if (fdebug>2) {
+            std::cout << "Did not pass cuts, not writing to CSV file" << std::endl;
+        }
+    }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void InitializeVariables(){
     Pn_Vect     = TVector3();
     Band_e_Vect = TVector3();
-    e           = new TLorentzVector( 0, 0, 0, Me );
-    Band_data_e = TLorentzVector( 0, 0, 0, Me );
+    e           = new TLorentzVector( 0, 0, 0, aux.Me );
+    Band_data_e = TLorentzVector( 0, 0, 0, aux.Me );
     
     xB          = Q2        = omega     = -9999;
     y                                   = -9999;
@@ -1122,8 +1144,8 @@ void InitializeVariables(){
         piplus_qFrame .push_back( TLorentzVector(0,0,0,aux.Mpips) );
         piminus       .push_back( TLorentzVector(0,0,0,aux.Mpims) );
         piminus_qFrame.push_back( TLorentzVector(0,0,0,aux.Mpims) );
-        Pn_qFrame     .push_back( TLorentzVector(0,0,0,aux.Mn) );
-        P_init_qFrame .push_back( TLorentzVector(0,0,0,aux.Mp) );
+        Pn_qFrame     = TLorentzVector(0,0,0,aux.Mn) ;
+        p_init_qFrame = TLorentzVector(0,0,0,aux.Mp) ;
     }
     status                                          = 1; // 0 is good...
 }
@@ -1180,17 +1202,17 @@ void MoveTo_qFrame(){
     TVector3 Pe = e->Vect();
     TVector3 Pq = q->Vect();
     
-    Pe       .RotateZ(-q_phi);
-    Pe       .RotateY(-q_theta);
+    Pe     .RotateZ(-q_phi);
+    Pe     .RotateY(-q_theta);
     Pe_phi = Pe.Phi();
-    Pe       .RotateZ(-Pe_phi);
-    Pq       .RotateZ(-q_phi);
-    Pq       .RotateY(-q_theta);
+    Pe     .RotateZ(-Pe_phi);
+    Pq     .RotateZ(-q_phi);
+    Pq     .RotateY(-q_theta);
 
     
     // (3) verify on q and Pe that the frame-change is done correctly
     //    RotateVectorTo_qFrame( &Pe );
-    e_qFrame.SetVectM( Pe, Me );
+    e_qFrame.SetVectM( Pe, aux.Me );
     //    RotateVectorTo_qFrame( &Pq );
     q_qFrame.SetVectM( Pq, q->M() );
     
@@ -1213,18 +1235,6 @@ void MoveTo_qFrame(){
         piminus_qFrame.at(piIdx).SetVectM( Ppiminus, aux.Mpi );
         // Double_t variables like piminus_qFrame_pT are read-off from SIDIS TTree
     }
-    
-    
-    // rotate neutron to q-Frame
-    TVector3 Pn_3Vector = RotateVectorTo_qFrame( Pn.Vect() );
-    Pn_qFrame.SetVectM( Pn_3Vector, aux.Mn );
-    alpha_n     = aux.ComputeLightConeFraction( Pn_qFrame );
-    
-    // rotate (initial) virtual moving proton to the q-Frame
-    TVector3 P_init_3Vector = RotateVectorTo_qFrame( P_init.Vect() );
-    P_init_qFrame.SetVectM( P_init_3Vector, E_init );
-    alpha_init  = aux.ComputeLightConeFraction( p_init_qFrame );
-
 }
 
 

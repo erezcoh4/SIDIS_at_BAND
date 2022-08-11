@@ -67,21 +67,21 @@ Double_t SIDISatBAND_auxiliary::Chi2PID_pion_upperBound( Double_t p, Double_t C)
     
 }
 
-// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-TVector3 SIDISatBAND_auxiliary::GetParticleVertex(clas12::region_part_ptr rp){
-    TVector3 V(rp->par()->getVx(),
-               rp->par()->getVy(),
-               rp->par()->getVz());
-    return V;
-}
+//// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+//TVector3 SIDISatBAND_auxiliary::GetParticleVertex(clas12::region_part_ptr rp){
+//    TVector3 V(rp->par()->getVx(),
+//               rp->par()->getVy(),
+//               rp->par()->getVz());
+//    return V;
+//}
 
-// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-void SIDISatBAND_auxiliary::SetParticle4Momentum (TLorentzVector &p4,clas12::region_part_ptr rp){
-    p4.SetXYZM(rp->par()->getPx(),
-               rp->par()->getPy(),
-               rp->par()->getPz(),
-               p4.M());
-}
+//// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+//void SIDISatBAND_auxiliary::SetParticle4Momentum (TLorentzVector &p4,clas12::region_part_ptr rp){
+//    p4.SetXYZM(rp->par()->getPx(),
+//               rp->par()->getPy(),
+//               rp->par()->getPz(),
+//               p4.M());
+//}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void SIDISatBAND_auxiliary::loadCutValues(std::string cutValuesFilename){
@@ -196,9 +196,21 @@ void SIDISatBAND_auxiliary::SetTorusBendingFromRunNumber ( Int_t RunNumber ){
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-void SIDISatBAND_auxiliary::StreamToCSVfile (std::ofstream& csvfile, std::vector<Double_t> observables){
-    for (auto v:observables) csvfile << v << ",";
+void SIDISatBAND_auxiliary::StreamToCSVfile (std::ofstream&         csvfile,
+                                             std::vector<Double_t>  observables,
+                                             std::vector<int>       precisions){
+    
+    //    for (auto v:observables) csvfile << v << ",";
+    //    csvfile << std::endl;
+    
+    for (int j=0; j < observables.size(); j++){
+        int precision = 9;
+        if (j < precisions.size()) precision = precisions.at(j);
+        auto v = observables.at(j);
+        csvfile << std::setprecision(precision) << std::fixed << v << ",";
+    }
     csvfile << std::endl;
+    
     
     if (fdebug>3) {
         std::cout << "StreamToEventCSVfile()" << std::endl;
@@ -231,9 +243,21 @@ void SIDISatBAND_auxiliary::Print4Vector( TLorentzVector v, std::string label ){
 
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-double ComputeLightConeFraction( TLorentzVector p ){
+double SIDISatBAND_auxiliary::ComputeLightConeFraction( TLorentzVector p ){
     // compute light-cone momentum fraction
     double m = p.Mag();
     double alpha = (p.E() - p.Z())/m;
     return alpha;
+}
+
+// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+void PrintMonitorHello(){
+    std::cout << "Hello..." << std::endl;
+    std::cout << "Is it me you're looking for?..." << std::endl;
+    std::cout << "I can see it in your eyes..." << std::endl;
+    std::cout << "I can see it in your smile..." << std::endl;
+    std::cout << "You're all I've ever wanted, and your arms are open wide..." << std::endl;
+    std::cout << "Cause you know just what to say, and you know just what to do..." << std::endl;
+    std::cout << "And I want to tell you so much, I love you" << std::endl;
+    std::cout << "I long to see the sunlight in your hair" << std::endl;
 }

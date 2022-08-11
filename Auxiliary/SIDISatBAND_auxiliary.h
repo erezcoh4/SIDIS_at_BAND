@@ -7,8 +7,10 @@
 #include <fstream>
 #include <iostream>
 
-#include "clas12reader.h"
-using namespace clas12;
+//#include "Auxiliary/clas12reader.h"
+//#include
+
+//using namespace clas12;
 
 class SIDISatBAND_auxiliary {
 public:
@@ -18,21 +20,26 @@ public:
     Double_t Chi2PID_pion_upperBound (Double_t p, Double_t C);
     Double_t Chi2PID_pion_lowerBound (Double_t p, Double_t C);
         
-    TVector3        GetParticleVertex (clas12::region_part_ptr rp);
-    void         SetParticle4Momentum (TLorentzVector &p4,clas12::region_part_ptr rp);
+//    TVector3        GetParticleVertex (clas12::region_part_ptr rp);
+//    void         SetParticle4Momentum (TLorentzVector &p4,clas12::region_part_ptr rp);
     void                loadCutValues (std::string cutValuesFilename="cutValues.csv");
     void               printCutValues ();
+    void            PrintMonitorHello ();
     void                 SetVerbosity (int _fdebug_)         {fdebug = _fdebug_;};
     void              SetTorusBending (int _torusBending_)   {torusBending = _torusBending_;};
     double               FindCutValue ( std::string cutName );
     TString           GetRunNumberSTR ( int RunNumber );
     Double_t    GetEbeamFromRunNumber ( Int_t RunNumber );
     void SetTorusBendingFromRunNumber ( Int_t RunNumber );
-    void              StreamToCSVfile (std::ofstream& csvfile,
-                                       std::vector<Double_t> observables);
+    void              StreamToCSVfile (std::ofstream&         csvfile,
+                                       std::vector<Double_t>  observables,
+                                       std::vector<int>       precisions);
+    
     void                  OpenCSVfile (std::ofstream& csvfile,
                                        TString filename, std::string header);
     void                 Print4Vector ( TLorentzVector v, std::string label );
+    double   ComputeLightConeFraction ( TLorentzVector p );
+    
 
     int                           fdebug;
     int                     torusBending; // -1 for In-bending, +1 for Out-bending

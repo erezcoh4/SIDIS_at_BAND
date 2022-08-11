@@ -44,6 +44,13 @@ TString csvheader = ( (TString)"status,runnum,evnum,beam_helicity,"
                      +(TString)"W,M_x,"
                      +(TString)"xF,eta_pi,");
 
+std::vector<int> csvprecisions = {
+    0,0,0,0,
+    9,9,9,9,
+    9,9,9,9,
+    9,9,9,9,
+    0,0,
+};
 
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
@@ -138,6 +145,8 @@ double               cutValue_Pe_max;
 double              cutValue_Zpi_min;
 double              cutValue_Zpi_max;
 double        Pe_phi, q_phi, q_theta; // "q-frame" parameters
+double                           Zpi;
+double                        Zpi_LC;
 
 bool        ePastCutsInEvent = false;
 bool     pipsPastCutsInEvent = false;
@@ -1610,18 +1619,21 @@ void ComputeElectronKinematics(int fdebug){
     xB    = Q2/(2. * aux.Mp * q.E());
     y     = omega / Ebeam;
     W     = sqrt((p_rest + q).Mag2());
-    //    W_d_rest   = sqrt((d_rest + q).Mag2()); // irrelevant
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void ComputePionKinematics(TLorentzVector pi, TLorentzVector pi_qFrame){
     
+    // pion energy fraction
+    Zpi          = pi.E()/omega;
+    Zpi_LC       = (pi_qFrame.E() - pi_qFrame.Pz()) / (q->E() - q->P());
+    
     // additional kinematical variables 
     // assuming scattering off a proton at rest
-    M_x = ( q + p_rest - pi ).Mag();
-    xF  = 2. * (pi.Dot(q)) / (q.P() * W);
-    eta_pi = 0.5 * log((pi_qFrame.E()+pi_qFrame.Pz()) /
-                       (pi_qFrame.E()-pi_qFrame.Pz()));
+    M_x     = ( q + p_rest - pi ).Mag();
+    xF      = 2. * (pi.Vect().Dot(q.Vect())) / (q.P() * W);
+    eta_pi  = 0.5 * log((pi_qFrame.E()+pi_qFrame.Pz()) /
+                        (pi_qFrame.E()-pi_qFrame.Pz()));
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -1808,24 +1820,22 @@ void Stream_e_pi_line_to_CSV( TString pionCharge, int piIdx,
     TLorentzVector  pi;
     TLorentzVector  pi_qFrame;
     TVector3        Vpi;
-    double          Zpi;
-    double       Zpi_LC;
     int    pi_DC_sector;
     
     if (pionCharge=="pi+") {
         pi              = piplus       .at(piIdx);
         pi_qFrame       = piplus_qFrame.at(piIdx);
         Vpi             = Vpiplus         [piIdx];
-        Zpi             = Zpips           [piIdx];
-        Zpi_LC          = ZpipsLC         [piIdx];
+//        Zpi             = Zpips           [piIdx];
+//        Zpi_LC          = ZpipsLC         [piIdx];
         pi_DC_sector    = pips_DC_sector  [piIdx];
     }
     else if (pionCharge=="pi-") {
         pi           = piminus       .at(piIdx);
         pi_qFrame    = piminus_qFrame.at(piIdx);
         Vpi          = Vpiminus         [piIdx];
-        Zpi          = Zpims            [piIdx];
-        Zpi_LC       = ZpimsLC          [piIdx];
+//        Zpi          = Zpims            [piIdx];
+//        Zpi_LC       = ZpimsLC          [piIdx];
         pi_DC_sector = pims_DC_sector   [piIdx];
    }
     else {
@@ -1849,9 +1859,27 @@ void Stream_e_pi_line_to_CSV( TString pionCharge, int piIdx,
         W,              M_x,
         xF,             eta_pi,
     };
-    StreamToCSVfile( pionCharge, variables ,
-                    passed_cuts_e_pi, passed_cuts_e_pi_kinematics,
-                    fdebug );
+    
+//    StreamToCSVfile( pionCharge, variables ,
+//                    passed_cuts_e_pi, passed_cuts_e_pi_kinematics,
+//                    fdebug );
+//
+    
+    // decide which file to write...
+    if (pionCharge=="pi+") {
+        if (passed_cuts_e_pi && passed_cuts_e_pi_kinematics) {
+            aux.StreamToCSVfile(SelectedEventsCSVfile_e_piplus_kinematics,
+                                observables,
+                                csvprecisions );
+        }
+    }
+    else if (pionCharge=="pi-") {
+        if (passed_cuts_e_pi && passed_cuts_e_pi_kinematics) {
+            aux.StreamToCSVfile(SelectedEventsCSVfile_e_piminus_kinematics,
+                                observables,
+                                csvprecisions );
+        }
+    }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

@@ -611,19 +611,22 @@ banklib/BBand.cpp
 
 rapidity: [https://www.jlab.org/conferences/radiative2016/talks/wednesday/weiss.pdf]
  
-DIS variables
+SIDIS kinematic variables
 
     // QE y-variable
     y         = omega / Ebeam;
     
     // Feynman x 
-    xF  = 2. * (pi.Dot(q)) / (q.P() * W)
+    xF  = 2. * (pi.Vect().Dot(q.Vect())) / (q.P() * W)
     
-SIDIS variables
+    Zpi = pi.E()/omega;
+    Zpi_LC = (pi_qFrame.E() - pi_qFrame.Pz()) / (q->E() - q->P());
+    
+        
     // barion rapidity  η_br = log(Pπ+/Pπ−) / 2
-    eta_pi     = 0.5 * log( (pi_qFrame().E()+pi_qFrame().Pz())
+    eta_pi     = 0.5 * log( (pi_qFrame.E()+pi_qFrame.Pz())
                             /
-                            (pi_qFrame().E()-pi_qFrame().Pz()))
+                            (pi_qFrame.E()-pi_qFrame.Pz()))
 
 
 Spectator energy-momentum and angle
@@ -634,9 +637,6 @@ Spectator energy-momentum and angle
     theta_sq= Pn.Angle( q->Vect() );
 
 proton initial state (in the nucleus)
-
-<!--    Emiss   = Md + q->E() - Pn.E();     -->
-<!--    Pmiss   = ( -Pn.Px(), -Pn.Py(), -Pn.Pz(), Emiss );-->
     
     Einit            = Md - Pn.E();
     Pinit            = ( 0 - Pn.Vect(), Md - Pn.E() );
@@ -646,31 +646,15 @@ proton initial state (in the nucleus)
 
 W - hadronic invariant mass
 
-    // for a proton
-    W_standing_p = sqrt((standing_p + q).Mag2());
-     
-    // for a deuteron
-    W_standing_d = sqrt((standing_d + q).Mag2());
-
-    // for a tagged proton in the nucleus
-    // equivalent to |p_miss + q|
-    // if careful not to double count omega in the energy component 
-    WPrime  = sqrt( (q.Px()-Pn.Px(), q.Py()-Pn.Py(), q.Pz()-Pn.Pz(), Emiss )2)   
+    // for a standing proton
+    W       = (p_rest + q).Mag();
+    W_Prime = ( p_init + *q ).Mag();   
 
 
 Mx - missing mass of the emerging hadron
 
-for (e,e'π)  
-
-    Mx_standing_d_ee_pi = ( (Beam + standing_d) - (e + pi) ).Mag();
-    Mx_standing_p_ee_pi = ( (Beam + standing_p) - (e + pi) ).Mag();
-    
-for (e,e'πn)    
-    
-    Mx_standing_d_ee_pi_n = ( (Beam + standing_d) - (e + pi + n) ).Mag();
-    Mx_standing_p_ee_pi_n = ( (Beam + standing_p) - (e + pi + n) ).Mag();
-    MxPrime_ee_pi_n       = ( (Beam + p_miss) - (e + pi + n) ).Mag();
-    
+    M_x       = ( p_rest + q - pi ).Mag();    
+    M_x_Prime = ( p_init + q - pi ).Mag();
     
     
     
