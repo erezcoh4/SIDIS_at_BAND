@@ -21,12 +21,18 @@ Aug-4, 2022
 Z_LC = (Ppi_q.E() - Ppi_q.Pz()) / (q.E() - q.P()); // z on the light-cone
 
 3. Replaced the cut on W from 
-   W_d = sqrt((standing_d + q).Mag2()) > 2.5 GeV/c2
+   W_d = sqrt((d_rest + q).Mag2()) > 2.5 GeV/c2
    to
-   W_p = sqrt((standing_p + q).Mag2()) > 2.5 GeV/c2
+   W_p = sqrt((p_res + q).Mag2()) > 2.0 GeV/c2
    in *apply_Kinematical_cuts* and *SIDISc12rSkimmer*
 
 4. Moved several generic routines from *SIDISc12rSkimmer* and *MergeSIDISandBANDSkimmers* to *SIDISatBAND_auxiliary*
+
+5. Revisied all kinematical variables, now left with only Z_LC which definition seems odd
+
+6. Added a varying precision to each variable that is streamed out to the CSV  
+
+ 
 
 
 July-28, 2022    

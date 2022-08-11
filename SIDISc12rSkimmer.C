@@ -61,11 +61,11 @@ TVector3                GetParticleVertex (clas12::region_part_ptr rp);
 void                     SetLorentzVector (TLorentzVector &p4, clas12::region_part_ptr rp);
 void                      OpenOutputFiles (TString csvfilename, TString header);
 void                     CloseOutputFiles (TString OutDataPath, TString outfilename);
-void                      StreamToCSVfile (TString pionCharge, // "pi+" or "pi-"
-                                           std::vector<Double_t> observables,
-                                           bool passed_cuts_e_pi,
-                                           bool passed_cuts_e_pi_kinematics,
-                                           int fdebug);
+//void                      StreamToCSVfile (TString pionCharge, // "pi+" or "pi-"
+//                                           std::vector<Double_t> observables,
+//                                           bool passed_cuts_e_pi,
+//                                           bool passed_cuts_e_pi_kinematics,
+//                                           int fdebug);
 void                       printCutValues ();
 void                        loadCutValues (TString cutValuesFilename = "cutValues.csv", int fdebug=0);
 void                      SetOutputTTrees ();
@@ -795,50 +795,50 @@ void CloseOutputFiles (TString OutDataPath, TString outfilename){
     << std::endl;
 }
 
-// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-void StreamToCSVfile (TString pionCharge, // "pi+" or "pi-"
-                      std::vector<Double_t> observables,
-                      bool passed_cuts_e_pi,
-                      bool passed_cuts_e_pi_kinematics,
-                      int fdebug){
-    if (fdebug>1) {
-        std::cout << "streaming to CSVfile" << std::endl;
-    }
-    // decide which file to write...
-    if (pionCharge=="pi+") {
-        for (auto v:observables) CSVfile_e_piplus << std::fixed << v << ",";
-        CSVfile_e_piplus << std::endl;
-        
-        if (passed_cuts_e_pi) {
-            for (auto v:observables) SelectedEventsCSVfile_e_piplus << std::fixed << v << ",";
-            SelectedEventsCSVfile_e_piplus << std::endl;
-            
-            if (passed_cuts_e_pi_kinematics){
-                for (auto v:observables) SelectedEventsCSVfile_e_piplus_kinematics << std::fixed << v << ",";
-                SelectedEventsCSVfile_e_piplus_kinematics << std::endl;
-            }
-        }
-        
-    }
-    else if (pionCharge=="pi-") {
-        for (auto v:observables) CSVfile_e_piminus << v << ",";
-        CSVfile_e_piminus << std::endl;
-        
-        if (passed_cuts_e_pi) {
-            for (auto v:observables) SelectedEventsCSVfile_e_piminus << v << ",";
-            SelectedEventsCSVfile_e_piminus << std::endl;
-            
-            if (passed_cuts_e_pi_kinematics){
-                for (auto v:observables) SelectedEventsCSVfile_e_piminus_kinematics << v << ",";
-                SelectedEventsCSVfile_e_piminus_kinematics << std::endl;
-            }
-        }
-    }
-    else {
-        std::cout << "pion charge ill-defined in StreamToCSVfile(), returning" << std::endl;
-        return;
-    }
-}
+//// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+//void StreamToCSVfile (TString pionCharge, // "pi+" or "pi-"
+//                      std::vector<Double_t> observables,
+//                      bool passed_cuts_e_pi,
+//                      bool passed_cuts_e_pi_kinematics,
+//                      int fdebug){
+//    if (fdebug>1) {
+//        std::cout << "streaming to CSVfile" << std::endl;
+//    }
+//    // decide which file to write...
+//    if (pionCharge=="pi+") {
+//        for (auto v:observables) CSVfile_e_piplus << std::fixed << v << ",";
+//        CSVfile_e_piplus << std::endl;
+//
+//        if (passed_cuts_e_pi) {
+//            for (auto v:observables) SelectedEventsCSVfile_e_piplus << std::fixed << v << ",";
+//            SelectedEventsCSVfile_e_piplus << std::endl;
+//
+//            if (passed_cuts_e_pi_kinematics){
+//                for (auto v:observables) SelectedEventsCSVfile_e_piplus_kinematics << std::fixed << v << ",";
+//                SelectedEventsCSVfile_e_piplus_kinematics << std::endl;
+//            }
+//        }
+//
+//    }
+//    else if (pionCharge=="pi-") {
+//        for (auto v:observables) CSVfile_e_piminus << v << ",";
+//        CSVfile_e_piminus << std::endl;
+//
+//        if (passed_cuts_e_pi) {
+//            for (auto v:observables) SelectedEventsCSVfile_e_piminus << v << ",";
+//            SelectedEventsCSVfile_e_piminus << std::endl;
+//
+//            if (passed_cuts_e_pi_kinematics){
+//                for (auto v:observables) SelectedEventsCSVfile_e_piminus_kinematics << v << ",";
+//                SelectedEventsCSVfile_e_piminus_kinematics << std::endl;
+//            }
+//        }
+//    }
+//    else {
+//        std::cout << "pion charge ill-defined in StreamToCSVfile(), returning" << std::endl;
+//        return;
+//    }
+//}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void loadCutValues(TString cutValuesFilename, int fdebug){
@@ -1626,7 +1626,7 @@ void ComputePionKinematics(TLorentzVector pi, TLorentzVector pi_qFrame){
     
     // pion energy fraction
     Zpi          = pi.E()/omega;
-    Zpi_LC       = (pi_qFrame.E() - pi_qFrame.Pz()) / (q->E() - q->P());
+    Zpi_LC       = (pi_qFrame.E() - pi_qFrame.Pz()) / (q.E() - q.P());
     
     // additional kinematical variables 
     // assuming scattering off a proton at rest
@@ -1869,14 +1869,14 @@ void Stream_e_pi_line_to_CSV( TString pionCharge, int piIdx,
     if (pionCharge=="pi+") {
         if (passed_cuts_e_pi && passed_cuts_e_pi_kinematics) {
             aux.StreamToCSVfile(SelectedEventsCSVfile_e_piplus_kinematics,
-                                observables,
+                                variables,
                                 csvprecisions );
         }
     }
     else if (pionCharge=="pi-") {
         if (passed_cuts_e_pi && passed_cuts_e_pi_kinematics) {
             aux.StreamToCSVfile(SelectedEventsCSVfile_e_piminus_kinematics,
-                                observables,
+                                variables,
                                 csvprecisions );
         }
     }
