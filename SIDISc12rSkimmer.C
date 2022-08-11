@@ -714,20 +714,22 @@ void OpenOutputFiles (TString outfilename,TString header){
     outFile_e_piminus = new TFile( outfilename + "_e_piminus.root" ,"RECREATE");
     outTree_e_piminus = new TTree( "tree" , "(e,e'pi-) event  information");
     
-    // Create output csv files
-    CSVfile_e_piplus.open( outfilename  + "_e_piplus.csv" );
-    CSVfile_e_piplus << header << std::endl;
-    CSVfile_e_piminus.open( outfilename + "_e_piminus.csv" );
-    CSVfile_e_piminus << header << std::endl;
-    
-    SelectedEventsCSVfile_e_piplus.open( outfilename + "_e_piplus_selected_eepi.csv" );
-    SelectedEventsCSVfile_e_piplus << header << std::endl;
-    SelectedEventsCSVfile_e_piminus.open( outfilename + "_e_piminus_selected_eepi.csv" );
-    SelectedEventsCSVfile_e_piminus << header << std::endl;
+//    // Create output csv files
+//    CSVfile_e_piplus.open( outfilename  + "_e_piplus.csv" );
+//    CSVfile_e_piplus << header << std::endl;
+//    CSVfile_e_piminus.open( outfilename + "_e_piminus.csv" );
+//    CSVfile_e_piminus << header << std::endl;
+//
+//    SelectedEventsCSVfile_e_piplus.open( outfilename + "_e_piplus_selected_eepi.csv" );
+//    SelectedEventsCSVfile_e_piplus << header << std::endl;
+//    SelectedEventsCSVfile_e_piminus.open( outfilename + "_e_piminus_selected_eepi.csv" );
+//    SelectedEventsCSVfile_e_piminus << header << std::endl;
 
-    SelectedEventsCSVfile_e_piplus_kinematics.open( outfilename + "_e_piplus_selected_eepi_kinematics.csv" );
+    SelectedEventsCSVfile_e_piplus_kinematics.open( outfilename +
+                                                   "_e_piplus_selected_eepi_kinematics.csv" );
     SelectedEventsCSVfile_e_piplus_kinematics << header << std::endl;
-    SelectedEventsCSVfile_e_piminus_kinematics.open( outfilename + "_e_piminus_selected_eepi_kinematics.csv" );
+    SelectedEventsCSVfile_e_piminus_kinematics.open( outfilename +
+                                                    "_e_piminus_selected_eepi_kinematics.csv" );
     SelectedEventsCSVfile_e_piminus_kinematics << header << std::endl;
 }
 
