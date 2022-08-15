@@ -53,7 +53,7 @@ TString csvheader = ((TString)"status,runnum,evnum,beam_helicity,"
                      +(TString)"xF,eta_pi,"
                      +(TString)"W_Prime,M_x_Prime,"
                      +(TString)"xF_Prime,"
-                     +(TString)"xB_Prime"
+                     +(TString)"xB_Prime,"
                      );
 std::vector<int> csvprecisions = {0,0,0,0,
     9,9,9,9,
@@ -274,7 +274,10 @@ void                       SetPionCharge ( TString fpionCharge ) {
 };
 void                         SetDataPath ( TString fDataPath )   {DataPath = fDataPath + "/";};
 void                           SetPrefix ( TString fPrefix )     {prefix = fPrefix;};
-void                        SetVerbosity ( int ffdebug )         {fdebug = ffdebug;};
+void                        SetVerbosity ( int ffdebug )         {
+    fdebug = ffdebug;
+    aux.SetVerbosity(fdebug);
+};
 void                           PrintTime ( TString prefix ){
     std::cout << prefix << ", after "
     << double(clock() - tStart) / (double)CLOCKS_PER_SEC
@@ -435,13 +438,13 @@ void CloseOutputFiles (TString OutDataPath){
 
 //// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 //void StreamToCSVfile (std::vector<Double_t> observables){
-//    
-//    
+//
+//
 ////    for (auto v:observables) {
 ////        CSVfile_e_pi_n << std::setprecision(9) << std::fixed << v << ",";
 ////    }
 ////    CSVfile_e_pi_n << std::endl;
-//    
+//
 //    for (int j=0; j < observables.size(); j++){
 //        int precision = 9;
 //        if (j < csvprecisions.size()) precision = csvprecisions.at(j);
@@ -449,8 +452,8 @@ void CloseOutputFiles (TString OutDataPath){
 //        CSVfile_e_pi_n << std::setprecision(precision) << std::fixed << v << ",";
 //    }
 //    CSVfile_e_pi_n << std::endl;
-//    
-//    
+//
+//
 //    if (fdebug>1) {
 //        std::cout << std::fixed;
 //        std::cout << "StreamToCSVfile()" << std::endl;
@@ -1061,12 +1064,14 @@ void Stream_e_pi_n_line_to_CSV(int piIdx,
         std::cout
         << "Stream_e_pi_n_line_to_CSV(piIdx "         << piIdx  << "), "
         << std::endl;
+        
         if (passed_cuts_e_pi_kinematics)
             std::cout << "passed (e,e'π) kinematical cuts" << std::endl;
         if (passed_cuts_n)
             std::cout << "passed (e,e'πn) cuts" << std::endl;
         
         std::cout
+        << "p(π): "         << pi->P()          << " GeV/c, "
         << "E(π): "         << pi->E()          << " GeV, "
         << "Z(π): "         << Zpi              << ", "
         << "Z(π)_LC: "      << Zpi_LC           << ", "
@@ -1185,7 +1190,7 @@ void MergeEventData(){
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void MoveTo_qFrame(){
-    if (fdebug>1){
+    if (fdebug>2){
         std::cout << "Moving to q-Frame" <<std::endl;
     }
     // Move to the "q-frame" and define the pion momentum in this frame

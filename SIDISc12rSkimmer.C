@@ -321,6 +321,8 @@ void SIDISc12rSkimmer(int RunNumber=6420,
                       TString fDataPath = "sidisdvcs",
                       int setInclusive=0 ){
     
+    aux.SetVerbosity(fdebug);
+
     SetDataPath( fDataPath );
     TString RunNumberStr = GetRunNumberSTR(RunNumber,fdebug);
     // read cut values
@@ -703,11 +705,11 @@ void SetLorentzVector (TLorentzVector &p4,clas12::region_part_ptr rp){
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void OpenOutputFiles (TString outfilename,TString header){
     
-    // Create output tree
-    outFile_e_piplus_no_cuts  = new TFile( outfilename + "_e_piplus_no_cuts.root"  ,"RECREATE");
-    outTree_e_piplus_no_cuts  = new TTree( "tree" , "(e,e'pi+) event information - no cuts");
-    outFile_e_piminus_no_cuts = new TFile( outfilename + "_e_piminus_no_cuts.root"  ,"RECREATE");
-    outTree_e_piminus_no_cuts = new TTree( "tree" , "(e,e'pi+) event information - no cuts");
+//    // Create output tree
+//    outFile_e_piplus_no_cuts  = new TFile( outfilename + "_e_piplus_no_cuts.root"  ,"RECREATE");
+//    outTree_e_piplus_no_cuts  = new TTree( "tree" , "(e,e'pi+) event information - no cuts");
+//    outFile_e_piminus_no_cuts = new TFile( outfilename + "_e_piminus_no_cuts.root"  ,"RECREATE");
+//    outTree_e_piminus_no_cuts = new TTree( "tree" , "(e,e'pi+) event information - no cuts");
     
     outFile_e_piplus  = new TFile( outfilename + "_e_piplus.root"  ,"RECREATE");
     outTree_e_piplus  = new TTree( "tree" , "(e,e'pi+) event information");
@@ -747,13 +749,13 @@ void CloseOutputFiles (TString OutDataPath, TString outfilename){
     int Nentires_e_piminus = outTree_e_piminus -> GetEntries();
     
     // close output ROOT
-    outFile_e_piplus_no_cuts->cd();
-    outTree_e_piplus_no_cuts->Write();
-    outFile_e_piplus_no_cuts->Close();
-
-    outFile_e_piminus_no_cuts->cd();
-    outTree_e_piminus_no_cuts->Write();
-    outFile_e_piminus_no_cuts->Close();
+//    outFile_e_piplus_no_cuts->cd();
+//    outTree_e_piplus_no_cuts->Write();
+//    outFile_e_piplus_no_cuts->Close();
+//
+//    outFile_e_piminus_no_cuts->cd();
+//    outTree_e_piminus_no_cuts->Write();
+//    outFile_e_piminus_no_cuts->Close();
 
     outFile_e_piplus->cd();
     outTree_e_piplus->Write();
@@ -1225,6 +1227,7 @@ void SetOutputTTrees(){
     outTree_e_piminus->Branch("W"                   ,&W                     );
     outTree_e_piminus->Branch("Z"                   ,Zpims                  );
     outTree_e_piminus->Branch("Z_LC"                ,ZpimsLC                );    
+    outTree_e_piminus->Branch("y"                   ,&y                     );
 
     outTree_e_piminus->Branch("EventPassedCuts"      ,&EventPassedCuts       );
     outTree_e_piminus->Branch("ePastCutsInEvent"     ,&ePastCutsInEvent      );
@@ -1570,8 +1573,8 @@ void WriteEventToOutput(int fdebug){
     }
     
     // Fill "no-cuts" TTrees even if nothing passed criteria
-    outTree_e_piplus_no_cuts -> Fill();
-    outTree_e_piminus_no_cuts -> Fill();
+    // outTree_e_piplus_no_cuts -> Fill();
+    // outTree_e_piminus_no_cuts -> Fill();
     
     if (ePastCutsInEvent && pipsPastCutsInEvent) {
         IsSelected_eepi = true;

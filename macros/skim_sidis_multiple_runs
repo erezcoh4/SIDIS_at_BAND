@@ -69,7 +69,9 @@ print('done.')
 print('')
 if args.no_email==False:#{
     mailtitle = 'Done processing skim_sidis_multiple_runs on ifarm'
-    mailbody  = 'e.g. scp -r cohen@ftp.jlab.org:/volatile/clas12/users/ecohen/BAND/SIDIS_skimming/skimmed_SIDIS_inc_006420_e_piplus_selected_eepi_kinematics.csv \~/Desktop/data/BAND/SIDIS_skimming/'
+    mailbody  = ('processed %d runs (run %d-%d)'%
+                (Nruns, FirstRun, FirstRun+Nruns) +
+    '\n Data in /volatile/clas12/users/ecohen/BAND/SIDIS_skimming/')
     emailstr = ('echo %s | mail -s "%s" cohen.erez7@gmail.com'%(mailbody,mailtitle) )
     os.system(emailstr)
 #}
