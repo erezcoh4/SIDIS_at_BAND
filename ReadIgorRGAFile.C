@@ -334,7 +334,6 @@ void                       CloseInputFile ();
 void                      OpenOutputFiles ();
 void                     CloseOutputFiles ();
 void                InitializeFileReading ();
-//void            StreamToCSVfile (std::vector<Double_t> observables, bool passed_cuts_e_pi_kinematics);
 void                         SetVerbosity (int ffdebug )          {
     fdebug = ffdebug;
     aux.SetVerbosity(fdebug);
@@ -374,7 +373,6 @@ void             Stream_e_pi_line_to_CSV (TString pionCharge,
 void               ComputePionKinematics (TLorentzVector pi,
                                           TLorentzVector pi_qFrame);
 
-//bool       eepiPassedKinematicalCriteria (TLorentzVector pi);
 void                       MoveTo_qFrame ();
 TVector3           RotateVectorTo_qFrame (TVector3 v);
 void                       GetBeamEnergy ();
@@ -1681,60 +1679,6 @@ void ComputePionKinematics(TLorentzVector pi, TLorentzVector pi_qFrame){
     eta_pi  = 0.5 * log((pi_qFrame.E()+pi_qFrame.Pz()) /
                         (pi_qFrame.E()-pi_qFrame.Pz()));
 }
-
-//
-//// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-//bool eepiPassedKinematicalCriteria(TLorentzVector pi){
-//    Zpi = pi.E()/omega;
-//
-//    if (fdebug>2) {
-//        std::cout
-//        << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-//        << std::endl
-//        << "eepiPassedKinematicalCriteria()"
-//        << std::endl
-//        << std::setprecision(2)
-//        << "Q²: "       << Q2 << " (GeV/c)²,"
-//        << "W: "        << W << " GeV/c²,"
-//        << "y: "        << y << ","
-//        << std::endl
-//        << "𝜃(e): "    << e.Theta()*r2d    << "˚,"
-//        << "p(e): "    << e.P()            << " GeV/c,"
-//        << std::endl
-//        << "𝜃(pi): "   << pi.Theta()*r2d   << "˚,"
-//        << "p(π): "    << pi.P()           << " GeV/c,"
-//        << std::endl
-//        << "z(π): "    << Zpi              << ","
-//        << std::endl;
-//    }
-//    if(   (      cutValue_Q2_min < Q2             &&             Q2 < cutValue_Q2_max       )
-//       && (       cutValue_W_min < W                                                        )
-//       && (                                                       y < cutValue_y_max        )
-//       && ( cutValue_e_theta_min < e.Theta()*r2d  &&  e.Theta()*r2d < cutValue_e_theta_max  )
-//       && (cutValue_pi_theta_min < pi.Theta()*r2d && pi.Theta()*r2d < cutValue_pi_theta_max )
-//       && (     cutValue_Ppi_min < pi.P()         &&         pi.P() < cutValue_Ppi_max      )
-//       && (      cutValue_Pe_min < e.P()          &&          e.P() < Ebeam                 )
-//       && (     cutValue_Zpi_min < Zpi            &&            Zpi < cutValue_Zpi_max      )
-//       ) {
-//        if (fdebug>2) {
-//            std::cout << "succesfully passed (e,e'π) kinematical cuts"
-//            << std::endl
-//            << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-//            << std::endl;
-//        }
-//        return true;
-//    }
-//    else {
-//        if (fdebug>2) {
-//            std::cout << "Did not pass (e,e'π) kinematical cuts"
-//            << std::endl
-//            << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-//            << std::endl;
-//        }
-//    }
-//
-//    return false;
-//}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 TVector3 RotateVectorTo_qFrame( TVector3 v ){
