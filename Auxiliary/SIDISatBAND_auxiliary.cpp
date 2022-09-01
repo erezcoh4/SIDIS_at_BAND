@@ -4,16 +4,6 @@
 #define r2d 180./3.1415 // radians to degrees
 
 
-//
-//Double_t       Me  = 0.00051099895; // GeV/c2
-//Double_t            Mpi = 0.139570; // GeV/c2
-//Double_t       Mpims  = 0.13957039; // GeV/c2
-//Double_t       Mpips  = 0.13957039; // GeV/c2
-//Double_t            Mp  = 0.938272; // GeV/c2
-//Double_t             Mn = 0.939565; // GeV/c2
-//Double_t                Md = 1.875; // GeV/c2
-//Double_t             Mp2 = Mp * Mp;
-//
 
 SIDISatBAND_auxiliary::SIDISatBAND_auxiliary(int _fdebug_, int _torusBending_){
     SetVerbosity    (_fdebug_);
@@ -84,12 +74,14 @@ Double_t SIDISatBAND_auxiliary::Chi2PID_pion_upperBound( Double_t p, Double_t C)
 //}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-void SIDISatBAND_auxiliary::loadCutValues(std::string cutValuesFilename){
-    
+void SIDISatBAND_auxiliary::loadCutValues(std::string cutValuesFilename,
+                                          int torusBending){
+    if (fdebug>2) {
+        std::cout << "SIDISatBAND_auxiliary::loadCutValues()" << std::endl;
+    }
     // read cut values csv file
     csv_reader csvr;
     cutValues = csvr.read_csv(cutValuesFilename);
-    if (fdebug>4) { printCutValues(); }
     
     // assign specific cut values - to speed things up
     // by avoiding recalling FindCutValue() on every event
@@ -118,8 +110,10 @@ void SIDISatBAND_auxiliary::loadCutValues(std::string cutValuesFilename){
     cutValue_e_PCAL_V               = FindCutValue("e_PCAL_V_min");
     cutValue_e_E_PCAL               = FindCutValue("e_E_PCAL_min");
     cutValue_SamplingFraction_min   = FindCutValue("SamplingFraction_min");
+    cutValue_PCAL_ECIN_SF_min       = FindCutValue("PCAL_ECIN_SF_min");
     cutValue_Ve_Vpi_dz_max          = FindCutValue("(Ve-Vpi)_z_max");
     cutValue_Q2_min                 = FindCutValue("Q2_min");
+    cutValue_Q2_max                 = FindCutValue("Q2_max");
     cutValue_W_min                  = FindCutValue("W_min");
     cutValue_y_max                  = FindCutValue("y_max");
     cutValue_e_theta_min            = FindCutValue("e_theta_min");
@@ -128,16 +122,41 @@ void SIDISatBAND_auxiliary::loadCutValues(std::string cutValuesFilename){
     cutValue_pi_theta_max           = FindCutValue("pi_theta_max");
     cutValue_Ppi_min                = FindCutValue("Ppi_min");
     cutValue_Ppi_max                = FindCutValue("Ppi_max");
+    cutValue_Pe_min                 = FindCutValue("Pe_min");
+    cutValue_Pe_max                 = FindCutValue("Pe_max");
     cutValue_Zpi_min                = FindCutValue("Zpi_min");
     cutValue_Zpi_max                = FindCutValue("Zpi_max");
+    
+    if (fdebug>2) { printCutValues(); }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void SIDISatBAND_auxiliary::printCutValues(){
-    std::cout << "Using cut values:" << std::endl;
-    for (auto cut: cutValues) {
-        std::cout << cut.first << ": " << cut.second << std::endl;
-    }
+    std::cout << "Using the following cut values:" << std::endl;
+    std::cout <<
+    "Vz_min: "                 << cutValue_Vz_min                 << ", " << std::endl <<
+    "Vz_max: "                 << cutValue_Vz_max                 << ", " << std::endl <<
+    "e_PCAL_W: "               << cutValue_e_PCAL_W               << ", " << std::endl <<
+    "e_PCAL_V: "               << cutValue_e_PCAL_V               << ", " << std::endl <<
+    "e_E_PCAL: "               << cutValue_e_E_PCAL               << ", " << std::endl <<
+    "SamplingFraction_min: "   << cutValue_SamplingFraction_min   << ", " << std::endl <<
+    "PCAL_ECIN_SF_min: "       << cutValue_PCAL_ECIN_SF_min       << ", " << std::endl <<
+    "Ve_Vpi_dz_max: "          << cutValue_Ve_Vpi_dz_max          << ", " << std::endl <<
+    "Q2_min: "                 << cutValue_Q2_min                 << ", " << std::endl <<
+    "Q2_max: "                 << cutValue_Q2_max                 << ", " << std::endl <<
+    "W_min: "                  << cutValue_W_min                  << ", " << std::endl <<
+    "y_max: "                  << cutValue_y_max                  << ", " << std::endl <<
+    "e_theta_min: "            << cutValue_e_theta_min            << ", " << std::endl <<
+    "e_theta_max: "            << cutValue_e_theta_max            << ", " << std::endl <<
+    "pi_theta_min: "           << cutValue_pi_theta_min           << ", " << std::endl <<
+    "pi_theta_max: "           << cutValue_pi_theta_max           << ", " << std::endl <<
+    "Ppi_min: "                << cutValue_Ppi_min                << ", " << std::endl <<
+    "Ppi_max: "                << cutValue_Ppi_max                << ", " << std::endl <<
+    "Pe_min: "                 << cutValue_Pe_min                 << ", " << std::endl <<
+    "Pe_max: "                 << cutValue_Pe_max                 << ", " << std::endl <<
+    "Zpi_min: "                << cutValue_Zpi_min                << ", " << std::endl <<
+    "Zpi_max: "                << cutValue_Zpi_max               << ", " << std::endl <<
+    std::endl;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -234,8 +253,13 @@ void SIDISatBAND_auxiliary::OpenCSVfile (std::ofstream& csvfile,
 void SIDISatBAND_auxiliary::Print4Vector( TLorentzVector v, std::string label ){
     std::cout << label << " 4-vector:"<<std::endl;
     std::cout
-    << "(Px,Py,Pz,E) = (" << v.Px() << "," << v.Py() << "," << v.Pz() << "," << v.E()
+    << std::setprecision(2)
+    << "(Px = " << v.Px()
+    << ", Py = " << v.Py()
+    << ", Pz = " << v.Pz()
+    << ", E = " << v.E()
     << "), M = " << v.Mag()
+    << " GeV"
     << std::endl;
 }
 
@@ -251,7 +275,7 @@ double SIDISatBAND_auxiliary::ComputeLightConeFraction( TLorentzVector p ){
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-void PrintMonitorHello(){
+void SIDISatBAND_auxiliary::PrintMonitorHello(){
     std::cout << "Hello..." << std::endl;
     std::cout << "Is it me you're looking for?..." << std::endl;
     std::cout << "I can see it in your eyes..." << std::endl;
@@ -260,4 +284,124 @@ void PrintMonitorHello(){
     std::cout << "Cause you know just what to say, and you know just what to do..." << std::endl;
     std::cout << "And I want to tell you so much, I love you" << std::endl;
     std::cout << "I long to see the sunlight in your hair" << std::endl;
+}
+
+
+
+
+
+// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+bool SIDISatBAND_auxiliary::eepiPassedKinematicalCriteria(Double_t Ebeam,
+                                                          Double_t omega,
+                                                          Double_t Q2,
+                                                          Double_t y,
+                                                          Double_t W,
+                                                          TLorentzVector pi,
+                                                          TLorentzVector e){
+    Double_t Zpi = pi.E()/omega;
+    
+    if (fdebug>2) {
+        std::cout
+        << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+        << std::endl
+        << "eepiPassedKinematicalCriteria()"
+        << std::endl
+        << std::setprecision(3)
+        << "Q²: "       << Q2 << " (GeV/c)²,"
+        << "W: "        << W << " GeV/c²,"
+        << "y: "        << y << ","
+        << std::endl
+        << "𝜃(e): "    << e.Theta()*r2d    << "˚,"
+        << "p(e): "    << e.P()            << " GeV/c,"
+        << std::endl
+        << "𝜃(pi): "   << pi.Theta()*r2d   << "˚,"
+        << "p(π): "    << pi.P()           << " GeV/c,"
+        << std::endl
+        << "z(π): "    << Zpi              << ","
+        << std::endl;
+        
+        if (fdebug>4) {
+            std::cout
+            << cutValue_Q2_min << " < " << "Q2="<< Q2 << " < " << cutValue_Q2_max
+            << std::endl
+            << cutValue_W_min  << " < " << "W="<<W
+            << std::endl
+            << "y="<<y               << " < " << cutValue_y_max
+            << std::endl
+            << cutValue_e_theta_min
+            << " < "    << "𝜃(e) = "<< e.Theta()*r2d << "˚"
+            << " < "    << cutValue_e_theta_max
+            << std::endl
+            << cutValue_pi_theta_min
+            << " < "    << "𝜃(π) = " <<pi.Theta()*r2d << "˚"
+            << " < "    << cutValue_pi_theta_max
+            << std::endl
+            << cutValue_Pe_min  << " < "  << "p(e)="<< e.P()  << " < " << Ebeam
+            << std::endl
+            << cutValue_Zpi_min << " < "  << "z(π)="<< Zpi    << " < " << cutValue_Zpi_max
+            << std::endl;
+            
+            if ( cutValue_Q2_min < Q2  && Q2 < cutValue_Q2_max  )
+                std::cout << "1 passed Q2 cut" << std::endl;
+            else
+                std::cout << "1 failed Q2 cut" << std::endl;
+            if ( cutValue_W_min < W  )
+                std::cout << "2 passed W cut" << std::endl;
+            else
+                std::cout << "2 failed W cut" << std::endl;
+            if ( y < cutValue_y_max  )
+                std::cout << "3 passed y cut" << std::endl;
+            else
+                std::cout << "3 failed y cut" << std::endl;
+            if ( cutValue_e_theta_min < e.Theta()*r2d  &&  e.Theta()*r2d < cutValue_e_theta_max  )
+                std::cout << "4 passed 𝜃(e) cut" << std::endl;
+            else
+                std::cout << "4 failed 𝜃(e) cut" << std::endl;
+            if (cutValue_pi_theta_min < pi.Theta()*r2d && pi.Theta()*r2d < cutValue_pi_theta_max )
+                std::cout << "5 passed 𝜃(π) cut" << std::endl;
+            else
+                std::cout << "5 failed 𝜃(π) cut" << std::endl;
+            if (cutValue_Ppi_min < pi.P()         &&         pi.P() < cutValue_Ppi_max)
+                std::cout << "6 passed p(π) cut" << std::endl;
+            else
+                std::cout << "6 failed p(π) cut" << std::endl;
+            if (cutValue_Pe_min < e.P()          &&          e.P() < Ebeam)
+                std::cout << "7 passed p(e) cut" << std::endl;
+            else
+                std::cout << "7 failed p(e) cut" << std::endl;
+            if (cutValue_Zpi_min < Zpi            &&            Zpi < cutValue_Zpi_max)
+                std::cout << "8 passed Z(π) cut" << std::endl;
+            else
+                std::cout << "8 failed Z(π) cut" << std::endl;
+        }
+        
+    }
+        
+    if(   (      cutValue_Q2_min < Q2             &&             Q2 < cutValue_Q2_max       )
+       && (       cutValue_W_min < W                                                        )
+       && (                                                       y < cutValue_y_max        )
+       && ( cutValue_e_theta_min < e.Theta()*r2d  &&  e.Theta()*r2d < cutValue_e_theta_max  )
+       && (cutValue_pi_theta_min < pi.Theta()*r2d && pi.Theta()*r2d < cutValue_pi_theta_max )
+       && (     cutValue_Ppi_min < pi.P()         &&         pi.P() < cutValue_Ppi_max      )
+       && (      cutValue_Pe_min < e.P()          &&          e.P() < Ebeam                 )
+       && (     cutValue_Zpi_min < Zpi            &&            Zpi < cutValue_Zpi_max      )
+       ) {
+        if (fdebug>2) {
+            std::cout << "succesfully passed (e,e'π) kinematical cuts"
+            << std::endl
+            << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            << std::endl;
+        }
+        return true;
+    }
+    else {
+        if (fdebug>2) {
+            std::cout << "Did not pass (e,e'π) kinematical cuts"
+            << std::endl
+            << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            << std::endl;
+        }
+    }
+        
+    return false;
 }

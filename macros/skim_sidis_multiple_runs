@@ -16,7 +16,7 @@ parser.add_argument("--NeventsMax",   type=int, default=-1,
                     required=False, help="maximal number of events to process")
 parser.add_argument("--fdebug",       type=int, default=1,
                     required=False, help="verbosity")
-parser.add_argument("--PrintProgress",type=int, default=50000,
+parser.add_argument("--PrintProgress",type=int, default=500000,
                     required=False, help="print progress (every N events)")
 parser.add_argument("--no-email",   dest="no_email",
                     default=False,  required=False,
@@ -69,9 +69,7 @@ print('done.')
 print('')
 if args.no_email==False:#{
     mailtitle = 'Done processing skim_sidis_multiple_runs on ifarm'
-    mailbody  = ('processed %d runs (run %d-%d)'%
-                (Nruns, FirstRun, FirstRun+Nruns) +
-    '\n Data in /volatile/clas12/users/ecohen/BAND/SIDIS_skimming/')
-    emailstr = ('echo %s | mail -s "%s" cohen.erez7@gmail.com'%(mailbody,mailtitle) )
+    mailbody  = ('Processed %d runs (run %d-%d), Data in /volatile/clas12/users/ecohen/BAND/SIDIS_skimming/')
+    emailstr = ('echo %s | mail -s "%s" cohen.erez7@gmail.com'%(Nruns, FirstRun, FirstRun+Nrunsmailbody,mailtitle) )
     os.system(emailstr)
 #}

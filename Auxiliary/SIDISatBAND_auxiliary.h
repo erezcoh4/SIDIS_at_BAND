@@ -22,7 +22,15 @@ public:
         
 //    TVector3        GetParticleVertex (clas12::region_part_ptr rp);
 //    void         SetParticle4Momentum (TLorentzVector &p4,clas12::region_part_ptr rp);
-    void                loadCutValues (std::string cutValuesFilename="cutValues.csv");
+    bool eepiPassedKinematicalCriteria(Double_t Ebeam,
+                                       Double_t omega,
+                                       Double_t Q2,
+                                       Double_t y,
+                                       Double_t W,
+                                       TLorentzVector pi,
+                                       TLorentzVector e );
+    void                loadCutValues (std::string cutValuesFilename="cutValues.csv",
+                                       int torusBending=1); //  -1 for In-bending, +1 for Out-bending
     void               printCutValues ();
     void            PrintMonitorHello ();
     void                 SetVerbosity (int _fdebug_)         {fdebug = _fdebug_;};
@@ -52,8 +60,10 @@ public:
     double             cutValue_e_PCAL_V;
     double             cutValue_e_E_PCAL;
     double cutValue_SamplingFraction_min;
+    double     cutValue_PCAL_ECIN_SF_min;
     double        cutValue_Ve_Vpi_dz_max;
     double               cutValue_Q2_min;
+    double               cutValue_Q2_max;
     double                cutValue_W_min;
     double                cutValue_y_max;
     double          cutValue_e_theta_min;
@@ -62,9 +72,10 @@ public:
     double         cutValue_pi_theta_max;
     double              cutValue_Ppi_min;
     double              cutValue_Ppi_max;
+    double               cutValue_Pe_min;
+    double               cutValue_Pe_max;
     double              cutValue_Zpi_min;
     double              cutValue_Zpi_max;
-    
     
     
     

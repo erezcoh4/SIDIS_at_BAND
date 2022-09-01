@@ -23,13 +23,12 @@
 #include "Auxiliary/clashit.cpp"
 #include "Auxiliary/genpart.cpp"
 
+#include "Auxiliary/SIDISatBAND_auxiliary.cpp"
+
 #define NMAXEVENTS 5000000
 #define NMAXNML 20 // maximal number of XXX
-#define NMAXPIONS 5 // maximal allowed number of pions
-#define r2d 180./3.1415 // radians to degrees
 
-// Output CSV file
-std::ofstream   CSVfile_e_e_pips, CSVfile_e_e_pims;
+SIDISatBAND_auxiliary aux;
 
 // time
 clock_t tStart = clock();
@@ -38,14 +37,22 @@ clock_t tStart = clock();
 TString csvheader = ( (TString)"status,runnum,evnum,beam_helicity,"
                      +(TString)"e_P,e_Theta,e_Phi,e_Vz,"
                      +(TString)"pi_P,pi_Theta,pi_Phi,pi_Vz,"
-                     +(TString)"Q2,W,xB,Zpi,omega,"
-                     +(TString)"xF,y,M_X,"
-                     +(TString)"Npips,Npims,Nelectrons,Ngammas,Nprotons,Nneutrons,Ndeuterons,"
+                     +(TString)"Q2,xB,omega,y,"
                      +(TString)"e_DC_sector,pi_DC_sector,"
                      +(TString)"e_Theta_qFrame,e_Phi_qFrame,"
                      +(TString)"pi_qFrame_Theta,pi_qFrame_Phi,"
-                     +(TString)"pi_qFrame_pT,pi_qFrame_pL,");
+                     +(TString)"pi_qFrame_pT,pi_qFrame_pL,"
+                     +(TString)"Zpi,Zpi_LC,"
+                     +(TString)"W,M_x,"
+                     +(TString)"xF,eta_pi,");
 
+std::vector<int> csvprecisions = {
+    0,0,0,0,
+    9,9,9,9,
+    9,9,9,9,
+    9,9,9,9,
+    0,0,
+};
 
 TString                   DataPath;
 TString                   Filename;
@@ -61,7 +68,7 @@ Long64_t                    runnum;
 Long64_t                     evnum;
 int                     NMaxEvents;
 int                            nml;
-int                            nPi;
+//int                            nPi;
 int                           npiP;
 int                           npiM;
 int                      inclusive; // tag to look at inclusive run - all the events with no selection
@@ -71,21 +78,16 @@ int                          e_idx; // leading electron index
 TFile                    * RGAFile;
 TTree                    * RGATree;
 
-Double_t       Me  = 0.00051099895; // GeV/c2
-Double_t       Mpims  = 0.13957039; // GeV/c2
-Double_t       Mpips  = 0.13957039; // GeV/c2
-Double_t            Mp  = 0.938272; // GeV/c2
-Double_t             Mn = 0.939565; // GeV/c2
-Double_t                Md = 1.875; // GeV/c2
-Double_t             Mp2 = Mp * Mp;
-Double_t                        xB; // Bjorken x
-Double_t                        xF; // Feynman x
-Double_t                        Q2;
-Double_t                     W2, W; // invariant hadronic mass
-Double_t                     Ebeam;
-Double_t                     omega;
-Double_t                        w2; // omega^2
-Double_t                         y; // QE variable
+// kinematics
+Double_t           Ebeam, omega, y, xB, Q2;
+Double_t                                xF;
+Double_t                            eta_pi;
+Double_t                             W, W2;
+Double_t                               M_x;
+Double_t                                w2; // omega^2
+double                                 Zpi;
+double                              Zpi_LC;
+
 
 // Input TTree variables
 Float_t                Ep[NMAXNML]; // electron momentum
@@ -212,7 +214,7 @@ int Nevents_passed_e_pips_kinematics_cuts;
 int    Nevents_passed_pims_cuts;
 int  Nevents_passed_e_pims_cuts;
 int Nevents_passed_e_pims_kinematics_cuts;
-
+int               PrintProgress;
 
 // leading electron
 double            e_E_PCAL; // electron energy deposit in PCAL [GeV]
@@ -249,6 +251,7 @@ double         pips_E_PCAL[NMAXPIONS];
 double         pips_E_ECIN[NMAXPIONS];
 double        pips_E_ECOUT[NMAXPIONS];
 double               Zpips[NMAXPIONS]; // hadron rest-frame energy
+double             ZpipsLC[NMAXPIONS]; // hadron rest-frame energy on the light cone
 
 double           piplus_Px[NMAXPIONS];
 double           piplus_Py[NMAXPIONS];
@@ -282,6 +285,7 @@ double         pims_E_PCAL[NMAXPIONS];
 double         pims_E_ECIN[NMAXPIONS];
 double        pims_E_ECOUT[NMAXPIONS];
 double               Zpims[NMAXPIONS]; // hadron rest-frame energy
+double             ZpimsLC[NMAXPIONS]; // hadron rest-frame energy on the light cone
 
 double              piminus_Px[NMAXPIONS];
 double              piminus_Py[NMAXPIONS];
@@ -297,26 +301,24 @@ double      piminus_qFrame_Phi[NMAXPIONS];
 
 
 // Output root file and tree
-TFile * outFile_e_piplus, * outFile_e_piminus;
-TTree * outTree_e_piplus, * outTree_e_piminus;
-TFile * outFile_e_piplus_no_cuts, * outFile_e_piminus_no_cuts;
-TTree * outTree_e_piplus_no_cuts, * outTree_e_piminus_no_cuts;
+//TFile * outFile_e_piplus, * outFile_e_piminus;
+//TTree * outTree_e_piplus, * outTree_e_piminus;
+//TFile * outFile_e_piplus_no_cuts, * outFile_e_piminus_no_cuts;
+//TTree * outTree_e_piplus_no_cuts, * outTree_e_piminus_no_cuts;
 
 // Output CSV file
-std::ofstream   CSVfile_e_piplus,  SelectedEventsCSVfile_e_piplus,  SelectedEventsCSVfile_e_piplus_kinematics;
-std::ofstream   CSVfile_e_piminus, SelectedEventsCSVfile_e_piminus, SelectedEventsCSVfile_e_piminus_kinematics;
+std::ofstream   CSVfile_e_e_pips, CSVfile_e_e_pims;
+
+
 // vectors in lab-frame
 TLorentzVector          Beam, target, e, q;
+TLorentzVector              d_rest, p_rest;
 std::vector<TLorentzVector>         piplus; // positive pions
 std::vector<TLorentzVector>        piminus; // negative pions
 // reconstructed vertex position
 TVector3                                Ve;
 std::vector<TVector3>              Vpiplus;
 std::vector<TVector3>             Vpiminus;
-
-// kinematics
-//Double_t     Ebeam, xB, Q2, omega, W, W2, xF, y, M_X;
-
 
 // vectors in q-frame
 TLorentzVector               e_qFrame, q_qFrame;
@@ -333,7 +335,10 @@ void                      OpenOutputFiles ();
 void                     CloseOutputFiles ();
 void                InitializeFileReading ();
 //void            StreamToCSVfile (std::vector<Double_t> observables, bool passed_cuts_e_pi_kinematics);
-void                         SetVerbosity (int ffdebug )          {fdebug = ffdebug;} ;
+void                         SetVerbosity (int ffdebug )          {
+    fdebug = ffdebug;
+    aux.SetVerbosity(fdebug);
+} ;
 void                          SetDataPath (TString fDataPath )    {DataPath = fDataPath;} ;
 void                          SetFileName (TString fFileName )    {Filename = fFileName;} ;
 void                        SetNMaxEVents (int fNMAXevents )      {NMaxEvents = fNMAXevents;};
@@ -345,6 +350,8 @@ void                         ReadRGAEvent (int event);
 void                    ComputeKinematics ();
 void           ExtractElectronInformation ();
 void              ExtractPionsInformation ();
+void               ExtractPipsInformation (int pipsIdx);
+void               ExtractPimsInformation (int pimsIdx);
 void                   WriteEventToOutput ();
 bool   CheckIfElectronPassedSelectionCuts (Int_t fid1,
                                            Int_t fid2,
@@ -360,7 +367,21 @@ bool      CheckIfPionPassedSelectionCuts (TString pionCharge, // "pi+" or "pi-"
                                           Double_t p,
                                           TVector3 Ve,
                                           TVector3 Vpi);
+void             Stream_e_pi_line_to_CSV (TString pionCharge,
+                                          int piIdx,
+                                          bool passed_cuts_e_pi,
+                                          bool passed_cuts_e_pi_kinematics);
+void               ComputePionKinematics (TLorentzVector pi,
+                                          TLorentzVector pi_qFrame);
 
+//bool       eepiPassedKinematicalCriteria (TLorentzVector pi);
+void                       MoveTo_qFrame ();
+TVector3           RotateVectorTo_qFrame (TVector3 v);
+void                       GetBeamEnergy ();
+void                 PrintRGAInformation ();
+void                    SetPrintProgress ( int fPrintProgress ){
+    PrintProgress = fPrintProgress;
+};
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 // Main functionality
@@ -368,9 +389,10 @@ bool      CheckIfPionPassedSelectionCuts (TString pionCharge, // "pi+" or "pi-"
 void ReadIgorRGAFile(TString fFileName="ntupleNew",
                      int fNMAXevents=-1,
                      int ffdebug=1,
-                     int PrintProgress=1000,
+                     int fPrintProgress=50000,
                      TString fDataPath="/Users/erezcohen/Desktop/data/BAND/RGA_Free_proton/",
-                     int fInclusive=0
+                     int fInclusive=0,
+                     int torusBending=-1
                      ){
     
     SetVerbosity          ( ffdebug );
@@ -378,6 +400,10 @@ void ReadIgorRGAFile(TString fFileName="ntupleNew",
     SetFileName           ( fFileName );
     SetNMaxEVents         ( fNMAXevents );
     SetInclusive          ( fInclusive );
+    SetPrintProgress      ( fPrintProgress );
+    // read cut values
+    aux.loadCutValues     ("macros/cuts/BANDcutValues.csv",torusBending);
+    
     InitializeFileReading ();
     OpenInputFile         ();
     OpenOutputFiles       ();
@@ -391,85 +417,85 @@ void ReadIgorRGAFile(TString fFileName="ntupleNew",
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void InitializeVariables (){
     xB          = Q2        = omega     = -9999;
-//    xF          = y         = M_X       = -9999;
-//    e_E_ECIN    = e_E_ECOUT = e_E_PCAL  = -9999;
-//    e_PCAL_W    = e_PCAL_V              = -9999;
-//    e_PCAL_x    = e_PCAL_y  = e_PCAL_z  = -9999;
-//    e_PCAL_sector                       = -9999;
-//    e_DC_sector = e_DC_Chi2N            = -9999;
-//    for (int regionIdx=0; regionIdx<3; regionIdx++) {
-//        e_DC_x[regionIdx]               = -9999;
-//        e_DC_y[regionIdx]               = -9999;
-//        e_DC_z[regionIdx]               = -9999;
-//    }
-//    Pe_phi = q_phi = q_theta            = 0;
-//
-//    Ve                                  = TVector3();
-//    ePastCutsInEvent                    = false;
-//
+    //    xF          = y         = M_X       = -9999;
+    //    e_E_ECIN    = e_E_ECOUT = e_E_PCAL  = -9999;
+    //    e_PCAL_W    = e_PCAL_V              = -9999;
+    //    e_PCAL_x    = e_PCAL_y  = e_PCAL_z  = -9999;
+    //    e_PCAL_sector                       = -9999;
+    //    e_DC_sector = e_DC_Chi2N            = -9999;
+    //    for (int regionIdx=0; regionIdx<3; regionIdx++) {
+    //        e_DC_x[regionIdx]               = -9999;
+    //        e_DC_y[regionIdx]               = -9999;
+    //        e_DC_z[regionIdx]               = -9999;
+    //    }
+    //    Pe_phi = q_phi = q_theta            = 0;
+    //
+    //    Ve                                  = TVector3();
+    //    ePastCutsInEvent                    = false;
+    //
     piplus          .clear();
     piminus         .clear();
     piplus_qFrame   .clear();
     piminus_qFrame  .clear();
-//    Vpiplus     .clear();
-//    Vpiminus    .clear();
-//    pipluses    .clear();
-//    piminuses   .clear();
-//    electrons   .clear();
-//    neutrons    .clear();
-//    protons     .clear();
-//    gammas      .clear();
-//    for (int piIdx=0; piIdx<NMAXPIONS; piIdx++) {
-//        pips_chi2PID[piIdx]                         = -9999;
-//        pips_DC_sector[piIdx]                       = -9999;
-//        pips_PCAL_sector[piIdx]                     = -9999;
-//        pips_PCAL_W[piIdx] = pips_PCAL_V[piIdx]     = -9999;
-//        pips_PCAL_x[piIdx] = pips_PCAL_y[piIdx]     = -9999;
-//        pips_PCAL_z[piIdx]                          = -9999;
-//        pips_E_PCAL[piIdx]                          = -9999;
-//        pips_E_ECIN[piIdx] = pips_E_ECOUT[piIdx]    = -9999;
-//
-//        pims_chi2PID[piIdx]                         = -9999;
-//        pims_DC_sector[piIdx]                       = -9999;
-//        pims_PCAL_sector[piIdx]                     = -9999;
-//        pims_PCAL_W[piIdx] = pims_PCAL_V[piIdx]     = -9999;
-//        pims_PCAL_x[piIdx] = pims_PCAL_y[piIdx]     = -9999;
-//        pims_PCAL_z[piIdx]                          = -9999;
-//        pims_E_PCAL[piIdx]                          = -9999;
-//        pims_E_ECIN[piIdx] = pims_E_ECOUT[piIdx]    = -9999;
-//        for (int regionIdx=0; regionIdx<3; regionIdx++) {
-//            pips_DC_x[piIdx][regionIdx]= pips_DC_y[piIdx][regionIdx]    = -9999;
-//            pips_DC_z[piIdx][regionIdx]                                 = -9999;
-//            pims_DC_x[piIdx][regionIdx]= pims_DC_y[piIdx][regionIdx]    = -9999;
-//            pims_DC_z[piIdx][regionIdx]                                 = -9999;
-//        }
-//        piplus       .push_back( TLorentzVector(0,0,0,db->GetParticle( 211 )->Mass()) );
-//        piplus_qFrame.push_back( TLorentzVector(0,0,0,db->GetParticle( 211 )->Mass()) );
-//        Vpiplus .push_back( TVector3() );
-//        pipsPastSelectionCuts[piIdx]                = false;
-//        eepipsPastKinematicalCuts[piIdx]            = false;
-//
-//        piminus       .push_back( TLorentzVector(0,0,0,db->GetParticle( -211 )->Mass()) );
-//        piminus_qFrame.push_back( TLorentzVector(0,0,0,db->GetParticle( -211 )->Mass()) );
-//        Vpiminus.push_back( TVector3() );
-//        pimsPastSelectionCuts[piIdx]                = false;
-//        eepimsPastKinematicalCuts[piIdx]            = false;
-//
-//        piplus_Px[piIdx]    = piplus_Py[piIdx]  = piplus_Pz[piIdx]  = piplus_E[piIdx]   = -9999;
-//        piminus_Px[piIdx]   = piminus_Py[piIdx] = piminus_Pz[piIdx] = piminus_E[piIdx]  = -9999;
-//        Vpiplus_X[piIdx]    = Vpiplus_Y[piIdx]  = Vpiplus_Z[piIdx]                      = -9999;
-//        Vpiminus_X[piIdx]   = Vpiminus_Y[piIdx] = Vpiminus_Z[piIdx]                     = -9999;
-//        piplus_qFrame_pT[piIdx]    = piplus_qFrame_pL[piIdx]                            = -9999;
-//        piminus_qFrame_pT[piIdx]   = piminus_qFrame_pL[piIdx]                           = -9999;
-//
-//    }
-//    DC_layer                                        = -9999;
-//    status                                          = 1; // 0 is good...
-//
-//    pipsPastCutsInEvent                             = false;
-//    eepipsPastCutsInEvent                           = false;
-//    pimsPastCutsInEvent                             = false;
-//    eepimsPastCutsInEvent                           = false;
+    //    Vpiplus     .clear();
+    //    Vpiminus    .clear();
+    //    pipluses    .clear();
+    //    piminuses   .clear();
+    //    electrons   .clear();
+    //    neutrons    .clear();
+    //    protons     .clear();
+    //    gammas      .clear();
+    for (int piIdx=0; piIdx<NMAXPIONS; piIdx++) {
+        //        pips_chi2PID[piIdx]                         = -9999;
+        //        pips_DC_sector[piIdx]                       = -9999;
+        //        pips_PCAL_sector[piIdx]                     = -9999;
+        //        pips_PCAL_W[piIdx] = pips_PCAL_V[piIdx]     = -9999;
+        //        pips_PCAL_x[piIdx] = pips_PCAL_y[piIdx]     = -9999;
+        //        pips_PCAL_z[piIdx]                          = -9999;
+        //        pips_E_PCAL[piIdx]                          = -9999;
+        //        pips_E_ECIN[piIdx] = pips_E_ECOUT[piIdx]    = -9999;
+        //
+        //        pims_chi2PID[piIdx]                         = -9999;
+        //        pims_DC_sector[piIdx]                       = -9999;
+        //        pims_PCAL_sector[piIdx]                     = -9999;
+        //        pims_PCAL_W[piIdx] = pims_PCAL_V[piIdx]     = -9999;
+        //        pims_PCAL_x[piIdx] = pims_PCAL_y[piIdx]     = -9999;
+        //        pims_PCAL_z[piIdx]                          = -9999;
+        //        pims_E_PCAL[piIdx]                          = -9999;
+        //        pims_E_ECIN[piIdx] = pims_E_ECOUT[piIdx]    = -9999;
+        //        for (int regionIdx=0; regionIdx<3; regionIdx++) {
+        //            pips_DC_x[piIdx][regionIdx]= pips_DC_y[piIdx][regionIdx]    = -9999;
+        //            pips_DC_z[piIdx][regionIdx]                                 = -9999;
+        //            pims_DC_x[piIdx][regionIdx]= pims_DC_y[piIdx][regionIdx]    = -9999;
+        //            pims_DC_z[piIdx][regionIdx]                                 = -9999;
+        //        }
+        piplus       .push_back( TLorentzVector(0,0,0,aux.Mpips) );
+        piplus_qFrame.push_back( TLorentzVector(0,0,0,aux.Mpips) );
+        Vpiplus .push_back( TVector3() );
+        pipsPastSelectionCuts[piIdx]                = false;
+        eepipsPastKinematicalCuts[piIdx]            = false;
+        
+        piminus       .push_back( TLorentzVector(0,0,0,aux.Mpims) );
+        piminus_qFrame.push_back( TLorentzVector(0,0,0,aux.Mpims) );
+        Vpiminus.push_back( TVector3() );
+        pimsPastSelectionCuts[piIdx]                = false;
+        eepimsPastKinematicalCuts[piIdx]            = false;
+        
+        piplus_Px[piIdx]    = piplus_Py[piIdx]  = piplus_Pz[piIdx]  = piplus_E[piIdx]   = -9999;
+        piminus_Px[piIdx]   = piminus_Py[piIdx] = piminus_Pz[piIdx] = piminus_E[piIdx]  = -9999;
+        Vpiplus_X[piIdx]    = Vpiplus_Y[piIdx]  = Vpiplus_Z[piIdx]                      = -9999;
+        Vpiminus_X[piIdx]   = Vpiminus_Y[piIdx] = Vpiminus_Z[piIdx]                     = -9999;
+        piplus_qFrame_pT[piIdx]    = piplus_qFrame_pL[piIdx]                            = -9999;
+        piminus_qFrame_pT[piIdx]   = piminus_qFrame_pL[piIdx]                           = -9999;
+        
+    }
+    //    DC_layer                                        = -9999;
+    status                                          = 1; // 0 is good...
+    
+    pipsPastCutsInEvent                             = false;
+    eepipsPastCutsInEvent                           = false;
+    pimsPastCutsInEvent                             = false;
+    eepimsPastCutsInEvent                           = false;
 }
 
 
@@ -479,6 +505,18 @@ void ReadRGAEvent(int event){
     Ne    = nml;
     Npips = npiP;
     Npims = npiM;
+    
+    // xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    // Aug-2022
+    // problem in Igor' file: no run number and no event number
+    //
+    // to solve this temporarily I assign the
+    // event number to be the TTree entry number here
+    //
+    if (evnum==0) evnum=event;
+    //
+    //
+    // xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -487,12 +525,13 @@ void ComputeKinematics(){
     
     // compute event kinematics (from e-only information)
     // assign kinematics to leading electron
-    Ebeam = Ep[e_idx] + Nu[e_idx];
-    q.SetPxPyPzE( qx[e_idx], qy[e_idx], qz[e_idx], Nu[e_idx] );
+    q       .SetPxPyPzE( qx[e_idx], qy[e_idx], qz[e_idx], Nu[e_idx] );
+    GetBeamEnergy();
+    Beam    .SetPxPyPzE (0, 0, Ebeam, Ebeam );
     
     Q2      = -q.Mag2();
     omega   = q.E();
-    xB      = Q2/(2. * Mp * q.E());
+    xB      = Q2/(2. * aux.Mp * q.E());
     
     W2      = (target + q).Mag2(); //    W2      = Mp2 - Q2 + 2. * omega * Mp;
     W       = sqrt(W2);
@@ -500,18 +539,52 @@ void ComputeKinematics(){
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+void GetBeamEnergy (){
+    Ebeam = Ep[e_idx] + Nu[e_idx];
+}
+
+
+// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void ReadEvents (){
     if (fdebug>1) {
-        std::cout << "ReadEvents (NeventsInRGATree="<<NeventsInRGATree<<")" << std::endl;
+        std::cout << "------------------------------------------------" << std::endl;
+        std::cout << "ReadEvents ("<<NeventsInRGATree<<" events)" << std::endl;
         std::cout << "------------------------------------------------" << std::endl;
     }
     
     for (int event=0; event < NeventsInRGATree ; event++) {
+        if ( (NMaxEvents>0) && (event>=NMaxEvents) ){
+            if (fdebug>1) {
+                std::cout
+                << std::endl
+                << "Stop reading events at event " << event << std::endl;
+            }
+            break;
+        }
+        
+        
+        if (fdebug>1) {
+            // start event
+            std::cout
+            << "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+            << std::endl;
+        }
         
         InitializeVariables ();
-        ReadRGAEvent                (event);
+        ReadRGAEvent        (event);
         
-        
+        if (fdebug>1){
+            std::cout
+            << "run "    << runnum      << ","
+            << "event "  << event       << "/" << NeventsInRGATree << ","
+            << "evnum "  << evnum       << ","
+            << std::endl
+            << "N(π+): " << Npips       << ","
+            << "N(π-): " << Npims       << ","
+            << std::setprecision(3)
+            << "E(beam): " << Ebeam     << " GeV,"
+            << std::endl;
+        }
         // filter events, extract information, and compute event kinematics:
         // we keep only d(e,e’pi+)X and d(e,e’pi-)X events
         if(  0 < Ne // after studying some MC and data, we need to kill events with more than 1 electron
@@ -524,122 +597,37 @@ void ReadEvents (){
             ExtractElectronInformation  ();
             ComputeKinematics           ();
             ExtractPionsInformation     ();
+            MoveTo_qFrame               ();
             WriteEventToOutput          ();
             
             if (fdebug>1){
-                std::cout
-                << "run "    << runnum      << ","
-                << "event "  << evnum       << ","
-                << std::endl
-                << "nml: "   << nml         << ","
-                << "nPi: "   << nPi         << ","
-                << "npiP: "  << npiP        << ","
-                << "npiM: "  << npiM        << ","
-                << std::endl;
-                
                 if (fdebug>3){
-                for (int e_idx=0; e_idx<nml; e_idx++) {
-                    std::cout
-                    << "Ep["<<e_idx<<"] "               << Ep[e_idx]            << ","
-                    << std::endl
-                    << "Epx["<<e_idx<<"] "              << Epx[e_idx]           << ","
-                    << "Epy["<<e_idx<<"] "              << Epy[e_idx]           << ","
-                    << "Epz["<<e_idx<<"] "              << Epz[e_idx]           << ","
-                    << std::endl
-                    << "Epid["<<e_idx<<"] "             << Epid[e_idx]          << ","
-                    << "Esector["<<e_idx<<"] "          << Esector[e_idx]       << ","
-                    << std::endl
-                    << "Etheta["<<e_idx<<"] "           << Etheta[e_idx]        << ","
-                    << "Ephi["<<e_idx<<"] "             << Ephi[e_idx]          << ","
-                    << std::endl
-                    << "Efiducial1["<<e_idx<<"] "       << Efiducial1[e_idx]    << ","
-                    << "Efiducial2["<<e_idx<<"] "       << Efiducial2[e_idx]    << ","
-                    << "Efiducial3["<<e_idx<<"] "       << Efiducial3[e_idx]    << ","
-                    << std::endl
-                    << "ePCAL_energy["<<e_idx<<"] "     << ePCAL_energy[e_idx]  << ","
-                    << "eECIN_energy["<<e_idx<<"] "     << eECIN_energy[e_idx]  << ","
-                    << "eECOUT_energy["<<e_idx<<"] "    << eECOUT_energy[e_idx] << ","
-                    << std::endl
-                    << "Nu["<<e_idx<<"] "               << Nu[e_idx]            << ","
-                    << std::endl
-                    << "qx["<<e_idx<<"] "              << qx[e_idx]           << ","
-                    << "qy["<<e_idx<<"] "              << qy[e_idx]           << ","
-                    << "qz["<<e_idx<<"] "              << qz[e_idx]           << ","
-                    << std::endl;
-                }
-                for (int pips_idx=0; pips_idx < npiP; pips_idx++) {
-                    std::cout
-                    << "piPp["<<pips_idx<<"] "               << piPp[pips_idx]            << ","
-                    << std::endl
-                    << "piPpx["<<pips_idx<<"] "              << piPpx[pips_idx]           << ","
-                    << "piPpy["<<pips_idx<<"] "              << piPpy[pips_idx]           << ","
-                    << "piPpz["<<pips_idx<<"] "              << piPpz[pips_idx]           << ","
-                    << std::endl
-                    << "piPpid["<<pips_idx<<"] "             << piPpid[pips_idx]          << ","
-                    << "piPsector["<<pips_idx<<"] "          << piPsector[pips_idx]       << ","
-                    << std::endl
-                    << "piPtheta["<<pips_idx<<"] "           << piPtheta[pips_idx]        << ","
-                    << "piPphi["<<pips_idx<<"] "             << piPphi[pips_idx]          << ","
-                    << std::endl
-                    << "piPfiducial1["<<pips_idx<<"] "       << piPfiducial1[pips_idx]    << ","
-                    << "piPfiducial2["<<pips_idx<<"] "       << piPfiducial2[pips_idx]    << ","
-                    << "piPfiducial3["<<pips_idx<<"] "       << piPfiducial3[pips_idx]    << ","
-                    << std::endl
-                    << "piPPCAL_energy["<<pips_idx<<"] "     << piPPCAL_energy[pips_idx]  << ","
-                    << "piPECIN_energy["<<pips_idx<<"] "     << piPECIN_energy[pips_idx]  << ","
-                    << "piPECOUT_energy["<<pips_idx<<"] "    << piPECOUT_energy[pips_idx] << ","
-                    << std::endl;
-                }
-                for (int pims_idx=0; pims_idx < npiM; pims_idx++) {
-                    std::cout
-                    << "piMp["<<pims_idx<<"] "               << piMp[pims_idx]            << ","
-                    << std::endl
-                    << "piMpx["<<pims_idx<<"] "              << piMpx[pims_idx]           << ","
-                    << "piMpy["<<pims_idx<<"] "              << piMpy[pims_idx]           << ","
-                    << "piMpz["<<pims_idx<<"] "              << piMpz[pims_idx]           << ","
-                    << std::endl
-                    << "piMpid["<<pims_idx<<"] "             << piMpid[pims_idx]          << ","
-                    << "piMsector["<<pims_idx<<"] "          << piMsector[pims_idx]       << ","
-                    << std::endl
-                    << "piMtheta["<<pims_idx<<"] "           << piMtheta[pims_idx]        << ","
-                    << "piMphi["<<pims_idx<<"] "             << piMphi[pims_idx]          << ","
-                    << std::endl
-                    << "piMfiducial1["<<pims_idx<<"] "       << piMfiducial1[pims_idx]    << ","
-                    << "piMfiducial2["<<pims_idx<<"] "       << piMfiducial2[pims_idx]    << ","
-                    << "piMfiducial3["<<pims_idx<<"] "       << piMfiducial3[pims_idx]    << ","
-                    << std::endl
-                    << "piMPCAL_energy["<<pims_idx<<"] "     << piMPCAL_energy[pims_idx]  << ","
-                    << "piMECIN_energy["<<pims_idx<<"] "     << piMECIN_energy[pims_idx]  << ","
-                    << "piMECOUT_energy["<<pims_idx<<"] "    << piMECOUT_energy[pims_idx] << ","
-                    << std::endl;
-                }
+                    PrintRGAInformation();
                 }
                 
-                std::cout
-                << "q: ("    << q.Px() << "," << q.Py()<< "," << q.Pz() << ";" << q.E()<<") "
-                << std::endl
-                << "Q2: " << Q2 << " (GeV/c)2, "
-                << "xB: " << xB << ", "
-                << std::endl;
-                // finish event
-                std::cout << "------------------------------------------------" << std::endl;
+                if (fdebug>4){
+                    std::cout
+                    << "q: ("    << q.Px() << "," << q.Py()<< "," << q.Pz() << ";" << q.E()<<") "
+                    << std::endl
+                    << "Q2: " << Q2 << " (GeV/c)2, "
+                    << "xB: " << xB << ", "
+                    << std::endl;
+                }
             }
-            
-            
         } else {
             if (fdebug>1) {
                 std::cout << "Skipped computations in this event as there are not enough particles: "
                 << "Ne = " << Ne << ",Npips = " << Npips << ",Npims = " << Npims << std::endl ;
             }
         }
-        
-        
-
-        
-        
-        if ( (NMaxEvents>0) && (event>NMaxEvents) ){
-            if (fdebug>1) { std::cout << std::endl << "Stop reading events at event " << event << std::endl;}
-            break;
+        if (fdebug>1) {
+            // finish event
+            std::cout
+            << "vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv"
+            << std::endl<< std::endl;
+        }
+        if (fdebug && event%PrintProgress==0){
+            std::cout << std::setprecision(1) << " event " << event << std::endl;
         }
     }
     if (fdebug>1) std::cout << "Done ReadEvents ()" << std::endl;
@@ -673,8 +661,9 @@ void SetInputTTree (){
     RGATree  -> SetBranchAddress("ePCAL_lw"         ,ePCAL_lw          );
     RGATree  -> SetBranchAddress("eECIN_energy"     ,eECIN_energy      );
     RGATree  -> SetBranchAddress("eECOUT_energy"    ,eECOUT_energy     );
-    
-    RGATree  -> SetBranchAddress("nPi"              ,&nPi              );
+    RGATree  -> SetBranchAddress("Esector"          ,Esector           );
+
+    // RGATree  -> SetBranchAddress("nPi"              ,&nPi              );
     
     RGATree  -> SetBranchAddress("npiP"               ,&npiP               );
     RGATree  -> SetBranchAddress("piPpid"             ,piPpid              );
@@ -698,7 +687,8 @@ void SetInputTTree (){
     RGATree  -> SetBranchAddress("piPPCAL_lw"         ,piPPCAL_lw          );
     RGATree  -> SetBranchAddress("piPECIN_energy"     ,piPECIN_energy      );
     RGATree  -> SetBranchAddress("piPECOUT_energy"    ,piPECOUT_energy     );
-
+    RGATree  -> SetBranchAddress("piPsector"          ,piPsector           );
+    
     RGATree  -> SetBranchAddress("npiM"               ,&npiM               );
     RGATree  -> SetBranchAddress("piMpid"             ,piMpid              );
     RGATree  -> SetBranchAddress("piMp"               ,piMp                );
@@ -721,194 +711,194 @@ void SetInputTTree (){
     RGATree  -> SetBranchAddress("piMPCAL_lw"         ,piMPCAL_lw          );
     RGATree  -> SetBranchAddress("piMECIN_energy"     ,piMECIN_energy      );
     RGATree  -> SetBranchAddress("piMECOUT_energy"    ,piMECOUT_energy     );
-
+    RGATree  -> SetBranchAddress("piMsector"          ,piMsector           );
     
     
     RGATree  -> SetBranchAddress("Nu"               ,Nu                );
     RGATree  -> SetBranchAddress("qx"               ,qx                );
     RGATree  -> SetBranchAddress("qy"               ,qy                );
     RGATree  -> SetBranchAddress("qz"               ,qz                );
-
-//    ******************************************************************************
-//    *Tree    :T         : e'pion                                                 *
-//    *Br    1 :runNum    : runNum/L                                               *
-//    *Br    2 :evNum     : evNum/L                                                *
-//    *Br    4 :Epid      : Epid[nml]/I                                            *
-//    *Br    5 :Echarge   : Echarge[nml]/I                                         *
-//    *Br    6 :Ep        : Ep[nml]/F                                              *
-//    *Br    7 :Epx       : Epx[nml]/F                                             *
-//    *Br    8 :Epy       : Epy[nml]/F                                             *
-//    *Br    9 :Epz       : Epz[nml]/F                                             *
-//    *Br   10 :Etheta    : Etheta[nml]/F                                          *
-//    *Br   11 :Ephi      : Ephi[nml]/F                                            *
-//    *Br   12 :Etime     : Etime[nml]/F                                           *
-//    *Br   13 :Epath     : Epath[nml]/F                                           *
-//    *Br   14 :Evz       : Evz[nml]/F                                             *
-//    *Br   15 :Estat     : Estat[nml]/I                                           *
-//    *Br   16 :EdE       : EdE[nml]/F                                             *
-//    *Br   17 :Ebeta     : Ebeta[nml]/F                                           *
-//    *Br   18 :Esector   : Esector[nml]/I                                         *
-//    *Br   19 :Eregion   : Eregion[nml]/I                                         *
-//    *Br   20 :Efiducial1 : Efiducial1[nml]/I                                     *
-//    *Br   21 :Efiducial2 : Efiducial2[nml]/I                                     *
-//    *Br   22 :Efiducial3 : Efiducial3[nml]/I                                     *
-//    *Br   23 :ePCAL_time : ePCAL_time[nml]/F                                     *
-//    *Br   24 :ePCAL_energy : ePCAL_energy[nml]/F                                 *
-//    *Br   25 :ePCAL_path : ePCAL_path[nml]/F                                     *
-//    *Br   26 :ePCAL_sector : ePCAL_sector[nml]/I                                 *
-//    *Br   27 :ePCAL_x   : ePCAL_x[nml]/F                                         *
-//    *Br   28 :ePCAL_y   : ePCAL_y[nml]/F                                         *
-//    *Br   29 :ePCAL_z   : ePCAL_z[nml]/F                                         *
-//    *Br   30 :ePCAL_lu  : ePCAL_lu[nml]/F                                        *
-//    *Br   31 :ePCAL_lv  : ePCAL_lv[nml]/F                                        *
-//    *Br   32 :ePCAL_lw  : ePCAL_lw[nml]/F                                        *
-//    *Br   33 :ePCAL_status : ePCAL_status[nml]/I                                 *
-//    *Br   34 :eECIN_time : eECIN_time[nml]/F                                     *
-//    *Br   35 :eECIN_energy : eECIN_energy[nml]/F                                 *
-//    *Br   36 :eECIN_path : eECIN_path[nml]/F                                     *
-//    *Br   37 :eECIN_sector : eECIN_sector[nml]/I                                 *
-//    *Br   38 :eECIN_x   : eECIN_x[nml]/F                                         *
-//    *Br   39 :eECIN_y   : eECIN_y[nml]/F                                         *
-//    *Br   40 :eECIN_z   : eECIN_z[nml]/F                                         *
-//    *Br   41 :eECIN_lu  : eECIN_lu[nml]/F                                        *
-//    *Br   42 :eECIN_lv  : eECIN_lv[nml]/F                                        *
-//    *Br   43 :eECIN_lw  : eECIN_lw[nml]/F                                        *
-//    *Br   44 :eECIN_status : eECIN_status[nml]/I                                 *
-//    *Br   45 :eECOUT_time : eECOUT_time[nml]/F                                   *
-//    *Br   46 :eECOUT_energy : eECOUT_energy[nml]/F                               *
-//    *Br   47 :eECOUT_path : eECOUT_path[nml]/F                                   *
-//    *Br   48 :eECOUT_sector : eECOUT_sector[nml]/I                               *
-//    *Br   49 :eECOUT_x  : eECOUT_x[nml]/F                                        *
-//    *Br   50 :eECOUT_y  : eECOUT_y[nml]/F                                        *
-//    *Br   51 :eECOUT_z  : eECOUT_z[nml]/F                                        *
-//    *Br   52 :eECOUT_lu : eECOUT_lu[nml]/F                                       *
-//    *Br   53 :eECOUT_lv : eECOUT_lv[nml]/F                                       *
-//    *Br   54 :eECOUT_lw : eECOUT_lw[nml]/F                                       *
-//    *Br   55 :eECOUT_status : eECOUT_status[nml]/I                               *
-//    *Br   56 :EdcX      : EdcX[nml][3]/F                                         *
-//    *Br   57 :EdcY      : EdcY[nml][3]/F                                         *
-//    *Br   58 :EdcZ      : EdcZ[nml][3]/F                                         *
-//    *Br   59 :npiP      : npiP/I                                                 *
-//    *Br   60 :piPpid    : piPpid[npiP]/I                                         *
-//    *Br   61 :piPcharge : piPcharge[npiP]/I                                      *
-//    *Br   62 :piPp      : piPp[npiP]/F                                           *
-//    *Br   63 :piPpx     : piPpx[npiP]/F                                          *
-//    *Br   64 :piPpy     : piPpy[npiP]/F                                          *
-//    *Br   65 :piPpz     : piPpz[npiP]/F                                          *
-//    *Br   66 :piPtheta  : piPtheta[npiP]/F                                       *
-//    *Br   67 :piPphi    : piPphi[npiP]/F                                         *
-//    *Br   68 :piPtime   : piPtime[npiP]/F                                        *
-//    *Br   69 :piPpath   : piPpath[npiP]/F                                        *
-//    *Br   70 :piPvz     : piPvz[npiP]/F                                          *
-//    *Br   71 :piPstat   : piPstat[npiP]/I                                        *
-//    *Br   72 :piPdE     : piPdE[npiP]/F                                          *
-//    *Br   73 :piPbeta   : piPbeta[npiP]/F                                        *
-//    *Br   74 :piPsector : piPsector[npiP]/I                                      *
-//    *Br   75 :piPregion : piPregion[npiP]/I                                      *
-//    *Br   76 :piPfiducial1 : piPfiducial1[npiP]/I                                *
-//    *Br   77 :piPfiducial2 : piPfiducial2[npiP]/I                                *
-//    *Br   78 :piPfiducial3 : piPfiducial3[npiP]/I                                *
-//    *Br   79 :piPPCAL_time : piPPCAL_time[npiP]/F                                *
-//    *Br   80 :piPPCAL_energy : piPPCAL_energy[npiP]/F                            *
-//    *Br   81 :piPPCAL_path : piPPCAL_path[npiP]/F                                *
-//    *Br   82 :piPPCAL_sector : piPPCAL_sector[npiP]/I                            *
-//    *Br   83 :piPPCAL_x : piPPCAL_x[npiP]/F                                      *
-//    *Br   84 :piPPCAL_y : piPPCAL_y[npiP]/F                                      *
-//    *Br   85 :piPPCAL_z : piPPCAL_z[npiP]/F                                      *
-//    *Br   86 :piPPCAL_lu : piPPCAL_lu[npiP]/F                                    *
-//    *Br   87 :piPPCAL_lv : piPPCAL_lv[npiP]/F                                    *
-//    *Br   88 :piPPCAL_lw : piPPCAL_lw[npiP]/F                                    *
-//    *Br   89 :piPPCAL_status : piPPCAL_status[npiP]/I                            *
-//    *Br   90 :piPECIN_time : piPECIN_time[npiP]/F                                *
-//    *Br   91 :piPECIN_energy : piPECIN_energy[npiP]/F                            *
-//    *Br   92 :piPECIN_path : piPECIN_path[npiP]/F                                *
-//    *Br   93 :piPECIN_sector : piPECIN_sector[npiP]/I                            *
-//    *Br   94 :piPECIN_x : piPECIN_x[npiP]/F                                      *
-//    *Br   95 :piPECIN_y : piPECIN_y[npiP]/F                                      *
-//    *Br   96 :piPECIN_z : piPECIN_z[npiP]/F                                      *
-//    *Br   97 :piPECIN_lu : piPECIN_lu[npiP]/F                                    *
-//    *Br   98 :piPECIN_lv : piPECIN_lv[npiP]/F                                    *
-//    *Br   99 :piPECIN_lw : piPECIN_lw[npiP]/F                                    *
-//    *Br  100 :piPECIN_status : piPECIN_status[npiP]/I                            *
-//    *Br  101 :piPECOUT_time : piPECOUT_time[npiP]/F                              *
-//    *Br  102 :piPECOUT_energy : piPECOUT_energy[npiP]/F                          *
-//    *Br  103 :piPECOUT_path : piPECOUT_path[npiP]/F                              *
-//    *Br  104 :piPECOUT_sector : piPECOUT_sector[npiP]/I                          *
-//    *Br  105 :piPECOUT_x : piPECOUT_x[npiP]/F                                    *
-//    *Br  106 :piPECOUT_y : piPECOUT_y[npiP]/F                                    *
-//    *Br  107 :piPECOUT_z : piPECOUT_z[npiP]/F                                    *
-//    *Br  108 :piPECOUT_lu : piPECOUT_lu[npiP]/F                                  *
-//    *Br  109 :piPECOUT_lv : piPECOUT_lv[npiP]/F                                  *
-//    *Br  110 :piPECOUT_lw : piPECOUT_lw[npiP]/F                                  *
-//    *Br  111 :piPECOUT_status : piPECOUT_status[npiP]/I                          *
-//    *Br  112 :piPdcX    : piPdcX[npiP][3]/F                                      *
-//    *Br  113 :piPdcY    : piPdcY[npiP][3]/F                                      *
-//    *Br  114 :piPdcZ    : piPdcZ[npiP][3]/F                                      *
-//    *Br  115 :npiM      : npiM/I                                                 *
-//    *Br  116 :piMpid    : piPpid[npiM]/I                                         *
-//    *Br  117 :piMcharge : piPcharge[npiM]/I                                      *
-//    *Br  118 :piMp      : piMp[npiM]/F                                           *
-//    *Br  119 :piMpx     : piMpx[npiM]/F                                          *
-//    *Br  120 :piMpy     : piMpy[npiM]/F                                          *
-//    *Br  121 :piMpz     : piMpz[npiM]/F                                          *
-//    *Br  122 :piMtheta  : piMtheta[npiM]/F                                       *
-//    *Br  123 :piMphi    : piMphi[npiM]/F                                         *
-//    *Br  124 :piMtime   : piMtime[npiM]/F                                        *
-//    *Br  125 :piMpath   : piMpath[npiM]/F                                        *
-//    *Br  126 :piMvz     : piMvz[npiM]/F                                          *
-//    *Br  127 :piMstat   : piMstat[npiM]/I                                        *
-//    *Br  128 :piMdE     : piMdE[npiM]/F                                          *
-//    *Br  129 :piMbeta   : piMbeta[npiM]/F                                        *
-//    *Br  130 :piMsector : piMsector[npiM]/I                                      *
-//    *Br  131 :piMregion : piMregion[npiM]/I                                      *
-//    *Br  132 :piMfiducial1 : piMfiducial1[npiM]/I                                *
-//    *Br  133 :piMfiducial2 : piMfiducial2[npiM]/I                                *
-//    *Br  134 :piMfiducial3 : piMfiducial3[npiM]/I                                *
-//    *Br  135 :piMPCAL_time : piMPCAL_time[npiM]/F                                *
-//    *Br  136 :piMPCAL_energy : piMPCAL_energy[npiM]/F                            *
-//    *Br  137 :piMPCAL_path : piMPCAL_path[npiM]/F                                *
-//    *Br  138 :piMPCAL_sector : piMPCAL_sector[npiM]/I                            *
-//    *Br  139 :piMPCAL_x : piMPCAL_x[npiM]/F                                      *
-//    *Br  140 :piMPCAL_y : piMPCAL_y[npiM]/F                                      *
-//    *Br  141 :piMPCAL_z : piMPCAL_z[npiM]/F                                      *
-//    *Br  142 :piMPCAL_lu : piMPCAL_lu[npiM]/F                                    *
-//    *Br  143 :piMPCAL_lv : piMPCAL_lv[npiM]/F                                    *
-//    *Br  144 :piMPCAL_lw : piMPCAL_lw[npiM]/F                                    *
-//    *Br  145 :piMPCAL_status : piMPCAL_status[npiM]/I                            *
-//    *Br  146 :piMECIN_time : piMECIN_time[npiM]/F                                *
-//    *Br  147 :piMECIN_energy : piMECIN_energy[npiM]/F                            *
-//    *Br  148 :piMECIN_path : piMECIN_path[npiM]/F                                *
-//    *Br  149 :piMECIN_sector : piMECIN_sector[npiM]/I                            *
-//    *Br  150 :piMECIN_x : piMECIN_x[npiM]/F                                      *
-//    *Br  151 :piMECIN_y : piMECIN_y[npiM]/F                                      *
-//    *Br  152 :piMECIN_z : piMECIN_z[npiM]/F                                      *
-//    *Br  153 :piMECIN_lu : piMECIN_lu[npiM]/F                                    *
-//    *Br  154 :piMECIN_lv : piMECIN_lv[npiM]/F                                    *
-//    *Br  155 :piMECIN_lw : piMECIN_lw[npiM]/F                                    *
-//    *Br  156 :piMECIN_status : piMECIN_status[npiM]/I                            *
-//    *Br  157 :piMECOUT_time : piMECOUT_time[npiM]/F                              *
-//    *Br  158 :piMECOUT_energy : piMECOUT_energy[npiM]/F                          *
-//    *Br  159 :piMECOUT_path : piMECOUT_path[npiM]/F                              *
-//    *Br  160 :piMECOUT_sector : piMECOUT_sector[npiM]/I                          *
-//    *Br  161 :piMECOUT_x : piMECOUT_x[npiM]/F                                    *
-//    *Br  162 :piMECOUT_y : piMECOUT_y[npiM]/F                                    *
-//    *Br  163 :piMECOUT_z : piMECOUT_z[npiM]/F                                    *
-//    *Br  164 :piMECOUT_lu : piMECOUT_lu[npiM]/F                                  *
-//    *Br  165 :piMECOUT_lv : piMECOUT_lv[npiM]/F                                  *
-//    *Br  166 :piMECOUT_lw : piMECOUT_lw[npiM]/F                                  *
-//    *Br  167 :piMECOUT_status : piMECOUT_status[npiM]/I                          *
-//    *Br  168 :piMdcX    : piMdcX[npiM][3]/F                                      *
-//    *Br  169 :piMdcY    : piMdcY[npiM][3]/F                                      *
-//    *Br  170 :piMdcZ    : piMdcZ[npiM][3]/F                                      *
-//    *Br  171 :Q2        : Q2[nml]/F                                              *
-//    *Br  172 :Nu        : Nu[nml]/F                                              *
-//    *Br  173 :q         : q[nml]/F                                               *
-//    *Br  174 :qx        : qx[nml]/F                                              *
-//    *Br  175 :qy        : qy[nml]/F                                              *
-//    *Br  176 :qz        : qz[nml]/F                                              *
-//    *Br  177 :xB        : xB[nml]/F                                              *
-//    *Br  178 :W2        : W2[nml]/F                                              *
-
+    
+    //    ******************************************************************************
+    //    *Tree    :T         : e'pion                                                 *
+    //    *Br    1 :runNum    : runNum/L                                               *
+    //    *Br    2 :evNum     : evNum/L                                                *
+    //    *Br    4 :Epid      : Epid[nml]/I                                            *
+    //    *Br    5 :Echarge   : Echarge[nml]/I                                         *
+    //    *Br    6 :Ep        : Ep[nml]/F                                              *
+    //    *Br    7 :Epx       : Epx[nml]/F                                             *
+    //    *Br    8 :Epy       : Epy[nml]/F                                             *
+    //    *Br    9 :Epz       : Epz[nml]/F                                             *
+    //    *Br   10 :Etheta    : Etheta[nml]/F                                          *
+    //    *Br   11 :Ephi      : Ephi[nml]/F                                            *
+    //    *Br   12 :Etime     : Etime[nml]/F                                           *
+    //    *Br   13 :Epath     : Epath[nml]/F                                           *
+    //    *Br   14 :Evz       : Evz[nml]/F                                             *
+    //    *Br   15 :Estat     : Estat[nml]/I                                           *
+    //    *Br   16 :EdE       : EdE[nml]/F                                             *
+    //    *Br   17 :Ebeta     : Ebeta[nml]/F                                           *
+    //    *Br   18 :Esector   : Esector[nml]/I                                         *
+    //    *Br   19 :Eregion   : Eregion[nml]/I                                         *
+    //    *Br   20 :Efiducial1 : Efiducial1[nml]/I                                     *
+    //    *Br   21 :Efiducial2 : Efiducial2[nml]/I                                     *
+    //    *Br   22 :Efiducial3 : Efiducial3[nml]/I                                     *
+    //    *Br   23 :ePCAL_time : ePCAL_time[nml]/F                                     *
+    //    *Br   24 :ePCAL_energy : ePCAL_energy[nml]/F                                 *
+    //    *Br   25 :ePCAL_path : ePCAL_path[nml]/F                                     *
+    //    *Br   26 :ePCAL_sector : ePCAL_sector[nml]/I                                 *
+    //    *Br   27 :ePCAL_x   : ePCAL_x[nml]/F                                         *
+    //    *Br   28 :ePCAL_y   : ePCAL_y[nml]/F                                         *
+    //    *Br   29 :ePCAL_z   : ePCAL_z[nml]/F                                         *
+    //    *Br   30 :ePCAL_lu  : ePCAL_lu[nml]/F                                        *
+    //    *Br   31 :ePCAL_lv  : ePCAL_lv[nml]/F                                        *
+    //    *Br   32 :ePCAL_lw  : ePCAL_lw[nml]/F                                        *
+    //    *Br   33 :ePCAL_status : ePCAL_status[nml]/I                                 *
+    //    *Br   34 :eECIN_time : eECIN_time[nml]/F                                     *
+    //    *Br   35 :eECIN_energy : eECIN_energy[nml]/F                                 *
+    //    *Br   36 :eECIN_path : eECIN_path[nml]/F                                     *
+    //    *Br   37 :eECIN_sector : eECIN_sector[nml]/I                                 *
+    //    *Br   38 :eECIN_x   : eECIN_x[nml]/F                                         *
+    //    *Br   39 :eECIN_y   : eECIN_y[nml]/F                                         *
+    //    *Br   40 :eECIN_z   : eECIN_z[nml]/F                                         *
+    //    *Br   41 :eECIN_lu  : eECIN_lu[nml]/F                                        *
+    //    *Br   42 :eECIN_lv  : eECIN_lv[nml]/F                                        *
+    //    *Br   43 :eECIN_lw  : eECIN_lw[nml]/F                                        *
+    //    *Br   44 :eECIN_status : eECIN_status[nml]/I                                 *
+    //    *Br   45 :eECOUT_time : eECOUT_time[nml]/F                                   *
+    //    *Br   46 :eECOUT_energy : eECOUT_energy[nml]/F                               *
+    //    *Br   47 :eECOUT_path : eECOUT_path[nml]/F                                   *
+    //    *Br   48 :eECOUT_sector : eECOUT_sector[nml]/I                               *
+    //    *Br   49 :eECOUT_x  : eECOUT_x[nml]/F                                        *
+    //    *Br   50 :eECOUT_y  : eECOUT_y[nml]/F                                        *
+    //    *Br   51 :eECOUT_z  : eECOUT_z[nml]/F                                        *
+    //    *Br   52 :eECOUT_lu : eECOUT_lu[nml]/F                                       *
+    //    *Br   53 :eECOUT_lv : eECOUT_lv[nml]/F                                       *
+    //    *Br   54 :eECOUT_lw : eECOUT_lw[nml]/F                                       *
+    //    *Br   55 :eECOUT_status : eECOUT_status[nml]/I                               *
+    //    *Br   56 :EdcX      : EdcX[nml][3]/F                                         *
+    //    *Br   57 :EdcY      : EdcY[nml][3]/F                                         *
+    //    *Br   58 :EdcZ      : EdcZ[nml][3]/F                                         *
+    //    *Br   59 :npiP      : npiP/I                                                 *
+    //    *Br   60 :piPpid    : piPpid[npiP]/I                                         *
+    //    *Br   61 :piPcharge : piPcharge[npiP]/I                                      *
+    //    *Br   62 :piPp      : piPp[npiP]/F                                           *
+    //    *Br   63 :piPpx     : piPpx[npiP]/F                                          *
+    //    *Br   64 :piPpy     : piPpy[npiP]/F                                          *
+    //    *Br   65 :piPpz     : piPpz[npiP]/F                                          *
+    //    *Br   66 :piPtheta  : piPtheta[npiP]/F                                       *
+    //    *Br   67 :piPphi    : piPphi[npiP]/F                                         *
+    //    *Br   68 :piPtime   : piPtime[npiP]/F                                        *
+    //    *Br   69 :piPpath   : piPpath[npiP]/F                                        *
+    //    *Br   70 :piPvz     : piPvz[npiP]/F                                          *
+    //    *Br   71 :piPstat   : piPstat[npiP]/I                                        *
+    //    *Br   72 :piPdE     : piPdE[npiP]/F                                          *
+    //    *Br   73 :piPbeta   : piPbeta[npiP]/F                                        *
+    //    *Br   74 :piPsector : piPsector[npiP]/I                                      *
+    //    *Br   75 :piPregion : piPregion[npiP]/I                                      *
+    //    *Br   76 :piPfiducial1 : piPfiducial1[npiP]/I                                *
+    //    *Br   77 :piPfiducial2 : piPfiducial2[npiP]/I                                *
+    //    *Br   78 :piPfiducial3 : piPfiducial3[npiP]/I                                *
+    //    *Br   79 :piPPCAL_time : piPPCAL_time[npiP]/F                                *
+    //    *Br   80 :piPPCAL_energy : piPPCAL_energy[npiP]/F                            *
+    //    *Br   81 :piPPCAL_path : piPPCAL_path[npiP]/F                                *
+    //    *Br   82 :piPPCAL_sector : piPPCAL_sector[npiP]/I                            *
+    //    *Br   83 :piPPCAL_x : piPPCAL_x[npiP]/F                                      *
+    //    *Br   84 :piPPCAL_y : piPPCAL_y[npiP]/F                                      *
+    //    *Br   85 :piPPCAL_z : piPPCAL_z[npiP]/F                                      *
+    //    *Br   86 :piPPCAL_lu : piPPCAL_lu[npiP]/F                                    *
+    //    *Br   87 :piPPCAL_lv : piPPCAL_lv[npiP]/F                                    *
+    //    *Br   88 :piPPCAL_lw : piPPCAL_lw[npiP]/F                                    *
+    //    *Br   89 :piPPCAL_status : piPPCAL_status[npiP]/I                            *
+    //    *Br   90 :piPECIN_time : piPECIN_time[npiP]/F                                *
+    //    *Br   91 :piPECIN_energy : piPECIN_energy[npiP]/F                            *
+    //    *Br   92 :piPECIN_path : piPECIN_path[npiP]/F                                *
+    //    *Br   93 :piPECIN_sector : piPECIN_sector[npiP]/I                            *
+    //    *Br   94 :piPECIN_x : piPECIN_x[npiP]/F                                      *
+    //    *Br   95 :piPECIN_y : piPECIN_y[npiP]/F                                      *
+    //    *Br   96 :piPECIN_z : piPECIN_z[npiP]/F                                      *
+    //    *Br   97 :piPECIN_lu : piPECIN_lu[npiP]/F                                    *
+    //    *Br   98 :piPECIN_lv : piPECIN_lv[npiP]/F                                    *
+    //    *Br   99 :piPECIN_lw : piPECIN_lw[npiP]/F                                    *
+    //    *Br  100 :piPECIN_status : piPECIN_status[npiP]/I                            *
+    //    *Br  101 :piPECOUT_time : piPECOUT_time[npiP]/F                              *
+    //    *Br  102 :piPECOUT_energy : piPECOUT_energy[npiP]/F                          *
+    //    *Br  103 :piPECOUT_path : piPECOUT_path[npiP]/F                              *
+    //    *Br  104 :piPECOUT_sector : piPECOUT_sector[npiP]/I                          *
+    //    *Br  105 :piPECOUT_x : piPECOUT_x[npiP]/F                                    *
+    //    *Br  106 :piPECOUT_y : piPECOUT_y[npiP]/F                                    *
+    //    *Br  107 :piPECOUT_z : piPECOUT_z[npiP]/F                                    *
+    //    *Br  108 :piPECOUT_lu : piPECOUT_lu[npiP]/F                                  *
+    //    *Br  109 :piPECOUT_lv : piPECOUT_lv[npiP]/F                                  *
+    //    *Br  110 :piPECOUT_lw : piPECOUT_lw[npiP]/F                                  *
+    //    *Br  111 :piPECOUT_status : piPECOUT_status[npiP]/I                          *
+    //    *Br  112 :piPdcX    : piPdcX[npiP][3]/F                                      *
+    //    *Br  113 :piPdcY    : piPdcY[npiP][3]/F                                      *
+    //    *Br  114 :piPdcZ    : piPdcZ[npiP][3]/F                                      *
+    //    *Br  115 :npiM      : npiM/I                                                 *
+    //    *Br  116 :piMpid    : piPpid[npiM]/I                                         *
+    //    *Br  117 :piMcharge : piPcharge[npiM]/I                                      *
+    //    *Br  118 :piMp      : piMp[npiM]/F                                           *
+    //    *Br  119 :piMpx     : piMpx[npiM]/F                                          *
+    //    *Br  120 :piMpy     : piMpy[npiM]/F                                          *
+    //    *Br  121 :piMpz     : piMpz[npiM]/F                                          *
+    //    *Br  122 :piMtheta  : piMtheta[npiM]/F                                       *
+    //    *Br  123 :piMphi    : piMphi[npiM]/F                                         *
+    //    *Br  124 :piMtime   : piMtime[npiM]/F                                        *
+    //    *Br  125 :piMpath   : piMpath[npiM]/F                                        *
+    //    *Br  126 :piMvz     : piMvz[npiM]/F                                          *
+    //    *Br  127 :piMstat   : piMstat[npiM]/I                                        *
+    //    *Br  128 :piMdE     : piMdE[npiM]/F                                          *
+    //    *Br  129 :piMbeta   : piMbeta[npiM]/F                                        *
+    //    *Br  130 :piMsector : piMsector[npiM]/I                                      *
+    //    *Br  131 :piMregion : piMregion[npiM]/I                                      *
+    //    *Br  132 :piMfiducial1 : piMfiducial1[npiM]/I                                *
+    //    *Br  133 :piMfiducial2 : piMfiducial2[npiM]/I                                *
+    //    *Br  134 :piMfiducial3 : piMfiducial3[npiM]/I                                *
+    //    *Br  135 :piMPCAL_time : piMPCAL_time[npiM]/F                                *
+    //    *Br  136 :piMPCAL_energy : piMPCAL_energy[npiM]/F                            *
+    //    *Br  137 :piMPCAL_path : piMPCAL_path[npiM]/F                                *
+    //    *Br  138 :piMPCAL_sector : piMPCAL_sector[npiM]/I                            *
+    //    *Br  139 :piMPCAL_x : piMPCAL_x[npiM]/F                                      *
+    //    *Br  140 :piMPCAL_y : piMPCAL_y[npiM]/F                                      *
+    //    *Br  141 :piMPCAL_z : piMPCAL_z[npiM]/F                                      *
+    //    *Br  142 :piMPCAL_lu : piMPCAL_lu[npiM]/F                                    *
+    //    *Br  143 :piMPCAL_lv : piMPCAL_lv[npiM]/F                                    *
+    //    *Br  144 :piMPCAL_lw : piMPCAL_lw[npiM]/F                                    *
+    //    *Br  145 :piMPCAL_status : piMPCAL_status[npiM]/I                            *
+    //    *Br  146 :piMECIN_time : piMECIN_time[npiM]/F                                *
+    //    *Br  147 :piMECIN_energy : piMECIN_energy[npiM]/F                            *
+    //    *Br  148 :piMECIN_path : piMECIN_path[npiM]/F                                *
+    //    *Br  149 :piMECIN_sector : piMECIN_sector[npiM]/I                            *
+    //    *Br  150 :piMECIN_x : piMECIN_x[npiM]/F                                      *
+    //    *Br  151 :piMECIN_y : piMECIN_y[npiM]/F                                      *
+    //    *Br  152 :piMECIN_z : piMECIN_z[npiM]/F                                      *
+    //    *Br  153 :piMECIN_lu : piMECIN_lu[npiM]/F                                    *
+    //    *Br  154 :piMECIN_lv : piMECIN_lv[npiM]/F                                    *
+    //    *Br  155 :piMECIN_lw : piMECIN_lw[npiM]/F                                    *
+    //    *Br  156 :piMECIN_status : piMECIN_status[npiM]/I                            *
+    //    *Br  157 :piMECOUT_time : piMECOUT_time[npiM]/F                              *
+    //    *Br  158 :piMECOUT_energy : piMECOUT_energy[npiM]/F                          *
+    //    *Br  159 :piMECOUT_path : piMECOUT_path[npiM]/F                              *
+    //    *Br  160 :piMECOUT_sector : piMECOUT_sector[npiM]/I                          *
+    //    *Br  161 :piMECOUT_x : piMECOUT_x[npiM]/F                                    *
+    //    *Br  162 :piMECOUT_y : piMECOUT_y[npiM]/F                                    *
+    //    *Br  163 :piMECOUT_z : piMECOUT_z[npiM]/F                                    *
+    //    *Br  164 :piMECOUT_lu : piMECOUT_lu[npiM]/F                                  *
+    //    *Br  165 :piMECOUT_lv : piMECOUT_lv[npiM]/F                                  *
+    //    *Br  166 :piMECOUT_lw : piMECOUT_lw[npiM]/F                                  *
+    //    *Br  167 :piMECOUT_status : piMECOUT_status[npiM]/I                          *
+    //    *Br  168 :piMdcX    : piMdcX[npiM][3]/F                                      *
+    //    *Br  169 :piMdcY    : piMdcY[npiM][3]/F                                      *
+    //    *Br  170 :piMdcZ    : piMdcZ[npiM][3]/F                                      *
+    //    *Br  171 :Q2        : Q2[nml]/F                                              *
+    //    *Br  172 :Nu        : Nu[nml]/F                                              *
+    //    *Br  173 :q         : q[nml]/F                                               *
+    //    *Br  174 :qx        : qx[nml]/F                                              *
+    //    *Br  175 :qy        : qy[nml]/F                                              *
+    //    *Br  176 :qz        : qz[nml]/F                                              *
+    //    *Br  177 :xB        : xB[nml]/F                                              *
+    //    *Br  178 :W2        : W2[nml]/F                                              *
+    
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
@@ -927,7 +917,7 @@ void OpenInputFile (){
     
     RGATree = (TTree*)RGAFile->Get("T");
     
-    if (fdebug>2) RGATree->Print();
+    if (fdebug>4) RGATree->Print();
     
     NeventsInRGATree = RGATree->GetEntries();
     SetInputTTree();
@@ -936,8 +926,8 @@ void OpenInputFile (){
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void OpenOutputFiles (){
     
-    CSVFilename_e_e_pips = DataPath + "/" + Filename + "_e_e_pips.csv";
-    CSVFilename_e_e_pims = DataPath + "/" + Filename + "_e_e_pims.csv";
+    CSVFilename_e_e_pips = DataPath + "/" + Filename + "_e_e_piplus";
+    CSVFilename_e_e_pims = DataPath + "/" + Filename + "_e_e_piminus";
     
     if (fdebug>2) {
         std::cout << "Opening output files: "
@@ -950,19 +940,23 @@ void OpenOutputFiles (){
     }
     
     // Write csv header output csv files
-    CSVfile_e_e_pips.open( CSVFilename_e_e_pips + ".csv" );
+    CSVfile_e_e_pips.open( CSVFilename_e_e_pips + "_selected_eepi_kinematics.csv" );
     CSVfile_e_e_pips << csvheader << std::endl;
     
     // Write csv header output csv files
-    CSVfile_e_e_pims.open( CSVFilename_e_e_pims + ".csv" );
+    CSVfile_e_e_pims.open( CSVFilename_e_e_pims + "_selected_eepi_kinematics.csv" );
     CSVfile_e_e_pims << csvheader << std::endl;
-        
+    
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void InitializeFileReading (){
     Nevents_e_e_pips = Nevents_e_e_pims = 0;
     NeventsInRGATree = 0;
+    target  .SetXYZM    (0, 0, 0,     aux.Md    );
+    d_rest  .SetXYZM    (0, 0, 0,     aux.Md    );
+    p_rest  .SetXYZM    (0, 0, 0,     aux.Mp    );
+    
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
@@ -984,8 +978,6 @@ void CloseOutputFiles (){
     << Nevents_e_e_pims << " (e,e'π-) events." << std::endl;
 }
 
-
-
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void ExtractElectronInformation(){
     // ------------------------------------------------------------------------------------------------
@@ -1004,48 +996,57 @@ void ExtractElectronInformation(){
             }
         }
     }
-    e.SetXYZM( Epx[e_idx], Epx[e_idx], Epx[e_idx], Me );
+    e.SetXYZM( Epx[e_idx], Epy[e_idx], Epz[e_idx], aux.Me );
     Ve = TVector3( 0, 0, Evz[e_idx] );
+    e_DC_sector = Esector[e_idx];
     
-//    // detector information on electron
-//    auto e_PCAL_info= electrons[leading_e_index]->cal(PCAL);
-//    e_E_PCAL        = e_PCAL_info->getEnergy();
-//    e_PCAL_sector   = e_PCAL_info->getSector();
-//    e_PCAL_V        = e_PCAL_info->getLv();
-//    e_PCAL_W        = e_PCAL_info->getLw();
-//    e_E_ECIN        = electrons[leading_e_index]->cal(ECIN)->getEnergy();
-//    e_E_ECOUT       = electrons[leading_e_index]->cal(ECOUT)->getEnergy();
-//
-//    // hit position in PCAL
-//    e_PCAL_x        = e_PCAL_info->getX();
-//    e_PCAL_y        = e_PCAL_info->getY();
-//    e_PCAL_z        = e_PCAL_info->getZ();
-//
-//    // Drift Chamber tracking system
-//    auto e_DC_info  = electrons[leading_e_index]->trk(DC);
-//    e_DC_sector     = e_DC_info->getSector(); // tracking sector
-//    e_DC_Chi2N      = e_DC_info->getChi2N();  // tracking chi^2/NDF
-//
-//    for (int regionIdx=0; regionIdx<3; regionIdx++) {
-//        int DC_layer = DC_layers[regionIdx];
-//        e_DC_x[regionIdx] = electrons[leading_e_index]->traj(DC,DC_layer)->getX();
-//        e_DC_y[regionIdx] = electrons[leading_e_index]->traj(DC,DC_layer)->getY();
-//        e_DC_z[regionIdx] = electrons[leading_e_index]->traj(DC,DC_layer)->getZ();
-//    }
+    if (fdebug>2) {
+        std::cout
+        << "p(e): "         << e.P()        << ","
+        << "Vz(e): "        << Ve.Z()       << ","
+        << "DC-sector(e): " << e_DC_sector  << ","
+        << std::endl;
+    }
     
-//    if (fdebug > 2) std::cout << "extracted electron information and computed kinematics" << std::endl;
+    //    // detector information on electron
+    //    auto e_PCAL_info= electrons[leading_e_index]->cal(PCAL);
+    //    e_E_PCAL        = e_PCAL_info->getEnergy();
+    //    e_PCAL_sector   = e_PCAL_info->getSector();
+    //    e_PCAL_V        = e_PCAL_info->getLv();
+    //    e_PCAL_W        = e_PCAL_info->getLw();
+    //    e_E_ECIN        = electrons[leading_e_index]->cal(ECIN)->getEnergy();
+    //    e_E_ECOUT       = electrons[leading_e_index]->cal(ECOUT)->getEnergy();
+    //
+    //    // hit position in PCAL
+    //    e_PCAL_x        = e_PCAL_info->getX();
+    //    e_PCAL_y        = e_PCAL_info->getY();
+    //    e_PCAL_z        = e_PCAL_info->getZ();
+    //
+    //    // Drift Chamber tracking system
+    //    auto e_DC_info  = electrons[leading_e_index]->trk(DC);
+    //    e_DC_sector     = e_DC_info->getSector(); // tracking sector
+    //    e_DC_Chi2N      = e_DC_info->getChi2N();  // tracking chi^2/NDF
+    //
+    //    for (int regionIdx=0; regionIdx<3; regionIdx++) {
+    //        int DC_layer = DC_layers[regionIdx];
+    //        e_DC_x[regionIdx] = electrons[leading_e_index]->traj(DC,DC_layer)->getX();
+    //        e_DC_y[regionIdx] = electrons[leading_e_index]->traj(DC,DC_layer)->getY();
+    //        e_DC_z[regionIdx] = electrons[leading_e_index]->traj(DC,DC_layer)->getZ();
+    //    }
+    
+    //    if (fdebug > 2) std::cout << "extracted electron information and computed kinematics" << std::endl;
     
     // ------------------------------------------------------------------------------------------------
     // now, check if electron passed event selection requirements
     // ------------------------------------------------------------------------------------------------
-//    ePastCutsInEvent = CheckIfElectronPassedSelectionCuts(e_PCAL_x, e_PCAL_y,
-//                                                              e_PCAL_W, e_PCAL_V,
-//                                                              e_E_PCAL, e_E_ECIN,
-//                                                              e_E_ECOUT,
-//                                                              e, Ve,
-//                                                              e_PCAL_sector, // e_PCAL_sector should be consistent with e_DC_sector
-//                                                              e_DC_x, e_DC_y, e_DC_z,
-//                                                              torusBending );
+    //    ePastCutsInEvent = CheckIfElectronPassedSelectionCuts(e_PCAL_x, e_PCAL_y,
+    //                                                              e_PCAL_W, e_PCAL_V,
+    //                                                              e_E_PCAL, e_E_ECIN,
+    //                                                              e_E_ECOUT,
+    //                                                              e, Ve,
+    //                                                              e_PCAL_sector, // e_PCAL_sector should be consistent with e_DC_sector
+    //                                                              e_DC_x, e_DC_y, e_DC_z,
+    //                                                              torusBending );
     ePastCutsInEvent = CheckIfElectronPassedSelectionCuts(Efiducial1[e_idx],
                                                           Efiducial2[e_idx],
                                                           Efiducial3[e_idx],
@@ -1058,27 +1059,108 @@ void ExtractElectronInformation(){
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void ExtractPionsInformation(){
     
-    // positive pions)
+    // positive pions
     for (int pipsIdx=0; pipsIdx < Npips; pipsIdx++) {
-        ExtractPipsInformation( pipsIdx, fdebug );
+        ExtractPipsInformation( pipsIdx );
     }
     // negative pions
     for (int pimsIdx=0; pimsIdx < Npims; pimsIdx++) {
-        ExtractPimsInformation( pimsIdx, fdebug );
+        ExtractPimsInformation( pimsIdx );
     }
     
-    // move to q-frame and define the pion momentum with respect to q
-    MoveTo_qFrame( fdebug );
     
     // done
     if (fdebug > 2) std::cout << "done extracting pion information" << std::endl;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-void WriteEventToOutput(){
-    // (Maybe) write this event to "selected events csv-file"
-    bool            IsSelected_eepi = false;
+void MoveTo_qFrame(){
+    if (fdebug>1){
+        std::cout << "Moving to q-Frame" <<std::endl;
+    }
+    //    Move to the "q-frame" and define the pion momentum in this frame
+    //    q-frame is defined as follows:
+    //    z axis is defined by the q - parallel to q
+    //    x axis is defined by the e' - such that p(e') resides in the x-z plane
+    
+    // (1) define q-angles
+    q_phi   = q.Phi();
+    q_theta = q.Theta();
+    
+    // (2) rotate Pe and q according to q angles
+    TVector3 Pe = e.Vect();
+    TVector3 Pq = q.Vect();
+    
+    Pe       .RotateZ(-q_phi);
+    Pe       .RotateY(-q_theta);
+    Pe_phi = Pe.Phi();
+    Pe       .RotateZ(-Pe_phi);
+    Pq       .RotateZ(-q_phi);
+    Pq       .RotateY(-q_theta);
+    
+    
+    // (3) verify on q and Pe that the frame-change is done correctly
+    //    RotateVectorTo_qFrame( &Pe );
+    e_qFrame.SetVectM( Pe, aux.Me );
+    //    RotateVectorTo_qFrame( &Pq );
+    q_qFrame.SetVectM( Pq, q.M() );
+    
+    if (fdebug>3){
+        aux.Print4Vector( e, "e" );
+        aux.Print4Vector( e_qFrame, "e in q-Frame" );
+        aux.Print4Vector( q , "q");
+        aux.Print4Vector( q_qFrame, "q in q-Frame" );
+    }
+    
+    
+    // (4) rotate pions to this q-frame
+    // pi+ int the q-Frame
+    for (int piIdx=0; piIdx<Npips; piIdx++) {
+        TVector3 Ppiplus = RotateVectorTo_qFrame( piplus.at(piIdx).Vect() );
+        piplus_qFrame.at(piIdx).SetVectM( Ppiplus, aux.Mpi  );
+        TLorentzVector Ppi_q = piplus_qFrame.at(piIdx);
+        // fill variables that later go to TTree
+        piplus_qFrame_pT[piIdx]   = Ppi_q.Pt();
+        piplus_qFrame_pL[piIdx]   = Ppi_q.Pz();
+        piplus_qFrame_Theta[piIdx]= Ppi_q.Theta();
+        piplus_qFrame_Phi[piIdx]  = Ppi_q.Phi();
+        
+        // z on the light-cone
+        ZpipsLC[piIdx]            = (Ppi_q.E() - Ppi_q.Pz()) / (q.E() - q.P());
+        
+        if (fdebug>1) aux.Print4Vector( Ppi_q, "π+(" + std::to_string(piIdx) + ")" );
+        
+    }
+    // pi- int the q-Frame
+    for (int piIdx=0; piIdx<Npims; piIdx++) {
+        TVector3 Ppiminus = RotateVectorTo_qFrame( piminus.at(piIdx).Vect() );
+        piminus_qFrame.at(piIdx).SetVectM( Ppiminus, aux.Mpi );
+        TLorentzVector Ppi_q = piminus_qFrame.at(piIdx);
+        // fill variables that later go to TTree
+        piminus_qFrame_pT[piIdx]   = Ppi_q.Pt();
+        piminus_qFrame_pL[piIdx]   = Ppi_q.Pz();
+        piminus_qFrame_Theta[piIdx]= Ppi_q.Theta();
+        piminus_qFrame_Phi[piIdx]  = Ppi_q.Phi();
+        // z on the light-cone
+        ZpimsLC[piIdx]             = (Ppi_q.E() - Ppi_q.Pz()) / (q.E() - q.P());
+        
+        if (fdebug>1) aux.Print4Vector( Ppi_q, "π-(" + std::to_string(piIdx) + ")" );
+    }
+    if (fdebug>4){
+        std::cout
+        << "size(piplus_qFrame): "  << piplus_qFrame.size() << ","
+        << "size(piminus_qFrame): " << piminus_qFrame.size()<< ","
+        << std::endl;
+    }
+    
+}
 
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+void WriteEventToOutput(){
+    if (fdebug>1) std::cout << "WriteEventToOutput()" << std::endl;
+    // (Maybe) write this event to "selected events csv-file"
+    bool IsSelected_eepi = false;
+    
     //ePastCutsInEvent = true;
     if (inclusive == 1) {
         pipsPastCutsInEvent = true;
@@ -1087,96 +1169,119 @@ void WriteEventToOutput(){
         eepimsPastCutsInEvent = true;
     }
     
-    // Fill "no-cuts" TTrees even if nothing passed criteria
-    outTree_e_piplus_no_cuts -> Fill();
-    outTree_e_piminus_no_cuts -> Fill();
+    //    if (fdebug>1) std::cout << "Fill 'no-cuts' TTrees even if nothing passed criteria" << std::endl;
+    //    // Fill "no-cuts" TTrees even if nothing passed criteria
+    //    outTree_e_piplus_no_cuts -> Fill();
+    //    outTree_e_piminus_no_cuts -> Fill();
+    
+    if (fdebug>1) {
+        std::cout
+        << "ePastCutsInEvent: "    << ePastCutsInEvent << ","
+        << "pipsPastCutsInEvent: " << pipsPastCutsInEvent
+        << std::endl;
+    }
+    
     
     if (ePastCutsInEvent && pipsPastCutsInEvent) {
         IsSelected_eepi = true;
-        outTree_e_piplus -> Fill();
-        if (fdebug>3) std::cout << "Filling (e,e'pi+) TTree with this event!" << std::endl;
+        //        outTree_e_piplus -> Fill();
+        if (fdebug>3) std::cout << "Filling (e,e'π+) TTree with this event!" << std::endl;
         
         Nevents_passed_e_pips_cuts ++ ;
         if (eepipsPastCutsInEvent) Nevents_passed_e_pips_kinematics_cuts ++;
         
         for (int pipsIdx=0; pipsIdx<Npips; pipsIdx++) {
             Stream_e_pi_line_to_CSV( "pi+", pipsIdx,
-                                    pipsPastSelectionCuts[pipsIdx], eepipsPastKinematicalCuts[pipsIdx],
-                                    fdebug );
+                                    pipsPastSelectionCuts[pipsIdx],
+                                    eepipsPastKinematicalCuts[pipsIdx]
+                                    );
         }
     }
     
     if (ePastCutsInEvent && pimsPastCutsInEvent) {
         IsSelected_eepi = true;
-        outTree_e_piminus -> Fill();
-        if (fdebug>3) std::cout << "Filling (e,e'pi-) TTree with this event!" << std::endl;
+        //        outTree_e_piminus -> Fill();
+        if (fdebug>3) std::cout << "Filling (e,e'π-) TTree with this event!" << std::endl;
         Nevents_passed_e_pims_cuts ++ ;
         if (eepimsPastCutsInEvent) Nevents_passed_e_pims_kinematics_cuts ++;
         
         for (int pimsIdx=0; pimsIdx<Npims; pimsIdx++) {
             Stream_e_pi_line_to_CSV( "pi-", pimsIdx,
-                                    pimsPastSelectionCuts[pimsIdx], eepimsPastKinematicalCuts[pimsIdx],
-                                    fdebug );
+                                    pimsPastSelectionCuts[pimsIdx],
+                                    eepimsPastKinematicalCuts[pimsIdx]
+                                    );
         }
     }
+    if (fdebug>1) std::cout << "Done WriteEventToOutput()" << std::endl;
 }
 
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void ExtractPipsInformation( int pipsIdx ){
     if (fdebug>2)
-        std::cout << "ExtractPipsInformation( pipsIdx=" << pipsIdx << ", fdebug=" << fdebug << " )" << std::endl;
+        std::cout << "ExtractPipsInformation(pipsIdx=" << pipsIdx << ")" << std::endl;
     
     
     // extract positive pion information
     piplus.at(pipsIdx).SetXYZM(piPpx[pipsIdx],
                                piPpy[pipsIdx],
                                piPpz[pipsIdx],
-                               Mpips);
+                               aux.Mpips);
     
-    Zpips[pipsIdx]              = piplus[pipsIdx].E() / omega;
-    Vpiplus[pipsIdx]            = TVector3( 0, 0 , piPvz[pipsIdx] );
-//    Vpiplus[pipsIdx]            = GetParticleVertex( pipluses[pipsIdx] );
-//    pips_chi2PID[pipsIdx]       = pipluses[pipsIdx]->par()->getChi2Pid();
-//
-//    // EC in and out
-//    pips_E_ECIN[pipsIdx]        = pipluses[pipsIdx]->cal(ECIN)->getEnergy();
-//    pips_E_ECOUT[pipsIdx]       = pipluses[pipsIdx]->cal(ECOUT)->getEnergy();
-//    // PCAL
-//    auto pips_PCAL_info         = pipluses[pipsIdx]->cal(PCAL);
-//    pips_E_PCAL[pipsIdx]        = pips_PCAL_info->getEnergy();
-//    pips_PCAL_sector[pipsIdx]   = pips_PCAL_info->getSector();
-//    pips_PCAL_V[pipsIdx]        = pips_PCAL_info->getLv();
-//    pips_PCAL_W[pipsIdx]        = pips_PCAL_info->getLw();
-//    pips_PCAL_x[pipsIdx]        = pips_PCAL_info->getX();
-//    pips_PCAL_y[pipsIdx]        = pips_PCAL_info->getY();
-//    pips_PCAL_z[pipsIdx]        = pips_PCAL_info->getZ();
-//    // DC
-//    auto pips_DC_info           = pipluses[pipsIdx]->trk(DC);
-//    pips_DC_sector[pipsIdx]     = pips_DC_info->getSector(); // tracking sector
-//    pips_Chi2N[pipsIdx]         = pips_DC_info->getChi2N();  // tracking chi^2/NDF
-//    for (int regionIdx=0; regionIdx<3; regionIdx++) {
-//        DC_layer = DC_layers[regionIdx];
-//        pips_DC_x[pipsIdx][regionIdx] = pipluses[pipsIdx]->traj(DC,DC_layer)->getX();
-//        pips_DC_y[pipsIdx][regionIdx] = pipluses[pipsIdx]->traj(DC,DC_layer)->getY();
-//        pips_DC_z[pipsIdx][regionIdx] = pipluses[pipsIdx]->traj(DC,DC_layer)->getZ();
-//        if (fdebug>3) {
-//            std::cout
-//            << "pips_DC_sector[pipsIdx="<<pipsIdx<<"]="
-//            << pips_DC_sector[pipsIdx]
-//            << ", DC_layer = " << DC_layer
-//            << std::endl
-//            << "pips_DC_x[pipsIdx="<<pipsIdx<<"][regionIdx="<<regionIdx<<"]="
-//            << pips_DC_x[pipsIdx][regionIdx]
-//            << std::endl
-//            << "pips_DC_y[pipsIdx="<<pipsIdx<<"][regionIdx="<<regionIdx<<"]="
-//            << pips_DC_y[pipsIdx][regionIdx]
-//            << std::endl
-//            << "pips_DC_z[pipsIdx="<<pipsIdx<<"][regionIdx="<<regionIdx<<"]="
-//            << pips_DC_z[pipsIdx][regionIdx]
-//            << std::endl;
-//        }
-//    }
+    Zpips[pipsIdx]          = piplus[pipsIdx].E() / omega;
+    Vpiplus[pipsIdx]        = TVector3( 0, 0 , piPvz[pipsIdx] );
+    pips_DC_sector[pipsIdx] = piPsector[pipsIdx];
+    
+    if (fdebug>2) {
+        std::cout
+        << "p(π+ "          <<pipsIdx<<"): " << piplus[pipsIdx].P()     << ","
+        << "z(π+ "          <<pipsIdx<<"): " << Zpips[pipsIdx]          << ","
+        << "Vz(π+ "         <<pipsIdx<<"): " << Vpiplus[pipsIdx].Z()    << ","
+        << "DC-sector(π+ "  <<pipsIdx<<"): " << pips_DC_sector[pipsIdx] << ","
+        << std::endl;
+    }
+    
+    //    Vpiplus[pipsIdx]            = GetParticleVertex( pipluses[pipsIdx] );
+    //    pips_chi2PID[pipsIdx]       = pipluses[pipsIdx]->par()->getChi2Pid();
+    //
+    //    // EC in and out
+    //    pips_E_ECIN[pipsIdx]        = pipluses[pipsIdx]->cal(ECIN)->getEnergy();
+    //    pips_E_ECOUT[pipsIdx]       = pipluses[pipsIdx]->cal(ECOUT)->getEnergy();
+    //    // PCAL
+    //    auto pips_PCAL_info         = pipluses[pipsIdx]->cal(PCAL);
+    //    pips_E_PCAL[pipsIdx]        = pips_PCAL_info->getEnergy();
+    //    pips_PCAL_sector[pipsIdx]   = pips_PCAL_info->getSector();
+    //    pips_PCAL_V[pipsIdx]        = pips_PCAL_info->getLv();
+    //    pips_PCAL_W[pipsIdx]        = pips_PCAL_info->getLw();
+    //    pips_PCAL_x[pipsIdx]        = pips_PCAL_info->getX();
+    //    pips_PCAL_y[pipsIdx]        = pips_PCAL_info->getY();
+    //    pips_PCAL_z[pipsIdx]        = pips_PCAL_info->getZ();
+    //    // DC
+    //    auto pips_DC_info           = pipluses[pipsIdx]->trk(DC);
+    //    pips_DC_sector[pipsIdx]     = pips_DC_info->getSector(); // tracking sector
+    //    pips_Chi2N[pipsIdx]         = pips_DC_info->getChi2N();  // tracking chi^2/NDF
+    //    for (int regionIdx=0; regionIdx<3; regionIdx++) {
+    //        DC_layer = DC_layers[regionIdx];
+    //        pips_DC_x[pipsIdx][regionIdx] = pipluses[pipsIdx]->traj(DC,DC_layer)->getX();
+    //        pips_DC_y[pipsIdx][regionIdx] = pipluses[pipsIdx]->traj(DC,DC_layer)->getY();
+    //        pips_DC_z[pipsIdx][regionIdx] = pipluses[pipsIdx]->traj(DC,DC_layer)->getZ();
+    //        if (fdebug>3) {
+    //            std::cout
+    //            << "pips_DC_sector[pipsIdx="<<pipsIdx<<"]="
+    //            << pips_DC_sector[pipsIdx]
+    //            << ", DC_layer = " << DC_layer
+    //            << std::endl
+    //            << "pips_DC_x[pipsIdx="<<pipsIdx<<"][regionIdx="<<regionIdx<<"]="
+    //            << pips_DC_x[pipsIdx][regionIdx]
+    //            << std::endl
+    //            << "pips_DC_y[pipsIdx="<<pipsIdx<<"][regionIdx="<<regionIdx<<"]="
+    //            << pips_DC_y[pipsIdx][regionIdx]
+    //            << std::endl
+    //            << "pips_DC_z[pipsIdx="<<pipsIdx<<"][regionIdx="<<regionIdx<<"]="
+    //            << pips_DC_z[pipsIdx][regionIdx]
+    //            << std::endl;
+    //        }
+    //    }
     // ------------------------------------------------------------------------------------------------
     // now, check if pion passed event selection requirements
     // ------------------------------------------------------------------------------------------------
@@ -1189,17 +1294,23 @@ void ExtractPipsInformation( int pipsIdx ){
     //                                                                     Ve,
     //                                                                     Vpiplus[pipsIdx],
     //                                                                     fdebug);
-
-    pipsPastSelectionCuts[pimsIdx] = CheckIfPionPassedSelectionCuts("pi+",
+    
+    pipsPastSelectionCuts[pipsIdx] = CheckIfPionPassedSelectionCuts("pi+",
                                                                     piPfiducial1[pipsIdx],
                                                                     piPfiducial2[pipsIdx],
                                                                     piPfiducial3[pipsIdx],
+                                                                    piPpid[pipsIdx],
                                                                     piplus[pipsIdx].P(),
                                                                     Ve,
                                                                     Vpiplus[pipsIdx]);
     
-    eepipsPastKinematicalCuts[pipsIdx] = eepiPassedKinematicalCriteria(piplus[pipsIdx],
-                                                                       fdebug);
+    eepipsPastKinematicalCuts[pipsIdx] = aux.eepiPassedKinematicalCriteria(Ebeam,
+                                                                           omega,
+                                                                           Q2,
+                                                                           y,
+                                                                           W,
+                                                                           piplus[pipsIdx],
+                                                                           e);
     if (pipsPastSelectionCuts[pipsIdx]) {
         pipsPastCutsInEvent = true;
         Nevents_passed_pips_cuts ++;
@@ -1208,79 +1319,92 @@ void ExtractPipsInformation( int pipsIdx ){
         }
     }
     
-//    piplus_Px[pipsIdx] = piplus[pipsIdx].Px();
-//    piplus_Py[pipsIdx] = piplus[pipsIdx].Py();
-//    piplus_Pz[pipsIdx] = piplus[pipsIdx].Pz();
-//    piplus_E[pipsIdx]  = piplus[pipsIdx].E();
-//    Vpiplus_X[pipsIdx] = Vpiplus[pipsIdx].X();
-//    Vpiplus_Y[pipsIdx] = Vpiplus[pipsIdx].Y();
-//    Vpiplus_Z[pipsIdx] = Vpiplus[pipsIdx].Z();
+    //    piplus_Px[pipsIdx] = piplus[pipsIdx].Px();
+    //    piplus_Py[pipsIdx] = piplus[pipsIdx].Py();
+    //    piplus_Pz[pipsIdx] = piplus[pipsIdx].Pz();
+    //    piplus_E[pipsIdx]  = piplus[pipsIdx].E();
+    //    Vpiplus_X[pipsIdx] = Vpiplus[pipsIdx].X();
+    //    Vpiplus_Y[pipsIdx] = Vpiplus[pipsIdx].Y();
+    //    Vpiplus_Z[pipsIdx] = Vpiplus[pipsIdx].Z();
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void ExtractPimsInformation( int pimsIdx ){
     // extract negative pion information
-    SetLorentzVector(piminus[pimsIdx]  ,piminuses[pimsIdx]);
     piminus.at(pimsIdx).SetXYZM(piMpx[pimsIdx],
                                 piMpy[pimsIdx],
                                 piMpz[pimsIdx],
-                                Mpims);
-
+                                aux.Mpims);
     
-    Zpims[pimsIdx]              = piminus[pimsIdx].E() / omega;
-//    Vpiminus[pimsIdx]           = GetParticleVertex( piminuses[pimsIdx] );
-    Vpiminus[pimsIdx]           = TVector3( 0, 0 , piMvz[pipsIdx] );
-//    pims_chi2PID[pimsIdx]       = piminuses[pimsIdx]->par()->getChi2Pid();
-//
-//    // EC in and out
-//    pims_E_ECIN[pimsIdx]        = piminuses[pimsIdx]->cal(ECIN)->getEnergy();
-//    pims_E_ECOUT[pimsIdx]       = piminuses[pimsIdx]->cal(ECOUT)->getEnergy();
-//    // PCAL
-//    auto pims_PCAL_info         = piminuses[pimsIdx]->cal(PCAL);
-//    pims_E_PCAL[pimsIdx]        = pims_PCAL_info->getEnergy();
-//    pims_PCAL_sector[pimsIdx]   = pims_PCAL_info->getSector();
-//    pims_PCAL_V[pimsIdx]        = pims_PCAL_info->getLv();
-//    pims_PCAL_W[pimsIdx]        = pims_PCAL_info->getLw();
-//    pims_PCAL_x[pimsIdx]        = pims_PCAL_info->getX();
-//    pims_PCAL_y[pimsIdx]        = pims_PCAL_info->getY();
-//    pims_PCAL_z[pimsIdx]        = pims_PCAL_info->getZ();
-//    // DC
-//    auto pims_DC_info           = piminuses[pimsIdx]->trk(DC);
-//    pims_DC_sector[pimsIdx]     = pims_DC_info->getSector(); // tracking sector
-//    pims_Chi2N[pimsIdx]         = pims_DC_info->getChi2N();  // tracking chi^2/NDF
-//    for (int regionIdx=0; regionIdx<3; regionIdx++) {
-//        DC_layer = DC_layers[regionIdx];
-//        pims_DC_x[pimsIdx][regionIdx] = piminuses[pimsIdx]->traj(DC,DC_layer)->getX();
-//        pims_DC_y[pimsIdx][regionIdx] = piminuses[pimsIdx]->traj(DC,DC_layer)->getY();
-//        pims_DC_z[pimsIdx][regionIdx] = piminuses[pimsIdx]->traj(DC,DC_layer)->getZ();
-//    }
+    
+    Zpims[pimsIdx]          = piminus[pimsIdx].E() / omega;
+    Vpiminus[pimsIdx]       = TVector3( 0, 0 , piMvz[pimsIdx] );
+    pims_DC_sector[pimsIdx] = piMsector[pimsIdx];
+    
+    if (fdebug>2) {
+        std::cout
+        << "p(π+ "          <<pimsIdx<<"): " << piminus[pimsIdx].P()     << ","
+        << "z(π+ "          <<pimsIdx<<"): " << Zpims[pimsIdx]           << ","
+        << "Vz(π+ "         <<pimsIdx<<"): " << Vpiminus[pimsIdx].Z()    << ","
+        << "DC-sector(π+ "  <<pimsIdx<<"): " << pims_DC_sector[pimsIdx]  << ","
+        << std::endl;
+    }
+    
+    //    Vpiminus[pimsIdx]           = GetParticleVertex( piminuses[pimsIdx] );
+    //    pims_chi2PID[pimsIdx]       = piminuses[pimsIdx]->par()->getChi2Pid();
+    //
+    //    // EC in and out
+    //    pims_E_ECIN[pimsIdx]        = piminuses[pimsIdx]->cal(ECIN)->getEnergy();
+    //    pims_E_ECOUT[pimsIdx]       = piminuses[pimsIdx]->cal(ECOUT)->getEnergy();
+    //    // PCAL
+    //    auto pims_PCAL_info         = piminuses[pimsIdx]->cal(PCAL);
+    //    pims_E_PCAL[pimsIdx]        = pims_PCAL_info->getEnergy();
+    //    pims_PCAL_sector[pimsIdx]   = pims_PCAL_info->getSector();
+    //    pims_PCAL_V[pimsIdx]        = pims_PCAL_info->getLv();
+    //    pims_PCAL_W[pimsIdx]        = pims_PCAL_info->getLw();
+    //    pims_PCAL_x[pimsIdx]        = pims_PCAL_info->getX();
+    //    pims_PCAL_y[pimsIdx]        = pims_PCAL_info->getY();
+    //    pims_PCAL_z[pimsIdx]        = pims_PCAL_info->getZ();
+    //    // DC
+    //    auto pims_DC_info           = piminuses[pimsIdx]->trk(DC);
+    //    pims_DC_sector[pimsIdx]     = pims_DC_info->getSector(); // tracking sector
+    //    pims_Chi2N[pimsIdx]         = pims_DC_info->getChi2N();  // tracking chi^2/NDF
+    //    for (int regionIdx=0; regionIdx<3; regionIdx++) {
+    //        DC_layer = DC_layers[regionIdx];
+    //        pims_DC_x[pimsIdx][regionIdx] = piminuses[pimsIdx]->traj(DC,DC_layer)->getX();
+    //        pims_DC_y[pimsIdx][regionIdx] = piminuses[pimsIdx]->traj(DC,DC_layer)->getY();
+    //        pims_DC_z[pimsIdx][regionIdx] = piminuses[pimsIdx]->traj(DC,DC_layer)->getZ();
+    //    }
     // ------------------------------------------------------------------------------------------------
     // now, check if pion passed event selection requirements
     // ------------------------------------------------------------------------------------------------
-//    pimsPastSelectionCuts[pimsIdx] = CheckIfPionPassedSelectionCuts("pi-",
-//                                                                     pims_DC_sector[pimsIdx],
-//                                                                     pims_DC_x[pimsIdx],
-//                                                                     pims_DC_y[pimsIdx],
-//                                                                     pims_DC_z[pimsIdx],
-//                                                                     pims_chi2PID[pimsIdx],  piminus[pimsIdx].P(),
-//                                                                     Ve,
-//                                                                     Vpiminus[pimsIdx],
-//                                                                     fdebug);
+    //    pimsPastSelectionCuts[pimsIdx] = CheckIfPionPassedSelectionCuts("pi-",
+    //                                                                     pims_DC_sector[pimsIdx],
+    //                                                                     pims_DC_x[pimsIdx],
+    //                                                                     pims_DC_y[pimsIdx],
+    //                                                                     pims_DC_z[pimsIdx],
+    //                                                                     pims_chi2PID[pimsIdx],  piminus[pimsIdx].P(),
+    //                                                                     Ve,
+    //                                                                     Vpiminus[pimsIdx],
+    //                                                                     fdebug);
     
-    // CONTINUE HERE!
-    pims_chi2PID[pimsIdx] =
     
     pimsPastSelectionCuts[pimsIdx] = CheckIfPionPassedSelectionCuts("pi-",
                                                                     piMfiducial1[pimsIdx],
                                                                     piMfiducial2[pimsIdx],
                                                                     piMfiducial3[pimsIdx],
-                                                                    pims_chi2PID[pimsIdx],
+                                                                    piMpid[pimsIdx],
                                                                     piminus[pimsIdx].P(),
                                                                     Ve,
                                                                     Vpiminus[pimsIdx]);
     
-    eepimsPastKinematicalCuts[pimsIdx] = eepiPassedKinematicalCriteria(piminus[pimsIdx],
-                                                                       fdebug);
+    eepimsPastKinematicalCuts[pimsIdx] = aux.eepiPassedKinematicalCriteria(Ebeam,
+                                                                           omega,
+                                                                           Q2,
+                                                                           y,
+                                                                           W,
+                                                                           piminus[pimsIdx],
+                                                                           e);
     if (pimsPastSelectionCuts[pimsIdx]) {
         pimsPastCutsInEvent = true;
         Nevents_passed_pims_cuts ++;
@@ -1289,13 +1413,13 @@ void ExtractPimsInformation( int pimsIdx ){
         }
     }
     
-//    piminus_Px[pimsIdx]          = piminus[pimsIdx].Px();
-//    piminus_Py[pimsIdx]          = piminus[pimsIdx].Py();
-//    piminus_Pz[pimsIdx]          = piminus[pimsIdx].Pz();
-//    piminus_E[pimsIdx]           = piminus[pimsIdx].E();
-//    Vpiminus_X[pimsIdx]          = Vpiminus[pimsIdx].X();
-//    Vpiminus_Y[pimsIdx]          = Vpiminus[pimsIdx].Y();
-//    Vpiminus_Z[pimsIdx]          = Vpiminus[pimsIdx].Z();
+    //    piminus_Px[pimsIdx]          = piminus[pimsIdx].Px();
+    //    piminus_Py[pimsIdx]          = piminus[pimsIdx].Py();
+    //    piminus_Pz[pimsIdx]          = piminus[pimsIdx].Pz();
+    //    piminus_E[pimsIdx]           = piminus[pimsIdx].E();
+    //    Vpiminus_X[pimsIdx]          = Vpiminus[pimsIdx].X();
+    //    Vpiminus_Y[pimsIdx]          = Vpiminus[pimsIdx].Y();
+    //    Vpiminus_Z[pimsIdx]          = Vpiminus[pimsIdx].Z();
 }
 
 
@@ -1307,16 +1431,40 @@ bool CheckIfElectronPassedSelectionCuts(Int_t fid1,
                                         Int_t fid3,
                                         TLorentzVector e,
                                         TVector3 Ve){
+    
+    if (fdebug>2) {
+        std::cout
+        << "CheckIfElectronPassedSelectionCuts("
+        << fid1 << "," << fid2 << "," << fid3 << ","
+        << Ve.Z()
+        << ")"
+        << std::endl;
         
+        if ((aux.cutValue_Vz_min < Ve.Z()) && (Ve.Z() < aux.cutValue_Vz_max))
+            std::cout << "passed z-cut" << std::endl;
+        
+        if (fid1 && fid2 && fid3 == false)
+            std::cout << "Did not pass fiducial cuts" << std::endl;
+        
+        if(!(true
+             // Cut on z-vertex position: in-bending torus field -13.0 cm < Vz < +12.0 cm
+             // Spring 19 and Spring 2020 in-bending.
+             // Fall 2019 (without low-energy-run) was out-bending.
+             &&  ((aux.cutValue_Vz_min < Ve.Z()) && (Ve.Z() < aux.cutValue_Vz_max))
+             ))
+            std::cout << "Did not pass electron cuts" << std::endl;
+        else
+            std::cout << "Succesfully passed electron cuts" << std::endl;
+    }
     bool DC_fid = fid1 && fid2 && fid3;
     if (DC_fid == false) return false;
     
     if(!(true
-       // Cut on z-vertex position: in-bending torus field -13.0 cm < Vz < +12.0 cm
-       // Spring 19 and Spring 2020 in-bending.
-       // Fall 2019 (without low-energy-run) was out-bending.
-       &&  ((cutValue_Vz_min < Ve.Z()) && (Ve.Z() < cutValue_Vz_max))
-       )) return false;
+         // Cut on z-vertex position: in-bending torus field -13.0 cm < Vz < +12.0 cm
+         // Spring 19 and Spring 2020 in-bending.
+         // Fall 2019 (without low-energy-run) was out-bending.
+         &&  ((aux.cutValue_Vz_min < Ve.Z()) && (Ve.Z() < aux.cutValue_Vz_max))
+         )) return false;
     
     return true;
 }
@@ -1341,27 +1489,109 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
     // ---------------
     // DC - fiducial cuts on DC
     
+    if (fdebug>2) {
+        std::cout
+        << "CheckIfPionPassedSelectionCuts("
+        << pionCharge   << ","
+        << fid1         << ","
+        << fid2         << ","
+        << fid3         << ","
+        << std::setprecision(4)
+        << chi2PID      << ","
+        << std::setprecision(3)
+        << p            << ","
+        << "|z(e)-z(π)| = "<< (Ve-Vpi).Z() << ")"
+        << std::endl;
+    }
+    
     bool DC_fid = fid1 && fid2 && fid3;
     if (DC_fid == false) return false;
-
+    
+    
+    int PDGcode;
+    double    C;
+    if (pionCharge=="pi+"){
+        PDGcode = 211;
+        C       = 0.88;
+    } else if (pionCharge=="pi-") {
+        PDGcode = -211;
+        C       = 0.93;
+    } else {
+        std::cout << "π charge ill-defined, returning false" << std::endl;
+        return false;
+    }
+    
+    
+    
+    
+    // xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    // Aug-25, 2022
+    // There is a problem here with chi2PID
+    // and the following block bypasses it temporarily
+    // so that at this point there is effectively no cut
+    // on the chi2pid of the pion.
+    //
+    // We need to solve it in the future.
+    //
+    // In RGB SIDIS studies we filter pions based on their chi2pid information:
+    //
+    // region_part_ptr::par()->getChi2Pid()
+    //
+    // This variable represents the goodness of fit
+    // for the hypothesis that it is a pion.
+    // In the RGA datafile that Igor prepared,
+    // there is a variable called *piPpid* for π+,
+    // and similarly *piMpid* for π-,
+    // but it only stores the PDG code of the particles, 211 and -211 respectively.
+    //
+    // On Aug-25,2022
+    // I asked Igor to add the chi2pid information to the RGA data-files
+    // and when he does this the following block should be corrected
+    //
+    // The reason why it is written as a block with the awd if-statement
+    // is to add a precaution in case I forget to make the correction:
+    // the bypass is done only in case where
+    // chi2pid == PDGcode for the particle
+    //
+    if (chi2PID == 211 || chi2PID == -211){
+        chi2PID = (aux.Chi2PID_pion_lowerBound( p, C )
+                   +
+                   aux.Chi2PID_pion_upperBound( p , C ) )/2;
+    }
+    //
+    //
+    //
+    // xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     
     if (fdebug>3) {
         std::cout << "in CheckIfPionPassedSelectionCuts()"<< std::endl
         << "pion charge: "          << pionCharge               << ","
-        << "DC_x[0]: "              << DC_x[0]                  << ","
         << "chi2PID:"               << chi2PID                  << ","
-        << "Chi2PID_pion_lowerBound( p="<<p<<", C="<<C<<" ): "  << Chi2PID_pion_lowerBound( p, C ) << ","
-        << "Chi2PID_pion_upperBound( p="<<p<<", C="<<C<<" ): "  << Chi2PID_pion_upperBound( p, C ) << ","
-        << "fabs((Ve-Vpi).Z()): "   << fabs((Ve-Vpi).Z())       << ","
+        << std::endl
+        << "Chi2PID_pion_lowerBound( p="<<p<<", C="<<C<<" ): "
+        << aux.Chi2PID_pion_lowerBound( p, C ) << ","
+        << std::endl
+        << "Chi2PID_pion_upperBound( p="<<p<<", C="<<C<<" ): "
+        << aux.Chi2PID_pion_upperBound( p, C ) << ","
+        << std::endl
+        << "|z(e)-z(π)| = "         << fabs((Ve-Vpi).Z())       << ","
         << std::endl;
     }
+    
     if(!
        // pi+ Identification Refinement - chi2PID vs. momentum
-       (( Chi2PID_pion_lowerBound( p, C ) < chi2PID && chi2PID < Chi2PID_pion_upperBound( p , C ) )
-       
-       // Cut on the z-Vertex Difference Between Electrons and Hadrons.
-       &&  ( fabs((Ve-Vpi).Z()) < cutValue_Ve_Vpi_dz_max )
-       )) {
+       (( aux.Chi2PID_pion_lowerBound( p, C ) < chi2PID
+         &&
+         chi2PID < aux.Chi2PID_pion_upperBound( p , C ) )
+        
+        // Cut on the z-Vertex Difference Between Electrons and Hadrons.
+        &&  ( fabs((Ve-Vpi).Z()) < aux.cutValue_Ve_Vpi_dz_max )
+        )) {
+        if (fdebug>3) {
+            std::cout
+            << "Did not pass CheckIfPionPassedSelectionCuts(), return false"
+            << std::endl;
+        }
         return false;
     }
     if (fdebug>3) {
@@ -1372,3 +1602,224 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
     return true;
 }
 
+
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+void Stream_e_pi_line_to_CSV( TString pionCharge, int piIdx,
+                             bool passed_cuts_e_pi,
+                             bool passed_cuts_e_pi_kinematics){
+    TLorentzVector  pi;
+    TLorentzVector  pi_qFrame;
+    TVector3        Vpi;
+    int    pi_DC_sector;
+    
+    if (pionCharge=="pi+") {
+        pi              = piplus       .at(piIdx);
+        pi_qFrame       = piplus_qFrame.at(piIdx);
+        Vpi             = Vpiplus         [piIdx];
+        pi_DC_sector    = pips_DC_sector  [piIdx];
+    }
+    else if (pionCharge=="pi-") {
+        pi           = piminus       .at(piIdx);
+        pi_qFrame    = piminus_qFrame.at(piIdx);
+        Vpi          = Vpiminus         [piIdx];
+        pi_DC_sector = pims_DC_sector   [piIdx];
+    }
+    else {
+        std::cout << "Stream_e_pi_line_to_CSV(): bad pi charge! " << std::endl;
+        return;
+    }
+    
+    ComputePionKinematics( pi, pi_qFrame );
+    
+    // now stream data to CSV file
+    std::vector<double> variables =
+    {   (double)status, (double)runnum,     (double)evnum,      (double)beam_helicity,
+        e.P(),          e.Theta(),          e.Phi(),            Ve.Z(),
+        pi.P(),         pi.Theta(),         pi.Phi(),           Vpi.Z(),
+        Q2,             xB,                 omega,              y,
+        (double)e_DC_sector,                (double)pi_DC_sector,
+        e_qFrame.Theta(),                   e_qFrame.Phi(),
+        pi_qFrame.Theta(),                  pi_qFrame.Phi(),
+        pi_qFrame.Pt(),                     pi_qFrame.Pz(),
+        Zpi,            Zpi_LC,
+        W,              M_x,
+        xF,             eta_pi,
+    };
+    
+    // decide which file to write...
+    if (pionCharge=="pi+") {
+        if (passed_cuts_e_pi && passed_cuts_e_pi_kinematics) {
+            Nevents_e_e_pips ++ ;
+            aux.StreamToCSVfile(CSVfile_e_e_pips,
+                                variables,
+                                csvprecisions );
+        }
+    }
+    else if (pionCharge=="pi-") {
+        if (passed_cuts_e_pi && passed_cuts_e_pi_kinematics) {
+            Nevents_e_e_pims ++ ;
+            aux.StreamToCSVfile(CSVfile_e_e_pims,
+                                variables,
+                                csvprecisions );
+        }
+    }
+}
+
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+void ComputePionKinematics(TLorentzVector pi, TLorentzVector pi_qFrame){
+    
+    // pion energy fraction
+    Zpi          = pi.E()/omega;
+    Zpi_LC       = (pi_qFrame.E() + pi_qFrame.Pz()) / (q.E() + q.P());
+    
+    // additional kinematical variables
+    // assuming scattering off a proton at rest
+    M_x     = ( q + p_rest - pi ).Mag();
+    xF      = 2. * (pi.Vect().Dot(q.Vect())) / (q.P() * W);
+    eta_pi  = 0.5 * log((pi_qFrame.E()+pi_qFrame.Pz()) /
+                        (pi_qFrame.E()-pi_qFrame.Pz()));
+}
+
+//
+//// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+//bool eepiPassedKinematicalCriteria(TLorentzVector pi){
+//    Zpi = pi.E()/omega;
+//
+//    if (fdebug>2) {
+//        std::cout
+//        << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+//        << std::endl
+//        << "eepiPassedKinematicalCriteria()"
+//        << std::endl
+//        << std::setprecision(2)
+//        << "Q²: "       << Q2 << " (GeV/c)²,"
+//        << "W: "        << W << " GeV/c²,"
+//        << "y: "        << y << ","
+//        << std::endl
+//        << "𝜃(e): "    << e.Theta()*r2d    << "˚,"
+//        << "p(e): "    << e.P()            << " GeV/c,"
+//        << std::endl
+//        << "𝜃(pi): "   << pi.Theta()*r2d   << "˚,"
+//        << "p(π): "    << pi.P()           << " GeV/c,"
+//        << std::endl
+//        << "z(π): "    << Zpi              << ","
+//        << std::endl;
+//    }
+//    if(   (      cutValue_Q2_min < Q2             &&             Q2 < cutValue_Q2_max       )
+//       && (       cutValue_W_min < W                                                        )
+//       && (                                                       y < cutValue_y_max        )
+//       && ( cutValue_e_theta_min < e.Theta()*r2d  &&  e.Theta()*r2d < cutValue_e_theta_max  )
+//       && (cutValue_pi_theta_min < pi.Theta()*r2d && pi.Theta()*r2d < cutValue_pi_theta_max )
+//       && (     cutValue_Ppi_min < pi.P()         &&         pi.P() < cutValue_Ppi_max      )
+//       && (      cutValue_Pe_min < e.P()          &&          e.P() < Ebeam                 )
+//       && (     cutValue_Zpi_min < Zpi            &&            Zpi < cutValue_Zpi_max      )
+//       ) {
+//        if (fdebug>2) {
+//            std::cout << "succesfully passed (e,e'π) kinematical cuts"
+//            << std::endl
+//            << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+//            << std::endl;
+//        }
+//        return true;
+//    }
+//    else {
+//        if (fdebug>2) {
+//            std::cout << "Did not pass (e,e'π) kinematical cuts"
+//            << std::endl
+//            << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+//            << std::endl;
+//        }
+//    }
+//
+//    return false;
+//}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+TVector3 RotateVectorTo_qFrame( TVector3 v ){
+    // move to q-Pe system: q is the z axis, Pe is in x-z plane: Pe=(Pe[x],0,Pe[q])
+    v.RotateZ( -q_phi  );
+    v.RotateY( -q_theta);
+    v.RotateZ( -Pe_phi );
+    return v;
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+void PrintRGAInformation(){
+for (int e_idx=0; e_idx<nml; e_idx++) {
+    std::cout
+    << "Ep["<<e_idx<<"] "               << Ep[e_idx]            << ","
+    << std::endl
+    << "Epx["<<e_idx<<"] "              << Epx[e_idx]           << ","
+    << "Epy["<<e_idx<<"] "              << Epy[e_idx]           << ","
+    << "Epz["<<e_idx<<"] "              << Epz[e_idx]           << ","
+    << std::endl
+    << "Epid["<<e_idx<<"] "             << Epid[e_idx]          << ","
+    << "Esector["<<e_idx<<"] "          << Esector[e_idx]       << ","
+    << std::endl
+    << "Etheta["<<e_idx<<"] "           << Etheta[e_idx]        << ","
+    << "Ephi["<<e_idx<<"] "             << Ephi[e_idx]          << ","
+    << std::endl
+    << "Efiducial1["<<e_idx<<"] "       << Efiducial1[e_idx]    << ","
+    << "Efiducial2["<<e_idx<<"] "       << Efiducial2[e_idx]    << ","
+    << "Efiducial3["<<e_idx<<"] "       << Efiducial3[e_idx]    << ","
+    << std::endl
+    << "ePCAL_energy["<<e_idx<<"] "     << ePCAL_energy[e_idx]  << ","
+    << "eECIN_energy["<<e_idx<<"] "     << eECIN_energy[e_idx]  << ","
+    << "eECOUT_energy["<<e_idx<<"] "    << eECOUT_energy[e_idx] << ","
+    << std::endl
+    << "Nu["<<e_idx<<"] "               << Nu[e_idx]            << ","
+    << std::endl
+    << "qx["<<e_idx<<"] "              << qx[e_idx]           << ","
+    << "qy["<<e_idx<<"] "              << qy[e_idx]           << ","
+    << "qz["<<e_idx<<"] "              << qz[e_idx]           << ","
+    << std::endl;
+}
+for (int pips_idx=0; pips_idx < npiP; pips_idx++) {
+    std::cout
+    << "piPp["<<pips_idx<<"] "               << piPp[pips_idx]            << ","
+    << std::endl
+    << "piPpx["<<pips_idx<<"] "              << piPpx[pips_idx]           << ","
+    << "piPpy["<<pips_idx<<"] "              << piPpy[pips_idx]           << ","
+    << "piPpz["<<pips_idx<<"] "              << piPpz[pips_idx]           << ","
+    << std::endl
+    << "piPpid["<<pips_idx<<"] "             << piPpid[pips_idx]          << ","
+    << "piPsector["<<pips_idx<<"] "          << piPsector[pips_idx]       << ","
+    << std::endl
+    << "piPtheta["<<pips_idx<<"] "           << piPtheta[pips_idx]        << ","
+    << "piPphi["<<pips_idx<<"] "             << piPphi[pips_idx]          << ","
+    << std::endl
+    << "piPfiducial1["<<pips_idx<<"] "       << piPfiducial1[pips_idx]    << ","
+    << "piPfiducial2["<<pips_idx<<"] "       << piPfiducial2[pips_idx]    << ","
+    << "piPfiducial3["<<pips_idx<<"] "       << piPfiducial3[pips_idx]    << ","
+    << std::endl
+    << "piPPCAL_energy["<<pips_idx<<"] "     << piPPCAL_energy[pips_idx]  << ","
+    << "piPECIN_energy["<<pips_idx<<"] "     << piPECIN_energy[pips_idx]  << ","
+    << "piPECOUT_energy["<<pips_idx<<"] "    << piPECOUT_energy[pips_idx] << ","
+    << std::endl;
+}
+for (int pims_idx=0; pims_idx < npiM; pims_idx++) {
+    std::cout
+    << "piMp["<<pims_idx<<"] "               << piMp[pims_idx]            << ","
+    << std::endl
+    << "piMpx["<<pims_idx<<"] "              << piMpx[pims_idx]           << ","
+    << "piMpy["<<pims_idx<<"] "              << piMpy[pims_idx]           << ","
+    << "piMpz["<<pims_idx<<"] "              << piMpz[pims_idx]           << ","
+    << std::endl
+    << "piMpid["<<pims_idx<<"] "             << piMpid[pims_idx]          << ","
+    << "piMsector["<<pims_idx<<"] "          << piMsector[pims_idx]       << ","
+    << std::endl
+    << "piMtheta["<<pims_idx<<"] "           << piMtheta[pims_idx]        << ","
+    << "piMphi["<<pims_idx<<"] "             << piMphi[pims_idx]          << ","
+    << std::endl
+    << "piMfiducial1["<<pims_idx<<"] "       << piMfiducial1[pims_idx]    << ","
+    << "piMfiducial2["<<pims_idx<<"] "       << piMfiducial2[pims_idx]    << ","
+    << "piMfiducial3["<<pims_idx<<"] "       << piMfiducial3[pims_idx]    << ","
+    << std::endl
+    << "piMPCAL_energy["<<pims_idx<<"] "     << piMPCAL_energy[pims_idx]  << ","
+    << "piMECIN_energy["<<pims_idx<<"] "     << piMECIN_energy[pims_idx]  << ","
+    << "piMECOUT_energy["<<pims_idx<<"] "    << piMECOUT_energy[pims_idx] << ","
+    << std::endl;
+}
+}

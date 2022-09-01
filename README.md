@@ -3,8 +3,8 @@
 # Semi Inclusive DIS (SIDIS) on a deuteron target with $pi^+$ and $pi^-$ tagging and a fast neutron recoiling from a SRC pair breakup 
 
 This repository is responsible for 
-(A) skimming for (e,e'$\pi^{\pm}$) events
-(B) merging (e,e'$\pi^{\pm}$) events with fast neutron recoiling from BAND data
+(A) skimming for (e,e'π±) events
+(B) merging (e,e'π±n) events with fast neutron recoiling from BAND data
 (C) adding pion information to an arbitrary event list    
     
     
@@ -12,13 +12,28 @@ This repository is responsible for
 ## Revisions and release notes
 ------------------------------------------------------------------------------
 
+
+Aug-26, 2022    
+-------------
+1. Stabilized **ReadIgorRGAFile.C** to add free proton data from RGA to our analysis chain
+
+2. Corrected the definition of **Z_LC** based on a conversation with Mark Strikman 
+
+
+Aug-19, 2022    
+-------------
+1. Added a mechanism to reproduce (e,e'π+)/(e,e'π-) ratios in different M_x bins in **extract_SIDIS_ratio()**
+
+2. Changed M_x cut from M_x>2.5 GeV which was wrong when we used a standing deuteron in M_x definition to M_x>1.3
+
+
 Aug-4, 2022    
 -------------
 1. Replaced *ComputeKinematics* in SIDISc12rSkimmer by *ComputeElecctronKinematics* 
 
 2. Added a computation of the following variables
 
-Z_LC = (Ppi_q.E() - Ppi_q.Pz()) / (q.E() - q.P()); // z on the light-cone
+Z_LC = (Ppi_q.E() + Ppi_q.Pz()) / (q.E() + q.P()); // z on the light-cone
 
 3. Replaced the cut on W from 
    W_d = sqrt((d_rest + q).Mag2()) > 2.5 GeV/c2
@@ -626,7 +641,7 @@ SIDIS kinematic variables
     xF  = 2. * (pi.Vect().Dot(q.Vect())) / (q.P() * W)
     
     Zpi = pi.E()/omega;
-    Zpi_LC = (pi_qFrame.E() - pi_qFrame.Pz()) / (q->E() - q->P());
+    Zpi_LC = (pi_qFrame.E() + pi_qFrame.Pz()) / (q->E() + q->P());
     
         
     // barion rapidity  η_br = log(Pπ+/Pπ−) / 2

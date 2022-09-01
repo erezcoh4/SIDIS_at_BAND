@@ -66,10 +66,10 @@ void                     CloseOutputFiles (TString OutDataPath, TString outfilen
 //                                           bool passed_cuts_e_pi,
 //                                           bool passed_cuts_e_pi_kinematics,
 //                                           int fdebug);
-void                       printCutValues ();
-void                        loadCutValues (TString cutValuesFilename = "cutValues.csv", int fdebug=0);
+//void                       printCutValues ();
+//void                        loadCutValues (TString cutValuesFilename = "cutValues.csv", int fdebug=0);
 void                      SetOutputTTrees ();
-double                       FindCutValue ( std::string cutName );
+//double                       FindCutValue ( std::string cutName );
 bool   CheckIfElectronPassedSelectionCuts (Double_t e_PCAL_x, Double_t e_PCAL_y,
                                            Double_t e_PCAL_W,Double_t e_PCAL_V,
                                            Double_t e_E_PCAL,
@@ -87,10 +87,10 @@ bool      CheckIfPionPassedSelectionCuts (TString pionCharge, // "pi+" or "pi-"
                                            Double_t chi2PID, Double_t p,
                                            TVector3 Ve,      TVector3 Vpi,
                                            int fdebug);
-bool        eepiPassedKinematicalCriteria (TLorentzVector pi,
-                                           int fdebug);
-Double_t          Chi2PID_pion_lowerBound (Double_t p, Double_t C=0.88); // C(pi+)=0.88, C(pi-)=0.93
-Double_t          Chi2PID_pion_upperBound (Double_t p, Double_t C=0.88); // C(pi+)=0.88, C(pi-)=0.93
+//bool        eepiPassedKinematicalCriteria (TLorentzVector pi,
+//                                           int fdebug);
+//Double_t          Chi2PID_pion_lowerBound (Double_t p, Double_t C=0.88); // C(pi+)=0.88, C(pi-)=0.93
+//Double_t          Chi2PID_pion_upperBound (Double_t p, Double_t C=0.88); // C(pi+)=0.88, C(pi-)=0.93
 int                       GetBeamHelicity (event_ptr p_event, int runnum, int fdebug);
 double                      GetBeamEnergy (int fdebug);
 TString                   GetRunNumberSTR (int RunNumber, int fdebug);
@@ -178,13 +178,6 @@ int                   inclusive; // tag to look at inclusive run - all the event
 int         Ne, Nn, Np, Npips, Npims, Ngammas;
 int                          Nd; // number of detected deuterons
 
-//// masses in GeV/c2
-//double          Me = 0.000510999;
-//double         Mpi = 0.139570;
-//double          Mp = 0.938656;
-//double          Mn = 0.939272;
-//double          Mp2 = Mp * Mp;
-//double          Md = 1.875612; // NIST
 // leading electron
 double            e_E_PCAL; // electron energy deposit in PCAL [GeV]
 double            e_E_ECIN; // electron energy deposit in ECAL_in [GeV]
@@ -280,7 +273,7 @@ std::ofstream   CSVfile_e_piplus,  SelectedEventsCSVfile_e_piplus,  SelectedEven
 std::ofstream   CSVfile_e_piminus, SelectedEventsCSVfile_e_piminus, SelectedEventsCSVfile_e_piminus_kinematics;
 // vectors in lab-frame
 TLorentzVector          Beam, target, e, q;
-TLorentzVector      d_rest, p_rest;
+TLorentzVector              d_rest, p_rest;
 std::vector<TLorentzVector>         piplus; // positive pions
 std::vector<TLorentzVector>        piminus; // negative pions
 // reconstructed vertex position
@@ -293,7 +286,6 @@ Double_t           Ebeam, omega, y, xB, Q2;
 Double_t                                xF;
 Double_t                            eta_pi;
 Double_t                             W, W2;
-Double_t                          W_d_rest;
 Double_t                               M_x;
 
 
@@ -326,9 +318,7 @@ void SIDISc12rSkimmer(int RunNumber=6420,
     SetDataPath( fDataPath );
     TString RunNumberStr = GetRunNumberSTR(RunNumber,fdebug);
     // read cut values
-    loadCutValues("cutValues.csv",fdebug);
-
-    
+    aux.loadCutValues("macros/cuts/BANDcutValues.csv",torusBending);
     
     inclusive = setInclusive;
     if (inclusive == 1) std::cout << "Running as inclusive" << std::endl;
@@ -489,20 +479,20 @@ bool CheckIfElectronPassedSelectionCuts(Double_t e_PCAL_x, Double_t e_PCAL_y,
        // fiducial cuts on PCAL
        //fabs(e_PCAL_x)>0
        //&&  fabs(e_PCAL_y)>0
-       &&  e_PCAL_W > cutValue_e_PCAL_W
-       &&  e_PCAL_V > cutValue_e_PCAL_V
+       &&  e_PCAL_W > aux.cutValue_e_PCAL_W
+       &&  e_PCAL_V > aux.cutValue_e_PCAL_V
        
        // Electron Identification Refinement  - PCAL Minimum Energy Deposition Cut
-       &&  e_E_PCAL > cutValue_e_E_PCAL
+       &&  e_E_PCAL > aux.cutValue_e_E_PCAL
        
        // Sampling fraction cut
-       && ((e_E_PCAL + e_E_ECIN + e_E_ECOUT)/e.P()) > cutValue_SamplingFraction_min
-       && (e_E_ECIN/e.P() > cutValue_PCAL_ECIN_SF_min - e_E_PCAL/e.P()) // RGA AN puts "<" here mistakenly
+       && ((e_E_PCAL + e_E_ECIN + e_E_ECOUT)/e.P()) > aux.cutValue_SamplingFraction_min
+       && (e_E_ECIN/e.P() > aux.cutValue_PCAL_ECIN_SF_min - e_E_PCAL/e.P()) // RGA AN puts "<" here mistakenly
        
        // Cut on z-vertex position: in-bending torus field -13.0 cm < Vz < +12.0 cm
        // Spring 19 and Spring 2020 in-bending.
        // Fall 2019 (without low-energy-run) was out-bending.
-       &&  ((cutValue_Vz_min < Ve.Z()) && (Ve.Z() < cutValue_Vz_max))
+       &&  ((aux.cutValue_Vz_min < Ve.Z()) && (Ve.Z() < aux.cutValue_Vz_max))
        )) return false;
     
     return true;
@@ -542,7 +532,7 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
         PDGcode = -211;
         C       = 0.93;
     } else {
-        std::cout << "pion charge is not defined in CheckIfPionPassedSelectionCuts(), returning false" << std::endl;
+        std::cout << "π charge ill-defined, returning false" << std::endl;
         return false;
     }
 
@@ -581,17 +571,21 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
         << "pion charge: "          << pionCharge               << ","
         << "DC_x[0]: "              << DC_x[0]                  << ","
         << "chi2PID:"               << chi2PID                  << ","
-        << "Chi2PID_pion_lowerBound( p="<<p<<", C="<<C<<" ): "  << Chi2PID_pion_lowerBound( p, C ) << ","
-        << "Chi2PID_pion_upperBound( p="<<p<<", C="<<C<<" ): "  << Chi2PID_pion_upperBound( p, C ) << ","
+        << "Chi2PID_pion_lowerBound( p="<<p<<", C="<<C<<" ): "
+        << aux.Chi2PID_pion_lowerBound( p, C ) << ","
+        << "Chi2PID_pion_upperBound( p="<<p<<", C="<<C<<" ): "
+        << aux.Chi2PID_pion_upperBound( p, C ) << ","
         << "fabs((Ve-Vpi).Z()): "   << fabs((Ve-Vpi).Z())       << ","
         << std::endl;
     }
     if(!
        // pi+ Identification Refinement - chi2PID vs. momentum
-       (( Chi2PID_pion_lowerBound( p, C ) < chi2PID && chi2PID < Chi2PID_pion_upperBound( p , C ) )
+       (( aux.Chi2PID_pion_lowerBound( p, C ) < chi2PID
+         &&
+         chi2PID < aux.Chi2PID_pion_upperBound( p , C ) )
        
        // Cut on the z-Vertex Difference Between Electrons and Hadrons.
-       &&  ( fabs((Ve-Vpi).Z()) < cutValue_Ve_Vpi_dz_max )
+       &&  ( fabs((Ve-Vpi).Z()) < aux.cutValue_Ve_Vpi_dz_max )
        )) {
         return false;
     }
@@ -602,89 +596,89 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
 
 
 
-// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-bool eepiPassedKinematicalCriteria(TLorentzVector pi, int fdebug){
-    double Zpi = pi.E()/omega;
-    if (fdebug>2) {
-        std::cout
-        << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-        << std::endl
-        << "eepiPassedKinematicalCriteria()"
-        << std::endl
-        << "Q2: "       << Q2 << " (GeV/c)2,"
-        << "W: "        << W << " GeV/c2,"
-        << "y: "        << y << ","
-        << std::endl
-        << "theta(e): " << e.Theta()*r2d    << " deg,"
-        << "p(e): "     << e.P()            << " GeV/c,"
-        << std::endl
-        << "theta(pi): "<< pi.Theta()*r2d   << " deg,"
-        << "p(pi): "    << pi.P()           << " GeV/c,"
-        << std::endl
-        << "z(pi): "    << Zpi              << ","
-        << std::endl
-        << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-        << std::endl;
-    }
-    if(   (      cutValue_Q2_min < Q2             &&             Q2 < cutValue_Q2_max       )
-       && (       cutValue_W_min < W                                                        )
-       && (                                                       y < cutValue_y_max        )
-       && ( cutValue_e_theta_min < e.Theta()*r2d  &&  e.Theta()*r2d < cutValue_e_theta_max  )
-       && (cutValue_pi_theta_min < pi.Theta()*r2d && pi.Theta()*r2d < cutValue_pi_theta_max )
-       && (     cutValue_Ppi_min < pi.P()         &&         pi.P() < cutValue_Ppi_max      )
-       && (      cutValue_Pe_min < e.P()          &&          e.P() < cutValue_Pe_max       )
-       && (     cutValue_Zpi_min < Zpi            &&            Zpi < cutValue_Zpi_max      )
-       ) {
-        if (fdebug>3) {
-            std::cout << "succesfully passed (e,e'pi) kinematical cuts" << std::endl;
-        }
-        return true;
-    }
-    return false;
-}
+//// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+//bool eepiPassedKinematicalCriteria(TLorentzVector pi, int fdebug){
+//    double Zpi = pi.E()/omega;
+//    if (fdebug>2) {
+//        std::cout
+//        << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+//        << std::endl
+//        << "eepiPassedKinematicalCriteria()"
+//        << std::endl
+//        << "Q2: "       << Q2 << " (GeV/c)2,"
+//        << "W: "        << W << " GeV/c2,"
+//        << "y: "        << y << ","
+//        << std::endl
+//        << "theta(e): " << e.Theta()*r2d    << " deg,"
+//        << "p(e): "     << e.P()            << " GeV/c,"
+//        << std::endl
+//        << "theta(pi): "<< pi.Theta()*r2d   << " deg,"
+//        << "p(pi): "    << pi.P()           << " GeV/c,"
+//        << std::endl
+//        << "z(pi): "    << Zpi              << ","
+//        << std::endl
+//        << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+//        << std::endl;
+//    }
+//    if(   (      cutValue_Q2_min < Q2             &&             Q2 < cutValue_Q2_max       )
+//       && (       cutValue_W_min < W                                                        )
+//       && (                                                       y < cutValue_y_max        )
+//       && ( cutValue_e_theta_min < e.Theta()*r2d  &&  e.Theta()*r2d < cutValue_e_theta_max  )
+//       && (cutValue_pi_theta_min < pi.Theta()*r2d && pi.Theta()*r2d < cutValue_pi_theta_max )
+//       && (     cutValue_Ppi_min < pi.P()         &&         pi.P() < cutValue_Ppi_max      )
+//       && (      cutValue_Pe_min < e.P()          &&          e.P() < Ebeam                 )
+//       && (     cutValue_Zpi_min < Zpi            &&            Zpi < cutValue_Zpi_max      )
+//       ) {
+//        if (fdebug>3) {
+//            std::cout << "succesfully passed (e,e'pi) kinematical cuts" << std::endl;
+//        }
+//        return true;
+//    }
+//    return false;
+//}
 
-// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-Double_t Chi2PID_pion_lowerBound( Double_t p, Double_t C){
-    // compute lower bound for chi2PID for a pi+
-    // based on RGA_Analysis_Overview_and_Procedures_Nov_4_2020-6245173-2020-12-09-v3.pdf
-    // p. 75
-    // "Strict cut"
-    //
-    // input:
-    // -------
-    // p        pion momentum
-    // C        is the scaling factor for sigma (away from the mean value of the pion distribution)
-    //
-    
-    return ( -C * 3 );
-}
-
-// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-Double_t Chi2PID_pion_upperBound( Double_t p, Double_t C){
-    // compute upper bound for chi2PID for a pi+
-    // based on RGA_Analysis_Overview_and_Procedures_Nov_4_2020-6245173-2020-12-09-v3.pdf
-    // p. 75
-    // "Strict cut"
-    //
-    // input:
-    // -------
-    // p        pion momentum
-    // C        is the scaling factor for sigma (away from the mean value of the pion distribution)
-    //
-    
-    if (p<2.44)
-        
-        return C*3;
-    
-    else if (p<4.6)
-        
-        return C*( 0.00869 + 14.98587*exp(-p/1.18236)+1.81751*exp(-p/4.86394) ) ;
-    
-    else
-        
-        return C*( -1.14099 + 24.14992*exp(-p/1.36554) + 2.66876*exp(-p/6.80552) );
-    
-}
+//// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+//Double_t Chi2PID_pion_lowerBound( Double_t p, Double_t C){
+//    // compute lower bound for chi2PID for a pi+
+//    // based on RGA_Analysis_Overview_and_Procedures_Nov_4_2020-6245173-2020-12-09-v3.pdf
+//    // p. 75
+//    // "Strict cut"
+//    //
+//    // input:
+//    // -------
+//    // p        pion momentum
+//    // C        is the scaling factor for sigma (away from the mean value of the pion distribution)
+//    //
+//
+//    return ( -C * 3 );
+//}
+//
+//// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+//Double_t Chi2PID_pion_upperBound( Double_t p, Double_t C){
+//    // compute upper bound for chi2PID for a pi+
+//    // based on RGA_Analysis_Overview_and_Procedures_Nov_4_2020-6245173-2020-12-09-v3.pdf
+//    // p. 75
+//    // "Strict cut"
+//    //
+//    // input:
+//    // -------
+//    // p        pion momentum
+//    // C        is the scaling factor for sigma (away from the mean value of the pion distribution)
+//    //
+//
+//    if (p<2.44)
+//
+//        return C*3;
+//
+//    else if (p<4.6)
+//
+//        return C*( 0.00869 + 14.98587*exp(-p/1.18236)+1.81751*exp(-p/4.86394) ) ;
+//
+//    else
+//
+//        return C*( -1.14099 + 24.14992*exp(-p/1.36554) + 2.66876*exp(-p/6.80552) );
+//
+//}
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 TVector3 GetParticleVertex(clas12::region_part_ptr rp){
@@ -844,77 +838,77 @@ void CloseOutputFiles (TString OutDataPath, TString outfilename){
 //    }
 //}
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-void loadCutValues(TString cutValuesFilename, int fdebug){
-    
-    // read cut values csv file
-    csv_reader csvr;
-    cutValues = csvr.read_csv("macros/cuts/BANDcutValues.csv");
-    if (fdebug>3) { printCutValues(); }
-    
-    // assign specific cut values - to speed things up
-    // by avoiding recalling FindCutValue() on every event
-    
-    // Cut on z-vertex position:
-    // based on RGA_Analysis_Overview_and_Procedures_Nov_4_2020-6245173-2020-12-09-v3.pdf
-    // p. 71
-    if (torusBending==-1){ // in-bending torus field
-        // Spring 19 and Spring 2020 in-bending.
-        cutValue_Vz_min = FindCutValue("Vz_e_min_inbending");
-        cutValue_Vz_max = FindCutValue("Vz_e_max_inbending");
-    } else if (torusBending==1){ // Out-bending torus field
-        // Fall 2019 (without low-energy-run) was out-bending.
-        cutValue_Vz_min = FindCutValue("Vz_e_min_outbending");
-        cutValue_Vz_max = FindCutValue("Vz_e_max_outbending");
-        
-    } else {
-        std::cout
-        << "Un-identified torus bending "
-        << torusBending
-        << ", return" << std::endl;
-        return;
-    }
-        
-    cutValue_e_PCAL_W               = FindCutValue("e_PCAL_W_min");
-    cutValue_e_PCAL_V               = FindCutValue("e_PCAL_V_min");
-    cutValue_e_E_PCAL               = FindCutValue("e_E_PCAL_min");
-    cutValue_SamplingFraction_min   = FindCutValue("SamplingFraction_min");
-    cutValue_PCAL_ECIN_SF_min       = FindCutValue("PCAL_ECIN_SF_min");
-    cutValue_Ve_Vpi_dz_max          = FindCutValue("(Ve-Vpi)_z_max");
-    cutValue_Q2_min                 = FindCutValue("Q2_min");
-    cutValue_Q2_max                 = FindCutValue("Q2_max");
-    cutValue_W_min                  = FindCutValue("W_min");
-    cutValue_y_max                  = FindCutValue("y_max");
-    cutValue_e_theta_min            = FindCutValue("e_theta_min");
-    cutValue_e_theta_max            = FindCutValue("e_theta_max");
-    cutValue_pi_theta_min           = FindCutValue("pi_theta_min");
-    cutValue_pi_theta_max           = FindCutValue("pi_theta_max");
-    cutValue_Ppi_min                = FindCutValue("Ppi_min");
-    cutValue_Ppi_max                = FindCutValue("Ppi_max");
-    cutValue_Pe_min                 = FindCutValue("Pe_min");
-    cutValue_Pe_max                 = FindCutValue("Pe_max");
-    cutValue_Zpi_min                = FindCutValue("Zpi_min");
-    cutValue_Zpi_max                = FindCutValue("Zpi_max");
-    
-    if (fdebug>2) { std::cout << "Done loading cut values." << std::endl; }
-}
+////....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+//void loadCutValues(TString cutValuesFilename, int fdebug){
+//
+//    // read cut values csv file
+//    csv_reader csvr;
+//    cutValues = csvr.read_csv("macros/cuts/BANDcutValues.csv");
+//    if (fdebug>3) { printCutValues(); }
+//
+//    // assign specific cut values - to speed things up
+//    // by avoiding recalling FindCutValue() on every event
+//
+//    // Cut on z-vertex position:
+//    // based on RGA_Analysis_Overview_and_Procedures_Nov_4_2020-6245173-2020-12-09-v3.pdf
+//    // p. 71
+//    if (torusBending==-1){ // in-bending torus field
+//        // Spring 19 and Spring 2020 in-bending.
+//        cutValue_Vz_min = FindCutValue("Vz_e_min_inbending");
+//        cutValue_Vz_max = FindCutValue("Vz_e_max_inbending");
+//    } else if (torusBending==1){ // Out-bending torus field
+//        // Fall 2019 (without low-energy-run) was out-bending.
+//        cutValue_Vz_min = FindCutValue("Vz_e_min_outbending");
+//        cutValue_Vz_max = FindCutValue("Vz_e_max_outbending");
+//
+//    } else {
+//        std::cout
+//        << "Un-identified torus bending "
+//        << torusBending
+//        << ", return" << std::endl;
+//        return;
+//    }
+//
+//    cutValue_e_PCAL_W               = FindCutValue("e_PCAL_W_min");
+//    cutValue_e_PCAL_V               = FindCutValue("e_PCAL_V_min");
+//    cutValue_e_E_PCAL               = FindCutValue("e_E_PCAL_min");
+//    cutValue_SamplingFraction_min   = FindCutValue("SamplingFraction_min");
+//    cutValue_PCAL_ECIN_SF_min       = FindCutValue("PCAL_ECIN_SF_min");
+//    cutValue_Ve_Vpi_dz_max          = FindCutValue("(Ve-Vpi)_z_max");
+//    cutValue_Q2_min                 = FindCutValue("Q2_min");
+//    cutValue_Q2_max                 = FindCutValue("Q2_max");
+//    cutValue_W_min                  = FindCutValue("W_min");
+//    cutValue_y_max                  = FindCutValue("y_max");
+//    cutValue_e_theta_min            = FindCutValue("e_theta_min");
+//    cutValue_e_theta_max            = FindCutValue("e_theta_max");
+//    cutValue_pi_theta_min           = FindCutValue("pi_theta_min");
+//    cutValue_pi_theta_max           = FindCutValue("pi_theta_max");
+//    cutValue_Ppi_min                = FindCutValue("Ppi_min");
+//    cutValue_Ppi_max                = FindCutValue("Ppi_max");
+//    cutValue_Pe_min                 = FindCutValue("Pe_min");
+//    cutValue_Pe_max                 = FindCutValue("Pe_max");
+//    cutValue_Zpi_min                = FindCutValue("Zpi_min");
+//    cutValue_Zpi_max                = FindCutValue("Zpi_max");
+//
+//    if (fdebug>2) { std::cout << "Done loading cut values." << std::endl; }
+//}
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-void printCutValues(){
-    std::cout << "Using cut values:" << std::endl;
-    for (auto cut: cutValues) {
-        std::cout << cut.first << ": " << cut.second << std::endl;
-    }
-}
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-double FindCutValue( std::string cutName ){
-    for (auto cut: cutValues) {
-        if (strcmp(cut.first.c_str(),cutName.c_str())==0){
-            return cut.second;
-        }
-    }
-}
+////....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+//void printCutValues(){
+//    std::cout << "Using cut values:" << std::endl;
+//    for (auto cut: cutValues) {
+//        std::cout << cut.first << ": " << cut.second << std::endl;
+//    }
+//}
+//
+////....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+//double FindCutValue( std::string cutName ){
+//    for (auto cut: cutValues) {
+//        if (strcmp(cut.first.c_str(),cutName.c_str())==0){
+//            return cut.second;
+//        }
+//    }
+//}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 int GetBeamHelicity( event_ptr p_event, int runnum, int fdebug ){
@@ -1631,7 +1625,7 @@ void ComputePionKinematics(TLorentzVector pi, TLorentzVector pi_qFrame){
     
     // pion energy fraction
     Zpi          = pi.E()/omega;
-    Zpi_LC       = (pi_qFrame.E() - pi_qFrame.Pz()) / (q.E() - q.P());
+    Zpi_LC       = (pi_qFrame.E() + pi_qFrame.Pz()) / (q.E() + q.P());
     
     // additional kinematical variables 
     // assuming scattering off a proton at rest
@@ -1704,8 +1698,14 @@ void ExtractPipsInformation( int pipsIdx, int fdebug ){
                                                                     Ve,
                                                                     Vpiplus[pipsIdx],
                                                                     fdebug);
-    eepipsPastKinematicalCuts[pipsIdx] = eepiPassedKinematicalCriteria(piplus[pipsIdx],
-                                                                       fdebug);
+    eepipsPastKinematicalCuts[pipsIdx] = aux.eepiPassedKinematicalCriteria(Ebeam,
+                                                                           omega,
+                                                                           Q2,
+                                                                           y,
+                                                                           W,
+                                                                           piplus[pipsIdx],
+                                                                           e);
+    
     if (pipsPastSelectionCuts[pipsIdx]) {
         pipsPastCutsInEvent = true;
         Nevents_passed_pips_cuts ++;
@@ -1759,14 +1759,19 @@ void ExtractPimsInformation( int pimsIdx, int fdebug ){
     pimsPastSelectionCuts[pimsIdx] = CheckIfPionPassedSelectionCuts("pi-",
                                                                      pims_DC_sector[pimsIdx],
                                                                      pims_DC_x[pimsIdx],
-                                                                     pims_DC_y[pimsIdx],
-                                                                     pims_DC_z[pimsIdx],
-                                                                     pims_chi2PID[pimsIdx],  piminus[pimsIdx].P(),
-                                                                     Ve,
-                                                                     Vpiminus[pimsIdx],
-                                                                     fdebug);
-    eepimsPastKinematicalCuts[pimsIdx] = eepiPassedKinematicalCriteria(piminus[pimsIdx],
-                                                                       fdebug);
+                                                                    pims_DC_y[pimsIdx],
+                                                                    pims_DC_z[pimsIdx],
+                                                                    pims_chi2PID[pimsIdx],  piminus[pimsIdx].P(),
+                                                                    Ve,
+                                                                    Vpiminus[pimsIdx],
+                                                                    fdebug);
+    eepimsPastKinematicalCuts[pimsIdx] = aux.eepiPassedKinematicalCriteria(Ebeam,
+                                                                           omega,
+                                                                           Q2,
+                                                                           y,
+                                                                           W,
+                                                                           piminus[pimsIdx],
+                                                                           e);
     if (pimsPastSelectionCuts[pimsIdx]) {
         pimsPastCutsInEvent = true;
         Nevents_passed_pims_cuts ++;
@@ -1831,16 +1836,12 @@ void Stream_e_pi_line_to_CSV( TString pionCharge, int piIdx,
         pi              = piplus       .at(piIdx);
         pi_qFrame       = piplus_qFrame.at(piIdx);
         Vpi             = Vpiplus         [piIdx];
-//        Zpi             = Zpips           [piIdx];
-//        Zpi_LC          = ZpipsLC         [piIdx];
         pi_DC_sector    = pips_DC_sector  [piIdx];
     }
     else if (pionCharge=="pi-") {
         pi           = piminus       .at(piIdx);
         pi_qFrame    = piminus_qFrame.at(piIdx);
         Vpi          = Vpiminus         [piIdx];
-//        Zpi          = Zpims            [piIdx];
-//        Zpi_LC       = ZpimsLC          [piIdx];
         pi_DC_sector = pims_DC_sector   [piIdx];
    }
     else {
@@ -1864,12 +1865,7 @@ void Stream_e_pi_line_to_CSV( TString pionCharge, int piIdx,
         W,              M_x,
         xF,             eta_pi,
     };
-    
-//    StreamToCSVfile( pionCharge, variables ,
-//                    passed_cuts_e_pi, passed_cuts_e_pi_kinematics,
-//                    fdebug );
-//
-    
+        
     // decide which file to write...
     if (pionCharge=="pi+") {
         if (passed_cuts_e_pi && passed_cuts_e_pi_kinematics) {

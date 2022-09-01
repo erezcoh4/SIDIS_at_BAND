@@ -1,6 +1,6 @@
 parameter,value
-Vz_e_min_inbending,-5.0
-Vz_e_max_inbending,-1.0
+Vz_e_min_inbending,-13.0
+Vz_e_max_inbending,12.0
 Vz_e_min_outbending,-18.0
 Vz_e_max_outbending,10.0
 e_PCAL_W_min,15.0

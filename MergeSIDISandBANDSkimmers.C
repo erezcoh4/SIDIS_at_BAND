@@ -944,7 +944,7 @@ void ComputeKinematics(TLorentzVector pi){
     
     // pion energy fraction    
     Zpi          = pi.E()/omega;
-    Zpi_LC       = (pi_qFrame.E() - pi_qFrame.Pz()) / (q->E() - q->P());
+    Zpi_LC       = (pi_qFrame.E() + pi_qFrame.Pz()) / (q->E() + q->P());
     Zpi_LC_Prime = Zpi_LC / alpha_n;
     
     // Kinematics assuming scattering off a proton at rest
