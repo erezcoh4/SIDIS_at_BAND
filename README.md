@@ -12,6 +12,10 @@ This repository is responsible for
 ## Revisions and release notes
 ------------------------------------------------------------------------------
 
+Sep-6, 2022    
+-------------
+1. Added **W_d** back to output variables in the csv file
+
 
 Aug-26, 2022    
 -------------

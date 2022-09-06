@@ -54,6 +54,7 @@ TString csvheader = ((TString)"status,runnum,evnum,beam_helicity,"
                      +(TString)"W_Prime,M_x_Prime,"
                      +(TString)"xF_Prime,"
                      +(TString)"xB_Prime,"
+                     +(TString)"W_d,"
                      );
 std::vector<int> csvprecisions = {0,0,0,0,
     9,9,9,9,
@@ -107,6 +108,7 @@ Double_t       Zpips_LC[NMAXPIONS]; // energy fraction rest frame on the light c
 Double_t          Zpims[NMAXPIONS]; // energy fraction rest frame
 Double_t       Zpims_LC[NMAXPIONS]; // energy fraction rest frame on the light cone
 Double_t                     W, W2; // energy of the hadronic system
+Double_t                 W_d, W2_d; // energy of the hadronic system
 //Double_t              W_p_rest;
 //Double_t              W_d_rest;
 //Double_t                     Emiss;
@@ -647,7 +649,8 @@ void SetInputAndOutputTTrees (){
     SIDISTree  -> SetBranchAddress("xB"                     ,&xB                     );
     SIDISTree  -> SetBranchAddress("Q2"                     ,&Q2                     );
     SIDISTree  -> SetBranchAddress("y"                      ,&y                      );
-    SIDISTree  -> SetBranchAddress("W"                         ,&W                      );
+    SIDISTree  -> SetBranchAddress("W"                      ,&W                      );
+    SIDISTree  -> SetBranchAddress("W_d"                    ,&W_d                    );
     
     // branches that depend on pion charge
     if (pionCharge=="pi+") {
@@ -951,6 +954,7 @@ void ComputeKinematics(TLorentzVector pi){
     // W is read off the SIDIS TTree
     // Kinematics for the virtual moving proton
     //      W = ( p_rest + q ).Mag();
+    //    W_d = ( d_rest + q ).Mag();
     W_Prime   = ( p_init + *q ).Mag();
         
     M_x       = ( p_rest + *q - pi ).Mag();
@@ -983,8 +987,9 @@ void ComputeKinematics(TLorentzVector pi){
         << "(p_init + *q).Mag2(): "<< (p_init + *q).Mag2()  << ","
         << std::endl
         << "-Pn: "      << (-Pn).P() << " GeV/c,"
-        << "W: "        << W        << " GeV/c2,"
+        << "W: "        << W         << " GeV/c2,"
         << "W': "       << W_Prime   << " GeV/c2,"
+        << "W_d: "      << W_d       << " GeV/c2,"
         << std::endl;
     }
 }
@@ -1112,6 +1117,7 @@ void InitializeVariables(){
     y                                   = -9999;
     M_x         = M_x_Prime             = -9999;
     W           = W_Prime               = -9999;
+    W           = W_d                   = -9999;
     xF          = xF_Prime              = -9999;
     Ve                                  = new TVector3();
     n_ToF                               = -9999;
