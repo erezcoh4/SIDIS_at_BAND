@@ -42,7 +42,8 @@ TString csvheader = ( (TString)"status,runnum,evnum,beam_helicity,"
                      +(TString)"pi_qFrame_pT,pi_qFrame_pL,"
                      +(TString)"Zpi,Zpi_LC,"
                      +(TString)"W,M_x,"
-                     +(TString)"xF,eta_pi,");
+                     +(TString)"xF,eta_pi,"
+                     +(TString)"W_d,");
 
 std::vector<int> csvprecisions = {
     0,0,0,0,
@@ -286,6 +287,7 @@ Double_t           Ebeam, omega, y, xB, Q2;
 Double_t                                xF;
 Double_t                            eta_pi;
 Double_t                             W, W2;
+Double_t                         W_d, W2_d;
 Double_t                               M_x;
 
 
@@ -994,7 +996,7 @@ void SetOutputTTrees(){
 //    outTree_e_piplus_no_cuts->Branch("xB"                   ,&xB                    );
 //    outTree_e_piplus_no_cuts->Branch("Q2"                   ,&Q2                    );
 //    outTree_e_piplus_no_cuts->Branch("omega"                ,&omega                 );
-//    outTree_e_piplus_no_cuts->Branch("W_d_rest"         ,&W_d_rest          );
+//    outTree_e_piplus_no_cuts->Branch("W_d"         ,&W_d          );
 //    outTree_e_piplus_no_cuts->Branch("W"         ,&W          );
 //    outTree_e_piplus_no_cuts->Branch("Z"                    ,Zpips                  );
 //    outTree_e_piplus_no_cuts->Branch("y"                    ,&y                     );
@@ -1069,8 +1071,8 @@ void SetOutputTTrees(){
     outTree_e_piplus->Branch("xB"                   ,&xB                    );
     outTree_e_piplus->Branch("Q2"                   ,&Q2                    );
     outTree_e_piplus->Branch("omega"                ,&omega                 );
-    outTree_e_piplus->Branch("W_d_rest"         ,&W_d_rest          );
-    outTree_e_piplus->Branch("W"         ,&W          );
+    outTree_e_piplus->Branch("W_d"                  ,&W_d          );
+    outTree_e_piplus->Branch("W"                    ,&W          );
     outTree_e_piplus->Branch("Z"                    ,Zpips                  );
     outTree_e_piplus->Branch("Z_LC"                 ,ZpipsLC                );
     outTree_e_piplus->Branch("y"                    ,&y                     );
@@ -1144,7 +1146,7 @@ void SetOutputTTrees(){
 //    outTree_e_piminus_no_cuts->Branch("xB"                  ,&xB                    );
 //    outTree_e_piminus_no_cuts->Branch("Q2"                  ,&Q2                    );
 //    outTree_e_piminus_no_cuts->Branch("omega"               ,&omega                 );
-//    outTree_e_piminus_no_cuts->Branch("W_d_rest"        ,&W_d_rest          );
+//    outTree_e_piminus_no_cuts->Branch("W_d"        ,&W_d          );
 //    outTree_e_piminus_no_cuts->Branch("W"        ,&W          );
 //    outTree_e_piminus_no_cuts->Branch("Z"                    ,Zpims                  );
 //
@@ -1217,7 +1219,7 @@ void SetOutputTTrees(){
     outTree_e_piminus->Branch("xB"                  ,&xB                    );
     outTree_e_piminus->Branch("Q2"                  ,&Q2                    );
     outTree_e_piminus->Branch("omega"               ,&omega                 );
-//    outTree_e_piminus->Branch("W_d_rest"            ,&W_d_rest          );
+    outTree_e_piminus->Branch("W_d"            ,&W_d          );
     outTree_e_piminus->Branch("W"                   ,&W                     );
     outTree_e_piminus->Branch("Z"                   ,Zpims                  );
     outTree_e_piminus->Branch("Z_LC"                ,ZpimsLC                );    
@@ -1371,7 +1373,7 @@ void InitializeVariables(){
     
     xB          = Q2        = omega     = -9999;
     xF          = y                     = -9999;
-    W_d_rest    = W                     = -9999;
+    W_d         = W                     = -9999;
     M_x                                 = -9999;
     e_E_ECIN    = e_E_ECOUT = e_E_PCAL  = -9999;
     e_PCAL_W    = e_PCAL_V              = -9999;
@@ -1612,12 +1614,13 @@ void FinishProgram(TString outfilepath, TString outfilename){
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void ComputeElectronKinematics(int fdebug){
     // compute event kinematics (from e-only information)
-    q     = Beam - e;
-    Q2    = -q.Mag2();
-    omega = q.E();
-    xB    = Q2/(2. * aux.Mp * q.E());
-    y     = omega / Ebeam;
-    W     = sqrt((p_rest + q).Mag2());
+    q       = Beam - e;
+    Q2      = -q.Mag2();
+    omega   = q.E();
+    xB      = Q2/(2. * aux.Mp * q.E());
+    y       = omega / Ebeam;
+    W       = sqrt((p_rest + q).Mag2());
+    W_d     = sqrt((d_rest + q).Mag2());
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -1864,6 +1867,7 @@ void Stream_e_pi_line_to_CSV( TString pionCharge, int piIdx,
         Zpi,            Zpi_LC,
         W,              M_x,
         xF,             eta_pi,
+        W_d,
     };
         
     // decide which file to write...

@@ -44,7 +44,8 @@ TString csvheader = ( (TString)"status,runnum,evnum,beam_helicity,"
                      +(TString)"pi_qFrame_pT,pi_qFrame_pL,"
                      +(TString)"Zpi,Zpi_LC,"
                      +(TString)"W,M_x,"
-                     +(TString)"xF,eta_pi,");
+                     +(TString)"xF,eta_pi,"
+                     +(TString)"W_d,");
 
 std::vector<int> csvprecisions = {
     0,0,0,0,
@@ -83,6 +84,7 @@ Double_t           Ebeam, omega, y, xB, Q2;
 Double_t                                xF;
 Double_t                            eta_pi;
 Double_t                             W, W2;
+Double_t                         W_d, W2_d;
 Double_t                               M_x;
 Double_t                                w2; // omega^2
 double                                 Zpi;
@@ -415,6 +417,7 @@ void ReadIgorRGAFile(TString fFileName="ntupleNew",
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void InitializeVariables (){
     xB          = Q2        = omega     = -9999;
+    W           = W_d                   = -9999;
     //    xF          = y         = M_X       = -9999;
     //    e_E_ECIN    = e_E_ECOUT = e_E_PCAL  = -9999;
     //    e_PCAL_W    = e_PCAL_V              = -9999;
@@ -531,9 +534,12 @@ void ComputeKinematics(){
     omega   = q.E();
     xB      = Q2/(2. * aux.Mp * q.E());
     
-    W2      = (target + q).Mag2(); //    W2      = Mp2 - Q2 + 2. * omega * Mp;
-    W       = sqrt(W2);
+    //    W2      = (target + q).Mag2(); //    W2      = Mp2 - Q2 + 2. * omega * Mp;
+    //    W       = sqrt(W2);
     y       = omega / Ebeam;
+    
+    W       = sqrt((p_rest + q).Mag2());
+    W_d     = sqrt((d_rest + q).Mag2());
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
@@ -1643,6 +1649,7 @@ void Stream_e_pi_line_to_CSV( TString pionCharge, int piIdx,
         Zpi,            Zpi_LC,
         W,              M_x,
         xF,             eta_pi,
+        W_d,
     };
     
     // decide which file to write...
