@@ -348,11 +348,31 @@ void MergeSIDISandBANDevents (int NMAXeventsToMerge=10,
         // grab neturon information from BAND
         GetBANDData ( MergedEvtId );
                 
+        std::cout << "(1) " << std::setprecision(4)
+        << "W: "        << W         << " GeV/c2,"
+        << "W': "       << W_Prime   << " GeV/c2,"
+        << "W_d: "      << W_d       << " GeV/c2,"
+        << std::endl;
+
+        
         // move to q-frame and define the pion and neutron momentum with respect to q
         MoveTo_qFrame       ();
 
+        std::cout << "(2) " << std::setprecision(4)
+        << "W: "        << W         << " GeV/c2,"
+        << "W': "       << W_Prime   << " GeV/c2,"
+        << "W_d: "      << W_d       << " GeV/c2,"
+        << std::endl;
+
         // merge information about the event from both sources
         MergeEventData      ();
+        
+        std::cout << "(3) " << std::setprecision(4)
+        << "W: "        << W         << " GeV/c2,"
+        << "W': "       << W_Prime   << " GeV/c2,"
+        << "W_d: "      << W_d       << " GeV/c2,"
+        << std::endl;
+
         
         if (fdebug && MergedEvtId%PrintProgress==0) std::cout << MergedEvtId << "/" << NeventsToMerge << std::endl;
     } // end merged event loop
