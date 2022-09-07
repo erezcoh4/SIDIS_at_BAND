@@ -986,7 +986,8 @@ void ComputeKinematics(TLorentzVector pi){
         << "(p_init + *q).Mag(): "<< (p_init + *q).Mag()  << ","
         << "(p_init + *q).Mag2(): "<< (p_init + *q).Mag2()  << ","
         << std::endl
-        << "-Pn: "      << (-Pn).P() << " GeV/c,"
+        << "Pn: "       << (Pn).P()  << " GeV/c,"
+        << std::setprecision(4)
         << "W: "        << W         << " GeV/c2,"
         << "W': "       << W_Prime   << " GeV/c2,"
         << "W_d: "      << W_d       << " GeV/c2,"
