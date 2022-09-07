@@ -1071,8 +1071,8 @@ void SetOutputTTrees(){
     outTree_e_piplus->Branch("xB"                   ,&xB                    );
     outTree_e_piplus->Branch("Q2"                   ,&Q2                    );
     outTree_e_piplus->Branch("omega"                ,&omega                 );
-    outTree_e_piplus->Branch("W_d"                  ,&W_d          );
-    outTree_e_piplus->Branch("W"                    ,&W          );
+    outTree_e_piplus->Branch("W_d"                  ,&W_d                   );
+    outTree_e_piplus->Branch("W"                    ,&W                     );
     outTree_e_piplus->Branch("Z"                    ,Zpips                  );
     outTree_e_piplus->Branch("Z_LC"                 ,ZpipsLC                );
     outTree_e_piplus->Branch("y"                    ,&y                     );
@@ -1219,7 +1219,7 @@ void SetOutputTTrees(){
     outTree_e_piminus->Branch("xB"                  ,&xB                    );
     outTree_e_piminus->Branch("Q2"                  ,&Q2                    );
     outTree_e_piminus->Branch("omega"               ,&omega                 );
-    outTree_e_piminus->Branch("W_d"            ,&W_d          );
+    outTree_e_piminus->Branch("W_d"                 ,&W_d                   );
     outTree_e_piminus->Branch("W"                   ,&W                     );
     outTree_e_piminus->Branch("Z"                   ,Zpims                  );
     outTree_e_piminus->Branch("Z_LC"                ,ZpimsLC                );    

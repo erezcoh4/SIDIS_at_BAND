@@ -522,8 +522,6 @@ void ReadRGAEvent(int event){
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void ComputeKinematics(){
-    
-    
     // compute event kinematics (from e-only information)
     // assign kinematics to leading electron
     q       .SetPxPyPzE( qx[e_idx], qy[e_idx], qz[e_idx], Nu[e_idx] );
