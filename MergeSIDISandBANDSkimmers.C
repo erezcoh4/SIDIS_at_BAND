@@ -1084,6 +1084,7 @@ void Stream_e_pi_n_line_to_CSV(int piIdx,
         W_Prime,        M_x_Prime,
         xF_Prime,
         xB_Prime,
+        W_d,
     };
     
     if (fdebug>2){
@@ -1187,7 +1188,7 @@ void InitializeVariables(){
 void MergeEventData(){
     if (fdebug>2){
         std::cout
-        << "MergeEventData( event " << BANDeventID << " from run " << BANDrunID << ")"
+        << "MergeEventData(event " << BANDeventID << " from run " << BANDrunID << ")"
         << std::endl        << std::endl;
     }
 
@@ -1208,10 +1209,13 @@ void MergeEventData(){
         if (goodneutron){
             Stream_e_pi_n_line_to_CSV(piIdx,
                                       eepiPastKinematicalCuts, goodneutron);
-            
         }
     }
-    if (fdebug>2) { std::cout << "-----------------------------------------------------------------" << std::endl; }
+    if (fdebug>2) {
+        std::cout
+        << "----------------------------------------------------------------"
+        << std::endl;
+    }
 }
 
 
