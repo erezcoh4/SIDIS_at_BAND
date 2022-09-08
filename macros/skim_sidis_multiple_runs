@@ -70,6 +70,6 @@ print('')
 if args.no_email==False:#{
     mailtitle = 'Done processing skim_sidis_multiple_runs on ifarm'
     mailbody  = ('processed %d runs (run %d-%d), Data in /volatile/clas12/users/ecohen/BAND/SIDIS_skimming/')
-    emailstr = ('echo %s | mail -s "%s" cohen.erez7@gmail.com'%(Nruns, FirstRun, FirstRun + mailbody,mailtitle) )
+    emailstr = ('echo %s | mail -s \"%s\" cohen.erez7@gmail.com'%(mailbody,mailtitle) )
     os.system(emailstr)
 #}
