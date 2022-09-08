@@ -43,7 +43,7 @@ TString csvheader = ( (TString)"status,runnum,evnum,beam_helicity,"
                      +(TString)"Zpi,Zpi_LC,"
                      +(TString)"W,M_x,"
                      +(TString)"xF,eta_pi,"
-                     +(TString)"W_d,");
+                     +(TString)"W_d,M_x_d,");
 
 std::vector<int> csvprecisions = {
     0,0,0,0,
@@ -288,7 +288,7 @@ Double_t                                xF;
 Double_t                            eta_pi;
 Double_t                             W, W2;
 Double_t                         W_d, W2_d;
-Double_t                               M_x;
+Double_t                        M_x, M_x_d;
 
 
 // vectors in q-frame
@@ -1374,7 +1374,7 @@ void InitializeVariables(){
     xB          = Q2        = omega     = -9999;
     xF          = y                     = -9999;
     W_d         = W                     = -9999;
-    M_x                                 = -9999;
+    M_x         = M_x_d                 = -9999;
     e_E_ECIN    = e_E_ECOUT = e_E_PCAL  = -9999;
     e_PCAL_W    = e_PCAL_V              = -9999;
     e_PCAL_x    = e_PCAL_y  = e_PCAL_z  = -9999;
@@ -1633,6 +1633,8 @@ void ComputePionKinematics(TLorentzVector pi, TLorentzVector pi_qFrame){
     // additional kinematical variables 
     // assuming scattering off a proton at rest
     M_x     = ( q + p_rest - pi ).Mag();
+    M_x_d   = ( q + d_rest - pi ).Mag();
+    
     xF      = 2. * (pi.Vect().Dot(q.Vect())) / (q.P() * W);
     eta_pi  = 0.5 * log((pi_qFrame.E()+pi_qFrame.Pz()) /
                         (pi_qFrame.E()-pi_qFrame.Pz()));
@@ -1867,7 +1869,7 @@ void Stream_e_pi_line_to_CSV( TString pionCharge, int piIdx,
         Zpi,            Zpi_LC,
         W,              M_x,
         xF,             eta_pi,
-        W_d,
+        W_d,            M_x_d,
     };
         
     // decide which file to write...

@@ -16,6 +16,8 @@ Sep-6, 2022
 -------------
 1. Added **W_d** back to output variables in the csv file
 
+2. Updated **apply_Kinematical_cuts()** such that cut values are read off from *BANDcutValues.csv* file 
+
 
 Aug-26, 2022    
 -------------
