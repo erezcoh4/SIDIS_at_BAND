@@ -462,7 +462,7 @@ def load_SIDIS_data(runs_filename  = "good_runs_10-2-final.txt",
                                               'xB', 'Zpi',
                                               'M_x', 'e_DC_sector',
                                               'pi_DC_sector','pi_qFrame_pT','pi_qFrame_pL',
-                                              'W_d'],
+                                              'W_d','M_x_d'],
                                      dtype={'runnum':int,'evnum': int,
                                             'e_DC_sector':int, 'pi_DC_sector':int,
                                             'e_P':np.half,'e_Theta':np.half,'e_Phi':np.half,
@@ -471,7 +471,7 @@ def load_SIDIS_data(runs_filename  = "good_runs_10-2-final.txt",
                                             'xB':np.half, 'Zpi':np.half,
                                             'M_x':np.half,
                                             'pi_qFrame_pT':np.half,'pi_qFrame_pL':np.half,
-                                            'W_d':np.half})
+                                            'W_d':np.half,'M_x_d':np.half})
                 
                 if runIdx==0: e_e_pi[pi_charge_name] = eepi
                 else:         e_e_pi[pi_charge_name] = pd.concat([e_e_pi[pi_charge_name],eepi])
@@ -539,6 +539,7 @@ def load_SIDIS_data(runs_filename  = "good_runs_10-2-final.txt",
     #}
 #}
 # ----------------------- #
+
 
 
 
@@ -726,15 +727,91 @@ def load_SIDIS_ratio(
 
 
 
+# ----------------------- #
+def extract_SIDIS_ratio(df_dict  = None,
+                        x_var    = 'xB' ,
+                        x_bins   = np.linspace(0.2,0.6,11),
+                        z_bins   = np.arange(0.3,0.8,0.1),
+                        z_widths = 0.01*np.ones(5),
+                        data_path= '/Users/erezcohen/Desktop/data/BAND/Results/',
+                        fdebug   = 0,
+                        prefix   = 'Untagged_SIDIS_ratio_',
+                        suffix   = '',
+                        M_x_min  = 0,
+                        M_x_max  = np.inf,
+                        W_min    = 0,
+                        W_max    = np.inf,
+                        Mx_d_min = 0):
+    '''
+    Extract SIDIS results,
+    the number of d(e,e'π+) and d(e,e'π-) events,
+    and save them to a CSV file
+    
+    last update Sep-8, 2022
+    
+    
+    input
+    ---------
+
+    
+    '''
+    
+    x        = (x_bins[1:] + x_bins[:-1])/2
+    x_err    = (x_bins[1:] - x_bins[:-1])/2
+    results_data_path = data_path + '/' + 'Results' + '/'
+    for z_bin,z_width in zip(z_bins,z_widths):
+        z_min,z_max = z_bin-z_width, z_bin+z_width
+        
+        (R,
+         R_err_up,R_err_dw,
+         N_pips,N_pims,
+         Zavg_pips,
+         Zavg_pims) = compute_ratio_pips_to_pims(df_dict = df_dict ,
+                                                 var     = x_var,
+                                                 bins    = x_bins,
+                                                 z_min   = z_min,
+                                                 z_max   = z_max,
+                                                 M_x_min = M_x_min,
+                                                 M_x_max = M_x_max,
+                                                 W_min=W_min,
+                                                 W_max=W_max,
+                                                 Mx_d_min=Mx_d_min)
+
+        df_to_save = pd.DataFrame({"$x_B$":x,
+                                   "$\Delta x_B$":x_err,
+                                   '$N(\pi_{+})$':N_pips,
+                                   '$N(\pi_{-})$':N_pims,
+                                   '$R$':R,
+                                   '$\Delta R_{+}$':R_err_up,
+                                   '$\Delta R_{-}$':R_err_dw})
+        
+        filelabel = 'Zmin%.3f_Zmean_pips%.3f_pims%.3f_Zmax%.3f'%(z_min,Zavg_pips,Zavg_pims,z_max)
+        filename  =  data_path + prefix + filelabel + suffix  + '.csv'
+        df_to_save.to_csv(filename)
+        print('saved',filename)
+        if fdebug>1:
+            print('$z=%.3f\pm%.3f$'%(z_bin,z_width))
+            print(filename)
+            display(df_to_save)
+# ----------------------- #
+
+
+
+
+
+
+
+
 
 # ----------------------- #
 def compute_ratio_pips_to_pims(df_dict,
                                var='xB',
                                bins=np.linspace(0,1,10),
                                weight_option = '',
-                               z_min=0,z_max=1,
-                               M_x_min=0,M_x_max=np.inf,
-                               W_min=0,W_max=np.inf):#{
+                               z_min=0,   z_max=1,
+                               M_x_min=0, M_x_max=np.inf,
+                               W_min=0,   W_max=np.inf,
+                               Mx_d_min=0 ):#{
     '''
     last edit Sep-8, 2022
     
@@ -766,11 +843,15 @@ def compute_ratio_pips_to_pims(df_dict,
     df_pips = df_pips[  (z_min   < df_pips.Zpi) & (df_pips.Zpi < z_max  )
                       & (M_x_min < df_pips.M_x) & (df_pips.M_x < M_x_max)
                       & (W_min   < df_pips.W  ) & (df_pips.W   < W_max  )   ]
+    if Mx_d_min>0:
+        df_pips = df_pips[Mx_d_min < df_pips.M_x_d]
     Zavg_pips = np.mean( np.array(df_pips.Zpi)  )
     
     df_pims = df_pims[  (z_min   < df_pims.Zpi) & (df_pims.Zpi < z_max  )
                       & (M_x_min < df_pims.M_x) & (df_pims.M_x < M_x_max)
                       & (W_min   < df_pims.W  ) & (df_pims.W   < W_max  )   ]
+    if Mx_d_min>0:
+        df_pims = df_pims[Mx_d_min < df_pims.M_x_d]
     Zavg_pims = np.mean( np.array(df_pims.Zpi)  )
 
 
@@ -826,77 +907,6 @@ def compute_ratio_pips_to_pims(df_dict,
             Zavg_pims]
 #}
 # ----------------------- #
-
-
-
-
-
-# ----------------------- #
-def extract_SIDIS_ratio(df_dict  = None,
-                        x_var    = 'xB' ,
-                        x_bins   = np.linspace(0.2,0.6,11),
-                        z_bins   = np.arange(0.3,0.8,0.1),
-                        z_widths = 0.01*np.ones(5),
-                        data_path= '/Users/erezcohen/Desktop/data/BAND/Results/',
-                        fdebug   = 0,
-                        prefix   = 'Untagged_SIDIS_ratio_',
-                        suffix   = '',
-                        M_x_min  = 0,
-                        M_x_max  = np.inf,
-                        W_min    = 0,
-                        W_max = np.inf):
-    '''
-    Extract SIDIS results,
-    the number of d(e,e'π+) and d(e,e'π-) events,
-    and save them to a CSV file
-    
-    last update Sep-8, 2022
-    
-    
-    input
-    ---------
-
-    
-    '''
-    
-    x        = (x_bins[1:] + x_bins[:-1])/2
-    x_err    = (x_bins[1:] - x_bins[:-1])/2
-    results_data_path = data_path + '/' + 'Results' + '/'
-    for z_bin,z_width in zip(z_bins,z_widths):
-        z_min,z_max = z_bin-z_width, z_bin+z_width
-        
-        (R,
-         R_err_up,R_err_dw,
-         N_pips,N_pims,
-         Zavg_pips,
-         Zavg_pims) = compute_ratio_pips_to_pims(df_dict = df_dict ,
-                                                 var     = x_var,
-                                                 bins    = x_bins,
-                                                 z_min   = z_min,
-                                                 z_max   = z_max,
-                                                 M_x_min = M_x_min,
-                                                 M_x_max = M_x_max,
-                                                 W_min=W_min,
-                                                 W_max=W_max)
-
-        df_to_save = pd.DataFrame({"$x_B$":x,
-                                   "$\Delta x_B$":x_err,
-                                   '$N(\pi_{+})$':N_pips,
-                                   '$N(\pi_{-})$':N_pims,
-                                   '$R$':R,
-                                   '$\Delta R_{+}$':R_err_up,
-                                   '$\Delta R_{-}$':R_err_dw})
-        
-        filelabel = 'Zmin%.3f_Zmean_pips%.3f_pims%.3f_Zmax%.3f'%(z_min,Zavg_pips,Zavg_pims,z_max)
-        filename  =  data_path + prefix + filelabel + suffix  + '.csv'
-        df_to_save.to_csv(filename)
-        print('saved',filename)
-        if fdebug>1:
-            print('$z=%.3f\pm%.3f$'%(z_bin,z_width))
-            print(filename)
-            display(df_to_save)
-# ----------------------- #
-
 
 
 
