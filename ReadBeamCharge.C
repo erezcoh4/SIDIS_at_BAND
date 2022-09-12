@@ -22,6 +22,8 @@
 
 //TString DataPath = "/volatile/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train_20200610/inc/";
 TString DataPath, prefix;// = "/cache/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train/sidisdvcs/";
+using namespace clas12;
+SIDISatBAND_auxiliary  aux;
 
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
@@ -40,14 +42,15 @@ void SetDataPath (TString fDataPath) {
     }
 }
 
-SIDISatBAND_auxiliary  aux;
 
 
-
+// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void ReadBeamCharge( int RunNumber=6420, int fdebug=0, TString fDataPath = "sidisdvcs" ){
     
 //    TString outfilepath = "/volatile/clas12/users/ecohen/BAND/SIDIS_skimming/";
     TString RunNumberStr = aux.GetRunNumberSTR ( RunNumber );
+    SetDataPath(fDataPath);
+    
 //    TString outfilename = "skimmed_SIDIS_inc_" + RunNumberStr;
     
 
