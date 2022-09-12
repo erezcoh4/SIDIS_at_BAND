@@ -19,12 +19,11 @@
 #include "clas12reader.h"
 #include "Auxiliary/SIDISatBAND_auxiliary.cpp"
 
-
-//TString DataPath = "/volatile/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train_20200610/inc/";
-TString DataPath, prefix;// = "/cache/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train/sidisdvcs/";
 using namespace clas12;
 SIDISatBAND_auxiliary  aux;
-
+TString DataPath, prefix;
+TString csvheader = ( (TString)"runnum,beam_charge,");
+std::ofstream csvfile;
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void SetDataPath (TString fDataPath) {
@@ -47,15 +46,13 @@ void SetDataPath (TString fDataPath) {
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void ReadBeamCharge( int RunNumber=6420, int fdebug=0, TString fDataPath = "sidisdvcs" ){
     
-//    TString outfilepath = "/volatile/clas12/users/ecohen/BAND/SIDIS_skimming/";
     TString RunNumberStr = aux.GetRunNumberSTR ( RunNumber );
     SetDataPath(fDataPath);
     
-//    TString outfilename = "skimmed_SIDIS_inc_" + RunNumberStr;
-    
-
-//    TString inputFile = DataPath + "inc_" + RunNumberStr + ".hipo";
-    TString inputFile = DataPath + prefix + RunNumberStr + ".hipo";
+    TString inputFile   = DataPath + prefix + RunNumberStr + ".hipo";
+    TString outfilename = "/volatile/clas12/users/ecohen/BAND/beam_charge.csv";
+    csvfile.open( outfilename, std::iomanip::app );
+    //    csvfile << csvheader << std::endl;
     
     TChain fake("hipo");
     fake.Add(inputFile.Data());
@@ -73,15 +70,16 @@ void ReadBeamCharge( int RunNumber=6420, int fdebug=0, TString fDataPath = "sidi
         // process the run
         auto scal          = c12.scalerReader();
         auto RunBeamCharge = c12.getRunBeamCharge();
-        if (fdebug){
-            std::cout << "beam charge: " << RunBeamCharge << std::endl;
-        }
         
         // go to next events to ask for run number
         c12.next();
         auto run           = c12.runconfig()->getRun();
-        if (fdebug) std::cout << "run " << run  << std::endl;
+        if (fdebug)
+            std::cout
+            << "run " << RunNumber << "beam charge: "
+            << RunBeamCharge << std::endl;
         
+        csvfile << RunNumber << "," << RunBeamCharge << "," << std::endl;
         
     } // end file loop
 }
