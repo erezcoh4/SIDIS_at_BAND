@@ -50,7 +50,7 @@ void ReadBeamCharge( int RunNumber=6420, int fdebug=0, TString fDataPath = "sidi
     SetDataPath(fDataPath);
     
     TString inputFile   = DataPath + prefix + RunNumberStr + ".hipo";
-    TString outfilename = "/volatile/clas12/users/ecohen/BAND/beam_charge_"+RunNumberStr+".csv";
+    TString outfilename = "/volatile/clas12/users/ecohen/BAND/metaData/beam_charge_"+RunNumberStr+".csv";
     csvfile.open( outfilename );
         csvfile << csvheader << std::endl;
     
