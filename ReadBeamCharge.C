@@ -76,7 +76,7 @@ void ReadBeamCharge( int RunNumber=6420, int fdebug=0, TString fDataPath = "sidi
         auto run           = c12.runconfig()->getRun();
         if (fdebug)
             std::cout
-            << "run " << RunNumber << "beam charge: "
+            << "run " << RunNumber << ", beam charge: "
             << RunBeamCharge << std::endl;
         
         csvfile << RunNumber << "," << RunBeamCharge << "," << std::endl;
