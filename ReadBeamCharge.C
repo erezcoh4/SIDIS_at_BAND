@@ -51,8 +51,8 @@ void ReadBeamCharge( int RunNumber=6420, int fdebug=0, TString fDataPath = "sidi
     
     TString inputFile   = DataPath + prefix + RunNumberStr + ".hipo";
     TString outfilename = "/volatile/clas12/users/ecohen/BAND/beam_charge.csv";
-    csvfile.open( outfilename, std::iomanip::app );
-    //    csvfile << csvheader << std::endl;
+    csvfile.open( outfilename );
+        csvfile << csvheader << std::endl;
     
     TChain fake("hipo");
     fake.Add(inputFile.Data());
@@ -82,6 +82,7 @@ void ReadBeamCharge( int RunNumber=6420, int fdebug=0, TString fDataPath = "sidi
         csvfile << RunNumber << "," << RunBeamCharge << "," << std::endl;
         
     } // end file loop
+    csvfile.close();
 }
 
 
