@@ -461,8 +461,7 @@ def load_SIDIS_data(runs_filename  = "good_runs_10-2-final.txt",
                                               'Q2', 'W',
                                               'xB', 'Zpi',
                                               'M_x', 'e_DC_sector',
-                                              'pi_DC_sector','pi_qFrame_pT','pi_qFrame_pL',
-                                              'W_d','M_x_d'],
+                                              'pi_DC_sector','pi_qFrame_pT','pi_qFrame_pL'],
                                      dtype={'runnum':int,'evnum': int,
                                             'e_DC_sector':int, 'pi_DC_sector':int,
                                             'e_P':np.half,'e_Theta':np.half,'e_Phi':np.half,
@@ -470,8 +469,7 @@ def load_SIDIS_data(runs_filename  = "good_runs_10-2-final.txt",
                                             'Q2':np.half,  'W':np.half,
                                             'xB':np.half, 'Zpi':np.half,
                                             'M_x':np.half,
-                                            'pi_qFrame_pT':np.half,'pi_qFrame_pL':np.half,
-                                            'W_d':np.half,'M_x_d':np.half})
+                                            'pi_qFrame_pT':np.half,'pi_qFrame_pL':np.half})
                 
                 if runIdx==0: e_e_pi[pi_charge_name] = eepi
                 else:         e_e_pi[pi_charge_name] = pd.concat([e_e_pi[pi_charge_name],eepi])
