@@ -21,22 +21,38 @@
 
 
 //TString DataPath = "/volatile/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train_20200610/inc/";
-TString DataPath = "/cache/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train/sidisdvcs/";
+TString DataPath, prefix;// = "/cache/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train/sidisdvcs/";
 
 
+// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+void SetDataPath (TString fDataPath) {
+    if (DataPath=="" || DataPath=="sidisdvcs" || DataPath=="sidis dvcs"){
+        // sidis-dvcs train files, used since July 2022
+        // (the 'usual' train files)
+        DataPath = "/cache/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train/sidisdvcs/";
+        prefix   = "sidisdvcs_";
+    }
+    else if (DataPath=="inclusive" || DataPath=="inc"){
+        // inclusive train files, used until July 2022
+        // (inclusive train files were only generated in the beginning of RGB without any backup)
+        DataPath = "/volatile/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train_20200610/inc/";
+        prefix   = "inc_";
+    }
+}
 
 SIDISatBAND_auxiliary  aux;
 
 
 
-void ReadBeamCharge( int RunNumber=6420, int fdebug=0 ){
+void ReadBeamCharge( int RunNumber=6420, int fdebug=0, TString fDataPath = "sidisdvcs" ){
     
 //    TString outfilepath = "/volatile/clas12/users/ecohen/BAND/SIDIS_skimming/";
     TString RunNumberStr = aux.GetRunNumberSTR ( RunNumber );
-    TString outfilename = "skimmed_SIDIS_inc_" + RunNumberStr;
+//    TString outfilename = "skimmed_SIDIS_inc_" + RunNumberStr;
     
 
-    TString inputFile = DataPath + "inc_" + RunNumberStr + ".hipo";
+//    TString inputFile = DataPath + "inc_" + RunNumberStr + ".hipo";
+    TString inputFile = DataPath + prefix + RunNumberStr + ".hipo";
     
     TChain fake("hipo");
     fake.Add(inputFile.Data());
