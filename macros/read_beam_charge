@@ -43,7 +43,7 @@ runIdx = 0
 for line in run_fileLines[FirstRun:]:#{
     runIdx += 1
     run = int(line.strip())
-    commandline = ("clas12root -l -q 'ReadBeamCharge.C+(%d,%d)'"%
+    commandline = ("clas12root -q 'ReadBeamCharge.C+(%d,%d)'"%
                     (run,fdebug))
     print('')
     print("processing run %d/%d"%(runIdx,Nruns))
