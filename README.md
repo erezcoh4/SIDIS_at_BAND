@@ -12,6 +12,12 @@ This repository is responsible for
 ## Revisions and release notes
 ------------------------------------------------------------------------------
 
+Sep-13, 2022    
+-------------
+1. Added weight_option to **extract_SIDIS_ratio()** with a default value to weight by 'beam-charge', in which case the number of events is measured in 1/nC
+
+2. Added a column **'weight'** to **e_e_pi_pass_cuts** which is 1/beam-charge
+
 Sep-6, 2022    
 -------------
 1. Added **W_d** back to output variables in the csv file
@@ -630,6 +636,14 @@ banklib/BCalorimeter.cpp
 include/BBand.h
 banklib/BBand.cpp
 
+
+# Final SIDIS results
+---------------------------------------
+pandas.DataFrame(
+{"$x_B$","$\Delta x_B$",
+ '$N(\pi_{+})$','$N(\pi_{-})$',
+ '$R$','$\Delta R_{+}$','$\Delta R_{-}$'}
+ )
 
 # Kinematical observables
 ---------------------------------------
