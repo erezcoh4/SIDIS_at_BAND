@@ -344,7 +344,7 @@ def apply_cuts_to_e_e_pi(fdebug=2,
                                          doApply_minPn_cut,
                                          doApply_Mx_cut)
                                          
-    Aug-29, 2022
+    Sep-15, 2022
     '''
     # d(e,e'\pi) SIDIS data
     global e_e_pi, e_e_pi_pass_cuts
@@ -388,7 +388,14 @@ def apply_cuts_to_e_e_pi(fdebug=2,
         Nevents,frac_Nevents = get_Nevents(pi_ch, 'p-theta',      e_e_pi_after_p_theta_cut,      Nevents, frac_Nevents);
         Nevents,frac_Nevents = get_Nevents(pi_ch, 'Mx',           e_e_pi_after_Mx_cut,           Nevents, frac_Nevents);
         Nevents,frac_Nevents = get_Nevents(pi_ch, 'Kinematical',  e_e_pi_after_Kinematical_cuts, Nevents, frac_Nevents);
-        e_e_pi_pass_cuts[pi_ch]['weight'] = runnum_weight( e_e_pi_pass_cuts[pi_ch].runnum )
+        
+        # add beam-charge weight
+        runnumbers = np.array(e_e_pi_pass_cuts[pi_ch].runnum).astype(int);
+        print('l.394, runnumbers:')
+        print(runnumbers)
+        print('runnumbers[0:10000]:')
+        print(runnumbers[0:10000])
+        e_e_pi_pass_cuts[pi_ch]['weight'] = runnum_weight( runnumbers )
     #}
     print(' ')
     return e_e_pi_pass_cuts

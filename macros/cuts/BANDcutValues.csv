@@ -12,7 +12,7 @@ PCAL_ECIN_SF_min,0
 y_max,0.75
 Q2_min,2.0
 Q2_max,10.0
-W_min,0.5
+W_min,2.5
 W_max,100
 Zpi_min,0.3
 Zpi_max,1.0
