@@ -50,6 +50,189 @@ for run in beam_charge_all_runs.runnum:
 
 
 # ----------------------- #
+def apply_p_theta_acceptance_cut_single_set( df_dict=None,
+                                 NeventsMax=-1,
+                                 NMaxPerSubset = 500000,
+                                 fdebug=1):
+    '''
+        df_dict_after_cut = apply_p_theta_acceptance_cut(df_dict)
+        
+        Apply a π+/π- acceptance matching cut on the in p-\theta plane
+        last update Sep-15, 2022
+        
+    '''
+    import numpy as np
+    print("Apply a π+/π- acceptance matching cut on the in p-theta plane")
+    df_dict_after_cut = dict()
+        
+    for pi_ch in pi_charge_names:
+        
+        if NeventsMax > 0: NeventsMax = np.min( [NeventsMax, len(df_dict[pi_ch])] )
+        else:              NeventsMax = len(df_dict[pi_ch])
+        df = df_dict[pi_ch][0:NeventsMax]
+        if fdebug: print('Applying p-theta on cut for '+pi_ch+' on %d events'%NeventsMax)
+        good_indices = np.array([])
+        for sector in range(1,7):#{
+            df_in_sector   = df[df.pi_DC_sector == sector]
+            print(len(df_in_sector),'in sector',sector)
+            theta_min_pi   = pi_min_theta_cut( pi_charge = 'any', sector=sector, p=np.array(df_in_sector.pi_P) )
+            good_indices_in_sector = []
+            good_indices_in_sector = df_in_sector[ df_in_sector.pi_Theta*r2d > theta_min_pi ].index
+            good_indices = np.concatenate([good_indices,good_indices_in_sector])
+        #}
+        good_indices = np.unique(good_indices)
+        df_after_cut = df.loc[good_indices]
+
+        df_dict_after_cut[pi_ch] = df_after_cut
+    return df_dict_after_cut
+# ----------------------- #
+
+
+# ----------------------- #
+def load_SIDIS_data(runs_filename  = "good_runs_10-2-final.txt",
+                    main_data_path = '/Users/erezcohen/Desktop/data/BAND/',
+                    Nruns          = 1,
+                    do_e_e_pi      = True,
+                    do_e_e_pi_n    = True,
+                    do_e_e_pi_FreeP= True,
+                    do_all_vars    = False,
+                    fdebug         = 2,
+                    prefix         = "sidisdvcs",
+                    subdirname     = "",
+                    FreeP_prefix   = "ntupleNew"):#{
+    '''
+    e_e_pi, e_e_pi_n, e_e_pi_FreeP = load_SIDIS_data()
+    Load SIDIS data, and fill e_e_pi and e_e_pi_n with data
+    last update Sep-17, 2022
+    
+    input:
+    -------------
+    do_e_e_pi       flag to read d(e,e'π) data  from RGB - takes much time for a large number of runs
+    do_e_e_pi_n     flag to read d(e,e'πn) data from RGB - takes less time
+    do_e_e_pi_FreeP flag to read p(e,e'π) data from RGA  - takes much time
+    prefix          "sidisdvcs" / "inc"      - inclusive skimming train
+    subdirname      "With_W0.5cut" / "With_W2.5cut"
+    
+    
+    Comments:
+    -------------
+    e_e_pi, e_e_pi_n, e_e_pi_FreeP       dict(['piplus','piminus'])
+    e.g. :
+    e_e_pi['piplus'] = pandas.DataFrame( (e,e'π) events data )
+    
+    '''
+    global e_e_pi, e_e_pi_n, e_e_pi_FreeP;
+
+    e_e_pi_data_path       = main_data_path + 'SIDIS_skimming/' + prefix + '/' + subdirname + '/'
+    e_e_pi_n_data_path     = main_data_path + 'merged_SIDIS_and_BAND_skimming/'
+    e_e_pi_FreeP_data_path = main_data_path + 'RGA_Free_proton/'
+
+    runs = read_run_nunmbers(runs_filename=runs_filename,Nruns=Nruns)
+    e_e_pi, e_e_pi_n, e_e_pi_FreeP = dict(),dict(),dict()
+    
+    for runnum,runIdx in zip(runs,range(len(runs))):#{
+        if fdebug>1: print('Run number ',runnum,'(%d/%d runs)'%(runIdx+1,len(runs)))
+        for pi_charge_name,pi_print in zip(pi_charge_names,pi_prints):
+            if do_e_e_pi:#{
+                # e_e_pi[pi_charge_name] = []
+                if do_all_vars:
+                    eepi   = pd.read_csv(e_e_pi_data_path
+                                     +'skimmed_SIDIS_'
+                                     +prefix + '_'
+                                     +'00%d_e_%s_selected_eepi_kinematics.csv'%(runnum,pi_charge_name))
+
+                else: # more economic
+                    eepi   = pd.read_csv(e_e_pi_data_path
+                                     +'skimmed_SIDIS_'
+                                     +prefix + '_'
+                                     +'00%d_e_%s_selected_eepi_kinematics.csv'%(runnum,pi_charge_name),
+                                     usecols=['runnum','evnum',
+                                              'e_P','e_Theta','e_Phi',
+                                              'pi_P', 'pi_Theta', 'pi_Phi',
+                                              'Q2', 'W',
+                                              'xB', 'Zpi',
+                                              'M_x', 'e_DC_sector',
+                                              'pi_DC_sector','pi_qFrame_pT','pi_qFrame_pL'],
+                                     dtype={'runnum':int,'evnum': int,
+                                            'e_DC_sector':int, 'pi_DC_sector':int,
+                                            'e_P':np.half,'e_Theta':np.half,'e_Phi':np.half,
+                                            'pi_P':np.half,'pi_Theta':np.half, 'pi_Phi':np.half,
+                                            'Q2':np.half,  'W':np.half,
+                                            'xB':np.half, 'Zpi':np.half,
+                                            'M_x':np.half,
+                                            'pi_qFrame_pT':np.half,'pi_qFrame_pL':np.half})
+                
+                if runIdx==0: e_e_pi[pi_charge_name] = eepi
+                else:         e_e_pi[pi_charge_name] = pd.concat([e_e_pi[pi_charge_name],eepi])
+
+                
+                if fdebug>1: print('Loaded',len(eepi)," d(e,e'"+pi_print+") events")
+
+            #}
+            if do_e_e_pi_n:#{
+                eepin = pd.read_csv(e_e_pi_n_data_path
+                                    + 'skimmed_SIDIS_and_BAND_'
+                                    + prefix + '_'
+                                    + '00%d_e_%s_n.csv'%(runnum,pi_charge_name))
+                
+                if fdebug>1: print('Loaded',len(eepin)," d(e,e'"+pi_print+"n) events")
+
+                if runIdx==0: e_e_pi_n[pi_charge_name] = eepin
+                else:         e_e_pi_n[pi_charge_name] = pd.concat([e_e_pi_n[pi_charge_name],eepin])
+            #}
+        #}
+    #}
+    if do_e_e_pi_FreeP:#{
+        for pi_charge_name,pi_print in zip(pi_charge_names,pi_prints):
+            if do_all_vars:
+                eepi   = pd.read_csv(e_e_pi_FreeP_data_path
+                                 +FreeP_prefix
+                                 +'_e_e_%s_selected_eepi_kinematics.csv'%(pi_charge_name))
+
+            else: # more economic
+                eepi   = pd.read_csv(e_e_pi_FreeP_data_path
+                                 +FreeP_prefix
+                                 +'_e_e_%s_selected_eepi_kinematics.csv'%(pi_charge_name),
+                                 usecols=['runnum','evnum',
+                                          'e_P','e_Theta','e_Phi',
+                                          'pi_P', 'pi_Theta', 'pi_Phi',
+                                          'Q2', 'W',
+                                          'xB', 'Zpi',
+                                          'M_x', 'e_DC_sector', 'pi_DC_sector','pi_qFrame_pT','pi_qFrame_pL'],
+                                 dtype={'runnum':int,'evnum': int,
+                                        'e_DC_sector':int, 'pi_DC_sector':int,
+                                        'e_P':np.half,'e_Theta':np.half,'e_Phi':np.half,
+                                        'pi_P':np.half,'pi_Theta':np.half, 'pi_Phi':np.half,
+                                        'Q2':np.half,  'W':np.half,
+                                        'xB':np.half, 'Zpi':np.half,
+                                        'M_x':np.half,
+                                        'pi_qFrame_pT':np.half,'pi_qFrame_pL':np.half})
+            
+            # Aug-2022: in e_e_pi_FreeP we only have 1 data-file
+            e_e_pi_FreeP[pi_charge_name] = eepi
+            #            if runIdx==0: e_e_pi_FreeP[pi_charge_name] = eepi
+            #            else:         e_e_pi_FreeP[pi_charge_name] = pd.concat([e_e_pi_FreeP[pi_charge_name],eepi])
+            if fdebug>1: print('Loaded',len(eepi)," p(e,e'"+pi_print+") events")
+        #}
+    #}
+       
+    print('Done loading files.')
+    
+    if fdebug>0:
+        print('')
+        print('Total statistics:')
+        for pi_charge_name,pi_print in zip(pi_charge_names,pi_prints):
+            if do_e_e_pi:       print(len(e_e_pi[pi_charge_name])      ," d(e,e'"+pi_print+")  events")
+            if do_e_e_pi_n:     print(len(e_e_pi_n[pi_charge_name])    ," d(e,e'"+pi_print+"n) events")
+            if do_e_e_pi_FreeP: print(len(e_e_pi_FreeP[pi_charge_name])," p(e,e'"+pi_print+")  events")
+    #}
+    return e_e_pi, e_e_pi_n, e_e_pi_FreeP
+#}
+# ----------------------- #
+
+
+
+# ----------------------- #
 def compute_ratio_pips_to_pims(df_dict,
                                var='xB',
                                bins=np.linspace(0,1,10),
@@ -335,7 +518,8 @@ def apply_cuts_to_e_e_pi(fdebug=2,
                          NMaxPerSubset = 500000,
                          doAcceptanceMatchingCut = True,
                          doApply_minPn_cut       = True,
-                         doApply_Mx_cut          = True):#{
+                         doApply_Mx_cut          = True,
+                         W_min                   = None):#{
     '''
     e_e_pi_pass_cuts = apply_cuts_to_e_e_pi(fdebug,
                                          NeventsMax,
@@ -351,10 +535,15 @@ def apply_cuts_to_e_e_pi(fdebug=2,
 
     
     if doAcceptanceMatchingCut:#{
-        e_e_pi_after_p_theta_cut = apply_p_theta_acceptance_cut( e_e_pi,
-                                                                NeventsMax=NeventsMax,
-                                                                NMaxPerSubset=NMaxPerSubset,
-                                                                fdebug=fdebug )
+        # e_e_pi_after_p_theta_cut = apply_p_theta_acceptance_cut( e_e_pi,
+#                                                                NeventsMax=NeventsMax,
+#                                                                NMaxPerSubset=NMaxPerSubset,
+#                                                                fdebug=fdebug )
+        e_e_pi_after_p_theta_cut = apply_p_theta_acceptance_cut_single_set( e_e_pi,
+                                                                  NeventsMax=NeventsMax,
+                                                                  NMaxPerSubset=NMaxPerSubset,
+                                                                  fdebug=fdebug )
+
     #}
     else:#{
         e_e_pi_after_p_theta_cut = dict()
@@ -371,7 +560,7 @@ def apply_cuts_to_e_e_pi(fdebug=2,
         e_e_pi_after_Mx_cut      = e_e_pi_after_p_theta_cut
     #}
 
-    e_e_pi_after_Kinematical_cuts = apply_Kinematical_cuts( e_e_pi_after_Mx_cut )
+    e_e_pi_after_Kinematical_cuts = apply_Kinematical_cuts( e_e_pi_after_Mx_cut, W_min=W_min )
     e_e_pi_pass_cuts         = e_e_pi_after_Kinematical_cuts;
 
     Nevents      = dict()
@@ -391,10 +580,6 @@ def apply_cuts_to_e_e_pi(fdebug=2,
         
         # add beam-charge weight
         runnumbers = np.array(e_e_pi_pass_cuts[pi_ch].runnum).astype(int);
-        print('l.394, runnumbers:')
-        print(runnumbers)
-        print('runnumbers[0:10000]:')
-        print(runnumbers[0:10000])
         e_e_pi_pass_cuts[pi_ch]['weight'] = runnum_weight( runnumbers )
     #}
     print(' ')
@@ -537,7 +722,8 @@ def apply_further_selection_cuts_to_data(fdebug=2,
                                          NMaxPerSubset = 500000,
                                          doAcceptanceMatchingCut = True,
                                          doApply_minPn_cut       = True,
-                                         doApply_Mx_cut          = True,):#{
+                                         doApply_Mx_cut          = True,
+                                         W_min                   = None):#{
     '''
     e_e_pi_pass_cuts, e_e_pi_n_pass_cuts, e_e_pi_GEMC_pass_cuts = apply_further_selection_cuts_to_data(fdebug=2)
     last edit Aug-26, 2022
@@ -553,7 +739,8 @@ def apply_further_selection_cuts_to_data(fdebug=2,
     input:
     --------
     doApply_*_cut      flag to apply the cut or not
-    
+    W_min              default is read-off automatically from macros/cuts/BANDcutValues.csv
+        
     return:
     --------
     e_e_pi_pass_cuts, e_e_pi_n_pass_cuts, e_e_pi_FreeP_pass_cuts, e_e_pi_GEMC_pass_cuts
@@ -573,21 +760,22 @@ def apply_further_selection_cuts_to_data(fdebug=2,
     
     # (1) d(e,e'π) Data
     if (e_e_pi=={}) is False:#{
-        print("(1) d(e,e'π) data")
+        print("(1) Applying cuts to d(e,e'π) data")
         e_e_pi_pass_cuts = apply_cuts_to_e_e_pi(fdebug, NeventsMax, NMaxPerSubset,
                                                 doAcceptanceMatchingCut,
                                                 doApply_minPn_cut,
-                                                doApply_Mx_cut)
+                                                doApply_Mx_cut,
+                                                W_min = W_min)
     # (2) d(e,e'πn) data
     if (e_e_pi_n=={}) is False:#{
-        print("(2) d(e,e'πn) data")
+        print("(2) Applying cuts to d(e,e'πn) data")
         e_e_pi_n_pass_cuts = apply_cuts_to_e_e_pi_n(fdebug, NeventsMax, NMaxPerSubset,
                                                     doAcceptanceMatchingCut,
                                                     doApply_minPn_cut,
                                                     doApply_Mx_cut)
     # (3) p(e,e'π) Data
     if (e_e_pi_FreeP=={}) is False:#{
-        print("(3) p(e,e'π) data")
+        print("(3) Applying cuts to p(e,e'π) data")
         e_e_pi_FreeP_pass_cuts = apply_cuts_to_e_e_pi_FreeP(fdebug, NeventsMax,NMaxPerSubset,
                                                     doAcceptanceMatchingCut,
                                                     doApply_minPn_cut,
@@ -628,143 +816,6 @@ def read_run_nunmbers(runfile_path = "/Users/erezcohen/Desktop/Software/CLAS12/B
 #}
 
 
-# ----------------------- #
-def load_SIDIS_data(runs_filename  = "good_runs_10-2-final.txt",
-                    main_data_path = '/Users/erezcohen/Desktop/data/BAND/',
-                    Nruns          = 1,
-                    do_e_e_pi      = True,
-                    do_e_e_pi_n    = True,
-                    do_e_e_pi_FreeP= True,
-                    do_all_vars    = False,
-                    fdebug         = 2,
-                    prefix         = "sidisdvcs",
-                    subdirname     = "",
-                    FreeP_prefix   = "ntupleNew"):#{
-    '''
-    Load SIDIS data, and fill e_e_pi and e_e_pi_n with data
-    last update Sep-8, 2022
-    
-    input:
-    -------------
-    do_e_e_pi       flag to read d(e,e'π) data  from RGB - takes much time for a large number of runs
-    do_e_e_pi_n     flag to read d(e,e'πn) data from RGB - takes less time
-    do_e_e_pi_FreeP flag to read p(e,e'π) data from RGA  - takes much time
-    prefix          "sidisdvcs" / "inc"      - inclusive skimming train
-    subdirname      "With_W0.5cut" / "With_W2.5cut"
-    
-    Comments:
-    -------------
-    e_e_pi, e_e_pi_n, e_e_pi_FreeP       dict(['piplus','piminus'])
-    e.g. :
-    e_e_pi['piplus'] = pandas.DataFrame( (e,e'π) events data )
-    
-    '''
-    global e_e_pi, e_e_pi_n, e_e_pi_FreeP;
-
-    e_e_pi_data_path       = main_data_path + 'SIDIS_skimming/' + prefix + '/' + subdirname + '/'
-    e_e_pi_n_data_path     = main_data_path + 'merged_SIDIS_and_BAND_skimming/'
-    e_e_pi_FreeP_data_path = main_data_path + 'RGA_Free_proton/'
-
-    runs = read_run_nunmbers(runs_filename=runs_filename,Nruns=Nruns)
-    
-    for runnum,runIdx in zip(runs,range(len(runs))):#{
-        if fdebug>1: print('Run number ',runnum,'(%d/%d runs)'%(runIdx+1,len(runs)))
-        for pi_charge_name,pi_print in zip(pi_charge_names,pi_prints):
-            if do_e_e_pi:#{
-                if do_all_vars:
-                    eepi   = pd.read_csv(e_e_pi_data_path
-                                     +'skimmed_SIDIS_'
-                                     +prefix + '_'
-                                     +'00%d_e_%s_selected_eepi_kinematics.csv'%(runnum,pi_charge_name))
-
-                else: # more economic
-                    eepi   = pd.read_csv(e_e_pi_data_path
-                                     +'skimmed_SIDIS_'
-                                     +prefix + '_'
-                                     +'00%d_e_%s_selected_eepi_kinematics.csv'%(runnum,pi_charge_name),
-                                     usecols=['runnum','evnum',
-                                              'e_P','e_Theta','e_Phi',
-                                              'pi_P', 'pi_Theta', 'pi_Phi',
-                                              'Q2', 'W',
-                                              'xB', 'Zpi',
-                                              'M_x', 'e_DC_sector',
-                                              'pi_DC_sector','pi_qFrame_pT','pi_qFrame_pL'],
-                                     dtype={'runnum':int,'evnum': int,
-                                            'e_DC_sector':int, 'pi_DC_sector':int,
-                                            'e_P':np.half,'e_Theta':np.half,'e_Phi':np.half,
-                                            'pi_P':np.half,'pi_Theta':np.half, 'pi_Phi':np.half,
-                                            'Q2':np.half,  'W':np.half,
-                                            'xB':np.half, 'Zpi':np.half,
-                                            'M_x':np.half,
-                                            'pi_qFrame_pT':np.half,'pi_qFrame_pL':np.half})
-                
-                if runIdx==0: e_e_pi[pi_charge_name] = eepi
-                else:         e_e_pi[pi_charge_name] = pd.concat([e_e_pi[pi_charge_name],eepi])
-
-                
-                if fdebug>1: print('Loaded',len(eepi)," d(e,e'"+pi_print+") events")
-
-            #}
-            if do_e_e_pi_n:#{
-                eepin = pd.read_csv(e_e_pi_n_data_path
-                                    + 'skimmed_SIDIS_and_BAND_'
-                                    + prefix + '_'
-                                    + '00%d_e_%s_n.csv'%(runnum,pi_charge_name))
-                
-                if fdebug>1: print('Loaded',len(eepin)," d(e,e'"+pi_print+"n) events")
-
-                if runIdx==0: e_e_pi_n[pi_charge_name] = eepin
-                else:         e_e_pi_n[pi_charge_name] = pd.concat([e_e_pi_n[pi_charge_name],eepin])
-            #}
-        #}
-    #}
-    if do_e_e_pi_FreeP:#{
-        for pi_charge_name,pi_print in zip(pi_charge_names,pi_prints):
-            if do_all_vars:
-                eepi   = pd.read_csv(e_e_pi_FreeP_data_path
-                                 +FreeP_prefix
-                                 +'_e_e_%s_selected_eepi_kinematics.csv'%(pi_charge_name))
-
-            else: # more economic
-                eepi   = pd.read_csv(e_e_pi_FreeP_data_path
-                                 +FreeP_prefix
-                                 +'_e_e_%s_selected_eepi_kinematics.csv'%(pi_charge_name),
-                                 usecols=['runnum','evnum',
-                                          'e_P','e_Theta','e_Phi',
-                                          'pi_P', 'pi_Theta', 'pi_Phi',
-                                          'Q2', 'W',
-                                          'xB', 'Zpi',
-                                          'M_x', 'e_DC_sector', 'pi_DC_sector','pi_qFrame_pT','pi_qFrame_pL'],
-                                 dtype={'runnum':int,'evnum': int,
-                                        'e_DC_sector':int, 'pi_DC_sector':int,
-                                        'e_P':np.half,'e_Theta':np.half,'e_Phi':np.half,
-                                        'pi_P':np.half,'pi_Theta':np.half, 'pi_Phi':np.half,
-                                        'Q2':np.half,  'W':np.half,
-                                        'xB':np.half, 'Zpi':np.half,
-                                        'M_x':np.half,
-                                        'pi_qFrame_pT':np.half,'pi_qFrame_pL':np.half})
-            
-            # Aug-2022: in e_e_pi_FreeP we only have 1 data-file
-            e_e_pi_FreeP[pi_charge_name] = eepi
-#            if runIdx==0: e_e_pi_FreeP[pi_charge_name] = eepi
-#            else:         e_e_pi_FreeP[pi_charge_name] = pd.concat([e_e_pi_FreeP[pi_charge_name],eepi])
-            if fdebug>1: print('Loaded',len(eepi)," p(e,e'"+pi_print+") events")
-        #}
-    #}
-       
-    print('Done loading files.')
-    
-    if fdebug>0:
-        print('')
-        print('Total statistics:')
-        for pi_charge_name,pi_print in zip(pi_charge_names,pi_prints):
-            if do_e_e_pi:       print(len(e_e_pi[pi_charge_name])      ," d(e,e'"+pi_print+")  events")
-            if do_e_e_pi_n:     print(len(e_e_pi_n[pi_charge_name])    ," d(e,e'"+pi_print+"n) events")
-            if do_e_e_pi_FreeP: print(len(e_e_pi_FreeP[pi_charge_name])," p(e,e'"+pi_print+")  events")
-    #}
-#}
-# ----------------------- #
-
 
 
 
@@ -775,33 +826,34 @@ def load_SIDIS_data(runs_filename  = "good_runs_10-2-final.txt",
 
 # ----------------------- #
 def apply_Kinematical_cuts( df_dict,
-                           Q2_min=0,     Q2_max =1000,
-                           Pe_min=0,     Pe_max =1000,
-                           Ppi_min=0,    Ppi_max=1000 ,
-                           W_min=0,     W_max  =1000,
+                           Q2_min=None,     Q2_max =None,
+                           Pe_min=None,     Pe_max =None,
+                           Ppi_min=None,    Ppi_max=None ,
+                           W_min=None,      W_max  =None,
                            cuts_filepath = "/Users/erezcohen/Desktop/Software/CLAS12/BAND/SIDIS_at_BAND/macros/cuts/",
                            cuts_filename = "BANDcutValues.csv"):#{
     '''
         df_dict_after_cut = apply_Kinematical_cuts(df_dict)
         
         Apply kinematical cuts to match BAND neutron skimming
-        last update Sep-8, 2022
+        last update Sep-17, 2022
         
-        cuts are read-off from cuts_filename
+        cuts are read-off from cuts_filename,
+        unless specifically stated in function input paraemters
         
     '''
     
     cuts = pd.read_csv( cuts_filepath + cuts_filename );
-    W_min = float(cuts[cuts.parameter=="W_min"].value)
-    W_max = float(cuts[cuts.parameter=="W_max"].value)
-    Q2_min = float(cuts[cuts.parameter=="Q2_min"].value)
-    Q2_max = float(cuts[cuts.parameter=="Q2_max"].value)
+    if W_min is None: W_min = float(cuts[cuts.parameter=="W_min"].value)
+    if W_max is None: W_max = float(cuts[cuts.parameter=="W_max"].value)
+    if Q2_min is None: Q2_min = float(cuts[cuts.parameter=="Q2_min"].value)
+    if Q2_max is None: Q2_max = float(cuts[cuts.parameter=="Q2_max"].value)
 
-    Pe_min = float(cuts[cuts.parameter=="Pe_min"].value)
-    Pe_max = float(cuts[cuts.parameter=="Pe_max"].value)
+    if Pe_min is None: Pe_min = float(cuts[cuts.parameter=="Pe_min"].value)
+    if Pe_max is None: Pe_max = float(cuts[cuts.parameter=="Pe_max"].value)
 
-    Ppi_min = float(cuts[cuts.parameter=="Ppi_min"].value)
-    Ppi_max = float(cuts[cuts.parameter=="Ppi_max"].value)
+    if Ppi_min is None: Ppi_min = float(cuts[cuts.parameter=="Ppi_min"].value)
+    if Ppi_max is None: Ppi_max = float(cuts[cuts.parameter=="Ppi_max"].value)
 
 
     
