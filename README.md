@@ -8,9 +8,34 @@ This repository is responsible for
 (C) adding pion information to an arbitrary event list    
     
     
+## Code flow 
+------------------------------------------------------------------------------
+Untagged d(e,e'π) data
+[SIDISc12rSkimmer.C (C++/ROOT) on ifarm] -> [Download csv files to local machine] -> [Untagged_SIDIS_ratio.ipynb (Python)]      
+
+Tagged d(e,e'πn) data
+[SIDISc12rSkimmer.C (C++/ROOT) on ifarm] -> [MergeSIDISandBANDSkimmers.C (C++/ROOT) on ifarm] -> [Download csv files to local machine] -> [Tagged_SIDIS_ratio.ipynb (Python)]      
+    
+Free proton p(e,e'π) data
+([Igor produce ROOT files from RGA data] -> [Download csv files to local machine] ->) [ReadIgorRGAFile.C (C++/ROOT) on local machine] -> [FreeP_SIDIS_ratio.ipynb (Python)]
+    
+    
+    
     
 ## Revisions and release notes
 ------------------------------------------------------------------------------
+
+
+Sep-30, 2022    
+-------------
+1. Added uncertainties to *N(π)* in final results csv files in **extract_SIDIS_ratio()**
+
+
+Sep-23, 2022    
+-------------
+1. Found and corrected a bug in **apply_p_theta_acceptance_cut_single_set()** that caused results to be unstable, see slides **BugFix_AcceptanceMatchingCut**
+
+
 
 Sep-13, 2022    
 -------------
@@ -640,11 +665,13 @@ banklib/BBand.cpp
 # Final SIDIS results
 ---------------------------------------
 pandas.DataFrame(
-{"$x_B$","$\Delta x_B$",
- '$N(\pi_{+})$','$N(\pi_{-})$',
- '$R$','$\Delta R_{+}$','$\Delta R_{-}$'}
- )
-
+{["$x_B$"],["$\Delta x_B$"],
+ ['$N(\pi_{+})$'],['$N(\pi_{-})$'],
+ ['$R$'],['$\Delta R_{+}$'],['$\Delta R_{-}$'],
+  ['$\Delta N(\pi_{+})$'],['$\Delta N(\pi_{+})$']})
+ 
+ 
+ 
 # Kinematical observables
 ---------------------------------------
 [SIDIS_analysis_note_final-5721534-2021-01-11-v15.pdf, p.1-2]
