@@ -105,7 +105,7 @@ void SIDISatBAND_auxiliary::loadCutValues(std::string cutValuesFilename,
         << ", return" << std::endl;
         return;
     }
-        
+    
     cutValue_e_PCAL_W               = FindCutValue("e_PCAL_W_min");
     cutValue_e_PCAL_V               = FindCutValue("e_PCAL_V_min");
     cutValue_e_E_PCAL               = FindCutValue("e_E_PCAL_min");
@@ -376,7 +376,7 @@ bool SIDISatBAND_auxiliary::eepiPassedKinematicalCriteria(Double_t Ebeam,
         }
         
     }
-        
+    
     if(   (      cutValue_Q2_min < Q2             &&             Q2 < cutValue_Q2_max       )
        && (       cutValue_W_min < W                                                        )
        && (                                                       y < cutValue_y_max        )
@@ -402,6 +402,44 @@ bool SIDISatBAND_auxiliary::eepiPassedKinematicalCriteria(Double_t Ebeam,
             << std::endl;
         }
     }
-        
+    
     return false;
+}
+
+
+
+// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+double calcQStar(TVector3 eP3, TVector3 piP3, double Ebeam){
+    //
+    // Compute the novel SIDIS observable, q∗
+    // designed to be maximally resilient against resolution
+    // effects while delivering the same sensitivity to TMD dynamics as Pt
+    //
+    // [Gao et al., "A Better Angle on Hadron Transverse Momentum Distributions at the EIC"]
+    // arXiv:2209.11211v1
+    //
+    // by Natalie Wright Oct-12, 2022
+    //
+    // input
+    // ------
+    // eP3      TVector3    electron momentum (in q-Frame)
+    // piP3     TVector3    π momentum (in q-Frame)
+    //
+    // return
+    // ------
+    // qstar    double      coplanarity momentum transfer part
+    //
+    
+    
+    
+    double tan_phi_acop = piP3.Y()/piP3.X(); // EIC Frame
+    double       eta_pi = TMath::ATanH(-piP3.Z()/piP3.Mag()); // - sign from EIC frame
+    double        eta_e = TMath::ATanH(-eP3.Z()/eP3.Mag());
+    double    delta_eta = eta_pi - eta_e;
+    
+    double        qstar =   2 * Ebeam * TMath::Exp(eta_pi) * tan_phi_acop
+                            /
+                            (1 + TMath::Exp(delta_eta));
+    
+    return qstar;    
 }

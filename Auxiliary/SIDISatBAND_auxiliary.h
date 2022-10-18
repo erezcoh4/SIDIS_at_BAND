@@ -47,6 +47,9 @@ public:
                                        TString filename, std::string header);
     void                 Print4Vector ( TLorentzVector v, std::string label );
     double   ComputeLightConeFraction ( TLorentzVector p );
+    double                  calcQStar ( TVector3 eP3, TVector3 piP3, double Ebeam );
+    
+    
     
 
     int                           fdebug;

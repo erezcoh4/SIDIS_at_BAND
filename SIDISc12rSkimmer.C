@@ -43,7 +43,8 @@ TString csvheader = ( (TString)"status,runnum,evnum,beam_helicity,"
                      +(TString)"Zpi,Zpi_LC,"
                      +(TString)"W,M_x,"
                      +(TString)"xF,eta_pi,"
-                     +(TString)"W_d,M_x_d,");
+                     +(TString)"W_d,M_x_d,"
+                     +(TString)"q,qStar,");
 
 std::vector<int> csvprecisions = {
     0,0,0,0,
@@ -1638,6 +1639,8 @@ void ComputePionKinematics(TLorentzVector pi, TLorentzVector pi_qFrame){
     xF      = 2. * (pi.Vect().Dot(q.Vect())) / (q.P() * W);
     eta_pi  = 0.5 * log((pi_qFrame.E()+pi_qFrame.Pz()) /
                         (pi_qFrame.E()-pi_qFrame.Pz()));
+    
+    qStar   = calcQStar( e_qFrame.Vect(), pi_qFrame.Vect(), Ebeam );
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -1832,10 +1835,10 @@ void Stream_e_pi_line_to_CSV( TString pionCharge, int piIdx,
                              bool passed_cuts_e_pi,
                              bool passed_cuts_e_pi_kinematics,
                              int fdebug ){
-    TLorentzVector  pi;
+    TLorentzVector         pi;
     TLorentzVector  pi_qFrame;
-    TVector3        Vpi;
-    int    pi_DC_sector;
+    TVector3              Vpi;
+    int          pi_DC_sector;
     
     if (pionCharge=="pi+") {
         pi              = piplus       .at(piIdx);
@@ -1870,6 +1873,7 @@ void Stream_e_pi_line_to_CSV( TString pionCharge, int piIdx,
         W,              M_x,
         xF,             eta_pi,
         W_d,            M_x_d,
+        q.P(),          qStar,
     };
         
     // decide which file to write...

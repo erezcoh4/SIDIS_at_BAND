@@ -25,6 +25,9 @@ Free proton p(e,e'π) data
 ## Revisions and release notes
 ------------------------------------------------------------------------------
 
+Oct-18, 2022    
+-------------
+1. Added qStar calculation by *calcQStar()* to **SIDISc12rSkimmer.C**, based on Natalie W. code, and output in SIDISc12rSkimmer
 
 Oct-11, 2022    
 -------------
