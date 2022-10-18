@@ -290,6 +290,7 @@ Double_t                            eta_pi;
 Double_t                             W, W2;
 Double_t                         W_d, W2_d;
 Double_t                        M_x, M_x_d;
+Double_t                             qStar;
 
 
 // vectors in q-frame
@@ -1371,7 +1372,7 @@ void InitializeFileReading(int NeventsMax, int c12Nentries, int fdebug){
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void InitializeVariables(){
     e = TLorentzVector(0,0,0,db->GetParticle( 11   )->Mass());
-    
+    qStar                               = -9999;
     xB          = Q2        = omega     = -9999;
     xF          = y                     = -9999;
     W_d         = W                     = -9999;
