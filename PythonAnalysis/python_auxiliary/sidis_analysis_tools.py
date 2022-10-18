@@ -49,6 +49,7 @@ for run in beam_charge_all_runs.runnum:
 
 
 
+
 # ----------------------- #
 def extract_SIDIS_ratio(df_dict  = None,
                         specific_run_number=None,
@@ -64,6 +65,8 @@ def extract_SIDIS_ratio(df_dict  = None,
                         M_x_max  = np.inf,
                         W_min    = 0,
                         W_max    = np.inf,
+                        Q2_min   = 0,
+                        Q2_max   = np.inf,
                         Mx_d_min = 0,
                         weight_option = 'beam-charge',):
     '''
@@ -71,7 +74,7 @@ def extract_SIDIS_ratio(df_dict  = None,
     the number of d(e,e'π+) and d(e,e'π-) events,
     and save them to a CSV file
     
-    last update Sep-30, 2022
+    last update Oct-11, 2022
     
     
     input
@@ -102,11 +105,13 @@ def extract_SIDIS_ratio(df_dict  = None,
                                                  z_max   = z_max,
                                                  M_x_min = M_x_min,
                                                  M_x_max = M_x_max,
-                                                 W_min=W_min,
-                                                 W_max=W_max,
-                                                 Mx_d_min=Mx_d_min,
-                                                       weight_option=weight_option,
-                                                 fdebug=fdebug)
+                                                 W_min   = W_min,
+                                                 W_max   = W_max,
+                                                 Mx_d_min= Mx_d_min,
+                                                  Q2_min = Q2_min,
+                                                  Q2_max = Q2_max,
+                                                  weight_option=weight_option,
+                                                 fdebug  = fdebug)
 
         df_to_save = pd.DataFrame({"$x_B$":x,
                                    "$\Delta x_B$":x_err,
@@ -129,20 +134,20 @@ def extract_SIDIS_ratio(df_dict  = None,
                 if fdebug>2: display(df_to_save)
 # ----------------------- #
 
-
 # ----------------------- #
 def compute_ratio_pips_to_pims(df_dict,
                                specific_run_number=None,
                                var='xB',
                                bins=np.linspace(0,1,10),
                                weight_option = 'beam-charge',
-                               z_min=0,   z_max=1,
-                               M_x_min=0, M_x_max=np.inf,
-                               W_min=0,   W_max=np.inf,
+                               z_min=0,    z_max=1,
+                               M_x_min=0,  M_x_max=np.inf,
+                               W_min=0,    W_max=np.inf,
+                               Q2_min = 0, Q2_max= np.inf,
                                Mx_d_min=0, fdebug=0,
                                cutoff = 1.e-8 ):#{
     '''
-    last edit Sep-30, 2022
+    last edit Oct-11, 2022
     
     [R_pips_to_pims, R_pips_to_pims_errup, R_pips_to_pims_errdw,
      N_pips, N_pims,
@@ -155,6 +160,7 @@ def compute_ratio_pips_to_pims(df_dict,
                                z_min=0,   z_max=1,
                                M_x_min=0, M_x_max=np.inf,
                                W_min=0,   W_max=np.inf,
+                               Q2_min = 0, Q2_max= np.inf,
                                Mx_d_min=0, fdebug=0 )
     
     
@@ -192,7 +198,7 @@ def compute_ratio_pips_to_pims(df_dict,
     df_pips = df_dict['piplus']
     df_pims = df_dict['piminus']
     
-    # cut on z
+    # cut on z and other variables for pi+
     df_pips = df_pips[  (z_min   < df_pips.Zpi) & (df_pips.Zpi < z_max  )
                       & (W_min   < df_pips.W  ) & (df_pips.W   < W_max  )   ]
     
@@ -202,6 +208,10 @@ def compute_ratio_pips_to_pims(df_dict,
     if 0 < Mx_d_min:
         df_pips = df_pips[ Mx_d_min < df_pips.M_x_d ]
         
+    if 0 < Q2_min or Q2_max < np.inf:
+        df_pips = df_pips[ (Q2_min < df_pips.Q2) & (df_pips.Q2 < Q2_max) ]
+
+        
     if specific_run_number is not None:
         if fdebug>1:  print('df_pips: before run %d filter: %d events'%(specific_run_number,len(df_pips)))
         df_pips = df_pips[df_pips.runnum == specific_run_number]
@@ -209,6 +219,7 @@ def compute_ratio_pips_to_pims(df_dict,
                            
     Zavg_pips = np.mean( np.array(df_pips.Zpi)  )
     
+    # cut on z and other variables for pi-
     df_pims = df_pims[  (z_min   < df_pims.Zpi) & (df_pims.Zpi < z_max  )
                       & (W_min   < df_pims.W  ) & (df_pims.W   < W_max  )   ]
     
@@ -217,6 +228,10 @@ def compute_ratio_pips_to_pims(df_dict,
     
     if 0 < Mx_d_min:
         df_pims = df_pims[Mx_d_min < df_pims.M_x_d]
+        
+    if 0 < Q2_min or Q2_max < np.inf:
+        df_pims = df_pims[ (Q2_min < df_pims.Q2) & (df_pims.Q2 < Q2_max) ]
+
         
     if specific_run_number is not None:
         df_pims = df_pims[df_pims.runnum == specific_run_number]
@@ -309,6 +324,7 @@ def compute_ratio_pips_to_pims(df_dict,
             np.array(N_pims_err)]
 #}
 # ----------------------- #
+
 
 
 

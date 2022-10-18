@@ -26,6 +26,11 @@ Free proton p(e,e'π) data
 ------------------------------------------------------------------------------
 
 
+Oct-11, 2022    
+-------------
+1. Added option to limit *Q2* values in **extract_SIDIS_ratio()** and **compute_ratio_pips_to_pims()**
+
+
 Sep-30, 2022    
 -------------
 1. Added uncertainties to *N(π)* in final results csv files in **extract_SIDIS_ratio()**
