@@ -1,6 +1,6 @@
 
 
-# Semi Inclusive DIS (SIDIS) on a deuteron target with $pi^+$ and $pi^-$ tagging and a fast neutron recoiling from a SRC pair breakup 
+# Semi Inclusive DIS (SIDIS) on a deuteron target with $\pi^+$ and $\pi^-$ tagging and a fast neutron recoiling from a SRC pair breakup 
 
 This repository is responsible for 
 (A) skimming for (e,e'π±) events
@@ -22,12 +22,15 @@ Free proton p(e,e'π) data
     
     
     
+    
 ## Revisions and release notes
 ------------------------------------------------------------------------------
 
-Oct-18, 2022    
+Oct-18, 2022  (sidisdvcs_v18Oct2022_commit_574cf9b)   
 -------------
 1. Added qStar calculation by *calcQStar()* to **SIDISc12rSkimmer.C**, based on Natalie W. code, and output in SIDISc12rSkimmer
+
+2. Corrected a bug in the cache shell script to extract files using jcache
 
 Oct-11, 2022    
 -------------
