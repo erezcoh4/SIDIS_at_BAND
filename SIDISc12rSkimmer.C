@@ -26,8 +26,6 @@
 #include "Auxiliary/csv_reader.h"
 #include "Auxiliary/SIDISatBAND_auxiliary.cpp"
 
-//#define NMAXPIONS 5 // maximal allowed number of pions
-//#define r2d 180./3.1415 // radians to degrees
 using namespace clas12;
 SIDISatBAND_auxiliary aux;
 
@@ -44,7 +42,8 @@ TString csvheader = ( (TString)"status,runnum,evnum,beam_helicity,"
                      +(TString)"W,M_x,"
                      +(TString)"xF,eta_pi,"
                      +(TString)"W_d,M_x_d,"
-                     +(TString)"q,qStar,");
+                     +(TString)"q,qStar,"
+                     );
 
 std::vector<int> csvprecisions = {
     0,0,0,0,
@@ -63,13 +62,6 @@ TVector3                GetParticleVertex (clas12::region_part_ptr rp);
 void                     SetLorentzVector (TLorentzVector &p4, clas12::region_part_ptr rp);
 void                      OpenOutputFiles (TString csvfilename, TString header);
 void                     CloseOutputFiles (TString OutDataPath, TString outfilename);
-//void                      StreamToCSVfile (TString pionCharge, // "pi+" or "pi-"
-//                                           std::vector<Double_t> observables,
-//                                           bool passed_cuts_e_pi,
-//                                           bool passed_cuts_e_pi_kinematics,
-//                                           int fdebug);
-//void                       printCutValues ();
-//void                        loadCutValues (TString cutValuesFilename = "cutValues.csv", int fdebug=0);
 void                      SetOutputTTrees ();
 //double                       FindCutValue ( std::string cutName );
 bool   CheckIfElectronPassedSelectionCuts (Double_t e_PCAL_x, Double_t e_PCAL_y,
@@ -89,10 +81,6 @@ bool      CheckIfPionPassedSelectionCuts (TString pionCharge, // "pi+" or "pi-"
                                            Double_t chi2PID, Double_t p,
                                            TVector3 Ve,      TVector3 Vpi,
                                            int fdebug);
-//bool        eepiPassedKinematicalCriteria (TLorentzVector pi,
-//                                           int fdebug);
-//Double_t          Chi2PID_pion_lowerBound (Double_t p, Double_t C=0.88); // C(pi+)=0.88, C(pi-)=0.93
-//Double_t          Chi2PID_pion_upperBound (Double_t p, Double_t C=0.88); // C(pi+)=0.88, C(pi-)=0.93
 int                       GetBeamHelicity (event_ptr p_event, int runnum, int fdebug);
 double                      GetBeamEnergy (int fdebug);
 TString                   GetRunNumberSTR (int RunNumber, int fdebug);
@@ -123,29 +111,29 @@ TString DataPath = "";
 TString   prefix = "";
 auto db = TDatabasePDG::Instance();
 // cut values
-std::vector<std::pair<std::string, double>> cutValues;
-double               cutValue_Vz_min;
-double               cutValue_Vz_max;
-double             cutValue_e_PCAL_W;
-double             cutValue_e_PCAL_V;
-double             cutValue_e_E_PCAL;
-double cutValue_SamplingFraction_min;
-double     cutValue_PCAL_ECIN_SF_min;
-double        cutValue_Ve_Vpi_dz_max;
-double               cutValue_Q2_min;
-double               cutValue_Q2_max;
-double                cutValue_W_min;
-double                cutValue_y_max;
-double          cutValue_e_theta_min;
-double          cutValue_e_theta_max;
-double         cutValue_pi_theta_min;
-double         cutValue_pi_theta_max;
-double              cutValue_Ppi_min;
-double              cutValue_Ppi_max;
-double               cutValue_Pe_min;
-double               cutValue_Pe_max;
-double              cutValue_Zpi_min;
-double              cutValue_Zpi_max;
+//std::vector<std::pair<std::string, double>> cutValues;
+//double               cutValue_Vz_min;
+//double               cutValue_Vz_max;
+//double             cutValue_e_PCAL_W;
+//double             cutValue_e_PCAL_V;
+//double             cutValue_e_E_PCAL;
+//double cutValue_SamplingFraction_min;
+//double     cutValue_PCAL_ECIN_SF_min;
+//double        cutValue_Ve_Vpi_dz_max;
+//double               cutValue_Q2_min;
+//double               cutValue_Q2_max;
+//double                cutValue_W_min;
+//double                cutValue_y_max;
+//double          cutValue_e_theta_min;
+//double          cutValue_e_theta_max;
+//double         cutValue_pi_theta_min;
+//double         cutValue_pi_theta_max;
+//double              cutValue_Ppi_min;
+//double              cutValue_Ppi_max;
+//double               cutValue_Pe_min;
+//double               cutValue_Pe_max;
+//double              cutValue_Zpi_min;
+//double              cutValue_Zpi_max;
 double        Pe_phi, q_phi, q_theta; // "q-frame" parameters
 double                           Zpi;
 double                        Zpi_LC;
@@ -297,7 +285,7 @@ Double_t                             qStar;
 TLorentzVector               e_qFrame, q_qFrame;
 std::vector<TLorentzVector>       piplus_qFrame;
 std::vector<TLorentzVector>      piminus_qFrame;
-//Double_t        Ppips_t_q, Ppips_q;
+
 // auxiliary
 DCfid_SIDIS dcfid;
 std::vector<region_part_ptr>  electrons, neutrons, protons, pipluses, piminuses, gammas, deuterons;

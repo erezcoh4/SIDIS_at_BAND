@@ -7,8 +7,9 @@
 #include <fstream>
 #include <iostream>
 
-//#include "Auxiliary/clas12reader.h"
-//#include
+#define    SHOW (x){ std::cout << (#x) << ": " << (x) << std::endl;};
+#define SHOWArr (x){ for (auto _x:x) std::cout << (#_x) << ": " << (_x) << ", " << std::endl;};
+
 
 //using namespace clas12;
 
@@ -48,6 +49,9 @@ public:
     void                 Print4Vector ( TLorentzVector v, std::string label );
     double   ComputeLightConeFraction ( TLorentzVector p );
     double                  calcQStar ( TVector3 eP3, TVector3 piP3, double Ebeam );
+    
+    
+    
     
     
     

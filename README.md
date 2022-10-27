@@ -26,9 +26,14 @@ Free proton p(e,e'π) data
 ## Revisions and release notes
 ------------------------------------------------------------------------------
 
+Oct-27, 2022  ()   
+-------------
+1. Added qStar calculation also to tagged data in **MergeSIDISandBANDSkimmers.C**
+
+
 Oct-18, 2022  (sidisdvcs_v18Oct2022_commit_574cf9b)   
 -------------
-1. Added qStar calculation by *calcQStar()* to **SIDISc12rSkimmer.C**, based on Natalie W. code, and output in SIDISc12rSkimmer
+1. Added qStar calculation to untagged data to **SIDISc12rSkimmer.C**, based on Natalie W. code, and output in SIDISc12rSkimmer, by copying *calcQStar()* into **SIDISatBAND_auxiliary.C**
 
 2. Corrected a bug in the cache shell script to extract files using jcache
 
