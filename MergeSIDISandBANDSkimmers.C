@@ -1005,7 +1005,7 @@ void Stream_e_pi_n_line_to_CSV(int piIdx,
         xF_Prime,
         xB_Prime,
         W_d,
-        q.P(),          qStar,
+        q->P(),         qStar,
     };
     
     if (fdebug>2){
