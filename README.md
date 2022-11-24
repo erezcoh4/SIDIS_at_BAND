@@ -26,7 +26,24 @@ Free proton p(e,e'π) data
 ## Revisions and release notes
 ------------------------------------------------------------------------------
 
-Oct-27, 2022  ()   
+Nov-24, 2022    
+-------------
+1. Added *alpha_pi* and *zeta_pi* to d(e,e'πn) data in **MergeSIDISandBANDSkimmers.C**
+
+    // pion light cone fraction in the lab-frame
+    alpha_pi     = (pi_qFrame.E() - pi_qFrame.Pz()) / (Md/2);
+    // LC momentum fraction of the active proton carried by the produced pion
+    alpha_n      = (Pn_qFrame.E() - Pn_qFrame.Pz()) / (Md/2);
+    zeta_pi      = alpha_pi / ( 2 - alpha_n );
+
+
+Nov-1, 2022    
+-------------
+1. Added *prefix* and *subdirname* to d(e,e'πn) data loading in **load_SIDIS_data()**
+
+
+
+Oct-27, 2022  (sidisdvcs_27Oct2022_commit_2fe215f)   
 -------------
 1. Added qStar calculation also to tagged data in **MergeSIDISandBANDSkimmers.C**
 
@@ -741,9 +758,13 @@ Mx - missing mass of the emerging hadron
     M_x_Prime = ( p_init + q - pi ).Mag();
     
     
+alpha - Light cone momentum fraction    
+
     
-    
-    
+    alpha_pi     = (pi_qFrame.E() - pi_qFrame.Pz()) / (Md/2);    
+    alpha_n      = (Pn_qFrame.E() - Pn_qFrame.Pz()) / (Md/2);
+    zeta_pi      = alpha_pi / ( 2 - alpha_n );
+
     
     
     

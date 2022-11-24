@@ -425,7 +425,7 @@ def apply_p_theta_acceptance_cut_single_set( df_dict=None,
     df_dict_after_cut = dict()
         
     for pi_ch in pi_charge_names:
-        
+        if fdebug: print('Applying p-theta on cut for '+pi_ch+' which includes %d events'%len(df_dict[pi_ch]))
         if NeventsMax > 0: NeventsMax = np.min( [NeventsMax, len(df_dict[pi_ch])] )
         else:              NeventsMax = len(df_dict[pi_ch])
         df = df_dict[pi_ch][0:NeventsMax]
@@ -499,7 +499,7 @@ def load_SIDIS_data(runs_filename  = "good_runs_10-2-final.txt",
     '''
     e_e_pi, e_e_pi_n, e_e_pi_FreeP = load_SIDIS_data()
     Load SIDIS data, and fill e_e_pi and e_e_pi_n with data
-    last update Sep-17, 2022
+    last update Nov-1, 2022
     
     input:
     -------------
@@ -520,7 +520,7 @@ def load_SIDIS_data(runs_filename  = "good_runs_10-2-final.txt",
     global e_e_pi, e_e_pi_n, e_e_pi_FreeP;
 
     e_e_pi_data_path       = main_data_path + 'SIDIS_skimming/' + prefix + '/' + subdirname + '/'
-    e_e_pi_n_data_path     = main_data_path + 'merged_SIDIS_and_BAND_skimming/'
+    e_e_pi_n_data_path     = main_data_path + 'merged_SIDIS_and_BAND_skimming/' + prefix + '/' + subdirname + '/'
     e_e_pi_FreeP_data_path = main_data_path + 'RGA_Free_proton/'
 
     runs = read_run_nunmbers(runs_filename=runs_filename,Nruns=Nruns)
@@ -634,6 +634,7 @@ def load_SIDIS_data(runs_filename  = "good_runs_10-2-final.txt",
 
 
 
+
 # ----------------------- #
 def runnum_weight( runnumbers ):
     return weight_per_run[runnumbers]
@@ -717,7 +718,7 @@ def apply_cuts_to_e_e_pi_n(fdebug=2,
 
 
 # ----------------------- #
-def apply_cuts_to_e_e_pi(fdebug=2,
+def apply_cuts_to_e_e_pi(fdebug=0,
                          NeventsMax=-1,
                          NMaxPerSubset = 500000,
                          doAcceptanceMatchingCut = True,
@@ -743,6 +744,7 @@ def apply_cuts_to_e_e_pi(fdebug=2,
 #                                                                NeventsMax=NeventsMax,
 #                                                                NMaxPerSubset=NMaxPerSubset,
 #                                                                fdebug=fdebug )
+        
         e_e_pi_after_p_theta_cut = apply_p_theta_acceptance_cut_single_set( e_e_pi,
                                                                   NeventsMax=NeventsMax,
                                                                   fdebug=fdebug )
@@ -934,7 +936,7 @@ def apply_cuts_to_e_e_pi_GEMC(fdebug=2,
 
 
 # ----------------------- #
-def apply_further_selection_cuts_to_data(fdebug=2,
+def apply_further_selection_cuts_to_data(fdebug=0,
                                          NeventsMax=-1,
                                          NMaxPerSubset = 500000,
                                          doAcceptanceMatchingCut = True,

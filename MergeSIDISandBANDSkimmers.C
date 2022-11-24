@@ -56,6 +56,7 @@ TString csvheader = ((TString)"status,runnum,evnum,beam_helicity,"
                      +(TString)"xB_Prime,"
                      +(TString)"W_d,"
                      +(TString)"q,qStar,"
+                     +(TString)"alpha_pi,zeta_pi,"
                      );
 std::vector<int> csvprecisions = {0,0,0,0,
     9,9,9,9,
@@ -125,6 +126,7 @@ Double_t                  theta_sq; // spectator angle with respect to momentum 
 Double_t            M_x, M_x_Prime;
 Double_t                     n_ToF;
 Double_t Zpi, Zpi_LC, Zpi_LC_Prime;
+Double_t         alpha_pi, zeta_pi;
 
 
 
@@ -886,6 +888,11 @@ void ComputeKinematics(TLorentzVector pi){
     Zpi          = pi.E()/omega;
     Zpi_LC       = (pi_qFrame.E() + pi_qFrame.Pz()) / (q->E() + q->P());
     Zpi_LC_Prime = Zpi_LC / alpha_n;
+    // pion light cone fraction in the lab-frame
+    alpha_pi     = (pi_qFrame.E() - pi_qFrame.Pz()) / (Md/2);
+    // LC momentum fraction of the active proton carried by the produced pion
+    alpha_n      = (Pn_qFrame.E() - Pn_qFrame.Pz()) / (Md/2);
+    zeta_pi      = alpha_pi / ( 2 - alpha_n );
     
     // Kinematics assuming scattering off a proton at rest
     // W is read off the SIDIS TTree
@@ -949,7 +956,6 @@ void Stream_e_pi_n_line_to_CSV(int piIdx,
                                bool passed_cuts_n){
     status = 0;
     TLorentzVector       * pi;
-//    TLorentzVector  pi_qFrame;
     TVector3            * Vpi;
     double       pi_DC_sector;
     double       pi_qFrame_pT;
@@ -1006,6 +1012,7 @@ void Stream_e_pi_n_line_to_CSV(int piIdx,
         xB_Prime,
         W_d,
         q->P(),         qStar,
+        alpha_pi,       zeta_pi,
     };
     
     if (fdebug>2){
@@ -1065,6 +1072,7 @@ void InitializeVariables(){
     Ve                                  = new TVector3();
     n_ToF                               = -9999;
     n_HitPos                            = TVector3();
+    alpha_pi    = zeta_pi               = -9999;
     
     piplus      .clear();
     piminus     .clear();
