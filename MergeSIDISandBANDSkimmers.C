@@ -899,9 +899,9 @@ void ComputeKinematics(TLorentzVector pi){
     // verify with direct calculation in lab frame
     TVector3 qVect = q->Vect();
     TVector3 qUnit = qVect.Unit();
-    alpha_pi_check     = (pi.E() - pi.Dot(qUnit)) / (aux.Md/2);
+    alpha_pi_check     = (pi.E() - pi.Vect().Dot(qUnit)) / (aux.Md/2);
     // LC momentum fraction of the active proton carried by the produced pion
-    alpha_n_check      = (Pn.E() - Pn.Dot(qUnit)) / (aux.Md/2);
+    alpha_n_check      = (Pn.E() - Pn.Vect().Dot(qUnit)) / (aux.Md/2);
     zeta_pi_check      = alpha_pi_check / ( 2 - alpha_n_check );
 
     
