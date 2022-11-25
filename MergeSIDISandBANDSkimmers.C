@@ -1025,6 +1025,7 @@ void Stream_e_pi_n_line_to_CSV(int piIdx,
         W_d,
         q->P(),         qStar,
         alpha_pi,       zeta_pi,
+        alpha_pi_check, zeta_pi_check,
     };
     
     if (fdebug>2){
