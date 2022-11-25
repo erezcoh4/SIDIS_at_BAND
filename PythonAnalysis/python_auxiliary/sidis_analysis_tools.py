@@ -485,21 +485,22 @@ def apply_p_theta_acceptance_cut_single_set( df_dict=None,
 
 
 # ----------------------- #
-def load_SIDIS_data(runs_filename  = "good_runs_10-2-final.txt",
-                    main_data_path = '/Users/erezcohen/Desktop/data/BAND/',
-                    Nruns          = 1,
-                    do_e_e_pi      = True,
-                    do_e_e_pi_n    = True,
-                    do_e_e_pi_FreeP= True,
-                    do_all_vars    = False,
-                    fdebug         = 2,
-                    prefix         = "sidisdvcs",
-                    subdirname     = "",
-                    FreeP_prefix   = "ntupleNew"):#{
+def load_SIDIS_data(runs_filename   = "good_runs_10-2-final.txt",
+                    main_data_path  = '/Users/erezcohen/Desktop/data/BAND/',
+                    Nruns           = 1,
+                    do_e_e_pi       = True,
+                    do_e_e_pi_n     = True,
+                    do_e_e_pi_FreeP = True,
+                    do_all_vars     = False,
+                    fdebug          = 2,
+                    prefix          = "sidisdvcs",
+                    subdirname      = "",
+                    taggedsubdirname= "",
+                    FreeP_prefix    = "ntupleNew"):#{
     '''
     e_e_pi, e_e_pi_n, e_e_pi_FreeP = load_SIDIS_data()
     Load SIDIS data, and fill e_e_pi and e_e_pi_n with data
-    last update Nov-1, 2022
+    last update Nov-25, 2022
     
     input:
     -------------
@@ -519,8 +520,9 @@ def load_SIDIS_data(runs_filename  = "good_runs_10-2-final.txt",
     '''
     global e_e_pi, e_e_pi_n, e_e_pi_FreeP;
 
+    if taggedsubdirname=="": taggedsubdirname = subdirname;
     e_e_pi_data_path       = main_data_path + 'SIDIS_skimming/' + prefix + '/' + subdirname + '/'
-    e_e_pi_n_data_path     = main_data_path + 'merged_SIDIS_and_BAND_skimming/' + prefix + '/' + subdirname + '/'
+    e_e_pi_n_data_path     = main_data_path + 'merged_SIDIS_and_BAND_skimming/' + prefix + '/' + taggedsubdirname + '/'
     e_e_pi_FreeP_data_path = main_data_path + 'RGA_Free_proton/'
 
     runs = read_run_nunmbers(runs_filename=runs_filename,Nruns=Nruns)
@@ -625,6 +627,7 @@ def load_SIDIS_data(runs_filename  = "good_runs_10-2-final.txt",
     return e_e_pi, e_e_pi_n, e_e_pi_FreeP
 #}
 # ----------------------- #
+
 
 
 

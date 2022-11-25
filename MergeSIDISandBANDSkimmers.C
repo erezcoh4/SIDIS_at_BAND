@@ -55,6 +55,7 @@ TString csvheader = ((TString)"status,runnum,evnum,beam_helicity,"
                      +(TString)"W_d,"
                      +(TString)"q,qStar,"
                      +(TString)"alpha_pi,zeta_pi,"
+                     +(TString)"alpha_pi_check,zeta_pi_check,"
                      );
 std::vector<int> csvprecisions = {0,0,0,0,
     9,9,9,9,
@@ -125,6 +126,9 @@ Double_t            M_x, M_x_Prime;
 Double_t                     n_ToF;
 Double_t Zpi, Zpi_LC, Zpi_LC_Prime;
 Double_t         alpha_pi, zeta_pi;
+Double_t            alpha_pi_check;
+Double_t             alpha_n_check;
+Double_t             zeta_pi_check;
 
 
 
@@ -891,6 +895,14 @@ void ComputeKinematics(TLorentzVector pi){
     // LC momentum fraction of the active proton carried by the produced pion
     alpha_n      = (Pn_qFrame.E() - Pn_qFrame.Pz()) / (aux.Md/2);
     zeta_pi      = alpha_pi / ( 2 - alpha_n );
+
+    // verify with direct calculation in lab frame
+    alpha_pi_check     = (pi.E() - pi.Dot(q.Vect().Unit())) / (aux.Md/2);
+    // LC momentum fraction of the active proton carried by the produced pion
+    alpha_n_check      = (Pn.E() - Pn.Dot(q.Vect().Unit())) / (aux.Md/2);
+    zeta_pi_check      = alpha_pi_check / ( 2 - alpha_n_check );
+
+    
     
     // Kinematics assuming scattering off a proton at rest
     // W is read off the SIDIS TTree
@@ -1071,7 +1083,9 @@ void InitializeVariables(){
     n_ToF                               = -9999;
     n_HitPos                            = TVector3();
     alpha_pi    = zeta_pi               = -9999;
-    
+        
+        alpha_pi_check = zeta_pi_check = alpha_n_check = -9999;
+        
     piplus      .clear();
     piminus     .clear();
     Vpiplus     .clear();
