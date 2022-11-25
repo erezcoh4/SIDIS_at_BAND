@@ -26,8 +26,6 @@
 
 
 #define NMAXEVENTS 5000000
-//#define NMAXPIONS 5 // maximal allowed number of pions
-//#define r2d 180./3.1415 // radians to degrees
 SIDISatBAND_auxiliary aux;
 
 
@@ -889,9 +887,9 @@ void ComputeKinematics(TLorentzVector pi){
     Zpi_LC       = (pi_qFrame.E() + pi_qFrame.Pz()) / (q->E() + q->P());
     Zpi_LC_Prime = Zpi_LC / alpha_n;
     // pion light cone fraction in the lab-frame
-    alpha_pi     = (pi_qFrame.E() - pi_qFrame.Pz()) / (Md/2);
+    alpha_pi     = (pi_qFrame.E() - pi_qFrame.Pz()) / (aux.Md/2);
     // LC momentum fraction of the active proton carried by the produced pion
-    alpha_n      = (Pn_qFrame.E() - Pn_qFrame.Pz()) / (Md/2);
+    alpha_n      = (Pn_qFrame.E() - Pn_qFrame.Pz()) / (aux.Md/2);
     zeta_pi      = alpha_pi / ( 2 - alpha_n );
     
     // Kinematics assuming scattering off a proton at rest
