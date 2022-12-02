@@ -49,6 +49,94 @@ for run in beam_charge_all_runs.runnum:
 
 
 
+# ----------------------- #
+def extract_SIDIS_ratio(df_dict  = None,
+                        specific_run_number=None,
+                        x_var    = 'xB' ,
+                        x_bins   = np.linspace(0.2,0.6,11),
+                        zvar     = "Zpi",
+                        z_bins   = np.arange(0.3,0.8,0.1),
+                        z_widths = 0.01*np.ones(5),
+                        data_path= '/Users/erezcohen/Desktop/data/BAND/Results/',
+                        fdebug   = 0,
+                        prefix   = 'Untagged_SIDIS_ratio_',
+                        suffix   = '',
+                        M_x_min  = 0,
+                        M_x_max  = np.inf,
+                        W_min    = 0,
+                        W_max    = np.inf,
+                        Q2_min   = 0,
+                        Q2_max   = np.inf,
+                        Mx_d_min = 0,
+                        weight_option = 'beam-charge',):
+    '''
+    Extract SIDIS results,
+    the number of d(e,e'π+) and d(e,e'π-) events,
+    and save them to a CSV file
+    
+    last update Nov-26, 2022
+    
+    
+    input
+    ---------
+    zvar            "Zpi" / "zeta_pi"
+    
+    '''
+    
+    x        = (x_bins[1:] + x_bins[:-1])/2
+    x_err    = (x_bins[1:] - x_bins[:-1])/2
+    for z_bin,z_width in zip(z_bins,z_widths):
+        z_min,z_max = z_bin-z_width, z_bin+z_width
+        
+        (R,
+         R_err_up,
+         R_err_dw,
+         N_pips,
+         N_pims,
+         Zavg_pips,
+         Zavg_pims,
+         N_pips_err,
+         N_pims_err) = compute_ratio_pips_to_pims(df_dict = df_dict ,
+                                                 specific_run_number=specific_run_number,
+                                                 var     = x_var,
+                                                 bins    = x_bins,
+                                                  zvar   = zvar,
+                                                 z_min   = z_min,
+                                                 z_max   = z_max,
+                                                 M_x_min = M_x_min,
+                                                 M_x_max = M_x_max,
+                                                 W_min   = W_min,
+                                                 W_max   = W_max,
+                                                 Mx_d_min= Mx_d_min,
+                                                  Q2_min = Q2_min,
+                                                  Q2_max = Q2_max,
+                                                  weight_option=weight_option,
+                                                 fdebug  = fdebug)
+
+        df_to_save = pd.DataFrame({"$x_B$":x,
+                                   "$\Delta x_B$":x_err,
+                                   '$N(\pi_{+})$':N_pips,
+                                   '$N(\pi_{-})$':N_pims,
+                                   '$\Delta N(\pi_{+})$':N_pips_err,
+                                   '$\Delta N(\pi_{-})$':N_pims_err,
+                                   '$R$':R,
+                                   '$\Delta R_{+}$':R_err_up,
+                                   '$\Delta R_{-}$':R_err_dw})
+        
+        filelabel = '%s_min%.3f_%s_mean_pips%.3f_pims%.3f_%s_max%.3f'%(zvar,z_min,zvar,Zavg_pips,Zavg_pims,zvar,z_max)
+        filename  =  data_path + prefix + filelabel + suffix  + '.csv'
+        df_to_save.to_csv(filename)
+        if fdebug:
+            print('saved',filename)
+            if fdebug>1:
+                print('$%s=%.3f\pm%.3f$'%(zvar,z_bin,z_width))
+                print(filename)
+                if fdebug>2: display(df_to_save)
+# ----------------------- #
+
+
+
+
 
 # ----------------------- #
 def compute_ratio_pips_to_pims(df_dict,
@@ -56,6 +144,7 @@ def compute_ratio_pips_to_pims(df_dict,
                                var='xB',
                                bins=np.linspace(0,1,10),
                                weight_option = 'beam-charge',
+                               zvar="Zpi",
                                z_min=0,    z_max=1,
                                M_x_min=0,  M_x_max=np.inf,
                                W_min=0,    W_max=np.inf,
@@ -115,8 +204,8 @@ def compute_ratio_pips_to_pims(df_dict,
     df_pims = df_dict['piminus']
     
     # cut on z and other variables for pi+
-    df_pips = df_pips[  (z_min   < df_pips.Zpi) & (df_pips.Zpi < z_max  )
-                      & (W_min   < df_pips.W  ) & (df_pips.W   < W_max  )   ]
+    df_pips = df_pips[  (z_min   < df_pips[zvar]) & (df_pips[zvar] < z_max  )
+                      & (W_min   < df_pips.W  )   & (df_pips.W   < W_max  )   ]
     
     if 0 < M_x_min or M_x_max < np.inf:
         df_pips = df_pips[ (M_x_min < df_pips.M_x) & (df_pips.M_x < M_x_max) ]
@@ -133,11 +222,11 @@ def compute_ratio_pips_to_pims(df_dict,
         df_pips = df_pips[df_pips.runnum == specific_run_number]
         if fdebug>1:  print('after run %d filter: %d events'%(specific_run_number,len(df_pips)))
                            
-    Zavg_pips = np.mean( np.array(df_pips.Zpi)  )
+    Zavg_pips = np.mean( np.array(df_pips[zvar])  )
     
     # cut on z and other variables for pi-
-    df_pims = df_pims[  (z_min   < df_pims.Zpi) & (df_pims.Zpi < z_max  )
-                      & (W_min   < df_pims.W  ) & (df_pims.W   < W_max  )   ]
+    df_pims = df_pims[  (z_min   < df_pims[zvar]) & (df_pims[zvar] < z_max  )
+                      & (W_min   < df_pims.W  )   & (df_pims.W   < W_max  )   ]
     
     if 0 < M_x_min or M_x_max < np.inf:
         df_pims = df_pims[ (M_x_min < df_pims.M_x) & (df_pims.M_x < M_x_max) ]
@@ -152,7 +241,7 @@ def compute_ratio_pips_to_pims(df_dict,
     if specific_run_number is not None:
         df_pims = df_pims[df_pims.runnum == specific_run_number]
 
-    Zavg_pims = np.mean( np.array(df_pims.Zpi)  )
+    Zavg_pims = np.mean( np.array(df_pims[zvar])  )
 
 
     pips = df_pips[var]
@@ -169,7 +258,7 @@ def compute_ratio_pips_to_pims(df_dict,
     R_pips_to_pims, R_pips_to_pims_err = [],[]
     N_pips, N_pims                     = [],[]
     N_pips_err, N_pims_err             = [],[]
-    if fdebug>1: print('%.2f<z<%.2f: '%(z_min,z_max), len(pips),'π+ and',len(pims),'π-')
+    if fdebug>1: print('%.2f<%s<%.2f: '%(z_min,zvar,z_max), len(pips),'π+ and',len(pims),'π-')
         
 
     for x_min,x_max in zip(bins[:-1],bins[1:]):#{
@@ -249,90 +338,6 @@ def compute_ratio_pips_to_pims(df_dict,
 # ----------------------- #
 
 
-# ----------------------- #
-def extract_SIDIS_ratio(df_dict  = None,
-                        specific_run_number=None,
-                        x_var    = 'xB' ,
-                        x_bins   = np.linspace(0.2,0.6,11),
-                        z_bins   = np.arange(0.3,0.8,0.1),
-                        z_widths = 0.01*np.ones(5),
-                        data_path= '/Users/erezcohen/Desktop/data/BAND/Results/',
-                        fdebug   = 0,
-                        prefix   = 'Untagged_SIDIS_ratio_',
-                        suffix   = '',
-                        M_x_min  = 0,
-                        M_x_max  = np.inf,
-                        W_min    = 0,
-                        W_max    = np.inf,
-                        Q2_min   = 0,
-                        Q2_max   = np.inf,
-                        Mx_d_min = 0,
-                        weight_option = 'beam-charge',):
-    '''
-    Extract SIDIS results,
-    the number of d(e,e'π+) and d(e,e'π-) events,
-    and save them to a CSV file
-    
-    last update Oct-11, 2022
-    
-    
-    input
-    ---------
-
-    
-    '''
-    
-    x        = (x_bins[1:] + x_bins[:-1])/2
-    x_err    = (x_bins[1:] - x_bins[:-1])/2
-    for z_bin,z_width in zip(z_bins,z_widths):
-        z_min,z_max = z_bin-z_width, z_bin+z_width
-        
-        (R,
-         R_err_up,
-         R_err_dw,
-         N_pips,
-         N_pims,
-         Zavg_pips,
-         Zavg_pims,
-         N_pips_err,
-         N_pims_err) = compute_ratio_pips_to_pims(df_dict = df_dict ,
-                                                 specific_run_number=specific_run_number,
-                                                 var     = x_var,
-                                                 bins    = x_bins,
-                                                 z_min   = z_min,
-                                                 z_max   = z_max,
-                                                 M_x_min = M_x_min,
-                                                 M_x_max = M_x_max,
-                                                 W_min   = W_min,
-                                                 W_max   = W_max,
-                                                 Mx_d_min= Mx_d_min,
-                                                  Q2_min = Q2_min,
-                                                  Q2_max = Q2_max,
-                                                  weight_option=weight_option,
-                                                 fdebug  = fdebug)
-
-        df_to_save = pd.DataFrame({"$x_B$":x,
-                                   "$\Delta x_B$":x_err,
-                                   '$N(\pi_{+})$':N_pips,
-                                   '$N(\pi_{-})$':N_pims,
-                                   '$\Delta N(\pi_{+})$':N_pips_err,
-                                   '$\Delta N(\pi_{-})$':N_pims_err,
-                                   '$R$':R,
-                                   '$\Delta R_{+}$':R_err_up,
-                                   '$\Delta R_{-}$':R_err_dw})
-        
-        filelabel = 'Zmin%.3f_Zmean_pips%.3f_pims%.3f_Zmax%.3f'%(z_min,Zavg_pips,Zavg_pims,z_max)
-        filename  =  data_path + prefix + filelabel + suffix  + '.csv'
-        df_to_save.to_csv(filename)
-        if fdebug:
-            print('saved',filename)
-            if fdebug>1:
-                print('$z=%.3f\pm%.3f$'%(z_bin,z_width))
-                print(filename)
-                if fdebug>2: display(df_to_save)
-# ----------------------- #
-
-
 
 
 
@@ -346,11 +351,15 @@ def load_SIDIS_ratio(xlabel   = "Bjorken $x$",
                      prefix   = 'Untagged_SIDIS_ratio_',
                      suffix   = '',
                      doPlotResults=False,
+                     zvar     = "Zpi",
                      data_path= '/Users/erezcohen/Desktop/data/BAND/Results/'):
     '''
     Load SIDIS ratio results
-    last update Sep-22, 2022
+    last update Nov-26, 2022
     
+    input
+    -------
+    zvar      "Zpi","zeta_pi"
     
     '''
     
@@ -361,13 +370,23 @@ def load_SIDIS_ratio(xlabel   = "Bjorken $x$",
     filelist = os.listdir(data_path)
     for filename in filelist:
         if prefix in filename and suffix in filename:
-            if fdebug: print( 'reading',filename )
             filenameparts = filename.split('_')
-            z_min     = float(filenameparts[3][4:8])
-            Zavg_pips = float(filenameparts[5][5:9])
-            Zavg_pims = float(filenameparts[6][5:9])
-            z_max     = float(filenameparts[7][4:8])
-            filelabel = 'Zmin%.3f_Zmean_pips%.3f_pims%.3f_Zmax%.3f'%(z_min,Zavg_pips,Zavg_pims,z_max)
+            
+            if zvar=="Zpi":
+                if "Zpi" not in filenameparts: continue
+                z_min     = float(filenameparts[4][4:8])
+                Zavg_pips = float(filenameparts[7][5:9])
+                Zavg_pims = float(filenameparts[8][5:9])
+                z_max     = float(filenameparts[10][4:8])
+
+            elif zvar=="zeta_pi":
+                if "zeta" not in filenameparts: continue
+                z_min     = float(filenameparts[5][4:8])
+                Zavg_pips = float(filenameparts[9][5:9])
+                Zavg_pims = float(filenameparts[10][5:9])
+                z_max     = float(filenameparts[13][4:8])
+
+            filelabel = '%s_min%.3f_%s_mean_pips%.3f_pims%.3f_%s_max%.3f'%(zvar,z_min,zvar,Zavg_pips,Zavg_pims,zvar,z_max)
 
             df = pd.read_csv( data_path + '/' + filename )
             SIDIS_results[filelabel] = df
@@ -385,7 +404,7 @@ def load_SIDIS_ratio(xlabel   = "Bjorken $x$",
         ax  = fig.add_subplot(1,1,1)
         for z_min,z_max,Zavg_pips,Zavg_pims in zip( z_min_arr, z_max_arr, Zavg_pips_arr, Zavg_pims_arr ):
             Zavg = (Zavg_pips+Zavg_pims)/2.
-            filelabel = 'Zmin%.3f_Zmean_pips%.3f_pims%.3f_Zmax%.3f'%(z_min,Zavg_pips,Zavg_pims,z_max)
+            filelabel = '%s_min%.3f_%s_mean_pips%.3f_pims%.3f_%s_max%.3f'%(zvar,z_min,zvar,Zavg_pips,Zavg_pims,zvar,z_max)
             
             df = SIDIS_results[filelabel]
             y    = df['$R$']
@@ -404,6 +423,7 @@ def load_SIDIS_ratio(xlabel   = "Bjorken $x$",
     if fdebug: print('Done.')
     return SIDIS_results
 # ----------------------- #
+
 
 
 

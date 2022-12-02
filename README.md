@@ -26,7 +26,7 @@ Free proton p(e,e'π) data
 ## Revisions and release notes
 ------------------------------------------------------------------------------
 
-Nov-24, 2022    
+Nov-24, 2022 (commit_5b2a758)    
 -------------
 1. Added *alpha_pi* and *zeta_pi* to d(e,e'πn) data in **MergeSIDISandBANDSkimmers.C**
 
@@ -35,6 +35,18 @@ Nov-24, 2022
     // LC momentum fraction of the active proton carried by the produced pion
     alpha_n      = (Pn_qFrame.E() - Pn_qFrame.Pz()) / (Md/2);
     zeta_pi      = alpha_pi / ( 2 - alpha_n );
+
+2. Added a possibility to bin the tagged cross-section ratio as a function of *zeta_pi* in **Tagged_SIDIS_ratio.ipynb**
+    (e,e π+ )
+    3820 events after original cut (100.0 %)
+    1733 events after p-theta cut (45.4 %)
+    1680 events after Kinematical cut (44.0 %)
+    (e,e π- )
+    1231 events after original cut (100.0 %)
+    811 events after p-theta cut (65.9 %)
+    793 events after Kinematical cut (64.4 %) 
+
+
 
 
 Nov-1, 2022    
