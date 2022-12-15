@@ -351,11 +351,14 @@ def load_SIDIS_ratio(xlabel   = "Bjorken $x$",
                      prefix   = 'Untagged_SIDIS_ratio_',
                      suffix   = '',
                      doPlotResults=False,
+                     axPlot   = [],
+                     Nzbins2Plot = 5,
+                     titlePlot="$\pi^+/\pi^-$ ratio as a function of $x_B$ without a tagged neutron",
                      zvar     = "Zpi",
                      data_path= '/Users/erezcohen/Desktop/data/BAND/Results/'):
     '''
     Load SIDIS ratio results
-    last update Nov-26, 2022
+    last update Dec-7, 2022
     
     input
     -------
@@ -371,7 +374,8 @@ def load_SIDIS_ratio(xlabel   = "Bjorken $x$",
     for filename in filelist:
         if prefix in filename and suffix in filename:
             filenameparts = filename.split('_')
-            
+            if fdebug>2: print(filename)
+            if fdebug>3: print(filenameparts)
             if zvar=="Zpi":
                 if "Zpi" not in filenameparts: continue
                 z_min     = float(filenameparts[4][4:8])
@@ -396,13 +400,20 @@ def load_SIDIS_ratio(xlabel   = "Bjorken $x$",
             Zavg_pims_arr.append(Zavg_pims)
 
         
+    z_min_arr = np.sort(z_min_arr)
+    z_max_arr = np.sort(z_max_arr)
+    Zavg_pips_arr = np.sort(Zavg_pips_arr)
+    Zavg_pims_arr = np.sort(Zavg_pims_arr)
+    
     if doPlotResults:#{
         x     = np.array(df["$x_B$"])
         x_err = np.array(df["$\Delta x_B$"])
 
-        fig = plt.figure(figsize=(9,6))
-        ax  = fig.add_subplot(1,1,1)
-        for z_min,z_max,Zavg_pips,Zavg_pims in zip( z_min_arr, z_max_arr, Zavg_pips_arr, Zavg_pims_arr ):
+        if axPlot==[]:
+            fig = plt.figure(figsize=(9,6))
+            axPlot  = fig.add_subplot(1,1,1)
+            
+        for z_min,z_max,Zavg_pips,Zavg_pims in zip( z_min_arr, z_max_arr, Zavg_pips_arr, Zavg_pims_arr[0:Nzbins2Plot] ):
             Zavg = (Zavg_pips+Zavg_pims)/2.
             filelabel = '%s_min%.3f_%s_mean_pips%.3f_pims%.3f_%s_max%.3f'%(zvar,z_min,zvar,Zavg_pips,Zavg_pims,zvar,z_max)
             
@@ -410,19 +421,19 @@ def load_SIDIS_ratio(xlabel   = "Bjorken $x$",
             y    = df['$R$']
             y_err= (df['$\Delta R_{+}$'],df['$\Delta R_{-}$'])
             # plot
-            l=ax.errorbar(x=x, xerr=x_err,  y=y, yerr=y_err,
+            l=axPlot.errorbar(x=x, xerr=x_err,  y=y, yerr=y_err,
                         marker='o',markeredgecolor='k',
                         label='$%.3f<z<%.3f, \\bar{z}=%.3f$'%(z_min,z_max,Zavg))
 
-        set_axes(ax,xlabel,"$N(e,e'\pi^+)/N(e,e'\pi^-)$",
-                 title="$\pi^+/\pi^-$ ratio as a function of $x_B$ without a tagged neutron",
-                 do_add_grid=True, do_add_legend=True, fontsize=18,
-                );
-        plt.legend(bbox_to_anchor=(1,1.05),loc='best',fontsize=18)
+        set_axes(axPlot,xlabel,"$N(e,e'\pi^+)/N(e,e'\pi^-)$",
+                 title=titlePlot,
+                 do_add_grid=True, do_add_legend=True,fontsize=18);
+        # plt.legend(bbox_to_anchor=(1,1.05),loc='best',fontsize=18)
         
     if fdebug: print('Done.')
     return SIDIS_results
 # ----------------------- #
+
 
 
 
