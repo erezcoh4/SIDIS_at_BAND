@@ -408,7 +408,7 @@ void SetDataPath (TString fDataPath) {
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-void SetDataPath (TString fSkimming) {
+void SetSkimming (TString fSkimming) {
     if (fSkimming=="" || fSkimming=="SIDIS_skimming" ){
         // d(e,e'π) files from RGB data
         Skimming = "SIDIS_skimming";
