@@ -8,6 +8,7 @@
 #
 # skim_sidis_multiple_runs --Nruns=1 --fdebug=3
 # skim_sidis_multiple_runs --Skimming=RGA_Free_proton --DataPath=nSidis --Ebeam=10.6
+# ./macros/skim_sidis_multiple_runs --Skimming=RGA_Free_proton --DataPath=nSidis --Nruns=1 --NeventsMax=10 --fdebug=3
 #
 #
 import sys, os, linecache
@@ -53,7 +54,7 @@ if Skimming == "SIDIS_skimming":
     runs_filename = "macros/runlists/good_runs_10-2-final.txt"
     
 elif Skimming == "RGA_Free_proton":
-    runs_filename = "macros/runlists/rga/rga_nsidis_runs_10-6.txt"
+    runs_filename = "macros/runlists/rga_data/rga_nsidis_runs_10-6.txt"
     Ebeam = 10.6
     
 # Using readlines()

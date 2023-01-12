@@ -28,7 +28,7 @@ Free proton p(e,e'π) data
 ## Revisions and release notes
 ------------------------------------------------------------------------------
 
-Jan-9, 2023 ()    
+Jan-12, 2023 (commit_ad849e5)    
 -------------
 
 1. Started analysis of free-p data *p(e,e'π)* from RGA with the same code for deuteron data *d(e,e'π)* from RGB
