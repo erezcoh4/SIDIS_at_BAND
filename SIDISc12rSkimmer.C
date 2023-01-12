@@ -413,7 +413,7 @@ void SetSkimming (TString fSkimming) {
         // d(e,e'π) files from RGB data
         Skimming = "SIDIS_skimming";
     }
-    else if (DataPath=="RGA_Free_proton"){
+    else if (fSkimming=="RGA_Free_proton"){
         // p(e,e'π) files from RGA data
         Skimming = "RGA_Free_proton";
     }
