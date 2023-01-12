@@ -17,7 +17,9 @@ Tagged d(e,e'πn) data
 [SIDISc12rSkimmer.C (C++/ROOT) on ifarm] -> [MergeSIDISandBANDSkimmers.C (C++/ROOT) on ifarm] -> [Download csv files to local machine] -> [Tagged_SIDIS_ratio.ipynb (Python)]      
     
 Free proton p(e,e'π) data
-([Igor produce ROOT files from RGA data] -> [Download csv files to local machine] ->) [ReadIgorRGAFile.C (C++/ROOT) on local machine] -> [FreeP_SIDIS_ratio.ipynb (Python)]
+[SIDISc12rSkimmer.C (C++/ROOT) on ifarm] -> [Download csv files to local machine] -> [FreeP_SIDIS_ratio.ipynb (Python)]
+(previosly (before Jan-2023)): 
+[Igor produced ROOT files from RGA data] -> [Download csv files to local machine] ->) [ReadIgorRGAFile.C (C++/ROOT) on local machine] -> [FreeP_SIDIS_ratio.ipynb (Python)]
     
     
     
@@ -25,6 +27,22 @@ Free proton p(e,e'π) data
     
 ## Revisions and release notes
 ------------------------------------------------------------------------------
+
+Jan-9, 2023 ()    
+-------------
+
+1. Started analysis of free-p data *p(e,e'π)* from RGA with the same code for deuteron data *d(e,e'π)* from RGB
+
+The reason for this change is that the small data files Igor produced were not enough and he is too busy to further produce more files from RGA
+The RGA free-p data are taken from **nSIDIS** train located in:
+    
+    /cache/clas12/rg-a/production/recon/spring2019/torus-1/pass1/v1/dst/train/nSidis
+
+For RGA use nSidis, they key difference is sidisdvcs has e_p > 1 GeV and nSidis has e_p > 2 GeV. [Harut A., Dec-2022] 
+This is done by the exact same code as BAND skimming **SIDISc12rSkimmer.C**
+
+
+
 
 Nov-24, 2022 (commit_5b2a758)    
 -------------

@@ -47,22 +47,7 @@ weight_per_run = np.zeros(np.max(beam_charge_all_runs.runnum)+1)
 for run in beam_charge_all_runs.runnum:
     weight_per_run[run] = 1./float(beam_charge_all_runs[beam_charge_all_runs.runnum==run].beam_charge);
 
-# ----------------------- #
-def plot_FF_expectation(color='blue',formula='(1-z)/(1+z)'):
-    '''
-    Field-Feynman fragmentation model 
-    [R. D. Field and R. P. Feynman, Nucl. Phys. B136, 1 (1978)]
-    [J. Hua and B.Q. Ma Eur.Phys.J.C30:207-212,2003]
-    '''
-    zFF = np.linspace(0,1,100)
-    if formula == '(1-z)/(1+z)':
-        rFF = (1-zFF)/(1+zFF)
-        ax.plot(zFF, rFF, '--',color=color,label='(1-z)/(1+ z)')
-    elif formula == '(1-z)/(1-z+z/0.46)':
-        rFF = (1-zFF)/(1-zFF+zFF/0.46)
-        ax.plot(zFF, rFF, '--',color=color,label='(1-z)/(1 - z + z/0.46)')
-# ----------------------- #
-        
+
 
 # ----------------------- #
 def extract_SIDIS_ratio(df_dict  = None,

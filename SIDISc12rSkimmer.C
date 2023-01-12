@@ -63,7 +63,6 @@ void                     SetLorentzVector (TLorentzVector &p4, clas12::region_pa
 void                      OpenOutputFiles (TString csvfilename, TString header);
 void                     CloseOutputFiles (TString OutDataPath, TString outfilename);
 void                      SetOutputTTrees ();
-//double                       FindCutValue ( std::string cutName );
 bool   CheckIfElectronPassedSelectionCuts (Double_t e_PCAL_x, Double_t e_PCAL_y,
                                            Double_t e_PCAL_W,Double_t e_PCAL_V,
                                            Double_t e_E_PCAL,
@@ -102,38 +101,14 @@ void              Stream_e_pi_line_to_CSV (TString pionCharge, int piIdx,
                                            int fdebug );
 TVector3            RotateVectorTo_qFrame (TVector3 V);
 void                        MoveTo_qFrame (int fdebug);
-//void                         Print4Vector (TLorentzVector v, std::string label="" );
 void                          SetDataPath (TString fDataPath) ;
+void                          SetSkimming (TString fSkimming) ;
+void                             SetEbeam ( double fEbeam );
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 
 // globals
-TString DataPath = "";
-TString   prefix = "";
+TString Skimming = "", DataPath = "", prefix = "";
 auto db = TDatabasePDG::Instance();
-// cut values
-//std::vector<std::pair<std::string, double>> cutValues;
-//double               cutValue_Vz_min;
-//double               cutValue_Vz_max;
-//double             cutValue_e_PCAL_W;
-//double             cutValue_e_PCAL_V;
-//double             cutValue_e_E_PCAL;
-//double cutValue_SamplingFraction_min;
-//double     cutValue_PCAL_ECIN_SF_min;
-//double        cutValue_Ve_Vpi_dz_max;
-//double               cutValue_Q2_min;
-//double               cutValue_Q2_max;
-//double                cutValue_W_min;
-//double                cutValue_y_max;
-//double          cutValue_e_theta_min;
-//double          cutValue_e_theta_max;
-//double         cutValue_pi_theta_min;
-//double         cutValue_pi_theta_max;
-//double              cutValue_Ppi_min;
-//double              cutValue_Ppi_max;
-//double               cutValue_Pe_min;
-//double               cutValue_Pe_max;
-//double              cutValue_Zpi_min;
-//double              cutValue_Zpi_max;
 double        Pe_phi, q_phi, q_theta; // "q-frame" parameters
 double                           Zpi;
 double                        Zpi_LC;
@@ -158,10 +133,8 @@ int           Nevents_processed;
 int       Nevents_passed_e_cuts;
 int    Nevents_passed_pips_cuts;
 int  Nevents_passed_e_pips_cuts;
-int Nevents_passed_e_pips_kinematics_cuts;
-int    Nevents_passed_pims_cuts;
-int  Nevents_passed_e_pims_cuts;
-int Nevents_passed_e_pims_kinematics_cuts;
+int Nevents_passed_e_pips_kinematics_cuts, Nevents_passed_pims_cuts;
+int  Nevents_passed_e_pims_cuts, Nevents_passed_e_pims_kinematics_cuts;
 int                   inclusive; // tag to look at inclusive run - all the events with no selection
 
 // number of particles per event
@@ -301,13 +274,17 @@ void SIDISc12rSkimmer(int RunNumber=6420,
                       int fdebug=1,
                       int PrintProgress=50000,
                       int FirstEvent=0, // first event to analyze
+                      TString fSkimming = "SIDIS_skimming", // "SIDIS_skimming"  , "RGA_Free_proton"
+                      TString fDataPath = "sidisdvcs",      // "sidisdvcs", "inc", "nSidis"
+                      double fEbeam = 10.2, // [GeV]
                       int NpipsMin=1, // minimal number of pi+
-                      TString fDataPath = "sidisdvcs",
                       int setInclusive=0 ){
     
     aux.SetVerbosity(fdebug);
-
     SetDataPath( fDataPath );
+    SetSkimming( fSkimming );
+    SetEbeam   ( fEbeam    );
+
     TString RunNumberStr = GetRunNumberSTR(RunNumber,fdebug);
     // read cut values
     aux.loadCutValues("macros/cuts/BANDcutValues.csv",torusBending);
@@ -316,7 +293,7 @@ void SIDISc12rSkimmer(int RunNumber=6420,
     if (inclusive == 1) std::cout << "Running as inclusive" << std::endl;
 
     // open result files
-    TString outfilepath = "/volatile/clas12/users/ecohen/BAND/SIDIS_skimming/";
+    TString outfilepath = "/volatile/clas12/users/ecohen/BAND/" + Skimming + "/";
     TString outfilename = "skimmed_SIDIS_" + prefix + RunNumberStr;
     OpenResultFiles( outfilepath, outfilename );
 
@@ -410,18 +387,46 @@ void SIDISc12rSkimmer(int RunNumber=6420,
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void SetDataPath (TString fDataPath) {
-    if (DataPath=="" || DataPath=="sidisdvcs" || DataPath=="sidis dvcs"){
+    if (fDataPath=="" || fDataPath=="sidisdvcs" || fDataPath=="sidis dvcs"){
         // sidis-dvcs train files, used since July 2022
         // (the 'usual' train files)
         DataPath = "/cache/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train/sidisdvcs/";
         prefix   = "sidisdvcs_";
     }
-    else if (DataPath=="inclusive" || DataPath=="inc"){
+    else if (fDataPath=="inclusive" || fDataPath=="inc"){
         // inclusive train files, used until July 2022
         // (inclusive train files were only generated in the beginning of RGB without any backup)
         DataPath = "/volatile/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train_20200610/inc/";
         prefix   = "inc_";
     }
+    else if (fDataPath=="nSidis"){
+        // free-p data from RGB data
+        // For RGA we use nSidis, they key difference is sidisdvcs has e_p > 1 GeV and nSidis has e_p > 2 GeV.
+        DataPath = "/cache/clas12/rg-a/production/recon/spring2019/torus-1/pass1/v1/dst/train/nSidis/";
+        prefix   = "nsidis_";
+    }
+}
+
+// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+void SetDataPath (TString fSkimming) {
+    if (fSkimming=="" || fSkimming=="SIDIS_skimming" ){
+        // d(e,e'π) files from RGB data
+        Skimming = "SIDIS_skimming";
+    }
+    else if (DataPath=="RGA_Free_proton"){
+        // p(e,e'π) files from RGA data
+        Skimming = "RGA_Free_proton";
+    }
+}
+
+// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+void SetEbeam (double fEbeam) {
+    
+    // [GeV]
+    // RGA the enrgy was 10.6
+    // RGB Spring-2019 the enrgy was 10.2
+    // RGB Fall-2019 the enrgy was 10.4096
+    Ebeam = fEbeam;
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
@@ -1043,101 +1048,101 @@ void SetOutputTTrees(){
     
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-double GetBeamEnergy (int fdebug){
-    // ToDo:
-    // make this automatic using GetBeamEnergy
-    // rcdb crashes with
-    /*
-     *** Break *** segmentation violation
-
-
-
-     ===========================================================
-     There was a crash.
-     This is the entire stack trace of all threads:
-     ===========================================================
-     #0  0x00007f1733bdf41c in waitpid () from /lib64/libc.so.6
-     #1  0x00007f1733b5cf12 in do_system () from /lib64/libc.so.6
-     #2  0x00007f17386cff95 in TUnixSystem::StackTrace() () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCore.so.6.20
-     #3  0x00007f17386cd00c in TUnixSystem::DispatchSignals(ESignals) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCore.so.6.20
-     #4  <signal handler called>
-     #5  0x00007f171f2b7584 in SIDISc12rSkimmer(int, int, int, bool, int, int, TString) () from /u/home/cohen/SIDIS_at_BAND/SIDISc12rSkimmer_C.so
-     #6  0x00007f17391a308b in ?? ()
-     #7  0x00007ffe3aadbba0 in ?? ()
-     #8  0x00007ffe3aadbc90 in ?? ()
-     #9  0x00007ffe3aadbc50 in ?? ()
-     #10 0x00007ffe3aadbba0 in ?? ()
-     #11 0x00007ffe00000001 in ?? ()
-     #12 0x00000000019f8a20 in ?? ()
-     #13 0x00007f1738abe220 in vtable for TString () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCore.so.6.20
-     #14 0x0000005a00000061 in ?? ()
-     #15 0x0000000008f9ae70 in ?? ()
-     #16 0x00007ffe3aadc120 in ?? ()
-     #17 0x0000000000861d80 in ?? ()
-     #18 0x00007f172cb02df1 in cling::IncrementalExecutor::executeWrapper(llvm::StringRef, cling::Value*) const () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCling.so
-     #19 0x00007f172ca8ef23 in cling::Interpreter::RunFunction(clang::FunctionDecl const*, cling::Value*) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCling.so
-     #20 0x00007f172ca90a5d in cling::Interpreter::EvaluateInternal(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, cling::CompilationOptions, cling::Value*, cling::Transaction**, unsigned long) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCling.so
-     #21 0x00007f172ca90d45 in cling::Interpreter::process(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, cling::Value*, cling::Transaction**, bool) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCling.so
-     #22 0x00007f172cb517ad in cling::MetaProcessor::process(llvm::StringRef, cling::Interpreter::CompilationResult&, cling::Value*, bool) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCling.so
-     #23 0x00007f172c9f711c in HandleInterpreterException(cling::MetaProcessor*, char const*, cling::Interpreter::CompilationResult&, cling::Value*) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCling.so
-     #24 0x00007f172ca0d65c in TCling::ProcessLine(char const*, TInterpreter::EErrorCode*) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCling.so
-     #25 0x00007f172ca0dae1 in TCling::ProcessLineSynch(char const*, TInterpreter::EErrorCode*) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCling.so
-     #26 0x00007f173858ca0a in TApplication::ExecuteFile(char const*, int*, bool) [clone .localalias] () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCore.so.6.20
-     #27 0x00007f173858d6a7 in TApplication::ProcessLine(char const*, bool, int*) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCore.so.6.20
-     #28 0x00007f1735e4b462 in TRint::ProcessLineNr(char const*, char const*, int*) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libRint.so.6.20
-     #29 0x00007f1735e4cb7b in TRint::Run(bool) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libRint.so.6.20
-     #30 0x0000000000400c76 in main ()
-     ===========================================================
-
-
-     The lines below might hint at the cause of the crash.
-     You may get help by asking at the ROOT forum http://root.cern.ch/forum
-     Only if you are really convinced it is a bug in ROOT then please submit a
-     report at http://root.cern.ch/bugs Please post the ENTIRE stack trace
-     from above as an attachment in addition to anything else
-     that might help us fixing this issue.
-     ===========================================================
-     #5  0x00007f171f2b7584 in SIDISc12rSkimmer(int, int, int, bool, int, int, TString) () from /u/home/cohen/SIDIS_at_BAND/SIDISc12rSkimmer_C.so
-     #6  0x00007f17391a308b in ?? ()
-     #7  0x00007ffe3aadbba0 in ?? ()
-     #8  0x00007ffe3aadbc90 in ?? ()
-     #9  0x00007ffe3aadbc50 in ?? ()
-     #10 0x00007ffe3aadbba0 in ?? ()
-     #11 0x00007ffe00000001 in ?? ()
-     #12 0x00000000019f8a20 in ?? ()
-     #13 0x00007f1738abe220 in vtable for TString () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCore.so.6.20
-     #14 0x0000005a00000061 in ?? ()
-     #15 0x0000000008f9ae70 in ?? ()
-     #16 0x00007ffe3aadc120 in ?? ()
-     #17 0x0000000000861d80 in ?? ()
-     #18 0x00007f172cb02df1 in cling::IncrementalExecutor::executeWrapper(llvm::StringRef, cling::Value*) const () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCling.so
-     #19 0x00007f172ca8ef23 in cling::Interpreter::RunFunction(clang::FunctionDecl const*, cling::Value*) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCling.so
-     #20 0x00007f172ca90a5d in cling::Interpreter::EvaluateInternal(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, cling::CompilationOptions, cling::Value*, cling::Transaction**, unsigned long) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCling.so
-     #21 0x00007f172ca90d45 in cling::Interpreter::process(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, cling::Value*, cling::Transaction**, bool) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCling.so
-     #22 0x00007f172cb517ad in cling::MetaProcessor::process(llvm::StringRef, cling::Interpreter::CompilationResult&, cling::Value*, bool) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCling.so
-     #23 0x00007f172c9f711c in HandleInterpreterException(cling::MetaProcessor*, char const*, cling::Interpreter::CompilationResult&, cling::Value*) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCling.so
-     ===========================================================
-
-     */
-    //rcdb info
-    //        if (fdebug>3) std::cout << "reading RCDB info" << std::endl;
-    //        auto& rcdbData = c12.rcdb()->current();//struct with all relevent rcdb values
-    //
-    //        // get beam energy
-    //        if (fdebug>3) std::cout << "getting beam energy" << std::endl;
-    //        Ebeam = rcdbData.beam_energy ;
-    if (fdebug>3) std::cout << "set beam energy" << std::endl;
-    double Ebeam = 10.2; // [GeV] ( for Fall-2019 the enrgy was 10.4096)
-    return Ebeam;
-}
+////....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+//double GetBeamEnergy (int fdebug){
+//    // ToDo:
+//    // make this automatic using GetBeamEnergy
+//    // rcdb crashes with
+//    /*
+//     *** Break *** segmentation violation
+//
+//
+//
+//     ===========================================================
+//     There was a crash.
+//     This is the entire stack trace of all threads:
+//     ===========================================================
+//     #0  0x00007f1733bdf41c in waitpid () from /lib64/libc.so.6
+//     #1  0x00007f1733b5cf12 in do_system () from /lib64/libc.so.6
+//     #2  0x00007f17386cff95 in TUnixSystem::StackTrace() () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCore.so.6.20
+//     #3  0x00007f17386cd00c in TUnixSystem::DispatchSignals(ESignals) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCore.so.6.20
+//     #4  <signal handler called>
+//     #5  0x00007f171f2b7584 in SIDISc12rSkimmer(int, int, int, bool, int, int, TString) () from /u/home/cohen/SIDIS_at_BAND/SIDISc12rSkimmer_C.so
+//     #6  0x00007f17391a308b in ?? ()
+//     #7  0x00007ffe3aadbba0 in ?? ()
+//     #8  0x00007ffe3aadbc90 in ?? ()
+//     #9  0x00007ffe3aadbc50 in ?? ()
+//     #10 0x00007ffe3aadbba0 in ?? ()
+//     #11 0x00007ffe00000001 in ?? ()
+//     #12 0x00000000019f8a20 in ?? ()
+//     #13 0x00007f1738abe220 in vtable for TString () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCore.so.6.20
+//     #14 0x0000005a00000061 in ?? ()
+//     #15 0x0000000008f9ae70 in ?? ()
+//     #16 0x00007ffe3aadc120 in ?? ()
+//     #17 0x0000000000861d80 in ?? ()
+//     #18 0x00007f172cb02df1 in cling::IncrementalExecutor::executeWrapper(llvm::StringRef, cling::Value*) const () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCling.so
+//     #19 0x00007f172ca8ef23 in cling::Interpreter::RunFunction(clang::FunctionDecl const*, cling::Value*) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCling.so
+//     #20 0x00007f172ca90a5d in cling::Interpreter::EvaluateInternal(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, cling::CompilationOptions, cling::Value*, cling::Transaction**, unsigned long) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCling.so
+//     #21 0x00007f172ca90d45 in cling::Interpreter::process(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, cling::Value*, cling::Transaction**, bool) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCling.so
+//     #22 0x00007f172cb517ad in cling::MetaProcessor::process(llvm::StringRef, cling::Interpreter::CompilationResult&, cling::Value*, bool) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCling.so
+//     #23 0x00007f172c9f711c in HandleInterpreterException(cling::MetaProcessor*, char const*, cling::Interpreter::CompilationResult&, cling::Value*) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCling.so
+//     #24 0x00007f172ca0d65c in TCling::ProcessLine(char const*, TInterpreter::EErrorCode*) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCling.so
+//     #25 0x00007f172ca0dae1 in TCling::ProcessLineSynch(char const*, TInterpreter::EErrorCode*) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCling.so
+//     #26 0x00007f173858ca0a in TApplication::ExecuteFile(char const*, int*, bool) [clone .localalias] () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCore.so.6.20
+//     #27 0x00007f173858d6a7 in TApplication::ProcessLine(char const*, bool, int*) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCore.so.6.20
+//     #28 0x00007f1735e4b462 in TRint::ProcessLineNr(char const*, char const*, int*) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libRint.so.6.20
+//     #29 0x00007f1735e4cb7b in TRint::Run(bool) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libRint.so.6.20
+//     #30 0x0000000000400c76 in main ()
+//     ===========================================================
+//
+//
+//     The lines below might hint at the cause of the crash.
+//     You may get help by asking at the ROOT forum http://root.cern.ch/forum
+//     Only if you are really convinced it is a bug in ROOT then please submit a
+//     report at http://root.cern.ch/bugs Please post the ENTIRE stack trace
+//     from above as an attachment in addition to anything else
+//     that might help us fixing this issue.
+//     ===========================================================
+//     #5  0x00007f171f2b7584 in SIDISc12rSkimmer(int, int, int, bool, int, int, TString) () from /u/home/cohen/SIDIS_at_BAND/SIDISc12rSkimmer_C.so
+//     #6  0x00007f17391a308b in ?? ()
+//     #7  0x00007ffe3aadbba0 in ?? ()
+//     #8  0x00007ffe3aadbc90 in ?? ()
+//     #9  0x00007ffe3aadbc50 in ?? ()
+//     #10 0x00007ffe3aadbba0 in ?? ()
+//     #11 0x00007ffe00000001 in ?? ()
+//     #12 0x00000000019f8a20 in ?? ()
+//     #13 0x00007f1738abe220 in vtable for TString () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCore.so.6.20
+//     #14 0x0000005a00000061 in ?? ()
+//     #15 0x0000000008f9ae70 in ?? ()
+//     #16 0x00007ffe3aadc120 in ?? ()
+//     #17 0x0000000000861d80 in ?? ()
+//     #18 0x00007f172cb02df1 in cling::IncrementalExecutor::executeWrapper(llvm::StringRef, cling::Value*) const () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCling.so
+//     #19 0x00007f172ca8ef23 in cling::Interpreter::RunFunction(clang::FunctionDecl const*, cling::Value*) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCling.so
+//     #20 0x00007f172ca90a5d in cling::Interpreter::EvaluateInternal(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, cling::CompilationOptions, cling::Value*, cling::Transaction**, unsigned long) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCling.so
+//     #21 0x00007f172ca90d45 in cling::Interpreter::process(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, cling::Value*, cling::Transaction**, bool) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCling.so
+//     #22 0x00007f172cb517ad in cling::MetaProcessor::process(llvm::StringRef, cling::Interpreter::CompilationResult&, cling::Value*, bool) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCling.so
+//     #23 0x00007f172c9f711c in HandleInterpreterException(cling::MetaProcessor*, char const*, cling::Interpreter::CompilationResult&, cling::Value*) () from /site/12gev_phys/2.4/Linux_CentOS7.7.1908-gcc9.2.0/root/6.20.04/lib/libCling.so
+//     ===========================================================
+//
+//     */
+//    //rcdb info
+//    //        if (fdebug>3) std::cout << "reading RCDB info" << std::endl;
+//    //        auto& rcdbData = c12.rcdb()->current();//struct with all relevent rcdb values
+//    //
+//    //        // get beam energy
+//    //        if (fdebug>3) std::cout << "getting beam energy" << std::endl;
+//    //        Ebeam = rcdbData.beam_energy ;
+//    if (fdebug>3) std::cout << "set beam energy" << std::endl;
+//    double Ebeam = 10.2; // [GeV] ( for Fall-2019 the enrgy was 10.4096)
+//    return Ebeam;
+//}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void InitializeFileReading(int NeventsMax, int c12Nentries, int fdebug){
     if (fdebug>1) {
         std::cout << "InitializeFileReading( " << NeventsMax << " , " << c12Nentries << " , " << fdebug << ")" << std::endl;
     }
-    Ebeam   = GetBeamEnergy ( fdebug );
+    // Ebeam   = GetBeamEnergy ( fdebug );
     Beam    .SetPxPyPzE (0, 0, Ebeam, Ebeam );
     target  .SetXYZM    (0, 0, 0,     aux.Md    );
     d_rest  .SetXYZM    (0, 0, 0,     aux.Md    );

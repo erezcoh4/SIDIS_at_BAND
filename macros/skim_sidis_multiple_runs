@@ -2,7 +2,13 @@
 # -*- coding: utf-8 -*-
 #
 # continously take data and print the rate every few seconds
-# last edit Sep-12, 2021 (EOC)
+# last edit Jan-9, 2023 (EOC)
+#
+# execute:
+#
+# skim_sidis_multiple_runs --Nruns=1 --fdebug=3
+# skim_sidis_multiple_runs --Skimming=RGA_Free_proton --DataPath=nSidis --Ebeam=10.6
+#
 #
 import sys, os, linecache
 import argparse
@@ -23,7 +29,13 @@ parser.add_argument("--no-email",   dest="no_email",
                     action='store_true', help="do not send email")
 parser.add_argument("--FirstEvent",     type=int, default=0,
                     required=False, help="first event to start from")
-                                
+parser.add_argument("--Skimming",     type=str, default="SIDIS_skimming",
+                    required=False, help="SIDIS_skimming,RGA_Free_proton")
+parser.add_argument("--DataPath",     type=str, default="sidisdvcs",
+                    required=False, help="inc,sidisdvcs,nSidis")
+parser.add_argument("--Ebeam",     type=float, default=10.2,
+                    required=False, help="beam energy")
+                      
 
 args = parser.parse_args()
 
@@ -33,8 +45,17 @@ fdebug        = args.fdebug
 PrintProgress = args.PrintProgress
 FirstRun      = args.FirstRun
 FirstEvent    = args.FirstEvent
-runs_filename = "macros/runlists/good_runs_10-2-final.txt"
+Skimming      = args.Skimming
+DataPath      = args.DataPath
+Ebeam         = args.Ebeam
 
+if Skimming == "SIDIS_skimming":
+    runs_filename = "macros/runlists/good_runs_10-2-final.txt"
+    
+elif Skimming == "RGA_Free_proton":
+    runs_filename = "macros/runlists/rga/rga_nsidis_runs_10-6.txt"
+    Ebeam = 10.6
+    
 # Using readlines()
 runs_file = open(runs_filename, 'r')
 run_fileLines = runs_file.readlines();
@@ -55,8 +76,8 @@ for line in run_fileLines[FirstRun:]:#{
     print('')
     print("processing run %d/%d"%(runIdx,Nruns))
     print('')
-    commandline = ("clas12root -q 'SIDISc12rSkimmer.C+(%d,%d,%d,%d,%d)'"%
-                    (run,NeventsMax,fdebug,PrintProgress,FirstEvent))
+    commandline = ("clas12root -q 'SIDISc12rSkimmer.C+(%d,%d,%d,%d,%d,\"%s\",\"%s\",%f)'"%
+                    (run,NeventsMax,fdebug,PrintProgress,FirstEvent,Skimming,DataPath,Ebeam))
     print(commandline)
     
     os.system( commandline )
@@ -69,7 +90,7 @@ print('done.')
 print('')
 if args.no_email==False:#{
     mailtitle = 'Done processing skim_sidis_multiple_runs on ifarm'
-    mailbody  = ('Processed %d runs %d-%d, Data in /volatile/clas12/users/ecohen/BAND/SIDIS_skimming/'%(Nruns, FirstRun, FirstRun + Nruns))
+    mailbody  = ('Processed %d %s runs (%d-%d), Data in /volatile/clas12/users/ecohen/BAND/%s/'%(Nruns, DataPath, FirstRun, FirstRun + Nruns, Skimming))
     emailstr = ('echo %s | mail -s %s cohen.erez7@gmail.com'%(mailbody,mailtitle) )
     os.system(emailstr)
 #}
