@@ -57,6 +57,8 @@ elif Skimming == "RGA_Free_proton":
     runs_filename = "macros/runlists/rga_data/rga_nsidis_runs_10-6.txt"
     Ebeam = 10.6
     
+if DataPath=="nsidis": DataPath="nSidis"
+    
 # Using readlines()
 runs_file = open(runs_filename, 'r')
 run_fileLines = runs_file.readlines();
