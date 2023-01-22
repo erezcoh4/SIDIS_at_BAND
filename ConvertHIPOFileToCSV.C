@@ -59,7 +59,7 @@ void ComputeElectronKinematics(int fdebug){
     Q2      = -q.Mag2();
     omega   = q.E();
     xB      = Q2/(2. * aux.Mp * q.E());
-    W       = sqrt((p_rest + q).Mag2());
+    W       = 0;//sqrt((p_rest + q).Mag2());
 }
 
 
