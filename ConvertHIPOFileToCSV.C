@@ -1,5 +1,6 @@
 // Read a HIPO file and convert a few of the variables to CSV
 // clas12root -q ConvertHIPOFileToCSV.C
+// clas12root -q ConvertHIPOFileToCSV.C(\"0001"\)
 //
 
 
@@ -30,7 +31,7 @@
 using namespace clas12;
 SIDISatBAND_auxiliary  aux;
 TString DataPath, prefix;
-TString csvheader = ( (TString)"RunNumber,xB,omega,W,Q2,");
+TString csvheader = ( (TString)"RunNumber,xB,omega,Q2,W,");
 std::ofstream csvfile;
 
 // auxiliary
@@ -39,6 +40,8 @@ std::vector<region_part_ptr>  electrons;
 int              RunNumber, EventNumber;
 TLorentzVector       Beam, target, e, q;
 double                 Q2, omega, W, xB;
+TLorentzVector p_rest;
+p_rest.SetXYZM    (0, 0, 0,     aux.Mp    );
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void  SetLorentzVector (TLorentzVector &p4, clas12::region_part_ptr rp){
@@ -56,14 +59,14 @@ void ComputeElectronKinematics(int fdebug){
     Q2      = -q.Mag2();
     omega   = q.E();
     xB      = Q2/(2. * aux.Mp * q.E());
-    W       = 0; //sqrt((p_rest + q).Mag2());
+    W       = sqrt((p_rest + q).Mag2());
 }
 
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-void ConvertHIPOFileToCSV(TString   fInFilepath = "/work/cebaf24gev/sidis/reconstructed/rgc-unp-deut-22gev/hipo/",
+void ConvertHIPOFileToCSV(TString     fFilename = "0000",
+                          TString   fInFilepath = "/work/cebaf24gev/sidis/reconstructed/rgc-unp-deut-22gev/hipo/",
                           TString  fOutFilepath = "/volatile/clas12/users/ecohen/BAND/Simulations/JLAB22GeV_Harut_Jan2023/",
-                          TString     fFilename = "0000",
                           double         fEbeam = 22.0,
                           int            fdebug = 0){
     
