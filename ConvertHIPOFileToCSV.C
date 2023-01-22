@@ -99,6 +99,13 @@ void ConvertHIPOFileToCSV(TString   fInFilepath = "/work/cebaf24gev/sidis/recons
             // Get Particles By Type
             electrons          = c12.getByID( 11   );
             int             Ne = electrons.size();
+            if (fdebug) {
+                std::cout
+                << "EventNumber: " << EventNumber
+                << "N(e): " << Ne
+                << std::endl;
+                
+            }
             if (Ne==0) continue;
             double  leading_e_E;
             int     leading_e_index = 0;
@@ -114,7 +121,7 @@ void ConvertHIPOFileToCSV(TString   fInFilepath = "/work/cebaf24gev/sidis/recons
             }
             // set leading electron 4-momentum
             SetLorentzVector(e , electrons[leading_e_index]);
-            
+            ComputeElectronKinematics(fdebug);
             
             if (fdebug){
                 std::cout
