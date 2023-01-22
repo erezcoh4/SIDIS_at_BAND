@@ -1,6 +1,6 @@
 // Read a HIPO file and convert a few of the variables to CSV
 // clas12root -q ConvertHIPOFileToCSV.C
-// clas12root -q ConvertHIPOFileToCSV.C(\"0001"\)
+// clas12root -q ConvertHIPOFileToCSV.C(\"0001\")
 //
 
 
@@ -40,8 +40,8 @@ std::vector<region_part_ptr>  electrons;
 int              RunNumber, EventNumber;
 TLorentzVector       Beam, target, e, q;
 double                 Q2, omega, W, xB;
-TLorentzVector p_rest;
-p_rest.SetXYZM    (0, 0, 0,     aux.Mp    );
+TLorentzVector                   p_rest;
+p_rest.SetXYZM(0, 0, 0, aux.Mp    );
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void  SetLorentzVector (TLorentzVector &p4, clas12::region_part_ptr rp){
