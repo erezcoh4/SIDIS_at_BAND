@@ -18,8 +18,14 @@
 #include <TChain.h>
 #include <TCanvas.h>
 #include <TBenchmark.h>
+#include <string>
+#include <iomanip>
+#include <utility>
+#include <iostream>
+#include <stdexcept>
+ 
 #include "clas12reader.h"
-//#include "Auxiliary/SIDISatBAND_auxiliary.cpp"
+#include "Auxiliary/SIDISatBAND_auxiliary.cpp"
 
 using namespace clas12;
 SIDISatBAND_auxiliary  aux;
