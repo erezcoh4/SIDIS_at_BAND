@@ -28,6 +28,13 @@ Free proton p(e,e'π) data
 ## Revisions and release notes
 ------------------------------------------------------------------------------
 
+Jan-17, 2023    
+-------------
+
+1. Updated python analysis code to make **p(e,e'π)** be analyzed similary to **d(e,e'π)** since we now extract the data from the farm in the same way and apply the same cuts on the data. 
+    The only difference between **p(e,e'π)** and **d(e,e'π)** now is the charge-weights assigned on a run by run basis, that we need to complete for the free-proton data
+
+
 Jan-12, 2023 (commit_ad849e5)    
 -------------
 

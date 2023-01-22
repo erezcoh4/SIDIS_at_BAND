@@ -47,8 +47,12 @@ weight_per_run = np.zeros(np.max(beam_charge_all_runs.runnum)+1)
 for run in beam_charge_all_runs.runnum:
     weight_per_run[run] = 1./float(beam_charge_all_runs[beam_charge_all_runs.runnum==run].beam_charge);
 
+    
+    
 # ----------------------- #
-def plot_FF_expectation(color='blue',formula='(1-z)/(1+z)'):
+def plot_FF_expectation(color='blue',formula='(1-z)/(1+z)', ax=None,x0=0.32,z0=0.5,
+                        delta_z=0,
+                        Q2=np.linspace(5,9,100)):
     '''
     Field-Feynman fragmentation model 
     [R. D. Field and R. P. Feynman, Nucl. Phys. B136, 1 (1978)]
@@ -61,6 +65,125 @@ def plot_FF_expectation(color='blue',formula='(1-z)/(1+z)'):
     elif formula == '(1-z)/(1-z+z/0.46)':
         rFF = (1-zFF)/(1-zFF+zFF/0.46)
         ax.plot(zFF, rFF, '--',color=color,label='(1-z)/(1 - z + z/0.46)')
+    elif formula == 'r(Q^2,x=x0,z=z0)':
+        rFF = (1-z0)/(1-z0+z0/0.46)*np.ones(len(Q2))
+        rFF_dw = (1-(z0-delta_z))/(1-(z0-delta_z)+(z0-delta_z)/0.46)*np.ones(len(Q2))
+        rFF_up = (1-(z0+delta_z))/(1-(z0+delta_z)+(z0+delta_z)/0.46)*np.ones(len(Q2))
+        # ax.plot(Q2, rFF, '--',color=color,label='(1-z)/(1 - z + z/0.46)')
+        ax.fill_between(Q2, rFF_dw, rFF_up,color=color,alpha=0.3, linewidth=0)
+        
+# ----------------------- #
+        
+    
+# ----------------------- #
+def get_r_from_CrossSectionRatio(R, R_errup, R_errdw, u_over_d=1):
+    r    = (4.*u_over_d - R)/(4*u_over_d*R - 1)
+    r_errup = 15*u_over_d*R_errup/np.square(4*u_over_d*R-1)
+    r_errdw = 15*u_over_d*R_errdw/np.square(4*u_over_d*R-1)
+
+    return r,r_errup,r_errdw  
+# ----------------------- #
+
+    
+    
+# ----------------------- #
+def extract_r_from_SIDIS_ratio(data_path = '/Users/erezcohen/Desktop/data/BAND/Results/',
+                               prefix = 'Tagged_SIDIS_ratio_', 
+                               suffixes=[''], 
+                               xB_selected   = 0.34,
+                               Delta_xB      = 0.02,
+                               Zpi_min       = 0.3, 
+                               Zpi_max       = 0.9, 
+                               fdebug        = 0,
+                               u_over_d      = 1,
+                              ):
+    z_arr,z_errdw_arr,z_errup_arr,r_arr,r_errup_arr,r_errdw_arr = dict(),dict(),dict(),dict(),dict(),dict()
+    for suffix in suffixes:
+        results = load_SIDIS_ratio(prefix = prefix, 
+                                   fdebug=0,
+                                   suffix = suffix,                                                                         
+                                   doPlotResults=False,  
+                                   data_path=data_path)
+        if fdebug: 
+            print('results with %s/%s:'%(prefix,suffix))
+            print(results)
+        result_name = suffix
+        z_arr[result_name],z_errdw_arr[result_name],z_errup_arr[result_name] = [],[],[]
+        r_arr[result_name],r_errup_arr[result_name],r_errdw_arr[result_name] = [],[],[]
+        for key in results.keys():
+            #print (key)
+            z_min = np.max([Zpi_min,float(key[7:12])]);
+            z_max = np.min([Zpi_max,float(key[-4:])]);
+            z_mean_pips = float(key[26:31])
+            z_mean_pims = float(key[36:40])
+            z = (z_mean_pips + z_mean_pims)/2
+            # print(z_min,z,z_max)
+
+            z_errdw = z - z_min 
+            z_errup = z_max - z
+            z_arr[result_name].append( z )
+            z_errdw_arr[result_name].append( z_errdw )
+            z_errup_arr[result_name].append( z_errup )
+
+            res = results[key][np.abs(results[key]['$x_B$']-xB_selected) < Delta_xB/2]
+            if fdebug>1: 
+                print('res:')
+                print(res)
+                print(res['$R$'])
+            if len(res)==0:    # empty data-frame
+                R,dR_up,dR_dw=0,0,0
+            elif len(res)==1:  # one x bin
+                R,dR_up,dR_dw = float(res['$R$']),float(res['$\Delta R_{+}$']),float(res['$\Delta R_{+}$'])
+            else: # integrated over x bins
+                Npips_tot = np.sum(res['$N(\pi_{+})$'])
+                dNpips_tot = np.sum(res['$\Delta N(\pi_{+})$'])
+                Npims_tot = np.sum(res['$N(\pi_{-})$'])
+                dNpims_tot = np.sum(res['$\Delta N(\pi_{-})$'])
+                if Npips_tot==0 or Npims_tot==0: R,dR_up,dR_dw=0,0,0
+                else: 
+                    R = Npips_tot/Npims_tot
+                    dR_up = R * np.sqrt( np.square(dNpips_tot/Npips_tot) + np.square(dNpims_tot/Npims_tot ))
+                    dR_dw = dR_up
+            
+            r,r_errup,r_errdw  = get_r_from_CrossSectionRatio(R, dR_up, dR_dw, u_over_d=u_over_d)
+            r_arr[result_name].append( r )
+            r_errup_arr[result_name].append( r_errup )
+            r_errdw_arr[result_name].append( r_errdw )
+
+
+    print('Done loading %s SIDIS results and extracting r for x=%.2f.'%(prefix,xB_selected))
+    print('From',data_path)
+    print('For',suffixes)
+    return z_arr,z_errdw_arr,z_errup_arr, r_arr, r_errup_arr, r_errdw_arr    
+# ----------------------- #
+
+    
+    
+    
+    
+    
+    
+    
+    
+# ----------------------- #
+def plot_FF_expectation(color='blue',formula='(1-z)/(1+z)', ax=None,x0=0.32,z0=0.5):
+    '''
+    Field-Feynman fragmentation model 
+    [R. D. Field and R. P. Feynman, Nucl. Phys. B136, 1 (1978)]
+    [J. Hua and B.Q. Ma Eur.Phys.J.C30:207-212,2003]
+    '''
+    zFF = np.linspace(0,1,100)
+    if formula == '(1-z)/(1+z)':
+        rFF = (1-zFF)/(1+zFF)
+        ax.plot(zFF, rFF, '--',color=color,label='(1-z)/(1+ z)')
+    elif formula == '(1-z)/(1-z+z/0.46)':
+        rFF = (1-zFF)/(1-zFF+zFF/0.46)
+        ax.plot(zFF, rFF, '--',color=color,label='(1-z)/(1 - z + z/0.46)')
+    elif formula == 'r(Q^2,x=x0,z=z0)':
+        Q2 = np.linspace(5,9,100)
+        rFF = (1-z0)/(1-z0+z0/0.46)*np.ones(len(Q2))
+        ax.plot(Q2, rFF, '--',color=color,label='(1-z)/(1 - z + z/0.46)')
+        
 # ----------------------- #
         
 
@@ -553,11 +676,13 @@ def load_SIDIS_data(runs_filename   = "good_runs_10-2-final.txt",
                     prefix          = "sidisdvcs",
                     subdirname      = "",
                     taggedsubdirname= "",
-                    FreeP_prefix    = "ntupleNew"):#{
+                    FreePsubdirname = "",
+                    FreeP_prefix    = "nSidis",
+                    FreePruns_filename = "rga_data/rga_nsidis_runs_10-6.txt"):#{
     '''
     e_e_pi, e_e_pi_n, e_e_pi_FreeP = load_SIDIS_data()
     Load SIDIS data, and fill e_e_pi and e_e_pi_n with data
-    last update Nov-25, 2022
+    last update Jan-17, 2023
     
     input:
     -------------
@@ -580,9 +705,10 @@ def load_SIDIS_data(runs_filename   = "good_runs_10-2-final.txt",
     if taggedsubdirname=="": taggedsubdirname = subdirname;
     e_e_pi_data_path       = main_data_path + 'SIDIS_skimming/' + prefix + '/' + subdirname + '/'
     e_e_pi_n_data_path     = main_data_path + 'merged_SIDIS_and_BAND_skimming/' + prefix + '/' + taggedsubdirname + '/'
-    e_e_pi_FreeP_data_path = main_data_path + 'RGA_Free_proton/'
+    e_e_pi_FreeP_data_path = main_data_path + 'RGA_Free_proton/' + FreeP_prefix + '/'+ FreePsubdirname + '/'
 
     runs = read_run_nunmbers(runs_filename=runs_filename,Nruns=Nruns)
+    FreePruns = read_run_nunmbers(runs_filename=FreePruns_filename,Nruns=Nruns)
     e_e_pi, e_e_pi_n, e_e_pi_FreeP = dict(),dict(),dict()
     
     for runnum,runIdx in zip(runs,range(len(runs))):#{
@@ -638,39 +764,68 @@ def load_SIDIS_data(runs_filename   = "good_runs_10-2-final.txt",
         #}
     #}
     if do_e_e_pi_FreeP:#{
-        for pi_charge_name,pi_print in zip(pi_charge_names,pi_prints):
-            if do_all_vars:
-                eepi   = pd.read_csv(e_e_pi_FreeP_data_path
-                                 +FreeP_prefix
-                                 +'_e_e_%s_selected_eepi_kinematics.csv'%(pi_charge_name))
+        for runnum,runIdx in zip(FreePruns,range(len(FreePruns))):#{
+            if fdebug>1: print('Free-P RGA Run number ',runnum,'(%d/%d runs)'%(runIdx+1,len(runs)))
+        
+            for pi_charge_name,pi_print in zip(pi_charge_names,pi_prints):
+                if do_all_vars:
+                    eepi   = pd.read_csv(e_e_pi_FreeP_data_path
+                                         +'skimmed_SIDIS_'
+                                         +FreeP_prefix + '_'
+                                         +'00%d_e_%s_selected_eepi_kinematics.csv'%(runnum,pi_charge_name))
 
-            else: # more economic
-                eepi   = pd.read_csv(e_e_pi_FreeP_data_path
-                                 +FreeP_prefix
-                                 +'_e_e_%s_selected_eepi_kinematics.csv'%(pi_charge_name),
-                                 usecols=['runnum','evnum',
-                                          'e_P','e_Theta','e_Phi',
-                                          'pi_P', 'pi_Theta', 'pi_Phi',
-                                          'Q2', 'W',
-                                          'xB', 'Zpi',
-                                          'M_x', 'e_DC_sector', 'pi_DC_sector','pi_qFrame_pT','pi_qFrame_pL'],
-                                 dtype={'runnum':int,'evnum': int,
-                                        'e_DC_sector':int, 'pi_DC_sector':int,
-                                        'e_P':np.half,'e_Theta':np.half,'e_Phi':np.half,
-                                        'pi_P':np.half,'pi_Theta':np.half, 'pi_Phi':np.half,
-                                        'Q2':np.half,  'W':np.half,
-                                        'xB':np.half, 'Zpi':np.half,
-                                        'M_x':np.half,
-                                        'pi_qFrame_pT':np.half,'pi_qFrame_pL':np.half})
-            
-            # Aug-2022: in e_e_pi_FreeP we only have 1 data-file
-            e_e_pi_FreeP[pi_charge_name] = eepi
-            #            if runIdx==0: e_e_pi_FreeP[pi_charge_name] = eepi
-            #            else:         e_e_pi_FreeP[pi_charge_name] = pd.concat([e_e_pi_FreeP[pi_charge_name],eepi])
-            if fdebug>1: print('Loaded',len(eepi)," p(e,e'"+pi_print+") events")
+#                     eepi   = pd.read_csv(e_e_pi_FreeP_data_path
+#                                      +FreeP_prefix
+#                                      +'_e_e_%s_selected_eepi_kinematics.csv'%(pi_charge_name))
+
+                else: # more economic
+                    eepi   = pd.read_csv(e_e_pi_FreeP_data_path
+                                         +'skimmed_SIDIS_'
+                                         +FreeP_prefix + '_'
+                                         +'00%d_e_%s_selected_eepi_kinematics.csv'%(runnum,pi_charge_name),
+                                     usecols=['runnum','evnum',
+                                              'e_P','e_Theta','e_Phi',
+                                              'pi_P', 'pi_Theta', 'pi_Phi',
+                                              'Q2', 'W',
+                                              'xB', 'Zpi',
+                                              'M_x', 'e_DC_sector', 'pi_DC_sector','pi_qFrame_pT','pi_qFrame_pL'],
+                                     dtype={'runnum':int,'evnum': int,
+                                            'e_DC_sector':int, 'pi_DC_sector':int,
+                                            'e_P':np.half,'e_Theta':np.half,'e_Phi':np.half,
+                                            'pi_P':np.half,'pi_Theta':np.half, 'pi_Phi':np.half,
+                                            'Q2':np.half,  'W':np.half,
+                                            'xB':np.half, 'Zpi':np.half,
+                                            'M_x':np.half,
+                                            'pi_qFrame_pT':np.half,'pi_qFrame_pL':np.half})
+
+        
+                    # eepi   = pd.read_csv(e_e_pi_FreeP_data_path
+                    #                  +FreeP_prefix
+                    #                  +'_e_e_%s_selected_eepi_kinematics.csv'%(pi_charge_name),
+                    #                  usecols=['runnum','evnum',
+                    #                           'e_P','e_Theta','e_Phi',
+                    #                           'pi_P', 'pi_Theta', 'pi_Phi',
+                    #                           'Q2', 'W',
+                    #                           'xB', 'Zpi',
+                    #                           'M_x', 'e_DC_sector', 'pi_DC_sector','pi_qFrame_pT','pi_qFrame_pL'],
+                    #                  dtype={'runnum':int,'evnum': int,
+                    #                         'e_DC_sector':int, 'pi_DC_sector':int,
+                    #                         'e_P':np.half,'e_Theta':np.half,'e_Phi':np.half,
+                    #                         'pi_P':np.half,'pi_Theta':np.half, 'pi_Phi':np.half,
+                    #                         'Q2':np.half,  'W':np.half,
+                    #                         'xB':np.half, 'Zpi':np.half,
+                    #                         'M_x':np.half,
+                    #                         'pi_qFrame_pT':np.half,'pi_qFrame_pL':np.half})
+
+                # Aug-2022: in e_e_pi_FreeP we only have 1 data-file
+                # e_e_pi_FreeP[pi_charge_name] = eepi
+                # Jan-2023: in e_e_pi_FreeP we have multiple runs
+                if runIdx==0: e_e_pi_FreeP[pi_charge_name] = eepi
+                else:         e_e_pi_FreeP[pi_charge_name] = pd.concat([e_e_pi_FreeP[pi_charge_name],eepi])
+                if fdebug>1: print('Loaded',len(eepi)," p(e,e'"+pi_print+") events")
+            #}
         #}
     #}
-       
     print('Done loading files.')
     
     if fdebug>0:
@@ -684,6 +839,7 @@ def load_SIDIS_data(runs_filename   = "good_runs_10-2-final.txt",
     return e_e_pi, e_e_pi_n, e_e_pi_FreeP
 #}
 # ----------------------- #
+
 
 
 
@@ -800,11 +956,6 @@ def apply_cuts_to_e_e_pi(fdebug=0,
 
     
     if doAcceptanceMatchingCut:#{
-        # e_e_pi_after_p_theta_cut = apply_p_theta_acceptance_cut( e_e_pi,
-#                                                                NeventsMax=NeventsMax,
-#                                                                NMaxPerSubset=NMaxPerSubset,
-#                                                                fdebug=fdebug )
-        
         e_e_pi_after_p_theta_cut = apply_p_theta_acceptance_cut_single_set( e_e_pi,
                                                                   NeventsMax=NeventsMax,
                                                                   fdebug=fdebug )
@@ -878,7 +1029,6 @@ def apply_cuts_to_e_e_pi_FreeP(fdebug=2,
     if doAcceptanceMatchingCut:#{
         e_e_pi_FreeP_after_p_theta_cut = apply_p_theta_acceptance_cut_single_set( e_e_pi_FreeP,
                                                                 NeventsMax=NeventsMax,
-#                                                                NMaxPerSubset=NMaxPerSubset,
                                                                 fdebug=fdebug )
     #}
     else:#{
