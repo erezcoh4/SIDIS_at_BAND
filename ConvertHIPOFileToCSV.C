@@ -76,7 +76,7 @@ void ConvertHIPOFileToCSV(TString   fInFilepath = "/work/cebaf24gev/sidis/recons
     fake.Add(inputFile.Data());
     //get the hipo data
     auto files  = fake.GetListOfFiles();
-    RunNumber   = std::stoi(fFilename);
+    RunNumber   = 0;//std::stoi(fFilename);
     EventNumber = 0;
     
     // step over events and extract information....
