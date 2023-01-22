@@ -68,7 +68,7 @@ void ConvertHIPOFileToCSV(TString   fInFilepath = "/work/cebaf24gev/sidis/recons
                           int            fdebug = 0){
     
     TString inputFile   = fInFilepath + fFilename + ".hipo";
-    TString outfilename = fInFilepath + fFilename + ".csv";
+    TString outfilename = fOutFilepath + fFilename + ".csv";
     csvfile.open( outfilename );
     csvfile << csvheader << std::endl;
     
