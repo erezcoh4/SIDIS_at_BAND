@@ -40,7 +40,7 @@ std::vector<region_part_ptr>  electrons;
 int              RunNumber, EventNumber;
 TLorentzVector       Beam, target, e, q;
 double                 Q2, omega, W, xB;
-TLorentzVector                   p_rest;
+TLorentzVector                 p_rest();
 p_rest.SetXYZM(0, 0, 0, aux.Mp    );
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
