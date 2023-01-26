@@ -54,15 +54,22 @@ void SetDataPath (TString fDataPath) {
 void ReadBeamCharge( int RunNumber=6420, int fdebug=0,
                     TString fSkimming = "SIDIS_skimming", // "SIDIS_skimming"  , "RGA_Free_proton"
                     TString fDataPath = "sidisdvcs"       // "sidisdvcs", "inc", "nSidis"
-                    ){
+){
     
     TString RunNumberStr = aux.GetRunNumberSTR ( RunNumber );
     SetDataPath(fDataPath);
     
+    if (fdebug>1) {
+        std::cout
+        << "DataPath: "     << DataPath     << ","
+        << "prefix: "       << prefix       << ","
+        << "RunNumberStr: " << RunNumberStr << ","
+        << std::endl
+    }
     TString inputFile   = DataPath + prefix + RunNumberStr + ".hipo";
     TString outfilename = "/volatile/clas12/users/ecohen/BAND/metaData/" + fSkimming + "_" + fDataPath + "_beam_charge_"+RunNumberStr+".csv";
     csvfile.open( outfilename );
-        csvfile << csvheader << std::endl;
+    csvfile << csvheader << std::endl;
     
     TChain fake("hipo");
     fake.Add(inputFile.Data());
