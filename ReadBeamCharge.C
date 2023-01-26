@@ -27,13 +27,13 @@ std::ofstream csvfile;
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void SetDataPath (TString fDataPath) {
-    if (DataPath=="" || DataPath=="sidisdvcs" || DataPath=="sidis dvcs"){
+    if (fDataPath=="" || fDataPath=="sidisdvcs" || DataPath=="sidis dvcs"){
         // sidis-dvcs train files, used since July 2022
         // (the 'usual' train files)
         DataPath = "/cache/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train/sidisdvcs/";
         prefix   = "sidisdvcs_";
     }
-    else if (DataPath=="inclusive" || DataPath=="inc"){
+    else if (fDataPath=="inclusive" || fDataPath=="inc"){
         // inclusive train files, used until July 2022
         // (inclusive train files were only generated in the beginning of RGB without any backup)
         DataPath = "/volatile/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train_20200610/inc/";
@@ -45,7 +45,6 @@ void SetDataPath (TString fDataPath) {
         DataPath = "/cache/clas12/rg-a/production/recon/spring2019/torus-1/pass1/v1/dst/train/nSidis/";
         prefix   = "nSidis_";
     }
-
 }
 
 
@@ -59,9 +58,11 @@ void ReadBeamCharge( int RunNumber=6420,
     
     TString RunNumberStr = aux.GetRunNumberSTR ( RunNumber );
     SetDataPath(fDataPath);
+    
     std::cout << "fdebug: " << fdebug << std::endl;
     if (fdebug>1) {
         std::cout
+        << "fDataPath: "    << fDataPath    << ","
         << "DataPath: "     << DataPath     << ","
         << "prefix: "       << prefix       << ","
         << "RunNumberStr: " << RunNumberStr << ","
