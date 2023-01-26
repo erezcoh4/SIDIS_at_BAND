@@ -39,6 +39,13 @@ void SetDataPath (TString fDataPath) {
         DataPath = "/volatile/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train_20200610/inc/";
         prefix   = "inc_";
     }
+    else if (fDataPath=="nSidis" || fDataPath=="nsidis"){
+        // free-p data from RGB data
+        // For RGA we use nSidis, they key difference is sidisdvcs has e_p > 1 GeV and nSidis has e_p > 2 GeV.
+        DataPath = "/cache/clas12/rg-a/production/recon/spring2019/torus-1/pass1/v1/dst/train/nSidis/";
+        prefix   = "nSidis_";
+    }
+
 }
 
 
@@ -46,7 +53,7 @@ void SetDataPath (TString fDataPath) {
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void ReadBeamCharge( int RunNumber=6420, int fdebug=0,
                     TString fSkimming = "SIDIS_skimming", // "SIDIS_skimming"  , "RGA_Free_proton"
-                    TString fDataPath = "sidisdvcs",      // "sidisdvcs", "inc", "nSidis"
+                    TString fDataPath = "sidisdvcs"       // "sidisdvcs", "inc", "nSidis"
                     ){
     
     TString RunNumberStr = aux.GetRunNumberSTR ( RunNumber );

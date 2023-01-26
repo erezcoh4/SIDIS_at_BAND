@@ -2,7 +2,11 @@
 # -*- coding: utf-8 -*-
 #
 # continously take data and print the rate every few seconds
-# last edit Apr-28, 2021 (EOC)
+# last edit Jan-26, 2023 (EOC)
+#
+# execute example:
+#
+# ./macros/read_beam_charge --Skimming=RGA_Free_proton --DataPath=nSidis --Nruns=1 --fdebug=2
 #
 import sys, os, linecache
 import argparse

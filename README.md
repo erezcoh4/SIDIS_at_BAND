@@ -28,6 +28,12 @@ Free proton p(e,e'π) data
 ## Revisions and release notes
 ------------------------------------------------------------------------------
 
+Jan-26, 2023    
+-------------
+
+1. Updated ReadBeamCharge.C to read beam charge from RGA runs same as RGB runs
+
+
 Jan-17, 2023    
 -------------
 
