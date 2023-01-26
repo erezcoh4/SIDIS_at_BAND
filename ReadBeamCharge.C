@@ -44,13 +44,16 @@ void SetDataPath (TString fDataPath) {
 
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-void ReadBeamCharge( int RunNumber=6420, int fdebug=0, TString fDataPath = "sidisdvcs" ){
+void ReadBeamCharge( int RunNumber=6420, int fdebug=0,
+                    TString fSkimming = "SIDIS_skimming", // "SIDIS_skimming"  , "RGA_Free_proton"
+                    TString fDataPath = "sidisdvcs",      // "sidisdvcs", "inc", "nSidis"
+                    ){
     
     TString RunNumberStr = aux.GetRunNumberSTR ( RunNumber );
     SetDataPath(fDataPath);
     
     TString inputFile   = DataPath + prefix + RunNumberStr + ".hipo";
-    TString outfilename = "/volatile/clas12/users/ecohen/BAND/metaData/beam_charge_"+RunNumberStr+".csv";
+    TString outfilename = "/volatile/clas12/users/ecohen/BAND/metaData/" + fSkimming + "_" + fDataPath + "_beam_charge_"+RunNumberStr+".csv";
     csvfile.open( outfilename );
         csvfile << csvheader << std::endl;
     

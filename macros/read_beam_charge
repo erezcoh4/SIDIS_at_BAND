@@ -29,7 +29,16 @@ args = parser.parse_args()
 Nruns         = args.Nruns
 fdebug        = args.fdebug
 FirstRun      = args.FirstRun
-runs_filename = "macros/runlists/good_runs_10-2-final.txt"
+Skimming      = args.Skimming
+DataPath      = args.DataPath
+
+if Skimming == "SIDIS_skimming":
+    runs_filename = "macros/runlists/good_runs_10-2-final.txt"
+    
+elif Skimming == "RGA_Free_proton":
+    runs_filename = "macros/runlists/rga_data/rga_nsidis_runs_10-6.txt"
+
+if DataPath=="nsidis": DataPath="nSidis"
 
 # Using readlines()
 runs_file = open(runs_filename, 'r')
