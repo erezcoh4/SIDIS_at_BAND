@@ -64,7 +64,7 @@ void ReadBeamCharge( int RunNumber=6420, int fdebug=0,
         << "DataPath: "     << DataPath     << ","
         << "prefix: "       << prefix       << ","
         << "RunNumberStr: " << RunNumberStr << ","
-        << std::endl
+        << std::endl;
     }
     TString inputFile   = DataPath + prefix + RunNumberStr + ".hipo";
     TString outfilename = "/volatile/clas12/users/ecohen/BAND/metaData/" + fSkimming + "_" + fDataPath + "_beam_charge_"+RunNumberStr+".csv";
