@@ -33,6 +33,7 @@ Jan-26, 2023
 
 1. Updated ReadBeamCharge.C to read beam charge from RGA runs same as RGB runs
 
+2. Added a shell script for RGA file extraction
 
 Jan-17, 2023    
 -------------
