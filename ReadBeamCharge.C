@@ -51,14 +51,15 @@ void SetDataPath (TString fDataPath) {
 
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-void ReadBeamCharge( int RunNumber=6420, int fdebug=0,
+void ReadBeamCharge( int RunNumber=6420,
+                    int fdebug=0,
                     TString fSkimming = "SIDIS_skimming", // "SIDIS_skimming"  , "RGA_Free_proton"
                     TString fDataPath = "sidisdvcs"       // "sidisdvcs", "inc", "nSidis"
 ){
     
     TString RunNumberStr = aux.GetRunNumberSTR ( RunNumber );
     SetDataPath(fDataPath);
-    
+    std::cout << "fdebug: " << fdebug << std::endl;
     if (fdebug>1) {
         std::cout
         << "DataPath: "     << DataPath     << ","
