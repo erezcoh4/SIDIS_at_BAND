@@ -41,6 +41,13 @@ Jan-30, 2023
 2. Added a shell script to get the 10.4 from the cache **shell_scripts/jcache_get_files_sidisdvcs_10-4.csh** 
 
 
+3. Corrected run-number TString format in SIDISatBAND_auxiliary::GetRunNumberSTR( int RunNumber )
+
+*old version: sprintf( RunNumberStr, "00%d", RunNumber );*
+*corrected version: sprintf( RunNumberStr, "%06d", RunNumber );*
+    
+
+
 Jan-26, 2023    
 -------------
 
@@ -762,9 +769,10 @@ good_runs_10-2-final.txt
 [/cache/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train/sidisdvcs/]
     
     good_runs_10-4.txt
-[/cache/clas12/rg-b/production/recon/spring2020/torus-1/pass1/v1/dst/train/sidisdvcs/]    
-    good_runs_10-6.txt
+[/cache/clas12/rg-b/production/recon/spring2020/torus-1/pass1/v1/dst/train/sidisdvcs/]
     
+    good_runs_10-6.txt
+[/cache/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train/sidisdvcs/]    
 
 2. RGA free-proton 
 

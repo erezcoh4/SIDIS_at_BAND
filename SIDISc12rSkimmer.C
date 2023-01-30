@@ -395,6 +395,8 @@ void SetDataPath (TString fDataPath, Double_t fEbeam) {
             DataPath = "/cache/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train/sidisdvcs/";
         } else if (fEbeam==10.4){
             DataPath = "/cache/clas12/rg-b/production/recon/spring2020/torus-1/pass1/v1/dst/train/sidisdvcs/";
+        } else if (fEbeam==10.6){
+            DataPath = "/cache/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train/sidisdvcs/";
         }
         prefix   = "sidisdvcs_";
     }
