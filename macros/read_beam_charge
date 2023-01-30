@@ -6,6 +6,7 @@
 #
 # execute example:
 #
+# ./macros/read_beam_charge --Ebeam=10.4 --Nruns=1 --fdebug=2
 # ./macros/read_beam_charge --Skimming=RGA_Free_proton --DataPath=nSidis --Nruns=1 --fdebug=2
 #
 import sys, os, linecache
@@ -25,6 +26,8 @@ parser.add_argument("--Skimming",     type=str, default="SIDIS_skimming",
                     required=False, help="SIDIS_skimming, RGA_Free_proton")
 parser.add_argument("--DataPath",     type=str, default="sidisdvcs",
                     required=False, help="inc, sidisdvcs, nSidis")
+parser.add_argument("--Ebeam",     type=float, default=10.4,
+                    required=False, help="beam energy")
 
                                 
 
@@ -35,6 +38,7 @@ fdebug        = args.fdebug
 FirstRun      = args.FirstRun
 Skimming      = args.Skimming
 DataPath      = args.DataPath
+Ebeam         = args.Ebeam
 
 if Skimming == "SIDIS_skimming":
     if Ebeam == 10.2:
