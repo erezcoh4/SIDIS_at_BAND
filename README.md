@@ -28,6 +28,18 @@ Free proton p(e,e'π) data
 ## Revisions and release notes
 ------------------------------------------------------------------------------
 
+Jan-30, 2023    
+-------------
+
+1. Started analyzing 10.4 GeV data
+    Good runs are taken from BAND analysis bandsoft_tools
+    **bandsoft_tools/runlists**
+    good_runs_10-2-final.txt
+    good_runs_10-4.txt
+    good_runs_10-6.txt
+    BAND analysis note [https://www.overleaf.com/project/6159d43f5128373fedfddb47] 
+
+
 Jan-26, 2023    
 -------------
 
@@ -737,6 +749,21 @@ include/BCalorimeter.h
 banklib/BCalorimeter.cpp
 include/BBand.h
 banklib/BBand.cpp
+
+# Data runs used for analysis
+---------------------------------------
+1. BAND-RGB:
+
+    Good runs are taken from BAND analysis 
+    **bandsoft_tools/runlists**: 
+    good_runs_10-2-final.txt
+    good_runs_10-4.txt
+    good_runs_10-6.txt
+    
+
+2. RGA free-proton 
+
+    rga_nsidis_runs_10-6.txt compiled from nSidis train 
 
 
 # Final SIDIS results

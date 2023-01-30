@@ -47,6 +47,12 @@ weight_per_run = np.zeros(np.max(beam_charge_all_runs.runnum)+1)
 for run in beam_charge_all_runs.runnum:
     weight_per_run[run] = 1./float(beam_charge_all_runs[beam_charge_all_runs.runnum==run].beam_charge);
 
+beam_charge_all_runs_rga = pd.read_csv('/Users/erezcohen/Desktop/data/BAND/metaData/rga_free_proton_beam_charge_all_runs.csv');
+weight_per_run_rga = np.zeros(np.max(beam_charge_all_runs_rga.runnum)+1)
+for run in beam_charge_all_runs_rga.runnum:
+    weight_per_run_rga[run] = 1./float(beam_charge_all_runs_rga[beam_charge_all_runs_rga.runnum==run].beam_charge);
+
+
     
     
 # ----------------------- #
@@ -852,8 +858,12 @@ def load_SIDIS_data(runs_filename   = "good_runs_10-2-final.txt",
 
 
 # ----------------------- #
-def runnum_weight( runnumbers ):
-    return weight_per_run[runnumbers]
+def runnum_weight( runnumbers, rungroup='rgb' ):
+    if rungroup=='rga':
+        return weight_per_run_rga[runnumbers]
+    elif rungroup=='rgb':
+        return weight_per_run[runnumbers]
+
 # ----------------------- #
 
 
@@ -996,7 +1006,7 @@ def apply_cuts_to_e_e_pi(fdebug=0,
         
         # add beam-charge weight
         runnumbers = np.array(e_e_pi_pass_cuts[pi_ch].runnum).astype(int);
-        e_e_pi_pass_cuts[pi_ch]['weight'] = runnum_weight( runnumbers )
+        e_e_pi_pass_cuts[pi_ch]['weight'] = runnum_weight( runnumbers, 'rgb')
     #}
     print(' ')
     return e_e_pi_pass_cuts
@@ -1019,7 +1029,7 @@ def apply_cuts_to_e_e_pi_FreeP(fdebug=2,
                                          doApply_minPn_cut,
                                          doApply_Mx_cut)
                                          
-    Aug-29, 2022
+    Jan-26, 2023
     
     p(e,e'\pi) SIDIS data
     '''
@@ -1051,11 +1061,8 @@ def apply_cuts_to_e_e_pi_FreeP(fdebug=2,
     
     # add beam-charge weight
     for pi_ch,pi_print in zip(pi_charge_names,pi_prints):#{
-    # For free-proton (RGA) data we do not have run-numbers or beam charge info
-    # (Sep-2022)
-    #        runnumbers = np.array(e_e_pi_FreeP_pass_cuts[pi_ch].runnum).astype(int);
-    #        e_e_pi_FreeP_pass_cuts[pi_ch]['weight'] = runnum_weight( runnumbers )
-        e_e_pi_FreeP_pass_cuts[pi_ch]['weight'] = 1;
+        runnumbers = np.array(e_e_pi_FreeP_pass_cuts[pi_ch].runnum).astype(int);
+        e_e_pi_FreeP_pass_cuts[pi_ch]['weight'] = runnum_weight( runnumbers,'rga' )
     #}
 
 
@@ -1080,6 +1087,10 @@ def apply_cuts_to_e_e_pi_FreeP(fdebug=2,
     
     return e_e_pi_FreeP_pass_cuts
 #}
+# ----------------------- #
+
+
+
 
 
 

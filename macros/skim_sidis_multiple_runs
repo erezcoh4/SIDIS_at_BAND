@@ -52,7 +52,12 @@ DataPath      = args.DataPath
 Ebeam         = args.Ebeam
 
 if Skimming == "SIDIS_skimming":
-    runs_filename = "macros/runlists/good_runs_10-2-final.txt"
+    if Ebeam == 10.2:
+        runs_filename = "macros/runlists/good_runs_10-2-final.txt"
+    elif Ebeam == 10.4:
+        runs_filename = "macros/runlists/good_runs_10-4.txt"
+    elif Ebeam == 10.6:
+        runs_filename = "macros/runlists/good_runs_10-6.txt"
     
 elif Skimming == "RGA_Free_proton":
     runs_filename = "macros/runlists/rga_data/rga_nsidis_runs_10-6.txt"
