@@ -101,7 +101,7 @@ void              Stream_e_pi_line_to_CSV (TString pionCharge, int piIdx,
                                            int fdebug );
 TVector3            RotateVectorTo_qFrame (TVector3 V);
 void                        MoveTo_qFrame (int fdebug);
-void                          SetDataPath (TString fDataPath) ;
+void                          SetDataPath (TString fDataPath, Double_t fEbeam) ;
 void                          SetSkimming (TString fSkimming) ;
 void                             SetEbeam ( double fEbeam );
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
@@ -281,7 +281,7 @@ void SIDISc12rSkimmer(int RunNumber=6420,
                       int setInclusive=0 ){
     
     aux.SetVerbosity(fdebug);
-    SetDataPath( fDataPath );
+    SetDataPath( fDataPath, fEbeam );
     SetSkimming( fSkimming );
     SetEbeam   ( fEbeam    );
 
@@ -386,11 +386,16 @@ void SIDISc12rSkimmer(int RunNumber=6420,
 
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-void SetDataPath (TString fDataPath) {
+void SetDataPath (TString fDataPath, Double_t fEbeam) {
+    
     if (fDataPath=="" || fDataPath=="sidisdvcs" || fDataPath=="sidis dvcs"){
         // sidis-dvcs train files, used since July 2022
         // (the 'usual' train files)
-        DataPath = "/cache/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train/sidisdvcs/";
+        if (fEbeam==10.2){
+            DataPath = "/cache/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train/sidisdvcs/";
+        } else if (fEbeam==10.4){
+            DataPath = "/cache/clas12/rg-b/production/recon/spring2020/torus-1/pass1/v1/dst/train/sidisdvcs/";
+        }
         prefix   = "sidisdvcs_";
     }
     else if (fDataPath=="inclusive" || fDataPath=="inc"){
@@ -400,7 +405,7 @@ void SetDataPath (TString fDataPath) {
         prefix   = "inc_";
     }
     else if (fDataPath=="nSidis" || fDataPath=="nsidis"){
-        // free-p data from RGB data
+        // free-p data from RGA data
         // For RGA we use nSidis, they key difference is sidisdvcs has e_p > 1 GeV and nSidis has e_p > 2 GeV.
         DataPath = "/cache/clas12/rg-a/production/recon/spring2019/torus-1/pass1/v1/dst/train/nSidis/";
         prefix   = "nSidis_";

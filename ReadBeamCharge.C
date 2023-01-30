@@ -26,11 +26,16 @@ TString csvheader = ( (TString)"runnum,beam_charge,");
 std::ofstream csvfile;
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-void SetDataPath (TString fDataPath) {
-    if (fDataPath=="" || fDataPath=="sidisdvcs" || DataPath=="sidis dvcs"){
+void SetDataPath (TString fDataPath, Double_t fEbeam) {
+    
+    if (fDataPath=="" || fDataPath=="sidisdvcs" || fDataPath=="sidis dvcs"){
         // sidis-dvcs train files, used since July 2022
         // (the 'usual' train files)
-        DataPath = "/cache/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train/sidisdvcs/";
+        if (fEbeam==10.2){
+            DataPath = "/cache/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train/sidisdvcs/";
+        } else if (fEbeam==10.4){
+            DataPath = "/cache/clas12/rg-b/production/recon/spring2020/torus-1/pass1/v1/dst/train/sidisdvcs/";
+        }
         prefix   = "sidisdvcs_";
     }
     else if (fDataPath=="inclusive" || fDataPath=="inc"){
@@ -40,7 +45,7 @@ void SetDataPath (TString fDataPath) {
         prefix   = "inc_";
     }
     else if (fDataPath=="nSidis" || fDataPath=="nsidis"){
-        // free-p data from RGB data
+        // free-p data from RGA data
         // For RGA we use nSidis, they key difference is sidisdvcs has e_p > 1 GeV and nSidis has e_p > 2 GeV.
         DataPath = "/cache/clas12/rg-a/production/recon/spring2019/torus-1/pass1/v1/dst/train/nSidis/";
         prefix   = "nSidis_";
@@ -53,11 +58,12 @@ void SetDataPath (TString fDataPath) {
 void ReadBeamCharge( int RunNumber=6420,
                     int fdebug=0,
                     TString fSkimming = "SIDIS_skimming", // "SIDIS_skimming"  , "RGA_Free_proton"
-                    TString fDataPath = "sidisdvcs"       // "sidisdvcs", "inc", "nSidis"
+                    TString fDataPath = "sidisdvcs",      // "sidisdvcs", "inc", "nSidis"
+                    double fEbeam = 10.2                  // [GeV]
 ){
     
     TString RunNumberStr = aux.GetRunNumberSTR ( RunNumber );
-    SetDataPath(fDataPath);
+    SetDataPath( fDataPath, fEbeam );
     
     std::cout << "fdebug: " << fdebug << std::endl;
     if (fdebug>1) {

@@ -34,8 +34,8 @@ Jan-30, 2023
 1. Started analyzing 10.4 GeV data
     Good runs are taken from BAND analysis bandsoft_tools
     **bandsoft_tools/runlists**
-    good_runs_10-2-final.txt
-    good_runs_10-4.txt
+    good_runs_10-2-final.txt [/cache/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train/sidisdvcs/]
+    good_runs_10-4.txt [/cache/clas12/rg-b/production/recon/spring2020/torus-1/pass1/v1/dst/train/sidisdvcs/]
     good_runs_10-6.txt
     BAND analysis note [https://www.overleaf.com/project/6159d43f5128373fedfddb47] 
 
@@ -755,9 +755,13 @@ banklib/BBand.cpp
 1. BAND-RGB:
 
     Good runs are taken from BAND analysis 
-    **bandsoft_tools/runlists**: 
-    good_runs_10-2-final.txt
+    **bandsoft_tools/runlists**:
+     
+good_runs_10-2-final.txt    
+[/cache/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train/sidisdvcs/]
+    
     good_runs_10-4.txt
+[/cache/clas12/rg-b/production/recon/spring2020/torus-1/pass1/v1/dst/train/sidisdvcs/]    
     good_runs_10-6.txt
     
 
