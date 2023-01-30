@@ -32,12 +32,13 @@ Jan-30, 2023
 -------------
 
 1. Started analyzing 10.4 GeV data
-    Good runs are taken from BAND analysis bandsoft_tools
-    **bandsoft_tools/runlists**
-    good_runs_10-2-final.txt [/cache/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train/sidisdvcs/]
     good_runs_10-4.txt [/cache/clas12/rg-b/production/recon/spring2020/torus-1/pass1/v1/dst/train/sidisdvcs/]
-    good_runs_10-6.txt
-    BAND analysis note [https://www.overleaf.com/project/6159d43f5128373fedfddb47] 
+    
+    (Good runs are taken from BAND analysis bandsoft_tools
+    **bandsoft_tools/runlists**)
+    
+
+2. Added a shell script to get the 10.4 from the cache **shell_scripts/jcache_get_files_sidisdvcs_10-4.csh** 
 
 
 Jan-26, 2023    
@@ -779,13 +780,17 @@ pandas.DataFrame(
   ['$\Delta N(\pi_{+})$'],['$\Delta N(\pi_{+})$']})
  
  
- 
-# Kinematical observables
+# Links and references
 ---------------------------------------
 [SIDIS_analysis_note_final-5721534-2021-01-11-v15.pdf, p.1-2]
 [THayward_thesis.pdf p.8]
+BAND analysis note [https://www.overleaf.com/project/6159d43f5128373fedfddb47] 
 
 rapidity: [https://www.jlab.org/conferences/radiative2016/talks/wednesday/weiss.pdf]
+ 
+ 
+# Kinematical observables
+---------------------------------------
  
 SIDIS kinematic variables
 
