@@ -172,7 +172,8 @@ double SIDISatBAND_auxiliary::FindCutValue( std::string cutName ){
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 TString SIDISatBAND_auxiliary::GetRunNumberSTR( int RunNumber ){
     char RunNumberStr[20];
-    sprintf( RunNumberStr, "00%d", RunNumber );
+    // sprintf( RunNumberStr, "00%d", RunNumber );
+    sprintf( RunNumberStr, "%06d", RunNumber );
     if (fdebug>1) std::cout << "(SIDIS) skimming run " << RunNumberStr << std::endl;
     return (TString)RunNumberStr;
 }
