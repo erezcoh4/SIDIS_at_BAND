@@ -82,7 +82,7 @@ bool      CheckIfPionPassedSelectionCuts (TString pionCharge, // "pi+" or "pi-"
                                            int fdebug);
 int                       GetBeamHelicity (event_ptr p_event, int runnum, int fdebug);
 double                      GetBeamEnergy (int fdebug);
-TString                   GetRunNumberSTR (int RunNumber, int fdebug);
+//TString                   GetRunNumberSTR (int RunNumber, int fdebug);
 void                InitializeFileReading (int NeventsMax,int c12Nentries, int fdebug);
 void                  InitializeVariables ();
 void                      OpenResultFiles (TString outfilepath, TString outfilename );
@@ -285,7 +285,7 @@ void SIDISc12rSkimmer(int RunNumber=6420,
     SetSkimming( fSkimming );
     SetEbeam   ( fEbeam    );
 
-    TString RunNumberStr = GetRunNumberSTR(RunNumber,fdebug);
+    TString RunNumberStr = aux.GetRunNumberSTR(RunNumber,fdebug);
     // read cut values
     aux.loadCutValues("macros/cuts/BANDcutValues.csv",torusBending);
     
@@ -1172,13 +1172,13 @@ void InitializeVariables(){
     eepimsPastCutsInEvent                           = false;
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-TString GetRunNumberSTR(int RunNumber, int fdebug){
-    char RunNumberStr[20];
-    sprintf( RunNumberStr, "00%d", RunNumber );
-    if (fdebug>1) std::cout << "(SIDIS) skimming run " << RunNumberStr << std::endl;
-    return (TString)RunNumberStr;
-}
+////....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+//TString GetRunNumberSTR(int RunNumber, int fdebug){
+//    char RunNumberStr[20];
+//    sprintf( RunNumberStr, "00%d", RunNumber );
+//    if (fdebug>1) std::cout << "(SIDIS) skimming run " << RunNumberStr << std::endl;
+//    return (TString)RunNumberStr;
+//}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void OpenResultFiles( TString outfilepath, TString outfilename ){
