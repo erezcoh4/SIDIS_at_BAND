@@ -285,7 +285,7 @@ void SIDISc12rSkimmer(int RunNumber=6420,
     SetSkimming( fSkimming );
     SetEbeam   ( fEbeam    );
 
-    TString RunNumberStr = aux.GetRunNumberSTR(RunNumber,fdebug);
+    TString RunNumberStr = aux.GetRunNumberSTR(RunNumber);
     // read cut values
     aux.loadCutValues("macros/cuts/BANDcutValues.csv",torusBending);
     
