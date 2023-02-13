@@ -27,8 +27,9 @@
 #include "Auxiliary/csv_reader.h"
 #define NMAXPIONS 20 // maximal allowed number of pions
 #define r2d 180./3.1415 // radians to degrees
-using namespace clas12;
 
+using namespace clas12;
+SIDISatBAND_auxiliary aux;
 
 // globals
 auto db = TDatabasePDG::Instance();
