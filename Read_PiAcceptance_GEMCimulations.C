@@ -287,8 +287,10 @@ void Read_PiAcceptance_GEMCimulations(TString fPiCharge = "pips",
     
     // Load cut values
     if (fdebug>2) std::cout << "Load cut values "  << std::endl;
-    loadCutValues("cutValues.csv",fdebug);
-
+    // loadCutValues("cutValues.csv",fdebug);
+    // read cut values
+    aux.loadCutValues("macros/cuts/BANDcutValues.csv",torusBending);
+    
     
     // determine how many files to process
     int NfilesToProcess = 1;

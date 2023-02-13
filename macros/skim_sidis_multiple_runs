@@ -6,6 +6,7 @@
 #
 # execute:
 #
+# ./macros/skim_sidis_multiple_runs --Ebeam=10.4 --Nruns=1 --fdebug=2 --NeventsMax=10 --no-email
 # skim_sidis_multiple_runs --Nruns=1 --fdebug=3
 # skim_sidis_multiple_runs --Skimming=RGA_Free_proton --DataPath=nSidis --Ebeam=10.6
 # ./macros/skim_sidis_multiple_runs --Skimming=RGA_Free_proton --DataPath=nSidis --Nruns=1 --NeventsMax=10 --fdebug=3

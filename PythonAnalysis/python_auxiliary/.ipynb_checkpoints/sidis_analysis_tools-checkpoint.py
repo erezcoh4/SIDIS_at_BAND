@@ -29,7 +29,7 @@ global e_e_pi          , e_e_pi_n,          e_e_pi_FreeP;
 # d(e,e'π), d(e,e'πn) and  p(e,e'π) events after all selection cuts
 global e_e_pi_pass_cuts, e_e_pi_n_pass_cuts,e_e_pi_FreeP_pass_cuts;
 
-# (e,e'π) simulated events, generated from uniform electron direction and uniform pion direction and momoentum
+# (e,e'π) simulated events, generated from uniform electron direction and uniform pion direction and momentum
 global e_e_pi_GEMC     , e_e_pi_GEMC_pass_cuts;
 
 
@@ -42,246 +42,178 @@ e_e_pi_GEMC_pass_cuts                                        = dict()
 
 # Compute weight to each run of 1/beam-charge
 # such that events are counted in 1/nC
-beam_charge_all_runs = pd.read_csv('/Users/erezcohen/Desktop/data/BAND/metaData/beam_charge_all_runs.csv');
+beam_charge_all_runs = pd.read_csv('/Users/erezcohen/Desktop/data/BAND/metaData/rgb_all_runs.csv');
 weight_per_run = np.zeros(np.max(beam_charge_all_runs.runnum)+1)
 for run in beam_charge_all_runs.runnum:
-    weight_per_run[run] = 1./float(beam_charge_all_runs[beam_charge_all_runs.runnum==run].beam_charge);
-
-beam_charge_all_runs_rga = pd.read_csv('/Users/erezcohen/Desktop/data/BAND/metaData/rga_free_proton_beam_charge_all_runs.csv');
+    weight_per_run[run] = 1./float(beam_charge_all_runs[beam_charge_all_runs.runnum==run].iloc[0]['Beam Charge [nC]']);
+    
+beam_charge_all_runs_rga = pd.read_csv('/Users/erezcohen/Desktop/data/BAND/metaData/rga_all_runs.csv');
 weight_per_run_rga = np.zeros(np.max(beam_charge_all_runs_rga.runnum)+1)
 for run in beam_charge_all_runs_rga.runnum:
     weight_per_run_rga[run] = 1./float(beam_charge_all_runs_rga[beam_charge_all_runs_rga.runnum==run].beam_charge);
 
+    
+    
+from scipy.optimize import curve_fit
 
-    
-    
 # ----------------------- #
-def plot_FF_expectation(color='blue',formula='(1-z)/(1+z)', ax=None,x0=0.32,z0=0.5,
-                        delta_z=0,
-                        Q2=np.linspace(5,9,100)):
+def rFF(z,a):
+    return (a * (1-z)/(1-z+z/0.46))
+# ----------------------- #
+
+
+# ----------------------- #
+def plot_r_vs_z_and_fit_to_rFF( z, z_err, r, r_err, 
+                               ax=None, label='',marker='o', markersize=10, 
+                               markeredgecolor='k',linestyle='None',capthick=2,capsize=2,
+                               do_plot_fit=False, do_add_fit_to_label=True, fdebug=0):
+    
+    popt, pcov = curve_fit( rFF, z[r>0], r[r>0], p0=None, sigma=r_err[r>0], bounds=(-np.inf, np.inf))
+    residuals = ( r[r>0] - rFF( z[r>0], *popt )) / r_err[r>0] ;
+    chisq     = sum( np.square(residuals) )
+    ndf       = len(z[r>0]) - 1
+    chisq_red = chisq / ndf
+    if fdebug:
+        print(z)
+        # print(*popt)
+        # print(*pcov)
+        # print(residuals)
+        # print(chisq,chisq_red)    
+    
+    f_scale     = popt[0]
+    f_scale_err = pcov[0][0]
+    # force limit scale factoor uncertainty to be above 0.01
+    if f_scale_err < 0.01: f_scale_err = 0.01
+    plot_label  = label
+    if do_add_fit_to_label:
+        plot_label = label + ', $f_{scale}=%.2f\pm%.2f$, $\chi^2/ndf=%.1f$'%(f_scale,f_scale_err,chisq_red)
+    l=ax.errorbar( x = z, xerr = z_err,
+                  y = r, yerr = r_err,
+                  markersize = markersize,
+                  label=plot_label,
+                  marker=marker,
+                  markeredgecolor=markeredgecolor,
+                  linestyle=linestyle,            
+                  capthick=capthick, 
+                  capsize=capsize)
+    if fdebug>1: print(r_err)
+    
+    if do_plot_fit: ax.plot( z, rFF( z, *popt ), '.')
+    return l
+# ----------------------- #
+
+# ----------------------- #
+def compute_chi2_between_two_r_vs_z( r1, r_err1, r2, r_err2 ):
+    mask = (r1>0) & (r2>0)
+    chisq     = sum( np.square( r1[mask] - r2[mask] ) / (np.square(r_err1[mask]) + np.square(r_err2[mask]) ))
+    ndf       = len(r1[mask])
+    chisq_red = chisq / ndf
+    return chisq_red
+# ----------------------- #
+
+
+# ----------------------- #
+def load_SIDIS_ratio(xlabel   = "Bjorken $x$",
+                     fdebug   = 0,
+                     prefix   = 'Untagged_SIDIS_ratio_',
+                     suffix   = '',
+                     doPlotResults=False,
+                     axPlot   = [],
+                     Nzbins2Plot = 5,
+                     titlePlot="$\pi^+/\pi^-$ ratio as a function of $x_B$ without a tagged neutron",
+                     zvar     = "Zpi",
+                     data_path= '/Users/erezcohen/Desktop/data/BAND/Results/Results_31Jan2023/'):
     '''
-    Field-Feynman fragmentation model 
-    [R. D. Field and R. P. Feynman, Nucl. Phys. B136, 1 (1978)]
-    [J. Hua and B.Q. Ma Eur.Phys.J.C30:207-212,2003]
-    '''
-    zFF = np.linspace(0,1,100)
-    if formula == '(1-z)/(1+z)':
-        rFF = (1-zFF)/(1+zFF)
-        ax.plot(zFF, rFF, '--',color=color,label='(1-z)/(1+ z)')
-    elif formula == '(1-z)/(1-z+z/0.46)':
-        rFF = (1-zFF)/(1-zFF+zFF/0.46)
-        ax.plot(zFF, rFF, '--',color=color,label='(1-z)/(1 - z + z/0.46)')
-    elif formula == 'r(Q^2,x=x0,z=z0)':
-        rFF = (1-z0)/(1-z0+z0/0.46)*np.ones(len(Q2))
-        rFF_dw = (1-(z0-delta_z))/(1-(z0-delta_z)+(z0-delta_z)/0.46)*np.ones(len(Q2))
-        rFF_up = (1-(z0+delta_z))/(1-(z0+delta_z)+(z0+delta_z)/0.46)*np.ones(len(Q2))
-        # ax.plot(Q2, rFF, '--',color=color,label='(1-z)/(1 - z + z/0.46)')
-        ax.fill_between(Q2, rFF_dw, rFF_up,color=color,alpha=0.3, linewidth=0)
-        
-# ----------------------- #
-        
-    
-# ----------------------- #
-def get_r_from_CrossSectionRatio(R, R_errup, R_errdw, u_over_d=1):
-    r    = (4.*u_over_d - R)/(4*u_over_d*R - 1)
-    r_errup = 15*u_over_d*R_errup/np.square(4*u_over_d*R-1)
-    r_errdw = 15*u_over_d*R_errdw/np.square(4*u_over_d*R-1)
-
-    return r,r_errup,r_errdw  
-# ----------------------- #
-
-    
-    
-# ----------------------- #
-def extract_r_from_SIDIS_ratio(data_path = '/Users/erezcohen/Desktop/data/BAND/Results/',
-                               prefix = 'Tagged_SIDIS_ratio_', 
-                               suffixes=[''], 
-                               xB_selected   = 0.34,
-                               Delta_xB      = 0.02,
-                               Zpi_min       = 0.3, 
-                               Zpi_max       = 0.9, 
-                               fdebug        = 0,
-                               u_over_d      = 1,
-                              ):
-    z_arr,z_errdw_arr,z_errup_arr,r_arr,r_errup_arr,r_errdw_arr = dict(),dict(),dict(),dict(),dict(),dict()
-    for suffix in suffixes:
-        results = load_SIDIS_ratio(prefix = prefix, 
-                                   fdebug=0,
-                                   suffix = suffix,                                                                         
-                                   doPlotResults=False,  
-                                   data_path=data_path)
-        if fdebug: 
-            print('results with %s/%s:'%(prefix,suffix))
-            print(results)
-        result_name = suffix
-        z_arr[result_name],z_errdw_arr[result_name],z_errup_arr[result_name] = [],[],[]
-        r_arr[result_name],r_errup_arr[result_name],r_errdw_arr[result_name] = [],[],[]
-        for key in results.keys():
-            #print (key)
-            z_min = np.max([Zpi_min,float(key[7:12])]);
-            z_max = np.min([Zpi_max,float(key[-4:])]);
-            z_mean_pips = float(key[26:31])
-            z_mean_pims = float(key[36:40])
-            z = (z_mean_pips + z_mean_pims)/2
-            # print(z_min,z,z_max)
-
-            z_errdw = z - z_min 
-            z_errup = z_max - z
-            z_arr[result_name].append( z )
-            z_errdw_arr[result_name].append( z_errdw )
-            z_errup_arr[result_name].append( z_errup )
-
-            res = results[key][np.abs(results[key]['$x_B$']-xB_selected) < Delta_xB/2]
-            if fdebug>1: 
-                print('res:')
-                print(res)
-                print(res['$R$'])
-            if len(res)==0:    # empty data-frame
-                R,dR_up,dR_dw=0,0,0
-            elif len(res)==1:  # one x bin
-                R,dR_up,dR_dw = float(res['$R$']),float(res['$\Delta R_{+}$']),float(res['$\Delta R_{+}$'])
-            else: # integrated over x bins
-                Npips_tot = np.sum(res['$N(\pi_{+})$'])
-                dNpips_tot = np.sum(res['$\Delta N(\pi_{+})$'])
-                Npims_tot = np.sum(res['$N(\pi_{-})$'])
-                dNpims_tot = np.sum(res['$\Delta N(\pi_{-})$'])
-                if Npips_tot==0 or Npims_tot==0: R,dR_up,dR_dw=0,0,0
-                else: 
-                    R = Npips_tot/Npims_tot
-                    dR_up = R * np.sqrt( np.square(dNpips_tot/Npips_tot) + np.square(dNpims_tot/Npims_tot ))
-                    dR_dw = dR_up
-            
-            r,r_errup,r_errdw  = get_r_from_CrossSectionRatio(R, dR_up, dR_dw, u_over_d=u_over_d)
-            r_arr[result_name].append( r )
-            r_errup_arr[result_name].append( r_errup )
-            r_errdw_arr[result_name].append( r_errdw )
-
-
-    print('Done loading %s SIDIS results and extracting r for x=%.2f.'%(prefix,xB_selected))
-    print('From',data_path)
-    print('For',suffixes)
-    return z_arr,z_errdw_arr,z_errup_arr, r_arr, r_errup_arr, r_errdw_arr    
-# ----------------------- #
-
-    
-    
-    
-    
-    
-    
-    
-    
-# ----------------------- #
-def plot_FF_expectation(color='blue',formula='(1-z)/(1+z)', ax=None,x0=0.32,z0=0.5):
-    '''
-    Field-Feynman fragmentation model 
-    [R. D. Field and R. P. Feynman, Nucl. Phys. B136, 1 (1978)]
-    [J. Hua and B.Q. Ma Eur.Phys.J.C30:207-212,2003]
-    '''
-    zFF = np.linspace(0,1,100)
-    if formula == '(1-z)/(1+z)':
-        rFF = (1-zFF)/(1+zFF)
-        ax.plot(zFF, rFF, '--',color=color,label='(1-z)/(1+ z)')
-    elif formula == '(1-z)/(1-z+z/0.46)':
-        rFF = (1-zFF)/(1-zFF+zFF/0.46)
-        ax.plot(zFF, rFF, '--',color=color,label='(1-z)/(1 - z + z/0.46)')
-    elif formula == 'r(Q^2,x=x0,z=z0)':
-        Q2 = np.linspace(5,9,100)
-        rFF = (1-z0)/(1-z0+z0/0.46)*np.ones(len(Q2))
-        ax.plot(Q2, rFF, '--',color=color,label='(1-z)/(1 - z + z/0.46)')
-        
-# ----------------------- #
-        
-
-# ----------------------- #
-def extract_SIDIS_ratio(df_dict  = None,
-                        specific_run_number=None,
-                        x_var    = 'xB' ,
-                        x_bins   = np.linspace(0.2,0.6,11),
-                        zvar     = "Zpi",
-                        z_bins   = np.arange(0.3,0.8,0.1),
-                        z_widths = 0.01*np.ones(5),
-                        data_path= '/Users/erezcohen/Desktop/data/BAND/Results/',
-                        fdebug   = 0,
-                        prefix   = 'Untagged_SIDIS_ratio_',
-                        suffix   = '',
-                        M_x_min  = 0,
-                        M_x_max  = np.inf,
-                        W_min    = 0,
-                        W_max    = np.inf,
-                        Q2_min   = 0,
-                        Q2_max   = np.inf,
-                        Mx_d_min = 0,
-                        weight_option = 'beam-charge',):
-    '''
-    Extract SIDIS results,
-    the number of d(e,e'π+) and d(e,e'π-) events,
-    and save them to a CSV file
-    
-    last update Nov-26, 2022
-    
+    Load SIDIS ratio results
+    last update Feb-9, 2023
     
     input
-    ---------
-    zvar            "Zpi" / "zeta_pi"
+    -------
+    zvar      "Zpi","zeta_pi"
     
     '''
     
-    x        = (x_bins[1:] + x_bins[:-1])/2
-    x_err    = (x_bins[1:] - x_bins[:-1])/2
-    for z_bin,z_width in zip(z_bins,z_widths):
-        z_min,z_max = z_bin-z_width, z_bin+z_width
-        
-        (R,
-         R_err_up,
-         R_err_dw,
-         N_pips,
-         N_pims,
-         Zavg_pips,
-         Zavg_pims,
-         N_pips_err,
-         N_pims_err) = compute_ratio_pips_to_pims(df_dict = df_dict ,
-                                                 specific_run_number=specific_run_number,
-                                                 var     = x_var,
-                                                 bins    = x_bins,
-                                                  zvar   = zvar,
-                                                 z_min   = z_min,
-                                                 z_max   = z_max,
-                                                 M_x_min = M_x_min,
-                                                 M_x_max = M_x_max,
-                                                 W_min   = W_min,
-                                                 W_max   = W_max,
-                                                 Mx_d_min= Mx_d_min,
-                                                  Q2_min = Q2_min,
-                                                  Q2_max = Q2_max,
-                                                  weight_option=weight_option,
-                                                 fdebug  = fdebug)
+    SIDIS_results = dict()
+    
+    z_min_arr, z_max_arr, Zavg_pips_arr, Zavg_pims_arr = [],[],[],[]
+    data_path = data_path + '/';
+    if fdebug: print('Reading files from ' + data_path)
+    filelist = os.listdir( data_path )
+    for filename in filelist:
+        if prefix in filename and suffix in filename:
+            filenameparts = filename.split('_')
+            if fdebug>2: print(filename)
+            if fdebug>3: print(filenameparts)
+            if zvar=="Zpi":
+                if "Zpi" not in filenameparts: continue
+                z_min     = float(filenameparts[4][4:8])
+                # Zavg_pips = float(filenameparts[7][5:9])
+                Zavg_pips_str = filenameparts[7][5:9]
+                if 'an' in Zavg_pips_str: 
+                    Zavg_pips = 0.000;
+                else:                     Zavg_pips = float(Zavg_pips_str)
+                # Zavg_pims = float(filenameparts[8][5:9])
+                Zavg_pims_str = filenameparts[8][5:9]
+                if 'an' in Zavg_pims_str: 
+                    Zavg_pims = 0.000;
+                else:                     Zavg_pims = float(Zavg_pims_str) 
+                z_max     = float(filenameparts[10][4:8])
 
-        df_to_save = pd.DataFrame({"$x_B$":x,
-                                   "$\Delta x_B$":x_err,
-                                   '$N(\pi_{+})$':N_pips,
-                                   '$N(\pi_{-})$':N_pims,
-                                   '$\Delta N(\pi_{+})$':N_pips_err,
-                                   '$\Delta N(\pi_{-})$':N_pims_err,
-                                   '$R$':R,
-                                   '$\Delta R_{+}$':R_err_up,
-                                   '$\Delta R_{-}$':R_err_dw})
+            elif zvar=="zeta_pi":
+                if "zeta" not in filenameparts: continue
+                z_min     = float(filenameparts[5][4:8])
+                Zavg_pips = float(filenameparts[9][5:9])
+                Zavg_pims = float(filenameparts[10][5:9])
+                z_max     = float(filenameparts[13][4:8])
+
+            filelabel = '%s_min%.3f_%s_mean_pips%.3f_pims%.3f_%s_max%.3f'%(zvar,z_min,zvar,Zavg_pips,Zavg_pims,zvar,z_max)
+
+            df = pd.read_csv( data_path + '/' + filename )
+            SIDIS_results[filelabel] = df
+            z_min_arr.append(z_min)
+            z_max_arr.append(z_max)
+            Zavg_pips_arr.append(Zavg_pips)
+            Zavg_pims_arr.append(Zavg_pims)
+
         
-        filelabel = '%s_min%.3f_%s_mean_pips%.3f_pims%.3f_%s_max%.3f'%(zvar,z_min,zvar,Zavg_pips,Zavg_pims,zvar,z_max)
-        filename  =  data_path + prefix + filelabel + suffix  + '.csv'
-        df_to_save.to_csv(filename)
-        if fdebug:
-            print('saved',filename)
-            if fdebug>1:
-                print('$%s=%.3f\pm%.3f$'%(zvar,z_bin,z_width))
-                print(filename)
-                if fdebug>2: display(df_to_save)
+    z_min_arr = np.sort(z_min_arr)
+    z_max_arr = np.sort(z_max_arr)
+    Zavg_pips_arr = np.sort(Zavg_pips_arr)
+    Zavg_pims_arr = np.sort(Zavg_pims_arr)
+    
+    if doPlotResults:#{
+        x     = np.array(df["$x_B$"])
+        x_err = np.array(df["$\Delta x_B$"])
+
+        if axPlot==[]:
+            fig = plt.figure(figsize=(9,6))
+            axPlot  = fig.add_subplot(1,1,1)
+            
+        for filelabel in SIDIS_results.keys():
+        # z_min,z_max,Zavg_pips,Zavg_pims in zip( z_min_arr, z_max_arr, Zavg_pips_arr, Zavg_pims_arr[0:Nzbins2Plot] ):
+            # Zavg = (Zavg_pips+Zavg_pims)/2.
+            # filelabel = '%s_min%.3f_%s_mean_pips%.3f_pims%.3f_%s_max%.3f'%(zvar,z_min,zvar,Zavg_pips,Zavg_pims,zvar,z_max)
+            
+            df = SIDIS_results[filelabel]
+            y    = df['$R$']
+            y_err= (df['$\Delta R_{+}$'],df['$\Delta R_{-}$'])
+            # plot
+            l=axPlot.errorbar(x=x, xerr=x_err,  y=y, yerr=y_err,
+                        marker='o',markeredgecolor='k',
+                        label='$%.3f<z<%.3f$'%(z_min,z_max))
+
+        set_axes(axPlot,xlabel,"$N(e,e'\pi^+)/N(e,e'\pi^-)$",
+                 title=titlePlot,
+                 do_add_grid=True, do_add_legend=True,fontsize=18);
+        # plt.legend(bbox_to_anchor=(1,1.05),loc='best',fontsize=18)
+        
+    if fdebug: print('Done.')
+    return SIDIS_results
 # ----------------------- #
 
 
-
-
-
+    
+    
 # ----------------------- #
 def compute_ratio_pips_to_pims(df_dict,
                                specific_run_number=None,
@@ -293,10 +225,12 @@ def compute_ratio_pips_to_pims(df_dict,
                                M_x_min=0,  M_x_max=np.inf,
                                W_min=0,    W_max=np.inf,
                                Q2_min = 0, Q2_max= np.inf,
+                               pT_min = 0, pT_max= np.inf,
+                               phi_min = 0,phi_max= np.inf,                               
                                Mx_d_min=0, fdebug=0,
                                cutoff = 1.e-8 ):#{
     '''
-    last edit Oct-19, 2022
+    last edit Feb-9, 2023
     
     [R_pips_to_pims, R_pips_to_pims_errup, R_pips_to_pims_errdw,
      N_pips, N_pims,
@@ -360,6 +294,14 @@ def compute_ratio_pips_to_pims(df_dict,
     if 0 < Q2_min or Q2_max < np.inf:
         df_pips = df_pips[ (Q2_min < df_pips.Q2) & (df_pips.Q2 < Q2_max) ]
 
+    if 0 < pT_min or pT_max < np.inf:
+        df_pips = df_pips[ (pT_min < df_pips.pi_qFrame_pT) & (df_pips.pi_qFrame_pT < pT_max) ]
+
+    if 0 < phi_min or phi_max < np.inf:
+        df_pips = df_pips[ (phi_min < df_pips.pi_qFrame_Phi) & (df_pips.pi_qFrame_Phi < phi_max) ]
+
+
+
         
     if specific_run_number is not None:
         if fdebug>1:  print('df_pips: before run %d filter: %d events'%(specific_run_number,len(df_pips)))
@@ -381,6 +323,15 @@ def compute_ratio_pips_to_pims(df_dict,
     if 0 < Q2_min or Q2_max < np.inf:
         df_pims = df_pims[ (Q2_min < df_pims.Q2) & (df_pims.Q2 < Q2_max) ]
 
+    if 0 < pT_min or pT_max < np.inf:
+        df_pims = df_pims[ (pT_min < df_pims.pi_qFrame_pT) & (df_pims.pi_qFrame_pT < pT_max) ]
+        
+    if 0 < phi_min or phi_max < np.inf:
+        df_pims = df_pims[ (phi_min < df_pims.pi_qFrame_Phi) & (df_pims.pi_qFrame_Phi < phi_max) ]
+
+
+
+        
         
     if specific_run_number is not None:
         df_pims = df_pims[df_pims.runnum == specific_run_number]
@@ -481,6 +432,178 @@ def compute_ratio_pips_to_pims(df_dict,
 #}
 # ----------------------- #
 
+    
+# ----------------------- #    
+def count_lines_enumrate(file_name):
+    fp = open(file_name,'r')
+    for line_count, line in enumerate(fp):
+        pass
+    return line_count
+# ----------------------- #    
+  
+# ----------------------- #
+def beam_energy_from_run(run,rungroup = 'rgb'):
+    beam_energy = 10.2 * np.ones(len(run))    
+    if rungroup == 'rga':
+        beam_energy = 10.6 #* np.ones(len(run))
+    if rungroup == 'rgb':
+        beam_energy[(6400 < run)  & (run < 6600)] = 10.2 
+        beam_energy[(11360 < run) & (run < 11570)] = 10.4
+        beam_energy[(6160 < run)  & (run < 6400)] = 10.4
+    return beam_energy   
+# ----------------------- #
+
+
+
+    
+# ----------------------- #
+def plot_FF_expectation(color='blue',formula='(1-z)/(1+z)', ax=None,x0=0.32,z0=0.5,
+                        delta_z=0,
+                        Q2=np.linspace(5,9,100)):
+    '''
+    Field-Feynman fragmentation model 
+    [R. D. Field and R. P. Feynman, Nucl. Phys. B136, 1 (1978)]
+    [J. Hua and B.Q. Ma Eur.Phys.J.C30:207-212,2003]
+    '''
+    zFF = np.linspace(0,1,100)
+    if formula == '(1-z)/(1+z)':
+        rFF = (1-zFF)/(1+zFF)
+        ax.plot(zFF, rFF, '--',color=color,label='$(1-z)/(1+ z)$')
+    elif formula == '(1-z)/(1-z+z/0.46)':
+        rFF = (1-zFF)/(1-zFF+zFF/0.46)
+        ax.plot(zFF, rFF, '--',color=color,label='$(1-z)/(1 - z + z/0.46)$')
+    elif formula == 'r(Q^2,x=x0,z=z0)':
+        rFF = (1-z0)/(1-z0+z0/0.46)*np.ones(len(Q2))
+        rFF_dw = (1-(z0-delta_z))/(1-(z0-delta_z)+(z0-delta_z)/0.46)*np.ones(len(Q2))
+        rFF_up = (1-(z0+delta_z))/(1-(z0+delta_z)+(z0+delta_z)/0.46)*np.ones(len(Q2))
+        # ax.plot(Q2, rFF, '--',color=color,label='(1-z)/(1 - z + z/0.46)')
+        ax.fill_between(Q2, rFF_dw, rFF_up,color=color,alpha=0.3, linewidth=0)
+        
+# ----------------------- #
+        
+    
+# ----------------------- #
+def get_r_from_CrossSectionRatio(R, R_errup, R_errdw, u_over_d=1):
+    r    = (4.*u_over_d - R)/(4*u_over_d*R - 1)
+    r_errup = 15*u_over_d*R_errup/np.square(4*u_over_d*R-1)
+    r_errdw = 15*u_over_d*R_errdw/np.square(4*u_over_d*R-1)
+
+    return r,r_errup,r_errdw  
+# ----------------------- #
+
+    
+    
+# ----------------------- #
+def extract_r_from_SIDIS_ratio(data_path = '/Users/erezcohen/Desktop/data/BAND/Results/',
+                               prefix = 'Tagged_SIDIS_ratio_', 
+                               suffixes=[''], 
+                               xB_selected   = 0.34,
+                               Delta_xB      = 0.02,
+                               Zpi_min       = 0.3, 
+                               Zpi_max       = 0.9, 
+                               fdebug        = 0,
+                               u_over_d      = 1,
+                              ):
+    z_arr,z_errdw_arr,z_errup_arr,r_arr,r_errup_arr,r_errdw_arr = dict(),dict(),dict(),dict(),dict(),dict()
+    for suffix in suffixes:
+        results = load_SIDIS_ratio(prefix = prefix, 
+                                   fdebug=0,
+                                   suffix = suffix,                                                                         
+                                   doPlotResults=False,  
+                                   data_path=data_path)
+        if fdebug: 
+            print('results with %s/%s:'%(prefix,suffix))
+            print(results)
+        result_name = suffix
+        z_arr[result_name],z_errdw_arr[result_name],z_errup_arr[result_name] = [],[],[]
+        r_arr[result_name],r_errup_arr[result_name],r_errdw_arr[result_name] = [],[],[]
+        for key in results.keys():#{
+            #print (key)
+            z_min = np.max([Zpi_min,float(key[7:12])]);
+            z_max = np.min([Zpi_max,float(key[-4:])]);
+            z_mean_pips = float(key[26:31])
+            z_mean_pims = float(key[36:40])
+            z = (z_mean_pips + z_mean_pims)/2
+            if z_mean_pips > 0 and z_mean_pims > 0:
+                z_errdw = z - z_min 
+                z_errup = z_max - z
+            else:
+                z_errdw = 0
+                z_errup = 0
+
+            z_arr[result_name].append( z )
+            z_errdw_arr[result_name].append( z_errdw )
+            z_errup_arr[result_name].append( z_errup )
+            # print(z_min,z,z_max,z_errdw,z_errup)
+
+            res = results[key][np.abs(results[key]['$x_B$']-xB_selected) < Delta_xB/2]
+            if fdebug>1: 
+                print('res:')
+                print(res)
+                print(res['$R$'])
+            if len(res)==0:    # empty data-frame
+                R,dR_up,dR_dw=0,0,0
+            elif len(res)==1:  # one x bin
+                R,dR_up,dR_dw = float(res['$R$']),float(res['$\Delta R_{+}$']),float(res['$\Delta R_{+}$'])
+            else: # integrated over x bins
+                Npips_tot = np.sum(res['$N(\pi_{+})$'])
+                dNpips_tot = np.sum(res['$\Delta N(\pi_{+})$'])
+                Npims_tot = np.sum(res['$N(\pi_{-})$'])
+                dNpims_tot = np.sum(res['$\Delta N(\pi_{-})$'])
+                if Npips_tot==0 or Npims_tot==0: R,dR_up,dR_dw=0,0,0
+                else: 
+                    R = Npips_tot/Npims_tot
+                    dR_up = R * np.sqrt( np.square(dNpips_tot/Npips_tot) + np.square(dNpims_tot/Npims_tot ))
+                    dR_dw = dR_up
+            
+            r,r_errup,r_errdw  = get_r_from_CrossSectionRatio(R, dR_up, dR_dw, u_over_d=u_over_d)
+            r_arr[result_name].append( r )
+            r_errup_arr[result_name].append( r_errup )
+            r_errdw_arr[result_name].append( r_errdw )
+        #}
+        r_arr[result_name] = np.array(r_arr[result_name])
+        r_errup_arr[result_name] = np.array(r_errup_arr[result_name])
+        r_errdw_arr[result_name] = np.array(r_errdw_arr[result_name])
+        z_arr[result_name] = np.array(z_arr[result_name])
+        z_errup_arr[result_name] = np.array(z_errup_arr[result_name])
+        z_errdw_arr[result_name] = np.array(z_errdw_arr[result_name])
+
+
+    print('Done loading %s SIDIS results and extracting r for x=%.2f.'%(prefix,xB_selected))
+    print('From',data_path)
+    print('For',suffixes)
+    return z_arr,z_errdw_arr,z_errup_arr, r_arr, r_errup_arr, r_errdw_arr
+# ----------------------- #
+
+    
+    
+    
+    
+    
+    
+    
+    
+# ----------------------- #
+def plot_FF_expectation(color='blue',formula='(1-z)/(1+z)', ax=None,x0=0.32,z0=0.5):
+    '''
+    Field-Feynman fragmentation model 
+    [R. D. Field and R. P. Feynman, Nucl. Phys. B136, 1 (1978)]
+    [J. Hua and B.Q. Ma Eur.Phys.J.C30:207-212,2003]
+    '''
+    zFF = np.linspace(0,1,100)
+    if formula == '(1-z)/(1+z)':
+        rFF = (1-zFF)/(1+zFF)
+        ax.plot(zFF, rFF, '--',color=color,label='(1-z)/(1+ z)')
+    elif formula == '(1-z)/(1-z+z/0.46)':
+        rFF = (1-zFF)/(1-zFF+zFF/0.46)
+        ax.plot(zFF, rFF, '--',color=color,label='(1-z)/(1 - z + z/0.46)')
+    elif formula == 'r(Q^2,x=x0,z=z0)':
+        Q2 = np.linspace(5,9,100)
+        rFF = (1-z0)/(1-z0+z0/0.46)*np.ones(len(Q2))
+        ax.plot(Q2, rFF, '--',color=color,label='(1-z)/(1 - z + z/0.46)')
+        
+# ----------------------- #
+        
 
 
 
@@ -490,106 +613,106 @@ def compute_ratio_pips_to_pims(df_dict,
 
 
 # ----------------------- #
-def load_SIDIS_ratio(xlabel   = "Bjorken $x$",
-                     fdebug   = 0,
-                     prefix   = 'Untagged_SIDIS_ratio_',
-                     suffix   = '',
-                     doPlotResults=False,
-                     axPlot   = [],
-                     Nzbins2Plot = 5,
-                     titlePlot="$\pi^+/\pi^-$ ratio as a function of $x_B$ without a tagged neutron",
-                     zvar     = "Zpi",
-                     data_path= '/Users/erezcohen/Desktop/data/BAND/Results/'):
+def extract_SIDIS_ratio(df_dict  = None,
+                        specific_run_number=None,
+                        x_var    = 'xB' ,
+                        x_bins   = np.linspace(0.2,0.6,11),
+                        zvar     = "Zpi",
+                        z_bins   = np.arange(0.3,0.8,0.1),
+                        z_widths = 0.01*np.ones(5),
+                        data_path= '/Users/erezcohen/Desktop/data/BAND/Results/',
+                        fdebug   = 0,
+                        prefix   = 'Untagged_SIDIS_ratio_',
+                        suffix   = '',
+                        M_x_min  = 0,
+                        M_x_max  = np.inf,
+                        W_min    = 0,
+                        W_max    = np.inf,
+                        Q2_min   = 0,
+                        Q2_max   = np.inf,
+                        pT_min   = 0,
+                        pT_max   = np.inf,
+                        phi_min  = 0,
+                        phi_max  = np.inf,
+                        Mx_d_min = 0,
+                        weight_option = 'beam-charge',):
     '''
-    Load SIDIS ratio results
-    last update Jan-2, 2023
+    Extract SIDIS results,
+    the number of d(e,e'π+) and d(e,e'π-) events,
+    and save them to a CSV file
+    
+    last update Feb-9, 2023
+    
     
     input
-    -------
-    zvar      "Zpi","zeta_pi"
+    ---------
+    zvar            "Zpi" / "zeta_pi"
     
     '''
     
-    SIDIS_results = dict()
-    
-    z_min_arr, z_max_arr, Zavg_pips_arr, Zavg_pims_arr = [],[],[],[]
-    if fdebug: print('Reading files from ' + data_path)
-    filelist = os.listdir(data_path)
-    for filename in filelist:
-        if prefix in filename and suffix in filename:
-            filenameparts = filename.split('_')
-            if fdebug>2: print(filename)
-            if fdebug>3: print(filenameparts)
-            if zvar=="Zpi":
-                if "Zpi" not in filenameparts: continue
-                z_min     = float(filenameparts[4][4:8])
-                # Zavg_pips = float(filenameparts[7][5:9])
-                Zavg_pips_str = filenameparts[7][5:9]
-                if 'an' in Zavg_pips_str: 
-                    Zavg_pips = 0.000;
-                else:                     Zavg_pips = float(Zavg_pips_str)
-                # Zavg_pims = float(filenameparts[8][5:9])
-                Zavg_pims_str = filenameparts[8][5:9]
-                if 'an' in Zavg_pims_str: 
-                    Zavg_pims = 0.000;
-                else:                     Zavg_pims = float(Zavg_pims_str) 
-                z_max     = float(filenameparts[10][4:8])
-
-            elif zvar=="zeta_pi":
-                if "zeta" not in filenameparts: continue
-                z_min     = float(filenameparts[5][4:8])
-                Zavg_pips = float(filenameparts[9][5:9])
-                Zavg_pims = float(filenameparts[10][5:9])
-                z_max     = float(filenameparts[13][4:8])
-
-            filelabel = '%s_min%.3f_%s_mean_pips%.3f_pims%.3f_%s_max%.3f'%(zvar,z_min,zvar,Zavg_pips,Zavg_pims,zvar,z_max)
-
-            df = pd.read_csv( data_path + '/' + filename )
-            SIDIS_results[filelabel] = df
-            z_min_arr.append(z_min)
-            z_max_arr.append(z_max)
-            Zavg_pips_arr.append(Zavg_pips)
-            Zavg_pims_arr.append(Zavg_pims)
-
+    x        = (x_bins[1:] + x_bins[:-1])/2
+    x_err    = (x_bins[1:] - x_bins[:-1])/2
+    for z_bin,z_width in zip(z_bins,z_widths):
+        z_min,z_max = z_bin-z_width, z_bin+z_width
         
-    z_min_arr = np.sort(z_min_arr)
-    z_max_arr = np.sort(z_max_arr)
-    Zavg_pips_arr = np.sort(Zavg_pips_arr)
-    Zavg_pims_arr = np.sort(Zavg_pims_arr)
-    
-    if doPlotResults:#{
-        x     = np.array(df["$x_B$"])
-        x_err = np.array(df["$\Delta x_B$"])
+        (R,
+         R_err_up,
+         R_err_dw,
+         N_pips,
+         N_pims,
+         Zavg_pips,
+         Zavg_pims,
+         N_pips_err,
+         N_pims_err) = compute_ratio_pips_to_pims(df_dict = df_dict ,
+                                                 specific_run_number=specific_run_number,
+                                                 var     = x_var,
+                                                 bins    = x_bins,
+                                                  zvar   = zvar,
+                                                 z_min   = z_min,
+                                                 z_max   = z_max,
+                                                 M_x_min = M_x_min,
+                                                 M_x_max = M_x_max,
+                                                 W_min   = W_min,
+                                                 W_max   = W_max,
+                                                 Mx_d_min= Mx_d_min,
+                                                  Q2_min = Q2_min,
+                                                  Q2_max = Q2_max,
+                                                  pT_min = pT_min,
+                                                  pT_max = pT_max,
+                                                  phi_min= phi_min,
+                                                  phi_max= phi_max,
+                                                  weight_option=weight_option,
+                                                 fdebug  = fdebug)
 
-        if axPlot==[]:
-            fig = plt.figure(figsize=(9,6))
-            axPlot  = fig.add_subplot(1,1,1)
-            
-        for z_min,z_max,Zavg_pips,Zavg_pims in zip( z_min_arr, z_max_arr, Zavg_pips_arr, Zavg_pims_arr[0:Nzbins2Plot] ):
-            Zavg = (Zavg_pips+Zavg_pims)/2.
-            filelabel = '%s_min%.3f_%s_mean_pips%.3f_pims%.3f_%s_max%.3f'%(zvar,z_min,zvar,Zavg_pips,Zavg_pims,zvar,z_max)
-            
-            df = SIDIS_results[filelabel]
-            y    = df['$R$']
-            y_err= (df['$\Delta R_{+}$'],df['$\Delta R_{-}$'])
-            # plot
-            l=axPlot.errorbar(x=x, xerr=x_err,  y=y, yerr=y_err,
-                        marker='o',markeredgecolor='k',
-                        label='$%.3f<z<%.3f, \\bar{z}=%.3f$'%(z_min,z_max,Zavg))
-
-        set_axes(axPlot,xlabel,"$N(e,e'\pi^+)/N(e,e'\pi^-)$",
-                 title=titlePlot,
-                 do_add_grid=True, do_add_legend=True,fontsize=18);
-        # plt.legend(bbox_to_anchor=(1,1.05),loc='best',fontsize=18)
+        df_to_save = pd.DataFrame({"$x_B$":x,
+                                   "$\Delta x_B$":x_err,
+                                   '$N(\pi_{+})$':N_pips,
+                                   '$N(\pi_{-})$':N_pims,
+                                   '$\Delta N(\pi_{+})$':N_pips_err,
+                                   '$\Delta N(\pi_{-})$':N_pims_err,
+                                   '$R$':R,
+                                   '$\Delta R_{+}$':R_err_up,
+                                   '$\Delta R_{-}$':R_err_dw})
         
-    if fdebug: print('Done.')
-    return SIDIS_results
+        filelabel = '%s_min%.3f_%s_mean_pips%.3f_pims%.3f_%s_max%.3f'%(zvar,z_min,zvar,Zavg_pips,Zavg_pims,zvar,z_max)
+        filename  =  data_path + prefix + filelabel + suffix  + '.csv'
+        df_to_save.to_csv(filename)
+        if fdebug:
+            print('saved',filename)
+            if fdebug>1:
+                print('$%s=%.3f\pm%.3f$'%(zvar,z_bin,z_width))
+                print(filename)
+                if fdebug>2: display(df_to_save)
 # ----------------------- #
 
 
 
 
-# NEED TO CHANGE THE "NAN" to something like 0.000 with 4 digits
+
+
+
+
+
 
 
 
@@ -668,187 +791,6 @@ def apply_p_theta_acceptance_cut_single_set( df_dict=None,
 #        df_dict_after_cut[pi_ch] = df_after_cut
 #    return df_dict_after_cut
 ## ----------------------- #
-
-
-# ----------------------- #
-def load_SIDIS_data(runs_filename   = "good_runs_10-2-final.txt",
-                    main_data_path  = '/Users/erezcohen/Desktop/data/BAND/',
-                    Nruns           = 1,
-                    do_e_e_pi       = True,
-                    do_e_e_pi_n     = True,
-                    do_e_e_pi_FreeP = True,
-                    do_all_vars     = False,
-                    fdebug          = 2,
-                    prefix          = "sidisdvcs",
-                    subdirname      = "",
-                    taggedsubdirname= "",
-                    FreePsubdirname = "",
-                    FreeP_prefix    = "nSidis",
-                    FreePruns_filename = "rga_data/rga_nsidis_runs_10-6.txt"):#{
-    '''
-    e_e_pi, e_e_pi_n, e_e_pi_FreeP = load_SIDIS_data()
-    Load SIDIS data, and fill e_e_pi and e_e_pi_n with data
-    last update Jan-17, 2023
-    
-    input:
-    -------------
-    do_e_e_pi       flag to read d(e,e'π) data  from RGB - takes much time for a large number of runs
-    do_e_e_pi_n     flag to read d(e,e'πn) data from RGB - takes less time
-    do_e_e_pi_FreeP flag to read p(e,e'π) data from RGA  - takes much time
-    prefix          "sidisdvcs" / "inc"      - inclusive skimming train
-    subdirname      "With_W0.5cut" / "With_W2.5cut"
-    
-    
-    Comments:
-    -------------
-    e_e_pi, e_e_pi_n, e_e_pi_FreeP       dict(['piplus','piminus'])
-    e.g. :
-    e_e_pi['piplus'] = pandas.DataFrame( (e,e'π) events data )
-    
-    '''
-    global e_e_pi, e_e_pi_n, e_e_pi_FreeP;
-
-    if taggedsubdirname=="": taggedsubdirname = subdirname;
-    e_e_pi_data_path       = main_data_path + 'SIDIS_skimming/' + prefix + '/' + subdirname + '/'
-    e_e_pi_n_data_path     = main_data_path + 'merged_SIDIS_and_BAND_skimming/' + prefix + '/' + taggedsubdirname + '/'
-    e_e_pi_FreeP_data_path = main_data_path + 'RGA_Free_proton/' + FreeP_prefix + '/'+ FreePsubdirname + '/'
-
-    runs = read_run_nunmbers(runs_filename=runs_filename,Nruns=Nruns)
-    FreePruns = read_run_nunmbers(runs_filename=FreePruns_filename,Nruns=Nruns)
-    e_e_pi, e_e_pi_n, e_e_pi_FreeP = dict(),dict(),dict()
-    
-    for runnum,runIdx in zip(runs,range(len(runs))):#{
-        if fdebug>1: print('Run number ',runnum,'(%d/%d runs)'%(runIdx+1,len(runs)))
-        for pi_charge_name,pi_print in zip(pi_charge_names,pi_prints):
-            if do_e_e_pi:#{
-                # e_e_pi[pi_charge_name] = []
-                if do_all_vars:
-                    eepi   = pd.read_csv(e_e_pi_data_path
-                                     +'skimmed_SIDIS_'
-                                     +prefix + '_'
-                                     +'00%d_e_%s_selected_eepi_kinematics.csv'%(runnum,pi_charge_name))
-
-                else: # more economic
-                    eepi   = pd.read_csv(e_e_pi_data_path
-                                     +'skimmed_SIDIS_'
-                                     +prefix + '_'
-                                     +'00%d_e_%s_selected_eepi_kinematics.csv'%(runnum,pi_charge_name),
-                                     usecols=['runnum','evnum',
-                                              'e_P','e_Theta','e_Phi',
-                                              'pi_P', 'pi_Theta', 'pi_Phi',
-                                              'Q2', 'W',
-                                              'xB', 'Zpi',
-                                              'M_x', 'e_DC_sector',
-                                              'pi_DC_sector','pi_qFrame_pT','pi_qFrame_pL'],
-                                     dtype={'runnum':int,'evnum': int,
-                                            'e_DC_sector':int, 'pi_DC_sector':int,
-                                            'e_P':np.half,'e_Theta':np.half,'e_Phi':np.half,
-                                            'pi_P':np.half,'pi_Theta':np.half, 'pi_Phi':np.half,
-                                            'Q2':np.half,  'W':np.half,
-                                            'xB':np.half, 'Zpi':np.half,
-                                            'M_x':np.half,
-                                            'pi_qFrame_pT':np.half,'pi_qFrame_pL':np.half})
-                
-                if runIdx==0: e_e_pi[pi_charge_name] = eepi
-                else:         e_e_pi[pi_charge_name] = pd.concat([e_e_pi[pi_charge_name],eepi])
-
-                
-                if fdebug>1: print('Loaded',len(eepi)," d(e,e'"+pi_print+") events")
-
-            #}
-            if do_e_e_pi_n:#{
-                eepin = pd.read_csv(e_e_pi_n_data_path
-                                    + 'skimmed_SIDIS_and_BAND_'
-                                    + prefix + '_'
-                                    + '00%d_e_%s_n.csv'%(runnum,pi_charge_name))
-                
-                if fdebug>1: print('Loaded',len(eepin)," d(e,e'"+pi_print+"n) events")
-
-                if runIdx==0: e_e_pi_n[pi_charge_name] = eepin
-                else:         e_e_pi_n[pi_charge_name] = pd.concat([e_e_pi_n[pi_charge_name],eepin])
-            #}
-        #}
-    #}
-    if do_e_e_pi_FreeP:#{
-        for runnum,runIdx in zip(FreePruns,range(len(FreePruns))):#{
-            if fdebug>1: print('Free-P RGA Run number ',runnum,'(%d/%d runs)'%(runIdx+1,len(runs)))
-        
-            for pi_charge_name,pi_print in zip(pi_charge_names,pi_prints):
-                if do_all_vars:
-                    eepi   = pd.read_csv(e_e_pi_FreeP_data_path
-                                         +'skimmed_SIDIS_'
-                                         +FreeP_prefix + '_'
-                                         +'00%d_e_%s_selected_eepi_kinematics.csv'%(runnum,pi_charge_name))
-
-#                     eepi   = pd.read_csv(e_e_pi_FreeP_data_path
-#                                      +FreeP_prefix
-#                                      +'_e_e_%s_selected_eepi_kinematics.csv'%(pi_charge_name))
-
-                else: # more economic
-                    eepi   = pd.read_csv(e_e_pi_FreeP_data_path
-                                         +'skimmed_SIDIS_'
-                                         +FreeP_prefix + '_'
-                                         +'00%d_e_%s_selected_eepi_kinematics.csv'%(runnum,pi_charge_name),
-                                     usecols=['runnum','evnum',
-                                              'e_P','e_Theta','e_Phi',
-                                              'pi_P', 'pi_Theta', 'pi_Phi',
-                                              'Q2', 'W',
-                                              'xB', 'Zpi',
-                                              'M_x', 'e_DC_sector', 'pi_DC_sector','pi_qFrame_pT','pi_qFrame_pL'],
-                                     dtype={'runnum':int,'evnum': int,
-                                            'e_DC_sector':int, 'pi_DC_sector':int,
-                                            'e_P':np.half,'e_Theta':np.half,'e_Phi':np.half,
-                                            'pi_P':np.half,'pi_Theta':np.half, 'pi_Phi':np.half,
-                                            'Q2':np.half,  'W':np.half,
-                                            'xB':np.half, 'Zpi':np.half,
-                                            'M_x':np.half,
-                                            'pi_qFrame_pT':np.half,'pi_qFrame_pL':np.half})
-
-        
-                    # eepi   = pd.read_csv(e_e_pi_FreeP_data_path
-                    #                  +FreeP_prefix
-                    #                  +'_e_e_%s_selected_eepi_kinematics.csv'%(pi_charge_name),
-                    #                  usecols=['runnum','evnum',
-                    #                           'e_P','e_Theta','e_Phi',
-                    #                           'pi_P', 'pi_Theta', 'pi_Phi',
-                    #                           'Q2', 'W',
-                    #                           'xB', 'Zpi',
-                    #                           'M_x', 'e_DC_sector', 'pi_DC_sector','pi_qFrame_pT','pi_qFrame_pL'],
-                    #                  dtype={'runnum':int,'evnum': int,
-                    #                         'e_DC_sector':int, 'pi_DC_sector':int,
-                    #                         'e_P':np.half,'e_Theta':np.half,'e_Phi':np.half,
-                    #                         'pi_P':np.half,'pi_Theta':np.half, 'pi_Phi':np.half,
-                    #                         'Q2':np.half,  'W':np.half,
-                    #                         'xB':np.half, 'Zpi':np.half,
-                    #                         'M_x':np.half,
-                    #                         'pi_qFrame_pT':np.half,'pi_qFrame_pL':np.half})
-
-                # Aug-2022: in e_e_pi_FreeP we only have 1 data-file
-                # e_e_pi_FreeP[pi_charge_name] = eepi
-                # Jan-2023: in e_e_pi_FreeP we have multiple runs
-                if runIdx==0: e_e_pi_FreeP[pi_charge_name] = eepi
-                else:         e_e_pi_FreeP[pi_charge_name] = pd.concat([e_e_pi_FreeP[pi_charge_name],eepi])
-                if fdebug>1: print('Loaded',len(eepi)," p(e,e'"+pi_print+") events")
-            #}
-        #}
-    #}
-    print('Done loading files.')
-    
-    if fdebug>0:
-        print('')
-        print('Total statistics:')
-        for pi_charge_name,pi_print in zip(pi_charge_names,pi_prints):
-            if do_e_e_pi:       print(len(e_e_pi[pi_charge_name])      ," d(e,e'"+pi_print+")  events")
-            if do_e_e_pi_n:     print(len(e_e_pi_n[pi_charge_name])    ," d(e,e'"+pi_print+"n) events")
-            if do_e_e_pi_FreeP: print(len(e_e_pi_FreeP[pi_charge_name])," p(e,e'"+pi_print+")  events")
-    #}
-    return e_e_pi, e_e_pi_n, e_e_pi_FreeP
-#}
-# ----------------------- #
-
-
-
-
 
 
 
@@ -1532,7 +1474,7 @@ def pi_min_theta_cut( pi_charge = 'pips', sector=1, p=2 ):
 
 
 # ----------------------- #
-def apply_Mx_cut( df_dict=None, Mx_min = 1.3, Mx_max = 5 ): #{
+def apply_Mx_cut( df_dict=None, Mx_min = 1.7, Mx_max = 5 ): #{
     '''
         df_dict_after_cut = apply_Mx_cut(df_dict)
         

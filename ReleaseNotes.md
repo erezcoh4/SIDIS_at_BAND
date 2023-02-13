@@ -1,11 +1,40 @@
 
 
 # SRC-SIDIS revisions and release-notes 
+-----------------------------------------------------------------
 
-Jan-30, 2023    
+
+Feb-13, 2023    
 -------------
 
-1. Started analyzing 10.4 GeV and 10.6 data
+1. Updated **Read_PiAcceptance_GEMCimulations.C** to read "white" GEMC simulations with the updated variables
+
+2. Added *e_e_pi_GEMC* data dictionary to analysis results - "white" spectrum of (e,e'π) events, 
+and the *do_e_e_pi_GEMC* option in **load_SIDIS_data()**
+
+
+Feb-9, 2023    
+-------------
+
+1. Updated minimal Mx cut to be Mx > 1.7 in **apply_Mx_cut( df_dict=None, Mx_min = 1.7, Mx_max = 5 )**
+
+2. Added *subdirname* to **load_SIDIS_ratio()**
+
+3. Added *pT* and *phi* limits to **extract_SIDIS_ratio()** and to **compute_ratio_pips_to_pims()**, in order to study the dependence of the results on these variables and check hidden artificial Q2 dependence, where *phi* is the angle in the reaction frame (i.e. virtual-photon frame)
+
+Feb-3, 2023    
+-------------
+
+1. Updated python analysis and cross-section extraction to include 10.4 and 10.6 GeV data
+    **load_SIDIS_data()** 
+        **load_SIDIS_data()**
+
+
+Jan-31, 2023 (commit_2e77f15)    
+-------------
+
+1. Expanded the analysis to include, in addition to 10.2 GeV data, also 10.4 GeV and 10.6 data
+        good_runs_10-2-final.txt [/cache/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train/sidisdvcs/]
         good_runs_10-4.txt [/cache/clas12/rg-b/production/recon/spring2020/torus-1/pass1/v1/dst/train/sidisdvcs/]
         good_runs_10-6.txt [/cache/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train/sidisdvcs/]
     

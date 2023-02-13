@@ -1,6 +1,5 @@
 // Read a HIPO file and convert a few of the variables to CSV
 // clas12root -q ConvertHIPOFileToCSV.C
-// clas12root -q 'ConvertHIPOFileToCSV.C+("0001")'
 //
 
 
@@ -19,29 +18,21 @@
 #include <TChain.h>
 #include <TCanvas.h>
 #include <TBenchmark.h>
-#include <string>
-#include <iomanip>
-#include <utility>
-#include <iostream>
-#include <stdexcept>
- 
 #include "clas12reader.h"
-#include "Auxiliary/SIDISatBAND_auxiliary.cpp"
+//#include "Auxiliary/SIDISatBAND_auxiliary.cpp"
 
 using namespace clas12;
-SIDISatBAND_auxiliary  aux;
+//SIDISatBAND_auxiliary  aux;
 TString DataPath, prefix;
-TString csvheader = ( (TString)"RunNumber,xB,omega,Q2,W,");
+TString csvheader = ( (TString)"RunNumber,xB,omega,W,Q2,");
 std::ofstream csvfile;
 
 // auxiliary
-// DCfid_SIDIS dcfid;
+DCfid_SIDIS dcfid;
 std::vector<region_part_ptr>  electrons;
 int              RunNumber, EventNumber;
 TLorentzVector       Beam, target, e, q;
 double                 Q2, omega, W, xB;
-//TLorentzVector                 p_rest();
-//p_rest.SetXYZM(0, 0, 0, aux.Mp    );
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void  SetLorentzVector (TLorentzVector &p4, clas12::region_part_ptr rp){
@@ -59,19 +50,19 @@ void ComputeElectronKinematics(int fdebug){
     Q2      = -q.Mag2();
     omega   = q.E();
     xB      = Q2/(2. * aux.Mp * q.E());
-    W       = 0;//sqrt((p_rest + q).Mag2());
+    W       = 0; //sqrt((p_rest + q).Mag2());
 }
 
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-void ConvertHIPOFileToCSV(TString     fFilename = "0000",
-                          TString   fInFilepath = "/work/cebaf24gev/sidis/reconstructed/rgc-unp-deut-22gev/hipo/",
+void ConvertHIPOFileToCSV(TString   fInFilepath = "/work/cebaf24gev/sidis/reconstructed/rgc-unp-deut-22gev/hipo/",
                           TString  fOutFilepath = "/volatile/clas12/users/ecohen/BAND/Simulations/JLAB22GeV_Harut_Jan2023/",
+                          TString     fFilename = "0000",
                           double         fEbeam = 22.0,
                           int            fdebug = 0){
     
     TString inputFile   = fInFilepath + fFilename + ".hipo";
-    TString outfilename = fOutFilepath + fFilename + ".csv";
+    TString outfilename = fInFilepath + fFilename + ".csv";
     csvfile.open( outfilename );
     csvfile << csvheader << std::endl;
     
@@ -79,7 +70,7 @@ void ConvertHIPOFileToCSV(TString     fFilename = "0000",
     fake.Add(inputFile.Data());
     //get the hipo data
     auto files  = fake.GetListOfFiles();
-    RunNumber   = 0;//std::stoi(fFilename);
+    RunNumber   = int(fFilename);
     EventNumber = 0;
     
     // step over events and extract information....
@@ -102,13 +93,6 @@ void ConvertHIPOFileToCSV(TString     fFilename = "0000",
             // Get Particles By Type
             electrons          = c12.getByID( 11   );
             int             Ne = electrons.size();
-            if (fdebug) {
-                std::cout
-                << "EventNumber: " << EventNumber
-                << "N(e): " << Ne
-                << std::endl;
-                
-            }
             if (Ne==0) continue;
             double  leading_e_E;
             int     leading_e_index = 0;
@@ -124,7 +108,7 @@ void ConvertHIPOFileToCSV(TString     fFilename = "0000",
             }
             // set leading electron 4-momentum
             SetLorentzVector(e , electrons[leading_e_index]);
-            ComputeElectronKinematics(fdebug);
+            
             
             if (fdebug){
                 std::cout
