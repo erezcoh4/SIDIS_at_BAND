@@ -25,6 +25,8 @@
 #include "clas12reader.h"
 #include "Auxiliary/DCfid_SIDIS.cpp"
 #include "Auxiliary/csv_reader.h"
+#include "Auxiliary/SIDISatBAND_auxiliary.cpp"
+
 #define NMAXPIONS 20 // maximal allowed number of pions
 #define r2d 180./3.1415 // radians to degrees
 
