@@ -174,7 +174,7 @@ TString SIDISatBAND_auxiliary::GetRunNumberSTR( int RunNumber, TString fSkimming
     char RunNumberStr[20];
     // sprintf( RunNumberStr, "00%d", RunNumber );
     
-    if(Skimming == "GEMC_p_uniform_distribution"){
+    if(fSkimming == "p_uniform_distribution"){
         // "white" GEMC simulation runs
         sprintf( RunNumberStr, "%d", RunNumber );
     } else {

@@ -47,7 +47,7 @@ TString csvheader = ( (TString)"status,runnum,evnum,beam_helicity,"
                      );
 
 // addition to csv for GEMC simulations
-TString csvheader_GEMCaddition == ( (TString)"e_P_g,e_Theta_g,e_Phi_g,e_Vz_g,"
+TString csvheader_GEMCaddition = ( (TString)"e_P_g,e_Theta_g,e_Phi_g,e_Vz_g,"
                                   +(TString)"pi_P_g,pi_Theta_g,pi_Phi_g,pi_Vz_g,"
                                   +(TString)"Q2_g,xB_g,omega_g,y_g,"
                                   );
@@ -65,55 +65,56 @@ std::vector<int> csvprecisions = {
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 // start clock
 auto start = std::chrono::high_resolution_clock::now();
-//// declare methods
-//TVector3                GetParticleVertex (clas12::region_part_ptr rp);
-//void                     SetLorentzVector (TLorentzVector &p4, clas12::region_part_ptr rp);
-//void                      OpenOutputFiles (TString csvfilename);
-//void                     CloseOutputFiles (TString OutDataPath, TString outfilename);
-//void                      SetOutputTTrees ();
-//bool   CheckIfElectronPassedSelectionCuts (Double_t e_PCAL_x, Double_t e_PCAL_y,
-//                                           Double_t e_PCAL_W,Double_t e_PCAL_V,
-//                                           Double_t e_E_PCAL,
-//                                           Double_t e_E_ECIN, Double_t e_E_ECOUT,
-//                                           TLorentzVector e,
-//                                           TVector3 Ve,
-//                                           Double_t e_DC_sector,
-//                                           Double_t e_DC_x[3],
-//                                           Double_t e_DC_y[3],
-//                                           Double_t e_DC_z[3],
-//                                           int torusBending);
-//bool      CheckIfPionPassedSelectionCuts (TString pionCharge, // "pi+" or "pi-"
-//                                           Double_t DC_sector,
-//                                           Double_t DC_x[3], Double_t DC_y[3], Double_t DC_z[3],
-//                                           Double_t chi2PID, Double_t p,
-//                                           TVector3 Ve,      TVector3 Vpi,
-//                                           int fdebug);
-//int                       GetBeamHelicity (event_ptr p_event, int runnum, int fdebug);
-//double                      GetBeamEnergy (int fdebug);
-//void                InitializeFileReading (int NeventsMax,int c12Nentries, int fdebug);
-//void                  InitializeVariables ();
-//void                      OpenResultFiles (TString outfilepath, TString outfilename );
-//void           ExtractElectronInformation (int fdebug);
-//void              ExtractPionsInformation (int fdebug);
-//void               ExtractPipsInformation (int pipsIdx, int fdebug );
-//void               ExtractPimsInformation (int pimsIdx, int fdebug );
-//void            ComputeElectronKinematics (int fdebug);
-//void                ComputePionKinematics (TLorentzVector pi, TLorentzVector pi_qFrame);
-//void                   WriteEventToOutput (int fdebug);
-//void                        FinishProgram (TString outfilepath, TString outfilename);
-//void                   GetParticlesByType (int evnum, int fdebug );
-//void              Stream_e_pi_line_to_CSV (TString pionCharge, int piIdx,
-//                                           bool passed_cuts_e_pi,
-//                                           bool passed_cuts_e_pi_kinematics,
-//                                           int fdebug );
-//TVector3            RotateVectorTo_qFrame (TVector3 V);
-//void                        MoveTo_qFrame (int fdebug);
-//void                          SetDataPath (TString fDataPath, Double_t fEbeam) ;
-//void                             SetSimPi (TString fSimPi);
-//void                          SetSkimming (TString fSkimming) ;
-//void                         SetInclusive ( int fInclusive );
-//void                             SetEbeam ( double fEbeam );
-//// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+// declare methods
+TVector3                GetParticleVertex (clas12::region_part_ptr rp);
+void                     SetLorentzVector (TLorentzVector &p4, clas12::region_part_ptr rp);
+void                      OpenOutputFiles (TString csvfilename);
+void                     CloseOutputFiles (TString OutDataPath, TString outfilename);
+void                      SetOutputTTrees ();
+bool   CheckIfElectronPassedSelectionCuts (Double_t e_PCAL_x, Double_t e_PCAL_y,
+                                           Double_t e_PCAL_W,Double_t e_PCAL_V,
+                                           Double_t e_E_PCAL,
+                                           Double_t e_E_ECIN, Double_t e_E_ECOUT,
+                                           TLorentzVector e,
+                                           TVector3 Ve,
+                                           Double_t e_DC_sector,
+                                           Double_t e_DC_x[3],
+                                           Double_t e_DC_y[3],
+                                           Double_t e_DC_z[3],
+                                           int torusBending);
+bool      CheckIfPionPassedSelectionCuts (TString pionCharge, // "pi+" or "pi-"
+                                           Double_t DC_sector,
+                                           Double_t DC_x[3], Double_t DC_y[3], Double_t DC_z[3],
+                                           Double_t chi2PID, Double_t p,
+                                           TVector3 Ve,      TVector3 Vpi,
+                                           int fdebug);
+int                       GetBeamHelicity (event_ptr p_event, int runnum, int fdebug);
+double                      GetBeamEnergy (int fdebug);
+void                InitializeFileReading (int NeventsMax,int c12Nentries, int fdebug);
+void                  InitializeVariables ();
+void                      OpenResultFiles (TString outfilepath, TString outfilename );
+void           ExtractElectronInformation (int fdebug);
+void              ExtractPionsInformation (int fdebug);
+void               ExtractPipsInformation (int pipsIdx, int fdebug );
+void               ExtractPimsInformation (int pimsIdx, int fdebug );
+void            ComputeElectronKinematics (int fdebug);
+void                ComputePionKinematics (TLorentzVector pi, TLorentzVector pi_qFrame);
+void                   WriteEventToOutput (int fdebug);
+void                        FinishProgram (TString outfilepath, TString outfilename);
+void                   GetParticlesByType (int evnum, int fdebug );
+void              Stream_e_pi_line_to_CSV (TString pionCharge, int piIdx,
+                                           bool passed_cuts_e_pi,
+                                           bool passed_cuts_e_pi_kinematics,
+                                           int fdebug );
+TVector3            RotateVectorTo_qFrame (TVector3 V);
+void                        MoveTo_qFrame (int fdebug);
+void                          SetDataPath (TString fDataPath, Double_t fEbeam) ;
+void                             SetSimPi (TString fSimPi);
+void                          SetSkimming (TString fSkimming) ;
+void                         SetInclusive ( int fInclusive );
+void                             SetEbeam ( double fEbeam );
+void                              SetIsMC ();
+// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 
 // globals
 TString Skimming = "", DataPath = "", prefix = "", SimPi = "";
@@ -250,9 +251,9 @@ DCfid_SIDIS dcfid;
 std::vector<region_part_ptr>  electrons, neutrons, protons, pipluses, piminuses, gammas, deuterons;
 
 
-
+// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void SetIsMC(){
-    if (Skimming=="GEMC_p_uniform_distribution"){
+    if (Skimming=="p_uniform_distribution"){
         IsMC = true;
     }
 }
@@ -292,7 +293,7 @@ void SetDataPath (TString fDataPath, Double_t fEbeam) {
         // GEMC simulations of "white" spectra
         // i.e. (e,e'π) events with no physics generator
         DataPath = "/volatile/clas12/users/ecohen/GEMC/hipo/10.2/AcceptanceCorrection/";
-        prefix = "GEMCsimulation_";
+        prefix = "p_uniform_distribution";
     }
 }
 
@@ -306,9 +307,9 @@ void SetSkimming (TString fSkimming) {
         // p(e,e'π) files from RGA data
         Skimming = "RGA_Free_proton";
     }
-    else if (fSkimming=="GEMC_p_uniform_distribution"){
+    else if (fSkimming=="p_uniform_distribution"){
         // (e,e'π) generated uniformly from "white" spectra with no physics
-        Skimming = "GEMC_p_uniform_distribution";
+        Skimming = "p_uniform_distribution";
     }
 }
 
@@ -528,7 +529,7 @@ void OpenOutputFiles (TString outfilename){
     } else {
         // GEMC simulation
         // Create output csv files
-        TString header += csvheader_GEMCaddition;
+        header += csvheader_GEMCaddition;
         
         if (SimPi=="piplus"){
             outFile_e_piplus  = new TFile( outfilename + "_e_piplus.root"  ,"RECREATE");
@@ -1503,7 +1504,7 @@ void Stream_e_pi_line_to_CSV( TString pionCharge, int piIdx,
     if (pionCharge=="pi+") {
         
         // do not write empty pi+ lines to (e,e'π+) file if simulation is (e,e'π-)
-        if ((IsMC) && (SimPi=="piminus")) break;
+        if ((IsMC) && (SimPi=="piminus")) continue;
         
         if (passed_cuts_e_pi && passed_cuts_e_pi_kinematics) {
             aux.StreamToCSVfile(SelectedEventsCSVfile_e_piplus_kinematics,
@@ -1514,7 +1515,7 @@ void Stream_e_pi_line_to_CSV( TString pionCharge, int piIdx,
     else if (pionCharge=="pi-") {
         
         // do not write empty pi- lines to (e,e'π-) file if simulation is (e,e'π+)
-        if ((IsMC) && (SimPi=="piplus")) break;
+        if ((IsMC) && (SimPi=="piplus")) continue;
 
         
         if (passed_cuts_e_pi && passed_cuts_e_pi_kinematics) {
@@ -1637,7 +1638,7 @@ void SIDISc12rSkimmer(int RunNumber    = 6420   ,
                       // first event to analyze
                       int FirstEvent   = 0      ,
                       // skimming:
-                      // "SIDIS_skimming"  , "RGA_Free_proton" , "GEMC_p_uniform_distribution"
+                      // "SIDIS_skimming"  , "RGA_Free_proton" , "p_uniform_distribution"
                       TString fSkimming= "SIDIS_skimming",
                       // data-path symbolic name
                       // "sidisdvcs", "inc", "nSidis", "AcceptanceCorrection"
@@ -1786,20 +1787,20 @@ void SIDISc12rSkimmer(int RunNumber    = 6420   ,
                             e_g = P_mc_particle;
                             Ve_g = V_mc_particle;
                         }
-                        else if ( (pid==211) && (PiCharge=="pips") ) {
+                        else if ( (pid==211) && (SimPi=="piplus") ) {
                             pi_g = P_mc_particle;
                             Vpi_g = V_mc_particle;
                         }
-                        else if ( (pid==-211) && (PiCharge=="pims") ) {
+                        else if ( (pid==-211) && (SimPi=="piminus") ) {
                             pi_g = P_mc_particle;
                             Vpi_g = V_mc_particle;
                         }
                         else  {
                             if (fdebug>2){
                                 std::cout << "MC particle PDG code " << pid << " do not match generated particles: e (" << 11 << ") + ";
-                                if ( PiCharge=="pips")
+                                if ( SimPi=="piplus")
                                     std::cout << " pi+ (" << 211;
-                                else if ( PiCharge=="pims")
+                                else if ( SimPi=="piminus")
                                     std::cout << " pi- (" << -211;
                                 std::cout << ")" << std::endl;
                             }
