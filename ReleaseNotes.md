@@ -4,6 +4,12 @@
 -----------------------------------------------------------------
 
 
+Feb-17, 2023    
+-------------
+
+1. Added simulation to **SIDISc12rSkimmer.C** so that simulation will undergo the exact same analysis code as data
+
+
 Feb-13, 2023    
 -------------
 

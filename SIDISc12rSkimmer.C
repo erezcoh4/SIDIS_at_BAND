@@ -234,10 +234,9 @@ Double_t W, W2, W_d, W2_d, M_x, M_x_d, qStar;
 
 // MC information,
 // generated quantities
-TLorentzVector          P_mc_particle;
-TLorentzVector          e_g,    pi_g;
-TVector3                V_mc_particle;
-TVector3                Ve_g,   Vpi_g;
+TLorentzVector  P_mc_particle;
+TLorentzVector  e_g,    pi_g, q_g;
+TVector3 V_mc_particle, Ve_g, Vpi_g;
 Double_t e_P_g, e_Theta_g, e_Phi_g, e_Vz_g;
 Double_t pi_P_g, pi_Theta_g, pi_Phi_g, pi_Vz_g, Q2_g, xB_g, omega_g, y_g;
 
@@ -254,7 +253,7 @@ std::vector<region_part_ptr>  electrons, neutrons, protons, pipluses, piminuses,
 
 void SetIsMC(){
     if (Skimming=="GEMC_p_uniform_distribution"){
-        IsMC = TRUE;
+        IsMC = true;
     }
 }
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
@@ -516,7 +515,7 @@ void OpenOutputFiles (TString outfilename){
 //    outTree_e_piminus_no_cuts = new TTree( "tree" , "(e,e'pi+) event information - no cuts");
     TString header = csvheader;
     
-    if (IsMC == FALSE){
+    if (IsMC == false){
         outFile_e_piplus  = new TFile( outfilename + "_e_piplus.root"  ,"RECREATE");
         outTree_e_piplus  = new TTree( "tree" , "(e,e'pi+) event information");
         outFile_e_piminus = new TFile( outfilename + "_e_piminus.root" ,"RECREATE");
