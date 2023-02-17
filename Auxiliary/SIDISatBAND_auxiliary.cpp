@@ -170,10 +170,16 @@ double SIDISatBAND_auxiliary::FindCutValue( std::string cutName ){
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-TString SIDISatBAND_auxiliary::GetRunNumberSTR( int RunNumber ){
+TString SIDISatBAND_auxiliary::GetRunNumberSTR( int RunNumber, TString fSkimming ){
     char RunNumberStr[20];
     // sprintf( RunNumberStr, "00%d", RunNumber );
-    sprintf( RunNumberStr, "%06d", RunNumber );
+    
+    if(Skimming == "GEMC_p_uniform_distribution"){
+        // "white" GEMC simulation runs
+        sprintf( RunNumberStr, "%d", RunNumber );
+    } else {
+        sprintf( RunNumberStr, "%06d", RunNumber );
+    }
     if (fdebug>1) std::cout << "(SIDIS) skimming run " << RunNumberStr << std::endl;
     return (TString)RunNumberStr;
 }

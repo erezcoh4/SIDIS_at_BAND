@@ -37,7 +37,7 @@ public:
     void                 SetVerbosity (int _fdebug_)         {fdebug = _fdebug_;};
     void              SetTorusBending (int _torusBending_)   {torusBending = _torusBending_;};
     double               FindCutValue ( std::string cutName );
-    TString           GetRunNumberSTR ( int RunNumber );
+    TString           GetRunNumberSTR ( int RunNumber, TString fSkimming );
     Double_t    GetEbeamFromRunNumber ( Int_t RunNumber );
     void SetTorusBendingFromRunNumber ( Int_t RunNumber );
     void              StreamToCSVfile (std::ofstream&         csvfile,
