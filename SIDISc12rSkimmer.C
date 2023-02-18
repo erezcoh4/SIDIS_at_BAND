@@ -1215,31 +1215,35 @@ void WriteEventToOutput(int fdebug){
     // outTree_e_piminus_no_cuts -> Fill();
     
     if (ePastCutsInEvent && pipsPastCutsInEvent) {
-        IsSelected_eepi = true;
-        outTree_e_piplus -> Fill();
-        if (fdebug>3) std::cout << "Filling (e,e'pi+) TTree with this event!" << std::endl;
-        
-        Nevents_passed_e_pips_cuts ++ ;
-        if (eepipsPastCutsInEvent) Nevents_passed_e_pips_kinematics_cuts ++;
-        
-        for (int pipsIdx=0; pipsIdx<Npips; pipsIdx++) {
-            Stream_e_pi_line_to_CSV( "pi+", pipsIdx,
-                                    pipsPastSelectionCuts[pipsIdx], eepipsPastKinematicalCuts[pipsIdx],
-                                    fdebug );
+        if ((!IsMC) || (IsMC && SiPM=="piplus")){
+            IsSelected_eepi = true;
+            outTree_e_piplus -> Fill();
+            if (fdebug>3) std::cout << "Filling (e,e'pi+) TTree with this event!" << std::endl;
+            
+            Nevents_passed_e_pips_cuts ++ ;
+            if (eepipsPastCutsInEvent) Nevents_passed_e_pips_kinematics_cuts ++;
+            
+            for (int pipsIdx=0; pipsIdx<Npips; pipsIdx++) {
+                Stream_e_pi_line_to_CSV( "pi+", pipsIdx,
+                                        pipsPastSelectionCuts[pipsIdx], eepipsPastKinematicalCuts[pipsIdx],
+                                        fdebug );
+            }
         }
     }
     
     if (ePastCutsInEvent && pimsPastCutsInEvent) {
-        IsSelected_eepi = true;
-        outTree_e_piminus -> Fill();
-        if (fdebug>3) std::cout << "Filling (e,e'pi-) TTree with this event!" << std::endl;
-        Nevents_passed_e_pims_cuts ++ ;
-        if (eepimsPastCutsInEvent) Nevents_passed_e_pims_kinematics_cuts ++;
-        
-        for (int pimsIdx=0; pimsIdx<Npims; pimsIdx++) {
-            Stream_e_pi_line_to_CSV( "pi-", pimsIdx,
-                                    pimsPastSelectionCuts[pimsIdx], eepimsPastKinematicalCuts[pimsIdx],
-                                    fdebug );
+        if ((!IsMC) || (IsMC && SiPM=="piminus")){
+            IsSelected_eepi = true;
+            outTree_e_piminus -> Fill();
+            if (fdebug>3) std::cout << "Filling (e,e'pi-) TTree with this event!" << std::endl;
+            Nevents_passed_e_pims_cuts ++ ;
+            if (eepimsPastCutsInEvent) Nevents_passed_e_pims_kinematics_cuts ++;
+            
+            for (int pimsIdx=0; pimsIdx<Npims; pimsIdx++) {
+                Stream_e_pi_line_to_CSV( "pi-", pimsIdx,
+                                        pimsPastSelectionCuts[pimsIdx], eepimsPastKinematicalCuts[pimsIdx],
+                                        fdebug );
+            }
         }
     }
 }
@@ -1473,8 +1477,6 @@ void GetParticlesByType (int evnum, int fdebug){
         std::cout
         << "size(piplus): "         << piplus.size()        << ","
         << "size(piminus): "        << piminus.size()       << ","
-        << "size(piplus_qFrame): "  << piplus_qFrame.size() << ","
-        << "size(piminus_qFrame): " << piminus_qFrame.size()<< ","
         << std::endl;
     }
 }
