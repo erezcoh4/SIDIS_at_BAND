@@ -14,7 +14,7 @@
 #
 # skim_sidis_multiple_runs --Skimming=RGA_Free_proton --DataPath=nSidis --Nruns=1 --NeventsMax=10 --fdebug=3
 #
-# skim_sidis_multiple_runs --Skimming=GEMC_p_uniform_distribution --DataPath=AcceptanceCorrection --NeventsMax=10
+# skim_sidis_multiple_runs --Skimming=p_uniform_distribution --DataPath=AcceptanceCorrection --NeventsMax=10
 #
 # comments
 #
@@ -80,7 +80,7 @@ elif Skimming == "RGA_Free_proton":
 elif Skimming == "p_uniform_distribution":
     Ebeam = 10.2 # "white" simulations were done for E = 10.2 GeV
     runs_filename = "macros/runlists/gemc_p_uniform_distribution.txt"
-
+    DataPath = "AcceptanceCorrection"
     
     
     

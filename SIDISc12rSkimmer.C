@@ -516,7 +516,7 @@ void OpenOutputFiles (TString outfilename){
 //    outTree_e_piminus_no_cuts = new TTree( "tree" , "(e,e'pi+) event information - no cuts");
     TString header = csvheader;
     
-    if (IsMC == false){
+    if (!IsMC){
         outFile_e_piplus  = new TFile( outfilename + "_e_piplus.root"  ,"RECREATE");
         outTree_e_piplus  = new TTree( "tree" , "(e,e'pi+) event information");
         outFile_e_piminus = new TFile( outfilename + "_e_piminus.root" ,"RECREATE");
@@ -526,7 +526,7 @@ void OpenOutputFiles (TString outfilename){
         SelectedEventsCSVfile_e_piplus_kinematics << header << std::endl;
         SelectedEventsCSVfile_e_piminus_kinematics.open( outfilename + "_e_piminus_selected_eepi_kinematics.csv" );
         SelectedEventsCSVfile_e_piminus_kinematics << header << std::endl;
-    } else {
+    } else if (IsMC) {
         // GEMC simulation
         // Create output csv files
         header += csvheader_GEMCaddition;
@@ -541,9 +541,9 @@ void OpenOutputFiles (TString outfilename){
             outTree_e_piminus = new TTree( "tree" , "(e,e'pi-) event  information");
             SelectedEventsCSVfile_e_piminus_kinematics.open( outfilename + "_e_piminus_selected_eepi_kinematics.csv" );
             SelectedEventsCSVfile_e_piminus_kinematics << header << std::endl;
-
         }
     }
+    if (fdebug>1) std::cout << "Done OpenOutputFiles( " << outfilename << ")" << std::endl;
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
@@ -1685,7 +1685,7 @@ void SIDISc12rSkimmer(int RunNumber    = 6420   ,
                      + "/" + SimPi
                      + "/ee" + SimPi + "_" + prefix
                      + "_" + RunNumberStr + "_reco.hipo");
-        outfilename = "skimmed_SIDIS_" + SimPi + "_" + prefix + RunNumberStr;
+        outfilename = "skimmed_SIDIS_" + SimPi + "_" + prefix + "_" + RunNumberStr;
     }
     
     if (fdebug>1){
@@ -1693,7 +1693,7 @@ void SIDISc12rSkimmer(int RunNumber    = 6420   ,
         << "Input file name: " << std::endl
         << infilename          << std::endl
         << "Output file name: "<< std::endl
-        << outfilename
+        << outfilepath + outfilename
         << std::endl;
     }
     
