@@ -733,7 +733,8 @@ void SetOutputTTrees(){
 //    outTree_e_piplus_no_cuts->Branch("piplus_qFrame_Theta"      ,&piplus_qFrame_Theta    , "piplus_qFrame_Theta[Npi]/D");
 //    outTree_e_piplus_no_cuts->Branch("piplus_qFrame_Phi"        ,&piplus_qFrame_Phi      , "piplus_qFrame_Phi[Npi]/D");
 
-
+    if (fdebug>1) std::cout << "SetOutputTTrees()" << std::endl;
+    
     // pi+
     outTree_e_piplus->Branch("eventnumber"          ,&evnum                 );
     outTree_e_piplus->Branch("runnum"               ,&runnum                );
@@ -784,7 +785,7 @@ void SetOutputTTrees(){
     outTree_e_piplus->Branch("Z"                    ,Zpips                  );
     outTree_e_piplus->Branch("Z_LC"                 ,ZpipsLC                );
     outTree_e_piplus->Branch("y"                    ,&y                     );
-
+    if (fdebug>1) std::cout << "outTree_e_piplus->Branch(y);" << std::endl;
     outTree_e_piplus->Branch("EventPassedCuts"      ,&EventPassedCuts       );
     outTree_e_piplus->Branch("ePastCutsInEvent"     ,&ePastCutsInEvent      );
     outTree_e_piplus->Branch("eepipsPastKinematicalCuts",&eepipsPastKinematicalCuts ,"eepipsPastKinematicalCuts[Npi]/O"  );
@@ -796,7 +797,7 @@ void SetOutputTTrees(){
     outTree_e_piplus->Branch("Ngammas"              ,&Ngammas               );
     outTree_e_piplus->Branch("Nprotons"             ,&Np                    );
     outTree_e_piplus->Branch("Nneutrons"            ,&Nn                    );
-    
+    if (fdebug>1) std::cout << "outTree_e_piplus->Branch(piplus_Px);" << std::endl;
     outTree_e_piplus->Branch("piplus_Px"                ,&piplus_Px              , "piplus_Px[Npi]/D"    );
     outTree_e_piplus->Branch("piplus_Py"                ,&piplus_Py              , "piplus_Py[Npi]/D"    );
     outTree_e_piplus->Branch("piplus_Pz"                ,&piplus_Pz              , "piplus_Pz[Npi]/D"    );
@@ -883,6 +884,8 @@ void SetOutputTTrees(){
 //    outTree_e_piminus_no_cuts->Branch("piminus_qFrame_Phi"   ,&piminus_qFrame_Phi      , "piminus_qFrame_Phi[Npi]/D");
     
     // pi-
+    if (fdebug>1) std::cout << "outTree_e_piminus->Branch(eventnumber);" << std::endl;
+
     outTree_e_piminus->Branch("eventnumber"          ,&evnum                 );
     outTree_e_piminus->Branch("runnum"               ,&runnum                );
     outTree_e_piminus->Branch("inclusive"            ,&inclusive             );
@@ -932,6 +935,7 @@ void SetOutputTTrees(){
     outTree_e_piminus->Branch("Z"                   ,Zpims                  );
     outTree_e_piminus->Branch("Z_LC"                ,ZpimsLC                );
     outTree_e_piminus->Branch("y"                   ,&y                     );
+    if (fdebug>1) std::cout << "outTree_e_piminus->Branch(y);" << std::endl;
 
     outTree_e_piminus->Branch("EventPassedCuts"      ,&EventPassedCuts       );
     outTree_e_piminus->Branch("ePastCutsInEvent"     ,&ePastCutsInEvent      );
