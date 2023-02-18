@@ -887,6 +887,7 @@ void SetOutputTTrees(){
     if (fdebug>1) std::cout << "outTree_e_piminus->Branch(eventnumber);" << std::endl;
 
     outTree_e_piminus->Branch("eventnumber"          ,&evnum                 );
+    if (fdebug>1) std::cout << "after outTree_e_piminus->Branch(eventnumber);" << std::endl;
     outTree_e_piminus->Branch("runnum"               ,&runnum                );
     if (fdebug>1) std::cout << "outTree_e_piminus->Branch(runnum);" << std::endl;
     outTree_e_piminus->Branch("inclusive"            ,&inclusive             );
