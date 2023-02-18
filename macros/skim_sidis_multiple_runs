@@ -42,7 +42,7 @@ parser.add_argument("--FirstEvent",     type=int, default=0,
                     required=False, help="first event to start from")
 parser.add_argument("--Skimming",     type=str, default="SIDIS_skimming",
                     required=False,
-                    help="SIDIS_skimming, RGA_Free_proton, GEMC_p_uniform_distribution" )
+                    help="SIDIS_skimming, RGA_Free_proton, p_uniform_distribution" )
 parser.add_argument("--DataPath",     type=str, default="sidisdvcs",
                     required=False,
                     help="inc, sidisdvcs, nSidis, AcceptanceCorrection")
@@ -77,7 +77,7 @@ elif Skimming == "RGA_Free_proton":
     runs_filename = "macros/runlists/rga_data/rga_nsidis_runs_10-6.txt"
     Ebeam = 10.6
     
-elif Skimming == "GEMC_p_uniform_distribution":
+elif Skimming == "p_uniform_distribution":
     Ebeam = 10.2 # "white" simulations were done for E = 10.2 GeV
     runs_filename = "macros/runlists/gemc_p_uniform_distribution.txt"
 
