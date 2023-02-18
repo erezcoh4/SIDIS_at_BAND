@@ -605,7 +605,7 @@ void CloseOutputFiles (TString OutDataPath, TString outfilename){
         std::cout << "wrote "  << Nentires_e_piplus  << " to (e,e'pi+) root file, "
         << std::endl << outFile_e_piplus -> GetName()
         << std::endl << OutDataPath + outfilename + "_e_piplus_selected_eepi_kinematics.csv"
-        << std::endl
+        << std::endl;
     }
     
     if ((!IsMC)
