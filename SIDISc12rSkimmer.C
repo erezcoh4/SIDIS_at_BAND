@@ -1215,7 +1215,7 @@ void WriteEventToOutput(int fdebug){
     // outTree_e_piminus_no_cuts -> Fill();
     
     if (ePastCutsInEvent && pipsPastCutsInEvent) {
-        if ((!IsMC) || (IsMC && SiPM=="piplus")){
+        if ((!IsMC) || (IsMC && SimPi=="piplus")){
             IsSelected_eepi = true;
             outTree_e_piplus -> Fill();
             if (fdebug>3) std::cout << "Filling (e,e'pi+) TTree with this event!" << std::endl;
@@ -1232,7 +1232,7 @@ void WriteEventToOutput(int fdebug){
     }
     
     if (ePastCutsInEvent && pimsPastCutsInEvent) {
-        if ((!IsMC) || (IsMC && SiPM=="piminus")){
+        if ((!IsMC) || (IsMC && SimPi=="piminus")){
             IsSelected_eepi = true;
             outTree_e_piminus -> Fill();
             if (fdebug>3) std::cout << "Filling (e,e'pi-) TTree with this event!" << std::endl;
