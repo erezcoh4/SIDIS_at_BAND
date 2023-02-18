@@ -893,6 +893,7 @@ void SetOutputTTrees(){
     outTree_e_piminus->Branch("e_E_ECIN"             ,&e_E_ECIN              );
     outTree_e_piminus->Branch("e_E_ECOUT"            ,&e_E_ECOUT             );
     outTree_e_piminus->Branch("e_PCAL_W"             ,&e_PCAL_W              );
+    if (fdebug>1) std::cout << "outTree_e_piminus->Branch(e_PCAL_W);" << std::endl;
     outTree_e_piminus->Branch("e_PCAL_V"             ,&e_PCAL_V              );
     outTree_e_piminus->Branch("e_PCAL_x"             ,&e_PCAL_x              );
     outTree_e_piminus->Branch("e_PCAL_y"             ,&e_PCAL_y              );
@@ -903,6 +904,8 @@ void SetOutputTTrees(){
     outTree_e_piminus->Branch("e_DC_x"               ,&e_DC_x                , "e_DC_x[3]/D"            );
     outTree_e_piminus->Branch("e_DC_y"               ,&e_DC_y                , "e_DC_y[3]/D"            );
     outTree_e_piminus->Branch("e_DC_z"               ,&e_DC_z                , "e_DC_z[3]/D"            );
+    if (fdebug>1) std::cout << "outTree_e_piminus->Branch(Npims);" << std::endl;
+
     outTree_e_piminus->Branch("Npi"                  ,&Npims                 );
     outTree_e_piminus->Branch("pi_chi2PID"           ,&pims_chi2PID          , "pi_chi2PID[Npi]/D"       );
     outTree_e_piminus->Branch("pi_PCAL_x"            ,&pims_PCAL_x           , "pi_PCAL_x[Npi]/D"        );
@@ -914,6 +917,7 @@ void SetOutputTTrees(){
     outTree_e_piminus->Branch("pi_DC_x"              ,&pims_DC_x             , "pi_DC_x[Npi][3]/D"       );
     outTree_e_piminus->Branch("pi_DC_y"              ,&pims_DC_y             , "pi_DC_y[Npi][3]/D"       );
     outTree_e_piminus->Branch("pi_DC_z"              ,&pims_DC_z             , "pi_DC_z[Npi][3]/D"       );
+    if (fdebug>1) std::cout << "outTree_e_piminus->Branch(pi_DC_z);" << std::endl;
     outTree_e_piminus->Branch("pi_E_PCAL"            ,&pims_E_PCAL           , "pi_E_PCAL[Npi]/D"        );
     outTree_e_piminus->Branch("pi_E_ECIN"            ,&pims_E_ECIN           , "pi_E_ECIN[Npi]/D"        );
     outTree_e_piminus->Branch("pi_E_ECIN"            ,&pims_E_ECIN           , "pi_E_ECIN[Npi]/D"        );
