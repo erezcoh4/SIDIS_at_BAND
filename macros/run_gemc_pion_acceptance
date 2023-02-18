@@ -58,9 +58,9 @@ if Nevents > 100000: #{
     Nevents = 100000
 #}
 
-pi_charges = ['pips','pims']
+pi_charges = ['piplus','piminus']
 if args.only_pips: #{
-    pi_charges    = ['pips']
+    pi_charges    = ['piplus']
 #}
 main_data_path  = "/volatile/clas12/users/ecohen/GEMC/"
 main_subdir     = "/10.2/AcceptanceCorrection/"

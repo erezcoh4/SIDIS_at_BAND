@@ -1,9 +1,9 @@
-#!/usr/bin/env python3.9
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 """
 
-./MC/Acceptance_Corrections/produce_LUND_file_for_GEMC.py --Nevents=1000000
+    ./MC/Acceptance_Corrections/produce_LUND_file_for_GEMC.py --Nevents=1000000
 
 
 Produce a LUND file of (e,e'\pi) events to simulate with GEMC.
@@ -73,6 +73,10 @@ Nevents = args.Nevents;
 particles = ['e-','pi'];
 r2d       = 180./np.pi;
 d2r       = np.pi/180.;
+# electron momentum limits based on data (3-7 GeV/c)
+e_P_min   = 3    # GeV/c
+e_P_max   = 6.5  # GeV/c
+# pion momentum limits based on event selectrion ctierion (1.25-5 GeV/c)
 p_min     = 1.25 # GeV/c
 p_max     = 5.00 # GeV/c
 theta_min = 3    # deg.
@@ -124,7 +128,7 @@ PDG[0]= PDG_e
 
 # electron taken from a simulated event that passed reconstruction stage with default clas12 yaml card
 # MC particle PDG code 11, p: 1.345 GeV/c, , theta: 30.9 deg, , phi: -163.4 deg, , V(z): 7.758 cm
-e_P   = 1.345
+# e_P   = 1.345
 e_Vz  = 7.758
 # electron vertex
 vx[0] = 0
@@ -152,7 +156,7 @@ if Nevents > 100000: #{
 # do the same process of positive and negative pions
 fdebug=1
 for file_idx in range(Nfiles):#{
-    for pi_charge,pi_label,pi_PDG in zip(['pips','pims'],['\pi^+','\pi^-'],[PDG_pips,PDG_pims]): #{
+    for pi_charge,pi_label,pi_PDG in zip(['piplus','piminus'],['\pi^+','\pi^-'],[PDG_pips,PDG_pims]): #{
         
         p_arr       = np.zeros(Nevents)
         theta_arr   = np.zeros(Nevents)
@@ -171,7 +175,7 @@ for file_idx in range(Nfiles):#{
         for n in range(Nevents):#{
         
             # Sample electron momentum uniformly
-            #         p           = np.random.uniform(p_min    ,p_max    )
+            e_P = np.random.uniform(e_P_min    ,e_P_max    )
             # Sample electron vertex position uniformly
             #                 vz[0] = np.random.uniform( vz_min, vz_max );
 

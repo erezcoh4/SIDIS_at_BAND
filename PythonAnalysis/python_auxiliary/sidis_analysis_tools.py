@@ -57,6 +57,200 @@ for run in beam_charge_all_runs_rga.runnum:
 from scipy.optimize import curve_fit
 
 # ----------------------- #
+def load_SIDIS_data(rgb_runs_filenames = ["good_runs_10-2-final.txt"],
+                    main_data_path  = '/Users/erezcohen/Desktop/data/BAND/',
+                    Nruns           = 1,
+                    do_e_e_pi       = True,
+                    do_e_e_pi_n     = True,
+                    do_e_e_pi_FreeP = True,
+                    do_e_e_pi_GEMC  = False, # "white" spectrum of (e,e'π) events with no physics
+                    do_all_vars     = False,
+                    fdebug          = 2,
+                    prefix          = "sidisdvcs",
+                    subdirname      = "",
+                    taggedsubdirname= "",
+                    FreePsubdirname = "",
+                    FreeP_prefix    = "nSidis",
+                    GEMCsubdirname = "gcard_rgb_spring2019/1M_events",
+                    rga_runs_filename = "rga_data/rga_nsidis_runs_10-6.txt"):#{
+    '''
+    e_e_pi, e_e_pi_n, e_e_pi_FreeP = load_SIDIS_data()
+    e_e_pi, e_e_pi_n, e_e_pi_FreeP, e_e_pi_GEMC = load_SIDIS_data(do_e_e_pi_GEMC=True)
+
+    Load SIDIS data, and fill e_e_pi and e_e_pi_n with data
+    last update Feb-13, 2023
+    
+    input:
+    -------------
+    do_e_e_pi       flag to read d(e,e'π) data  from RGB - takes much time for a large number of runs
+    do_e_e_pi_n     flag to read d(e,e'πn) data from RGB - takes less time
+    do_e_e_pi_FreeP flag to read p(e,e'π) data from RGA  - takes much time
+    prefix          "sidisdvcs" / "inc"      - inclusive skimming train
+    subdirname      "With_W0.5cut" / "With_W2.5cut"
+    do_e_e_pi_GEMC  flag to add e_e_pi_GEMC
+    
+    Comments:
+    -------------
+    e_e_pi, e_e_pi_n, e_e_pi_FreeP       dict(['piplus','piminus'])
+    e.g. :
+    e_e_pi['piplus'] = pandas.DataFrame( (e,e'π) events data )
+    
+    
+    '''
+    global e_e_pi, e_e_pi_n, e_e_pi_FreeP;
+
+    if taggedsubdirname=="": taggedsubdirname = subdirname;
+    
+    e_e_pi_data_path       = main_data_path + 'SIDIS_skimming/' + prefix + '/' + subdirname + '/'
+    e_e_pi_n_data_path     = main_data_path + 'merged_SIDIS_and_BAND_skimming/' + prefix + '/' + taggedsubdirname + '/'
+    e_e_pi_FreeP_data_path = main_data_path + 'RGA_Free_proton/' + FreeP_prefix + '/'+ FreePsubdirname + '/'
+    e_e_pi_GEMC_data_path  = main_data_path + 'AcceptanceCorrection/GEMCimulationOuputFiles/' + GEMCsubdirname + '/'
+
+    if len(rgb_runs_filenames)==1:#{
+        rgb_runs = read_run_nunmbers( runs_filename=rgb_runs_filenames[0], Nruns=Nruns )
+    #}
+    else:#{
+        rgb_runs = []
+        for f in rgb_runs_filenames:
+            for run in read_run_nunmbers( runs_filename=f, Nruns=Nruns ):
+                rgb_runs.append(run)
+    #}
+    rga_runs = read_run_nunmbers( runs_filename=rga_runs_filename, Nruns=Nruns)
+    e_e_pi, e_e_pi_n, e_e_pi_FreeP = dict(),dict(),dict()
+    if do_e_e_pi:#{
+        for runnum,runIdx in zip(rgb_runs,range(len(rgb_runs))):#{
+            if fdebug>1: print('Run number ',runnum,'(%d/%d runs)'%(runIdx+1,len(runs)))
+            for pi_charge_name,pi_print in zip(pi_charge_names,pi_prints):
+                if do_e_e_pi:#{
+                    if do_all_vars:
+                        eepi   = pd.read_csv(e_e_pi_data_path
+                                         +'skimmed_SIDIS_'
+                                         +prefix + '_'
+                                         +'%06d_e_%s_selected_eepi_kinematics.csv'%(runnum,pi_charge_name))
+
+                    else: # more economic
+                        eepi   = pd.read_csv(e_e_pi_data_path
+                                         +'skimmed_SIDIS_'
+                                         +prefix + '_'
+                                         +'%06d_e_%s_selected_eepi_kinematics.csv'%(runnum,pi_charge_name),
+                                         usecols=['runnum','evnum',
+                                                  'e_P','e_Theta','e_Phi',
+                                                  'pi_P', 'pi_Theta', 'pi_Phi',
+                                                  'Q2', 'W',
+                                                  'xB', 'Zpi',
+                                                  'M_x', 'e_DC_sector',
+                                                  'pi_DC_sector','pi_qFrame_pT',
+                                                  'pi_qFrame_pL','pi_qFrame_Phi'],
+                                         dtype={'runnum':int,'evnum': int,
+                                                'e_DC_sector':int, 'pi_DC_sector':int,
+                                                'e_P':np.half,'e_Theta':np.half,'e_Phi':np.half,
+                                                'pi_P':np.half,'pi_Theta':np.half, 'pi_Phi':np.half,
+                                                'Q2':np.half,  'W':np.half,
+                                                'xB':np.half, 'Zpi':np.half,
+                                                'M_x':np.half,
+                                                'pi_qFrame_pT':np.half,'pi_qFrame_pL':np.half,'pi_qFrame_Phi':np.half})
+
+                    if runIdx==0: e_e_pi[pi_charge_name] = eepi
+                    else:         e_e_pi[pi_charge_name] = pd.concat([e_e_pi[pi_charge_name],eepi])
+
+
+                    if fdebug>1: print('Loaded',len(eepi)," d(e,e'"+pi_print+") events")
+
+                #}
+                if do_e_e_pi_n:#{
+                    eepin = pd.read_csv(e_e_pi_n_data_path
+                                        + 'skimmed_SIDIS_and_BAND_'
+                                        + prefix + '_'
+                                        + '%06d_e_%s_n.csv'%(runnum,pi_charge_name))
+
+                    if fdebug>1: print('Loaded',len(eepin)," d(e,e'"+pi_print+"n) events")
+
+                    if runIdx==0: e_e_pi_n[pi_charge_name] = eepin
+                    else:         e_e_pi_n[pi_charge_name] = pd.concat([e_e_pi_n[pi_charge_name],eepin])
+                #}
+            #}
+        #}
+    #}
+    if do_e_e_pi_FreeP:#{
+        for runnum,runIdx in zip(rga_runs,range(len(rga_runs))):#{
+            if fdebug>1: print('Free-P RGA Run number ',runnum,'(%d/%d runs)'%(runIdx+1,len(runs)))
+        
+            for pi_charge_name,pi_print in zip(pi_charge_names,pi_prints):
+                if do_all_vars:
+                    eepi   = pd.read_csv(e_e_pi_FreeP_data_path
+                                         +'skimmed_SIDIS_'
+                                         +FreeP_prefix + '_'
+                                         +'%06d_e_%s_selected_eepi_kinematics.csv'%(runnum,pi_charge_name))
+                else: # more economic
+                    eepi   = pd.read_csv(e_e_pi_FreeP_data_path
+                                         +'skimmed_SIDIS_'
+                                         +FreeP_prefix + '_'
+                                         +'%06d_e_%s_selected_eepi_kinematics.csv'%(runnum,pi_charge_name),
+                                     usecols=['runnum','evnum',
+                                              'e_P','e_Theta','e_Phi',
+                                              'pi_P', 'pi_Theta', 'pi_Phi',
+                                              'Q2', 'W',
+                                              'xB', 'Zpi',
+                                              'M_x', 'e_DC_sector', 'pi_DC_sector','pi_qFrame_pT','pi_qFrame_pL'],
+                                     dtype={'runnum':int,'evnum': int,
+                                            'e_DC_sector':int, 'pi_DC_sector':int,
+                                            'e_P':np.half,'e_Theta':np.half,'e_Phi':np.half,
+                                            'pi_P':np.half,'pi_Theta':np.half, 'pi_Phi':np.half,
+                                            'Q2':np.half,  'W':np.half,
+                                            'xB':np.half, 'Zpi':np.half,
+                                            'M_x':np.half,
+                                            'pi_qFrame_pT':np.half,'pi_qFrame_pL':np.half})
+                if runIdx==0: e_e_pi_FreeP[pi_charge_name] = eepi
+                else:         e_e_pi_FreeP[pi_charge_name] = pd.concat([e_e_pi_FreeP[pi_charge_name],eepi])
+                if fdebug>1: print('Loaded',len(eepi)," p(e,e'"+pi_print+") events")
+            #}
+        #}
+    #}
+    if do_e_e_pi_GEMC:#{
+        for pi_charge_name,pi_print in zip(pi_charge_names,pi_prints):
+            eepi   = pd.read_csv(e_e_pi_GEMC_data_path +'ee%s_p_uniform_distribution.csv'%(pi_charge_name))
+#             if do_all_vars:
+#                 eepi   = pd.read_csv(e_e_pi_GEMC_data_path +'ee%s_p_uniform_distribution.csv'%(pi_charge_name))
+#             else:
+#                 eepi   = pd.read_csv(e_e_pi_GEMC_data_path +'ee%s_p_uniform_distribution.csv'%(pi_charge_name),                                                     
+#                                      usecols=['runnum','evnum',
+#                                                               'e_P','e_Theta','e_Phi',
+#                                                               'pi_P', 'pi_Theta', 'pi_Phi',
+#                                                               'Q2', 'W',
+#                                                               'xB', 'Zpi',
+#                                                               'M_x', 'e_DC_sector',
+#                                                               'pi_DC_sector','pi_qFrame_pT',
+#                                                               'pi_qFrame_pL','pi_qFrame_Phi'],                                     
+#                                      dtype={'runnum':int,'evnum': int,
+#                                                             'e_DC_sector':int, 'pi_DC_sector':int,
+#                                                             'e_P':np.half,'e_Theta':np.half,'e_Phi':np.half,
+#                                                             'pi_P':np.half,'pi_Theta':np.half, 'pi_Phi':np.half,
+#                                                             'Q2':np.half,  'W':np.half,
+#                                                             'xB':np.half, 'Zpi':np.half,
+#                                                             'M_x':np.half,
+#                                                             'pi_qFrame_pT':np.half,'pi_qFrame_pL':np.half,'pi_qFrame_Phi':np.half})
+            e_e_pi_GEMC[pi_charge_name] = eepi
+            if fdebug>1: print('Loaded',len(eepi)," simulated (e,e'"+pi_print+") events from a white spectrum")
+    #}
+    print('Done loading files.')
+    
+    if fdebug>0:
+        print('')
+        print('Total statistics:')
+        for pi_charge_name,pi_print in zip(pi_charge_names,pi_prints):
+            if do_e_e_pi:       print(len(e_e_pi[pi_charge_name])      ," d(e,e'"+pi_print+")  events")
+            if do_e_e_pi_n:     print(len(e_e_pi_n[pi_charge_name])    ," d(e,e'"+pi_print+"n) events")
+            if do_e_e_pi_FreeP: print(len(e_e_pi_FreeP[pi_charge_name])," p(e,e'"+pi_print+")  events")
+    #}
+    if do_e_e_pi_GEMC:
+        return e_e_pi, e_e_pi_n, e_e_pi_FreeP, e_e_pi_GEMC
+    else:
+        return e_e_pi, e_e_pi_n, e_e_pi_FreeP
+#}
+# ----------------------- #
+
+
+# ----------------------- #
 def rFF(z,a):
     return (a * (1-z)/(1-z+z/0.46))
 # ----------------------- #
