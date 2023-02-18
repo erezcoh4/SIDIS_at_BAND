@@ -1685,7 +1685,7 @@ void SIDISc12rSkimmer(int RunNumber    = 6420   ,
                      + "/" + SimPi
                      + "/ee" + SimPi + "_" + prefix
                      + "_" + RunNumberStr + "_reco.hipo");
-        outfilename = "skimmed_SIDIS_" + SimPi "_" + prefix + RunNumberStr;
+        outfilename = "skimmed_SIDIS_" + SimPi + "_" + prefix + RunNumberStr;
     }
     
     // open input file
