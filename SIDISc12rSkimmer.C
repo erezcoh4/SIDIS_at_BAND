@@ -1463,7 +1463,7 @@ void Stream_e_pi_line_to_CSV( TString pionCharge, int piIdx,
         pi_qFrame    = piminus_qFrame.at(piIdx);
         Vpi          = Vpiminus         [piIdx];
         pi_DC_sector = pims_DC_sector   [piIdx];
-   }
+    }
     else {
         std::cout << "Stream_e_pi_line_to_CSV(): bad pi charge! " << std::endl;
         return;
@@ -1497,31 +1497,36 @@ void Stream_e_pi_line_to_CSV( TString pionCharge, int piIdx,
             Q2_g,     xB_g,                 omega_g,              y_g     };
         
         variables.insert(variables.end(), std::begin(MCvariables), std::end(MCvariables));
-
-    }
         
+    }
+    
     // decide which file to write...
     if (pionCharge=="pi+") {
         
         // do not write empty pi+ lines to (e,e'π+) file if simulation is (e,e'π-)
-        if ((IsMC) && (SimPi=="piminus")) continue;
-        
-        if (passed_cuts_e_pi && passed_cuts_e_pi_kinematics) {
-            aux.StreamToCSVfile(SelectedEventsCSVfile_e_piplus_kinematics,
-                                variables,
-                                csvprecisions );
+        if ((!IsMC)
+            ||
+            ((IsMC) && (SimPi=="piplus"))){
+            
+            if (passed_cuts_e_pi && passed_cuts_e_pi_kinematics) {
+                aux.StreamToCSVfile(SelectedEventsCSVfile_e_piplus_kinematics,
+                                    variables,
+                                    csvprecisions );
+            }
         }
-    }
-    else if (pionCharge=="pi-") {
+    } else if (pionCharge=="pi-") {
         
         // do not write empty pi- lines to (e,e'π-) file if simulation is (e,e'π+)
-        if ((IsMC) && (SimPi=="piplus")) continue;
-
-        
-        if (passed_cuts_e_pi && passed_cuts_e_pi_kinematics) {
-            aux.StreamToCSVfile(SelectedEventsCSVfile_e_piminus_kinematics,
-                                variables,
-                                csvprecisions );
+        if ((!IsMC)
+            ||
+            ((IsMC) && (SimPi=="piminus"))){
+            
+            
+            if (passed_cuts_e_pi && passed_cuts_e_pi_kinematics) {
+                aux.StreamToCSVfile(SelectedEventsCSVfile_e_piminus_kinematics,
+                                    variables,
+                                    csvprecisions );
+            }
         }
     }
 }
@@ -1678,9 +1683,9 @@ void SIDISc12rSkimmer(int RunNumber    = 6420   ,
     if (IsMC){
         infilename = (DataPath
                      + "/" + SimPi
-                     + "/ee" + SimPi + "_" + FileLabel
+                     + "/ee" + SimPi + "_" + prefix
                      + "_" + RunNumberStr + "_reco.hipo");
-        outfilename = = "skimmed_SIDIS_" + SimPi "_" + prefix + RunNumberStr;
+        outfilename = "skimmed_SIDIS_" + SimPi "_" + prefix + RunNumberStr;
     }
     
     // open input file
