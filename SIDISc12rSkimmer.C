@@ -558,16 +558,20 @@ void OpenOutputFiles (TString outfilename){
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void CloseOutputFiles (TString OutDataPath, TString outfilename){
-    // close output CSV
+    // close output ROOT and CSV files
+    std::cout
+    << "Done processesing "  <<  Nevents_processed          << " events,"
+    << std::setprecision(3)
+    << (float)Nevents_passed_e_cuts/Nevents_processed       << " events passed e cuts,"
+    << "output files ready in root/csv formats in "
+    << std::endl;
+
+    
 //    CSVfile_e_piplus                .close();
 //    SelectedEventsCSVfile_e_piplus  .close();
-    SelectedEventsCSVfile_e_piplus_kinematics  .close();
 //    CSVfile_e_piminus               .close();
 //    SelectedEventsCSVfile_e_piminus .close();
-    SelectedEventsCSVfile_e_piminus_kinematics .close();
 
-    int Nentires_e_piplus  = outTree_e_piplus  -> GetEntries();
-    int Nentires_e_piminus = outTree_e_piminus -> GetEntries();
     
     // close output ROOT
 //    outFile_e_piplus_no_cuts->cd();
@@ -578,46 +582,58 @@ void CloseOutputFiles (TString OutDataPath, TString outfilename){
 //    outTree_e_piminus_no_cuts->Write();
 //    outFile_e_piminus_no_cuts->Close();
 
-    outFile_e_piplus->cd();
-    outTree_e_piplus->Write();
-    outFile_e_piplus->Close();
+    if ((!IsMC)
+        ||
+        ((IsMC) && (SimPi=="piplus"))
+        ){
+        SelectedEventsCSVfile_e_piplus_kinematics  .close();
+        int Nentires_e_piplus  = outTree_e_piplus  -> GetEntries();
+        
+        outFile_e_piplus->cd();
+        outTree_e_piplus->Write();
+        outFile_e_piplus->Close();
+        
+        
+        std::cout
+        << (float)Nevents_passed_pips_cuts/Nevents_processed    << " events passed pi+ cuts,"
+        << std::endl
+        << "\t" << (float)Nevents_passed_e_pips_cuts/Nevents_processed  << " passed (e,e'pi+) cuts,"
+        << std::endl
+        << "\t\t" << (float)Nevents_passed_e_pips_kinematics_cuts/Nevents_processed  << " also passed kinematical cuts,"
+        << std::endl;
+        
+        std::cout << "wrote "  << Nentires_e_piplus  << " to (e,e'pi+) root file, "
+        << std::endl << outFile_e_piplus -> GetName()
+        << std::endl << OutDataPath + outfilename + "_e_piplus_selected_eepi_kinematics.csv"
+        << std::endl
+    }
     
-    outFile_e_piminus->cd();
-    outTree_e_piminus->Write();
-    outFile_e_piminus->Close();
-    
-    
-    std::cout
-    << "Done processesing "  <<  Nevents_processed          << " events,"
-    << std::endl
-    << std::setprecision(3)
-    << (float)Nevents_passed_e_cuts/Nevents_processed       << " events passed e cuts,"
-    << std::endl
-    << (float)Nevents_passed_pips_cuts/Nevents_processed    << " events passed pi+ cuts,"
-    << std::endl
-    << "\t" << (float)Nevents_passed_e_pips_cuts/Nevents_processed  << " passed (e,e'pi+) cuts,"
-    << std::endl
-    << "\t\t" << (float)Nevents_passed_e_pips_kinematics_cuts/Nevents_processed  << " also passed kinematical cuts,"
-    << std::endl
-    << (float)Nevents_passed_pims_cuts/Nevents_processed    << " events passed pi- cuts,"
-    << std::endl
-    << "\t" << (float)Nevents_passed_e_pims_cuts/Nevents_processed  << " passed (e,e'pi-) cuts,"
-    << std::endl
-    <<  "\t\t" << (float)Nevents_passed_e_pims_kinematics_cuts/Nevents_processed  << " also passed kinematical cuts,"
-    << std::endl;
-    
-    
-    
-    std::cout << "output files ready in root/csv formats in " << std::endl
-    << std::endl
-    << "wrote "  << Nentires_e_piplus  << " to (e,e'pi+) root file, "
-    << std::endl << outFile_e_piplus -> GetName()
-    << std::endl << OutDataPath + outfilename + "_e_piplus_selected_eepi_kinematics.csv"
-    << std::endl
-    << "and "    << Nentires_e_piminus << " to (e,e'pi-) root file. "
-    << std::endl << outFile_e_piminus -> GetName()
-    << std::endl << OutDataPath + outfilename + "_e_piminus_selected_eepi_kinematics.csv"
-    << std::endl;
+    if ((!IsMC)
+        ||
+        ((IsMC) && (SimPi=="piminus"))
+        ){
+        SelectedEventsCSVfile_e_piminus_kinematics .close();
+        int Nentires_e_piminus = outTree_e_piminus -> GetEntries();
+        
+        outFile_e_piminus->cd();
+        outTree_e_piminus->Write();
+        outFile_e_piminus->Close();
+        
+        std::cout
+        << (float)Nevents_passed_pims_cuts/Nevents_processed    << " events passed pi- cuts,"
+        << std::endl
+        << "\t" << (float)Nevents_passed_e_pims_cuts/Nevents_processed  << " passed (e,e'pi-) cuts,"
+        << std::endl
+        <<  "\t\t" << (float)Nevents_passed_e_pims_kinematics_cuts/Nevents_processed  << " also passed kinematical cuts,"
+        << std::endl;
+        
+        std::cout << "output files ready in root/csv formats in " << std::endl
+        << std::endl
+        << "wrote "  << Nentires_e_piminus << " to (e,e'pi-) root file. "
+        << std::endl << outFile_e_piminus -> GetName()
+        << std::endl << OutDataPath + outfilename + "_e_piminus_selected_eepi_kinematics.csv"
+        << std::endl;
+    }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
