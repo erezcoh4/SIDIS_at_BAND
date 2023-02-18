@@ -1688,6 +1688,15 @@ void SIDISc12rSkimmer(int RunNumber    = 6420   ,
         outfilename = "skimmed_SIDIS_" + SimPi + "_" + prefix + RunNumberStr;
     }
     
+    if (fdebug>1){
+        std::cout
+        << "Input file name: " << std::endl
+        << infilename          << std::endl
+        << "Output file name: "<< std::endl
+        << outfilename
+        << std::endl;
+    }
+    
     // open input file
     TChain fake("hipo");
     fake.Add(infilename.Data());
