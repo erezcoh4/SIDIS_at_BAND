@@ -130,7 +130,7 @@ bool IsMC = false; // GEMC simulations
 int fdebug = 0;
 int torusBending = -1; // -1 for In-bending, +1 for Out-bending
 int DC_layers[3] = {6,18,36};// Region 1 is denoted at DC detector 6, Region 2 is denoted 18, Region 3 - as 36
-int DC_layer, runnum, evnum, beam_helicity;
+int DC_layer, runnum=0, evnum=0, beam_helicity=0;
 // helicity of the electron +1 along the beam and -1 opposite to it
 int status, NeventsMaxToProcess, Nevents_processed, Nevents_passed_e_cuts;
 int Nevents_passed_pips_cuts, Nevents_passed_e_pips_cuts;
@@ -884,7 +884,12 @@ void SetOutputTTrees(){
 //    outTree_e_piminus_no_cuts->Branch("piminus_qFrame_Phi"   ,&piminus_qFrame_Phi      , "piminus_qFrame_Phi[Npi]/D");
     
     // pi-
-    if (fdebug>1) std::cout << "outTree_e_piminus->Branch(eventnumber);" << std::endl;
+    if (fdebug>1){
+        std::cout << "outTree_e_piminus->Branch(eventnumber);"
+        << std::endl
+        << "evnum = " << evnum
+        << std::endl;}
+    
 
     outTree_e_piminus->Branch("eventnumber"          ,&evnum                 );
     if (fdebug>1) std::cout << "after outTree_e_piminus->Branch(eventnumber);" << std::endl;
