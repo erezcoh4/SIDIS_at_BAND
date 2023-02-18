@@ -114,7 +114,7 @@ void                          SetSkimming (TString fSkimming) ;
 void                         SetInclusive ( int fInclusive );
 void                             SetEbeam ( double fEbeam );
 void                              SetIsMC ();
-void                         SetVerbosity ( _fdebug_ = 0 );
+void                         SetVerbosity ( int _fdebug_ = 0 );
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 
 // globals
@@ -253,7 +253,7 @@ DCfid_SIDIS dcfid;
 std::vector<region_part_ptr>  electrons, neutrons, protons, pipluses, piminuses, gammas, deuterons;
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-void SetVerbosity( _fdebug_ ){
+void SetVerbosity( int _fdebug_ ){
     fdebug = _fdebug_;
     aux.SetVerbosity( fdebug );
 }
