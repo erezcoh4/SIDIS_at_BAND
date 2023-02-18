@@ -114,6 +114,7 @@ void                          SetSkimming (TString fSkimming) ;
 void                         SetInclusive ( int fInclusive );
 void                             SetEbeam ( double fEbeam );
 void                              SetIsMC ();
+void                         SetVerbosity ( _fdebug_ = 0 );
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 
 // globals
@@ -126,8 +127,9 @@ bool ePastCutsInEvent = false, pipsPastCutsInEvent = false, eepipsPastCutsInEven
 bool pimsPastCutsInEvent = false, EventPassedCuts = false,     eepimsPastCutsInEvent = false;
 bool IsMC = false; // GEMC simulations
 // meta-data
-int           torusBending = -1; // -1 for In-bending, +1 for Out-bending
-int    DC_layers[3] = {6,18,36};// Region 1 is denoted at DC detector 6, Region 2 is denoted 18, Region 3 - as 36
+int fdebug = 0;
+int torusBending = -1; // -1 for In-bending, +1 for Out-bending
+int DC_layers[3] = {6,18,36};// Region 1 is denoted at DC detector 6, Region 2 is denoted 18, Region 3 - as 36
 int DC_layer, runnum, evnum, beam_helicity;
 // helicity of the electron +1 along the beam and -1 opposite to it
 int status, NeventsMaxToProcess, Nevents_processed, Nevents_passed_e_cuts;
@@ -250,6 +252,12 @@ std::vector<TLorentzVector>      piminus_qFrame;
 DCfid_SIDIS dcfid;
 std::vector<region_part_ptr>  electrons, neutrons, protons, pipluses, piminuses, gammas, deuterons;
 
+// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+void SetVerbosity( _fdebug_ ){
+    fdebug = _fdebug_;
+    aux.SetVerbosity( fdebug );
+}
+
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void SetIsMC(){
@@ -257,10 +265,12 @@ void SetIsMC(){
         IsMC = true;
     }
 }
+
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void SetSimPi (TString fSimPi) {
     SimPi   = fSimPi; // default
 }
+
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void SetDataPath (TString fDataPath, Double_t fEbeam) {
     prefix   = "sidisdvcs_"; // default
@@ -1655,13 +1665,15 @@ void SIDISc12rSkimmer(int RunNumber    = 6420   ,
                       TString fSimPi   = "piplus"
                       ){
     
-    aux.SetVerbosity( fdebug );
+    
+    
+    SetVerbosity( fdebug     );
     SetDataPath ( fDataPath, fEbeam );
     SetSkimming ( fSkimming  );
     SetEbeam    ( fEbeam     );
     SetSimPi    ( fSimPi     );
     SetInclusive( fInclusive );
-    SetIsMC     ();
+    SetIsMC     (            );
     
     TString RunNumberStr = aux.GetRunNumberSTR(RunNumber, Skimming);
     
