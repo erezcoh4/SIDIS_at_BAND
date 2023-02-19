@@ -1269,7 +1269,7 @@ void ComputeElectronKinematics(){
     W_d     = sqrt((d_rest + q).Mag2());
     
     if (IsMC){
-        q         = Beam - e_g;
+        q_g       = Beam - e_g;
         Q2_g      = -q_g.Mag2();
         omega_g   = q_g.E();
         xB_g      = Q2_g/(2. * aux.Mp * q_g.E());
