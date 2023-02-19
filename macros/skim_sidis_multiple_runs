@@ -113,7 +113,7 @@ for line in run_fileLines[FirstRun:]:#{
     os.system( commandline )
     
     # if this is MC, repeat the same analysis for π+ and for π-
-    if ((Skimming=="p_uniform_distribution") and (args.only_pips==False))#{
+    if ((Skimming=="p_uniform_distribution") and (args.only_pips==False)):#{
         commandline = ("clas12root -q 'SIDISc12rSkimmer.C+(%d,%d,%d,%d,%d,\"%s\",\"%s\",%f,\"piminus\")'"%
                     (run,NeventsMax,fdebug,PrintProgress,FirstEvent,Skimming,DataPath,Ebeam))
         print(commandline)
