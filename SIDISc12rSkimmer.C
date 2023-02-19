@@ -97,7 +97,7 @@ void           ExtractElectronInformation (int fdebug);
 void              ExtractPionsInformation (int fdebug);
 void               ExtractPipsInformation (int pipsIdx, int fdebug );
 void               ExtractPimsInformation (int pimsIdx, int fdebug );
-void            ComputeElectronKinematics (int fdebug);
+void            ComputeElectronKinematics ();
 void                ComputePionKinematics (TLorentzVector pi, TLorentzVector pi_qFrame);
 void                   WriteEventToOutput (int fdebug);
 void                        FinishProgram (TString outfilepath, TString outfilename);
@@ -1258,7 +1258,7 @@ void FinishProgram(TString outfilepath, TString outfilename){
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-void ComputeElectronKinematics(int fdebug){
+void ComputeElectronKinematics(){
     // compute event kinematics (from e-only information)
     q       = Beam - e;
     Q2      = -q.Mag2();
@@ -1269,11 +1269,18 @@ void ComputeElectronKinematics(int fdebug){
     W_d     = sqrt((d_rest + q).Mag2());
     
     if (IsMC){
-        q       = Beam - e_g;
+        q         = Beam - e_g;
         Q2_g      = -q_g.Mag2();
         omega_g   = q_g.E();
         xB_g      = Q2_g/(2. * aux.Mp * q_g.E());
         y_g       = omega_g / Ebeam;
+        if (fdebug>1)
+            std::cout
+            << "ComputeElectronKinematics( for MC )"
+            << std::endl
+            << "Ebeam: "   << Ebeam     << ","
+            << "omega_g: " << omega_g   << ","
+            << std::endl;
     }
 }
 
@@ -1798,7 +1805,7 @@ void SIDISc12rSkimmer(int RunNumber    = 6420   ,
                    ){
                     
                     ExtractElectronInformation  (fdebug);
-                    ComputeElectronKinematics   (fdebug);
+                    ComputeElectronKinematics   ();
                     ExtractPionsInformation     (fdebug);
                     WriteEventToOutput          (fdebug);
                     
