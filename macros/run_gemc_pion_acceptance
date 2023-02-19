@@ -37,6 +37,8 @@ parser.add_argument("--fdebug",       type=int, default=1,
                     
 parser.add_argument("--only-pi+",               dest="only_pips",
                     action='store_true', help="do only pi+ (and not pi-)")
+parser.add_argument("--only-pi-",               dest="only_pims",
+                    action='store_true', help="do only pi- ")
 parser.add_argument("--only-reconstruction",    dest="only_reconstruction",
                     action='store_true', help="do only reconstruction (and no simulation)")
 parser.add_argument("--merge-background",       dest="merge_background",
@@ -61,6 +63,9 @@ if Nevents > 100000: #{
 pi_charges = ['piplus','piminus']
 if args.only_pips: #{
     pi_charges    = ['piplus']
+#}
+if args.only_pims: #{
+    pi_charges    = ['piminus']
 #}
 main_data_path  = "/volatile/clas12/users/ecohen/GEMC/"
 main_subdir     = "/10.2/AcceptanceCorrection/"
