@@ -1688,10 +1688,10 @@ void SIDISc12rSkimmer(int RunNumber    = 6420   ,
                       // "sidisdvcs", "inc", "nSidis", "AcceptanceCorrection"
                       TString fDataPath= "sidisdvcs",
                       double fEbeam    = 10.2, // [GeV]
-                      int NpipsMin     = 1,       // minimal number of pi+
-                      int   fInclusive = 0,
                       // simulation - piplus or piminus
-                      TString fSimPi   = "piplus"
+                      TString fSimPi   = "piplus",
+                      // inclusive means do not apply cuts
+                      int   fInclusive = 0
                       ){
     
     

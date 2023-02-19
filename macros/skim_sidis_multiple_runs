@@ -48,7 +48,10 @@ parser.add_argument("--DataPath",     type=str, default="sidisdvcs",
                     help="inc, sidisdvcs, nSidis, AcceptanceCorrection")
 parser.add_argument("--Ebeam",     type=float, default=10.2,
                     required=False, help="beam energy")
-                      
+parser.add_argument("--only-pi+",        dest="only_pips",
+                    default=False
+                    action='store_true', help="do only pi+ (and not pi-)")
+
 
 args = parser.parse_args()
 
@@ -107,8 +110,17 @@ for line in run_fileLines[FirstRun:]:#{
     commandline = ("clas12root -q 'SIDISc12rSkimmer.C+(%d,%d,%d,%d,%d,\"%s\",\"%s\",%f)'"%
                     (run,NeventsMax,fdebug,PrintProgress,FirstEvent,Skimming,DataPath,Ebeam))
     print(commandline)
-    
     os.system( commandline )
+    
+    # if this is MC, repeat the same analysis for π+ and for π-
+    if ((Skimming=="p_uniform_distribution") and (args.only_pips==False))#{
+        commandline = ("clas12root -q 'SIDISc12rSkimmer.C+(%d,%d,%d,%d,%d,\"%s\",\"%s\",%f,\"piminus\")'"%
+                    (run,NeventsMax,fdebug,PrintProgress,FirstEvent,Skimming,DataPath,Ebeam))
+        print(commandline)
+        os.system( commandline )
+    
+    #}
+    
     if (runIdx >= Nruns): break;
     print('------------------------------------------------------------')
 #}
