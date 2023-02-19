@@ -49,7 +49,7 @@ parser.add_argument("--DataPath",     type=str, default="sidisdvcs",
 parser.add_argument("--Ebeam",     type=float, default=10.2,
                     required=False, help="beam energy")
 parser.add_argument("--only-pi+",        dest="only_pips",
-                    default=False
+                    default=False,
                     action='store_true', help="do only pi+ (and not pi-)")
 
 
