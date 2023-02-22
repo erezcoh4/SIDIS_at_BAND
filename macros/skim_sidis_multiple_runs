@@ -51,6 +51,9 @@ parser.add_argument("--Ebeam",     type=float, default=10.2,
 parser.add_argument("--only-pi+",        dest="only_pips",
                     default=False,
                     action='store_true', help="do only pi+ (and not pi-)")
+parser.add_argument("--inclusive",          dest="inclusive",
+                    type=int,               default=0,
+                    help="do not apply cuts")
 
 
 args = parser.parse_args()
@@ -107,15 +110,15 @@ for line in run_fileLines[FirstRun:]:#{
     print('')
     print("processing run %d/%d"%(runIdx,Nruns))
     print('')
-    commandline = ("clas12root -q 'SIDISc12rSkimmer.C+(%d,%d,%d,%d,%d,\"%s\",\"%s\",%f)'"%
-                    (run,NeventsMax,fdebug,PrintProgress,FirstEvent,Skimming,DataPath,Ebeam))
+    commandline = ("clas12root -q 'SIDISc12rSkimmer.C+(%d,%d,%d,%d,%d,\"%s\",\"%s\",%f,%d)'"%
+                    (run,NeventsMax,fdebug,PrintProgress,FirstEvent,Skimming,DataPath,Ebeam,args.inclusive))
     print(commandline)
     os.system( commandline )
     
     # if this is MC, repeat the same analysis for π+ and for π-
     if ((Skimming=="p_uniform_distribution") and (args.only_pips==False)):#{
-        commandline = ("clas12root -q 'SIDISc12rSkimmer.C+(%d,%d,%d,%d,%d,\"%s\",\"%s\",%f,\"piminus\")'"%
-                    (run,NeventsMax,fdebug,PrintProgress,FirstEvent,Skimming,DataPath,Ebeam))
+        commandline = ("clas12root -q 'SIDISc12rSkimmer.C+(%d,%d,%d,%d,%d,\"%s\",\"%s\",%f,\"piminus\",%d)'"%
+                    (run,NeventsMax,fdebug,PrintProgress,FirstEvent,Skimming,DataPath,Ebeam,args.inclusive))
         print(commandline)
         os.system( commandline )
     

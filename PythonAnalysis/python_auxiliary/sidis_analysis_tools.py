@@ -71,14 +71,15 @@ def load_SIDIS_data(rgb_runs_filenames = ["good_runs_10-2-final.txt"],
                     taggedsubdirname= "",
                     FreePsubdirname = "",
                     FreeP_prefix    = "nSidis",
-                    GEMCsubdirname = "gcard_rgb_spring2019/1M_events",
-                    rga_runs_filename = "rga_data/rga_nsidis_runs_10-6.txt"):#{
+                    GEMCsubdirname  = "",
+                    rga_runs_filename = "rga_data/rga_nsidis_runs_10-6.txt",
+                    gemc_runs_filename = "gemc_p_uniform_distribution.txt"):#{
     '''
     e_e_pi, e_e_pi_n, e_e_pi_FreeP = load_SIDIS_data()
     e_e_pi, e_e_pi_n, e_e_pi_FreeP, e_e_pi_GEMC = load_SIDIS_data(do_e_e_pi_GEMC=True)
 
     Load SIDIS data, and fill e_e_pi and e_e_pi_n with data
-    last update Feb-13, 2023
+    last update Feb-20, 2023
     
     input:
     -------------
@@ -97,14 +98,14 @@ def load_SIDIS_data(rgb_runs_filenames = ["good_runs_10-2-final.txt"],
     
     
     '''
-    global e_e_pi, e_e_pi_n, e_e_pi_FreeP;
+    global e_e_pi, e_e_pi_n, e_e_pi_FreeP, e_e_pi_GEMC;
 
     if taggedsubdirname=="": taggedsubdirname = subdirname;
     
     e_e_pi_data_path       = main_data_path + 'SIDIS_skimming/' + prefix + '/' + subdirname + '/'
     e_e_pi_n_data_path     = main_data_path + 'merged_SIDIS_and_BAND_skimming/' + prefix + '/' + taggedsubdirname + '/'
     e_e_pi_FreeP_data_path = main_data_path + 'RGA_Free_proton/' + FreeP_prefix + '/'+ FreePsubdirname + '/'
-    e_e_pi_GEMC_data_path  = main_data_path + 'AcceptanceCorrection/GEMCimulationOuputFiles/' + GEMCsubdirname + '/'
+    e_e_pi_GEMC_data_path  = main_data_path + 'p_uniform_distribution/' + GEMCsubdirname + '/'
 
     if len(rgb_runs_filenames)==1:#{
         rgb_runs = read_run_nunmbers( runs_filename=rgb_runs_filenames[0], Nruns=Nruns )
@@ -116,7 +117,9 @@ def load_SIDIS_data(rgb_runs_filenames = ["good_runs_10-2-final.txt"],
                 rgb_runs.append(run)
     #}
     rga_runs = read_run_nunmbers( runs_filename=rga_runs_filename, Nruns=Nruns)
-    e_e_pi, e_e_pi_n, e_e_pi_FreeP = dict(),dict(),dict()
+    gemc_runs = read_run_nunmbers( runs_filename=gemc_runs_filename, Nruns=Nruns)
+
+    e_e_pi, e_e_pi_n, e_e_pi_FreeP, e_e_pi_GEMC = dict(),dict(),dict(),dict()
     if do_e_e_pi:#{
         for runnum,runIdx in zip(rgb_runs,range(len(rgb_runs))):#{
             if fdebug>1: print('Run number ',runnum,'(%d/%d runs)'%(runIdx+1,len(runs)))
@@ -207,8 +210,11 @@ def load_SIDIS_data(rgb_runs_filenames = ["good_runs_10-2-final.txt"],
         #}
     #}
     if do_e_e_pi_GEMC:#{
-        for pi_charge_name,pi_print in zip(pi_charge_names,pi_prints):
-            eepi   = pd.read_csv(e_e_pi_GEMC_data_path +'ee%s_p_uniform_distribution.csv'%(pi_charge_name))
+        for runnum,runIdx in zip(gemc_runs,range(len(gemc_runs))):#{
+            for pi_charge_name,pi_print in zip(pi_charge_names,pi_prints):
+                # eepi   = pd.read_csv(e_e_pi_GEMC_data_path +'ee%s_p_uniform_distribution.csv'%(pi_charge_name))
+                eepi   = pd.read_csv(e_e_pi_GEMC_data_path 
+                                     + 'skimmed_SIDIS_%s_p_uniform_distribution_%d_e_%s_selected_eepi_kinematics.csv'%(pi_charge_name,runnum,pi_charge_name))
 #             if do_all_vars:
 #                 eepi   = pd.read_csv(e_e_pi_GEMC_data_path +'ee%s_p_uniform_distribution.csv'%(pi_charge_name))
 #             else:
@@ -229,8 +235,10 @@ def load_SIDIS_data(rgb_runs_filenames = ["good_runs_10-2-final.txt"],
 #                                                             'xB':np.half, 'Zpi':np.half,
 #                                                             'M_x':np.half,
 #                                                             'pi_qFrame_pT':np.half,'pi_qFrame_pL':np.half,'pi_qFrame_Phi':np.half})
-            e_e_pi_GEMC[pi_charge_name] = eepi
-            if fdebug>1: print('Loaded',len(eepi)," simulated (e,e'"+pi_print+") events from a white spectrum")
+                if runIdx==0: e_e_pi_GEMC[pi_charge_name] = eepi
+                else:         e_e_pi_GEMC[pi_charge_name] = pd.concat([e_e_pi_GEMC[pi_charge_name],eepi])    
+                if fdebug>1: print('Loaded',len(eepi)," simulated (e,e'"+pi_print+") events from a white spectrum")
+        #}
     #}
     print('Done loading files.')
     
@@ -248,6 +256,8 @@ def load_SIDIS_data(rgb_runs_filenames = ["good_runs_10-2-final.txt"],
         return e_e_pi, e_e_pi_n, e_e_pi_FreeP
 #}
 # ----------------------- #
+
+
 
 
 # ----------------------- #
@@ -1227,71 +1237,6 @@ def apply_cuts_to_e_e_pi_FreeP(fdebug=2,
 
 
 
-
-
-
-# ----------------------- #
-def apply_cuts_to_e_e_pi_GEMC(fdebug=2,
-                             NeventsMax=-1,
-                             NMaxPerSubset = 500000,
-                             doAcceptanceMatchingCut = True,
-                             doApply_minPn_cut       = True,
-                             doApply_Mx_cut          = True):#{
-    '''
-    e_e_pi_GEMC_pass_cuts = apply_cuts_to_e_e_pi_GEMC(fdebug,
-                                         NeventsMax,
-                                         NMaxPerSubset,
-                                         doAcceptanceMatchingCut,
-                                         doApply_minPn_cut,
-                                         doApply_Mx_cut)
-                                         
-    June-29, 2022
-    
-    (e,e'\pi) - (uniform) MC for acceptance correction (uniform in e and \pi)
-    '''
-    
-    global e_e_pi_GEMC, e_e_pi_GEMC_pass_cuts
-
-    e_e_pi_GEMC_after_eepi_cuts       = dict()
-
-    # Apply (e,e'pi) SIDIS kinematical cuts while asking if pion was accepted,
-    # externally (here, and not in the CLAS12ROOT script) since we
-    # want to retain and record also the events that did not pass these cuts, in the simulation
-    # whereas in data we just omit events that did not pass these cuts
-    for pi_ch in pi_charge_names:#{
-        e_e_pi_GEMC_after_eepi_cuts[pi_ch] = e_e_pi_GEMC[pi_ch][(e_e_pi_GEMC[pi_ch].pi_passed_cuts==1) & (e_e_pi_GEMC[pi_ch].eepiPastKinematicalCuts==1)];
-    #}
-    e_e_pi_GEMC_after_p_theta_cut = apply_p_theta_acceptance_cut_single_set( e_e_pi_GEMC_after_eepi_cuts )
-    e_e_pi_GEMC_after_Mx_cut      = apply_Mx_cut(  e_e_pi_GEMC_after_p_theta_cut )
-    e_e_pi_GEMC_pass_cuts         = e_e_pi_GEMC_after_Mx_cut;
-
-
-
-    # print number of events retained on every cut in the uniform GEMC
-    if fdebug<2: return
-    for pi_ch,pi_print in zip(pi_charge_names,pi_prints):#{
-        print('(e,e',pi_print,') in uniform GEMC simulation')
-
-        Nevents[pi_ch + ' GEMC original'] = len(e_e_pi_GEMC[pi_ch])
-        frac_Nevents[pi_ch + ' GEMC original'] = 1
-        print(Nevents[pi_ch + ' GEMC original'],'events before cut')
-
-        Nevents[pi_ch +' GEMC p-theta cut'] = len(e_e_pi_GEMC_after_p_theta_cut[pi_ch])
-        frac_Nevents[pi_ch + ' GEMC p-theta cut'] = float(Nevents[pi_ch +' GEMC p-theta cut'])/ Nevents[pi_ch + ' GEMC original']
-        print(Nevents[pi_ch +' GEMC p-theta cut'],'events after p-theta cut (%.1f'%(100.*frac_Nevents[pi_ch + ' GEMC p-theta cut']),'%)')
-
-
-        Nevents[pi_ch +' GEMC Mx cut'] = len(e_e_pi_GEMC_after_Mx_cut[pi_ch])
-        frac_Nevents[pi_ch + ' GEMC Mx cut'] = float(Nevents[pi_ch +' GEMC Mx cut'])/Nevents[pi_ch + ' GEMC original']
-        print(Nevents[pi_ch +' GEMC Mx cut'],'events after M_X cut (%.1f'%(100.*frac_Nevents[pi_ch + ' GEMC Mx cut']),'%)')
-    #}
-    print(' ')
-    return e_e_pi_GEMC_pass_cuts
-#}
-
-
-
-
 # ----------------------- #
 def apply_further_selection_cuts_to_data(fdebug=0,
                                          NeventsMax=-1,
@@ -1357,6 +1302,7 @@ def apply_further_selection_cuts_to_data(fdebug=0,
                                                     doApply_minPn_cut,
                                                     doApply_Mx_cut)
     # (4) MC
+    if fdebug: print('e_e_pi_GEMC=={}:',(e_e_pi_GEMC=={}))
     if (e_e_pi_GEMC=={}) is False:#{
         if fdebug: print('(4) MC')
         e_e_pi_GEMC_pass_cuts = apply_cuts_to_e_e_pi_GEMC(fdebug, NeventsMax, NMaxPerSubset,
@@ -1367,6 +1313,79 @@ def apply_further_selection_cuts_to_data(fdebug=0,
     return e_e_pi_pass_cuts, e_e_pi_n_pass_cuts, e_e_pi_FreeP_pass_cuts, e_e_pi_GEMC_pass_cuts
 #}
 # ----------------------- #
+
+
+
+
+# ----------------------- #
+def apply_cuts_to_e_e_pi_GEMC(fdebug=2,
+                             NeventsMax=-1,
+                             NMaxPerSubset = 500000,
+                             doAcceptanceMatchingCut = True,
+                             doApply_minPn_cut       = True,
+                             doApply_Mx_cut          = True):#{
+    '''
+    e_e_pi_GEMC_pass_cuts = apply_cuts_to_e_e_pi_GEMC(fdebug,
+                                         NeventsMax,
+                                         NMaxPerSubset,
+                                         doAcceptanceMatchingCut,
+                                         doApply_minPn_cut,
+                                         doApply_Mx_cut)
+                                         
+    Feb-20, 2023
+    
+    (e,e'π) - (uniform) MC for acceptance correction (uniform in e and π)
+    '''
+    
+    global e_e_pi_GEMC, e_e_pi_GEMC_pass_cuts
+
+    e_e_pi_GEMC_after_eepi_cuts       = dict()
+
+    # Apply (e,e'pi) SIDIS kinematical cuts while asking if pion was accepted,
+    # externally (here, and not in the CLAS12ROOT script) since we
+    # want to retain and record also the events that did not pass these cuts, in the simulation
+    # whereas in data we just omit events that did not pass these cuts
+    # for pi_ch in pi_charge_names:#{
+    #     e_e_pi_GEMC_after_eepi_cuts[pi_ch] = e_e_pi_GEMC[pi_ch][(e_e_pi_GEMC[pi_ch].pi_passed_cuts==1) & (e_e_pi_GEMC[pi_ch].eepiPastKinematicalCuts==1)];
+    # #}
+    # e_e_pi_GEMC_after_p_theta_cut = apply_p_theta_acceptance_cut_single_set( e_e_pi_GEMC_after_eepi_cuts )
+    e_e_pi_GEMC_after_p_theta_cut = apply_p_theta_acceptance_cut_single_set( e_e_pi_GEMC )
+    e_e_pi_GEMC_after_Mx_cut      = apply_Mx_cut(  e_e_pi_GEMC_after_p_theta_cut )
+    e_e_pi_GEMC_pass_cuts         = e_e_pi_GEMC_after_Mx_cut;
+
+    # add beam-charge weight - 1 for "white" distribution
+    for pi_ch,pi_print in zip(pi_charge_names,pi_prints):#{
+        e_e_pi_GEMC_pass_cuts[pi_ch]['weight'] = 1
+    #}
+
+
+
+    # print number of events retained on every cut in the uniform GEMC
+    # if fdebug<2: return
+#     for pi_ch,pi_print in zip(pi_charge_names,pi_prints):#{
+#         print('(e,e',pi_print,') in uniform GEMC simulation')
+
+#         Nevents[pi_ch + ' GEMC original'] = len(e_e_pi_GEMC[pi_ch])
+#         frac_Nevents[pi_ch + ' GEMC original'] = 1
+#         print(Nevents[pi_ch + ' GEMC original'],'events before cut')
+
+#         Nevents[pi_ch +' GEMC p-theta cut'] = len(e_e_pi_GEMC_after_p_theta_cut[pi_ch])
+#         frac_Nevents[pi_ch + ' GEMC p-theta cut'] = float(Nevents[pi_ch +' GEMC p-theta cut'])/ Nevents[pi_ch + ' GEMC original']
+#         print(Nevents[pi_ch +' GEMC p-theta cut'],'events after p-theta cut (%.1f'%(100.*frac_Nevents[pi_ch + ' GEMC p-theta cut']),'%)')
+
+
+#         Nevents[pi_ch +' GEMC Mx cut'] = len(e_e_pi_GEMC_after_Mx_cut[pi_ch])
+#         frac_Nevents[pi_ch + ' GEMC Mx cut'] = float(Nevents[pi_ch +' GEMC Mx cut'])/Nevents[pi_ch + ' GEMC original']
+#         print(Nevents[pi_ch +' GEMC Mx cut'],'events after M_X cut (%.1f'%(100.*frac_Nevents[pi_ch + ' GEMC Mx cut']),'%)')
+#     #}
+    # print(' ')
+    return e_e_pi_GEMC_pass_cuts
+#}
+
+
+
+
+
 
 
 # ----------------------- #
