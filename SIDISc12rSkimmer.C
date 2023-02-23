@@ -1794,7 +1794,15 @@ void SIDISc12rSkimmer(int RunNumber    = 6420   ,
                 deuterons   = c12.getByID( 1000010020 );
                 GetParticlesByType ( evnum, fdebug );
                 
-                
+                if (fdebug>2) {
+                    std::cout
+                    << "Ne: "           << Ne << ","
+                    << "inclusive: "    << inclusive << ","
+                    << "Npips: "        << Npips << ","
+                    << "Npims: "        << Npims << ","
+                    << "NMAXPIONS: "    << NMAXPIONS << ","
+                    << std::endl;
+                }
                 // filter events, extract information, and compute event kinematics:
                 // we keep only d(e,e’pi+)X and d(e,e’pi-)X events
                 if(  0 < Ne // after studying some MC and data, we need to kill events with more than 1 electron
