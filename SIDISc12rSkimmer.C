@@ -1175,6 +1175,7 @@ void ExtractElectronInformation(int fdebug){
                                                               e_PCAL_sector, // e_PCAL_sector should be consistent with e_DC_sector
                                                               e_DC_x, e_DC_y, e_DC_z,
                                                               torusBending );
+    if (inclusive)         ePastCutsInEvent = true;
     if (ePastCutsInEvent)  Nevents_passed_e_cuts++ ;
 }
 
