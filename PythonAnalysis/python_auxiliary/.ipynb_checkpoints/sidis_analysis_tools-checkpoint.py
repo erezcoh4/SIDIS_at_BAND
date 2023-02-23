@@ -329,7 +329,7 @@ def load_SIDIS_ratio(xlabel   = "Bjorken $x$",
                      data_path= '/Users/erezcohen/Desktop/data/BAND/Results/Results_31Jan2023/'):
     '''
     Load SIDIS ratio results
-    last update Feb-9, 2023
+    last update Feb-22, 2023
     
     input
     -------
@@ -414,6 +414,8 @@ def load_SIDIS_ratio(xlabel   = "Bjorken $x$",
     if fdebug: print('Done.')
     return SIDIS_results
 # ----------------------- #
+
+
 
 
     

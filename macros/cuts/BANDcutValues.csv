@@ -3,11 +3,11 @@ Vz_e_min_inbending,-13.0
 Vz_e_max_inbending,12.0
 Vz_e_min_outbending,-18.0
 Vz_e_max_outbending,10.0
-e_PCAL_W_min,15.0
-e_PCAL_V_min,15.0
+e_PCAL_W_min,19.0
+e_PCAL_V_min,19.0
 e_E_PCAL_min,0.07
 SamplingFraction_min,0.17
-PCAL_ECIN_SF_min,0
+PCAL_ECIN_SF_min,0.2
 (Ve-Vpi)_z_max,20.0
 y_max,0.75
 Q2_min,2.0
