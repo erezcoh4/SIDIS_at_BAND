@@ -1799,7 +1799,7 @@ void SIDISc12rSkimmer(int RunNumber    = 6420   ,
                 // we keep only d(e,e’pi+)X and d(e,e’pi-)X events
                 if(  0 < Ne // after studying some MC and data, we need to kill events with more than 1 electron
                    &&
-                   (inclusive == 1 || (0 < Npips) || (0 < Npims)) // "inclusive" means (e,e') events
+                   ((inclusive == 1) || (0 < Npips) || (0 < Npims)) // "inclusive" means (e,e') events
                    &&
                    (Npips < NMAXPIONS) && (Npims < NMAXPIONS) // we don't want to crash the memeory
                    ){
