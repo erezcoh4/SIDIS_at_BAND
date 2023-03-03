@@ -122,7 +122,7 @@ def load_SIDIS_data(rgb_runs_filenames = ["good_runs_10-2-final.txt"],
     e_e_pi, e_e_pi_n, e_e_pi_FreeP, e_e_pi_GEMC = dict(),dict(),dict(),dict()
     if do_e_e_pi:#{
         for runnum,runIdx in zip(rgb_runs,range(len(rgb_runs))):#{
-            if fdebug>1: print('Run number ',runnum,'(%d/%d runs)'%(runIdx+1,len(runs)))
+            if fdebug>1: print('Run number ',runnum,'(%d/%d runs)'%(runIdx+1,len(rgb_runs)))
             for pi_charge_name,pi_print in zip(pi_charge_names,pi_prints):
                 if do_e_e_pi:#{
                     if do_all_vars:
