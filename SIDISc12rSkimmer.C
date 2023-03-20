@@ -221,7 +221,7 @@ TTree * outTree_e_piplus_no_cuts, * outTree_e_piminus_no_cuts;
 std::ofstream   CSVfile_e_piplus,  SelectedEventsCSVfile_e_piplus,  SelectedEventsCSVfile_e_piplus_kinematics;
 std::ofstream   CSVfile_e_piminus, SelectedEventsCSVfile_e_piminus, SelectedEventsCSVfile_e_piminus_kinematics;
 // vectors in lab-frame
-TLorentzVector          Beam, target, e, q;
+TLorentzVector      Beam, target, e, q, pi;
 TLorentzVector              d_rest, p_rest;
 std::vector<TLorentzVector>         piplus; // positive pions
 std::vector<TLorentzVector>        piminus; // negative pions
