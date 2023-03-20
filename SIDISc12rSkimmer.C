@@ -1314,15 +1314,16 @@ void ExtractPipsInformation( int pipsIdx, int fdebug ){
     
     // First - we restrict ourselves to pions only from the central detector
     if( pipluses[pipsIdx]->getRegion() != FD ){
-        if (fdebug>2)
+        if (fdebug>2){
             SetLorentzVector(pi  ,pipluses[pipsIdx]);
             std::cout
             << "piplus [" << pipsIdx << "] not from FD (from " << pipluses[pipsIdx]->getRegion()
-            << ")"
+            << ") "
             << "p = "       << pi.P() << " GeV/c, "
-            << "theta = "   << pi.Theta()*180./3.1415 << "˚, "
+            << "theta = "   << pi.Theta()*180./3.1415 << "˚"
             << ", not extracting information..."
             << std::endl;
+        }
         return;
     }else{
         if (fdebug>2) std::cout << "piplus ["<<pipsIdx<<"] is from FD ("<<pipluses[pipsIdx]->getRegion()<< "), extracting information..." << std::endl;
@@ -1421,9 +1422,9 @@ void ExtractPimsInformation( int pimsIdx, int fdebug ){
             
             std::cout << "piminus ["<<pimsIdx<<"] not from FD (from "
             << piminuses[pimsIdx]->getRegion()
-            << ")"
-            << "p = "       << pi.P() << " GeV/c, " 
-            << "theta = "   << pi.Theta()*180./3.1415 << "˚, "
+            << ") "
+            << "p = "       << pi.P() << " GeV/c, "
+            << "theta = "   << pi.Theta()*180./3.1415 << "˚"
             << ", not extracting information..." << std::endl;
         }
         return;
@@ -1711,7 +1712,7 @@ TVector3 RotateVectorTo_qFrame( TVector3 v ){
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void SetInclusive( int fInclusive ){
     inclusive = fInclusive;
-    if (inclusive == 1) std::cout << "Running as inclusive" << std::endl;
+    if (inclusive == 1) std::cout << "Running as inclusive (all data registered event regardless of the application of event selection cuts)" << std::endl;
 }
 
 
