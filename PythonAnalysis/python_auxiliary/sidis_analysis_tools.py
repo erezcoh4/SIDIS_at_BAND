@@ -176,7 +176,7 @@ def load_SIDIS_data(rgb_runs_filenames = ["good_runs_10-2-final.txt"],
     #}
     if do_e_e_pi_FreeP:#{
         for runnum,runIdx in zip(rga_runs,range(len(rga_runs))):#{
-            if fdebug>1: print('Free-P RGA Run number ',runnum,'(%d/%d runs)'%(runIdx+1,len(runs)))
+            if fdebug>1: print('Free-P RGA Run number ',runnum,'(%d/%d runs)'%(runIdx+1,len(rga_runs)))
         
             for pi_charge_name,pi_print in zip(pi_charge_names,pi_prints):
                 if do_all_vars:
@@ -655,7 +655,7 @@ def beam_energy_from_run(run,rungroup = 'rgb'):
     if rungroup == 'rgb':
         beam_energy[(6400 < run)  & (run < 6600)] = 10.2 
         beam_energy[(11360 < run) & (run < 11570)] = 10.4
-        beam_energy[(6160 < run)  & (run < 6400)] = 10.4
+        beam_energy[(6160 < run)  & (run < 6400)] = 10.6
     return beam_energy   
 # ----------------------- #
 
@@ -788,28 +788,7 @@ def extract_r_from_SIDIS_ratio(data_path = '/Users/erezcohen/Desktop/data/BAND/R
     
     
     
-    
-# ----------------------- #
-def plot_FF_expectation(color='blue',formula='(1-z)/(1+z)', ax=None,x0=0.32,z0=0.5):
-    '''
-    Field-Feynman fragmentation model 
-    [R. D. Field and R. P. Feynman, Nucl. Phys. B136, 1 (1978)]
-    [J. Hua and B.Q. Ma Eur.Phys.J.C30:207-212,2003]
-    '''
-    zFF = np.linspace(0,1,100)
-    if formula == '(1-z)/(1+z)':
-        rFF = (1-zFF)/(1+zFF)
-        ax.plot(zFF, rFF, '--',color=color,label='(1-z)/(1+ z)')
-    elif formula == '(1-z)/(1-z+z/0.46)':
-        rFF = (1-zFF)/(1-zFF+zFF/0.46)
-        ax.plot(zFF, rFF, '--',color=color,label='(1-z)/(1 - z + z/0.46)')
-    elif formula == 'r(Q^2,x=x0,z=z0)':
-        Q2 = np.linspace(5,9,100)
-        rFF = (1-z0)/(1-z0+z0/0.46)*np.ones(len(Q2))
-        ax.plot(Q2, rFF, '--',color=color,label='(1-z)/(1 - z + z/0.46)')
-        
-# ----------------------- #
-        
+
 
 
 

@@ -1310,7 +1310,15 @@ void ExtractPipsInformation( int pipsIdx, int fdebug ){
         std::cout << "ExtractPipsInformation( pipsIdx=" << pipsIdx << ", fdebug=" << fdebug << " )" << std::endl;
     
     
-    // extract positive pion information
+    // Extract positive pion information
+    
+    // First - we restrict ourselves to pions only from the central detector
+    if( pipluses[pipsIdx]->getRegion() != FD ){
+        if (fdebug>2) std::cout << "piplus [" << pipsIdx << "] is not from FD but rather from " << pipluses[pipsIdx]->getRegion() << ", not extracting information...";
+        return;
+    }
+
+    // Now we extract the information on this pion
     SetLorentzVector(piplus[pipsIdx]  ,pipluses[pipsIdx]);
     Zpips[pipsIdx]              = piplus[pipsIdx].E() / omega;
     Vpiplus[pipsIdx]            = GetParticleVertex( pipluses[pipsIdx] );
@@ -1394,7 +1402,15 @@ void ExtractPipsInformation( int pipsIdx, int fdebug ){
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void ExtractPimsInformation( int pimsIdx, int fdebug ){
-    // extract negative pion information
+    // Extract negative pion information
+    
+    // First - we restrict ourselves to pions only from the central detector
+    if( piminuses[pimsIdx]->getRegion() != FD ){
+        if (fdebug>2) std::cout << "piminus [" << pimsIdx << "] is not from FD but rather from " << piminuses[pimsIdx]->getRegion() << ", not extracting information...";
+        return;
+    }
+
+    // Now we extract pion information
     SetLorentzVector(piminus[pimsIdx]  ,piminuses[pimsIdx]);
     Zpims[pimsIdx]              = piminus[pimsIdx].E() / omega;
     Vpiminus[pimsIdx]           = GetParticleVertex( piminuses[pimsIdx] );

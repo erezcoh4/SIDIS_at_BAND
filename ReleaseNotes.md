@@ -3,8 +3,19 @@
 # SRC-SIDIS revisions and release-notes 
 -----------------------------------------------------------------
 
+Mar-20, 2023 (commit_)   
+-------------
 
-Feb-17, 2023    
+1. Moved to using only pions from the forward detector 
+    The reason is that the central detector is not calibrated for our data-sets.
+    The way that this was done is by updating *ExtractPipsInformation* and *ExtractPimsInformation* in **SIDISc12rSkimmer.C**
+      
+    if( pipluses[pipsIdx]->getRegion() != FD ) return;
+    
+      
+2. Updated Pytj
+
+Mar-3, 2023 (commit_cfbc431)   
 -------------
 
 1. Added simulation to **SIDISc12rSkimmer.C** so that simulation will undergo the exact same analysis code as data
