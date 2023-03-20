@@ -13,7 +13,8 @@ Mar-20, 2023 (commit_)
     if( pipluses[pipsIdx]->getRegion() != FD ) return;
     
       
-2. Updated Pytj
+2. Updated Python analysis to step over event selection cuts one-by-one in **EventSelectionCuts.ipynb**
+
 
 Mar-3, 2023 (commit_cfbc431)   
 -------------

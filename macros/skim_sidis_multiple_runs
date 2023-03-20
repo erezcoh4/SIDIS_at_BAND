@@ -16,7 +16,10 @@
 #
 # skim_sidis_multiple_runs --Skimming=p_uniform_distribution --DataPath=AcceptanceCorrection --NeventsMax=10
 #
+# skim_sidis_multiple_runs --Nruns=1 --fdebug=3 --NeventsMax=10 --no-email --inclusive=1
+#
 # comments
+# ------------
 #
 # GEMC_p_uniform_distribution - GEMC simulation of "white" (e,e'π) spectra with no physics
 #

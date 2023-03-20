@@ -1314,8 +1314,10 @@ void ExtractPipsInformation( int pipsIdx, int fdebug ){
     
     // First - we restrict ourselves to pions only from the central detector
     if( pipluses[pipsIdx]->getRegion() != FD ){
-        if (fdebug>2) std::cout << "piplus [" << pipsIdx << "] is not from FD but rather from " << pipluses[pipsIdx]->getRegion() << ", not extracting information...";
+        if (fdebug>2) std::cout << "piplus [" << pipsIdx << "] not from FD (from " << pipluses[pipsIdx]->getRegion() << "), not extracting information..." << std::endl;
         return;
+    }else{
+        if (fdebug>2) std::cout << "piplus ["<<pipsIdx<<"] is from FD ("<<pipluses[pipsIdx]->getRegion()<< "), extracting information..." << std::endl;
     }
 
     // Now we extract the information on this pion
@@ -1406,8 +1408,11 @@ void ExtractPimsInformation( int pimsIdx, int fdebug ){
     
     // First - we restrict ourselves to pions only from the central detector
     if( piminuses[pimsIdx]->getRegion() != FD ){
-        if (fdebug>2) std::cout << "piminus [" << pimsIdx << "] is not from FD but rather from " << piminuses[pimsIdx]->getRegion() << ", not extracting information...";
+        if (fdebug>2) std::cout << "piminus ["<<pimsIdx<<"] not from FD (from "<<piminuses[pimsIdx]->getRegion()<< "), not extracting information..." << std::endl;
         return;
+    }
+    else{
+        if (fdebug>2) std::cout << "piminus ["<<pimsIdx<<"] is from FD ("<<piminuses[pimsIdx]->getRegion()<< "), extracting information..." << std::endl;
     }
 
     // Now we extract pion information
