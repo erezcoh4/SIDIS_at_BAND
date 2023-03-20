@@ -1319,8 +1319,8 @@ void ExtractPipsInformation( int pipsIdx, int fdebug ){
             std::cout
             << "piplus [" << pipsIdx << "] not from FD (from " << pipluses[pipsIdx]->getRegion()
             << ")"
-            << "p = "       << pi.P() << " GeV/c, " <<
-            << "theta = "   << pi.Theta()*180./3.1415 << "˚, " <<
+            << "p = "       << pi.P() << " GeV/c, "
+            << "theta = "   << pi.Theta()*180./3.1415 << "˚, "
             << ", not extracting information..."
             << std::endl;
         return;
@@ -1422,8 +1422,8 @@ void ExtractPimsInformation( int pimsIdx, int fdebug ){
             std::cout << "piminus ["<<pimsIdx<<"] not from FD (from "
             << piminuses[pimsIdx]->getRegion()
             << ")"
-            << "p = "       << pi.P() << " GeV/c, " <<
-            << "theta = "   << pi.Theta()*180./3.1415 << "˚, " <<
+            << "p = "       << pi.P() << " GeV/c, " 
+            << "theta = "   << pi.Theta()*180./3.1415 << "˚, "
             << ", not extracting information..." << std::endl;
         }
         return;
