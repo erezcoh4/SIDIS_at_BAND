@@ -1314,7 +1314,15 @@ void ExtractPipsInformation( int pipsIdx, int fdebug ){
     
     // First - we restrict ourselves to pions only from the central detector
     if( pipluses[pipsIdx]->getRegion() != FD ){
-        if (fdebug>2) std::cout << "piplus [" << pipsIdx << "] not from FD (from " << pipluses[pipsIdx]->getRegion() << "), not extracting information..." << std::endl;
+        if (fdebug>2)
+            SetLorentzVector(pi  ,pipluses[pipsIdx]);
+            std::cout
+            << "piplus [" << pipsIdx << "] not from FD (from " << pipluses[pipsIdx]->getRegion()
+            << ")"
+            << "p = "       << pi.P() << " GeV/c, " <<
+            << "theta = "   << pi.Theta()*180./3.1415 << "˚, " <<
+            << ", not extracting information..."
+            << std::endl;
         return;
     }else{
         if (fdebug>2) std::cout << "piplus ["<<pipsIdx<<"] is from FD ("<<pipluses[pipsIdx]->getRegion()<< "), extracting information..." << std::endl;
@@ -1408,7 +1416,16 @@ void ExtractPimsInformation( int pimsIdx, int fdebug ){
     
     // First - we restrict ourselves to pions only from the central detector
     if( piminuses[pimsIdx]->getRegion() != FD ){
-        if (fdebug>2) std::cout << "piminus ["<<pimsIdx<<"] not from FD (from "<<piminuses[pimsIdx]->getRegion()<< "), not extracting information..." << std::endl;
+        if (fdebug>2){
+            SetLorentzVector(pi  ,piminuses[pimsIdx] );
+            
+            std::cout << "piminus ["<<pimsIdx<<"] not from FD (from "
+            << piminuses[pimsIdx]->getRegion()
+            << ")"
+            << "p = "       << pi.P() << " GeV/c, " <<
+            << "theta = "   << pi.Theta()*180./3.1415 << "˚, " <<
+            << ", not extracting information..." << std::endl;
+        }
         return;
     }
     else{
