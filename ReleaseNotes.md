@@ -12,8 +12,11 @@ Mar-20, 2023 (commit_)
       
     if( pipluses[pipsIdx]->getRegion() != FD ) return;
     
+2. Added a branch in TTree called “pi_region”, in order that in the event-selection cuts notebook, we show only events with Npi>0 where pi is from the FD
       
-2. Updated Python analysis to step over event selection cuts one-by-one in **EventSelectionCuts.ipynb**
+3. Updated Python analysis to step over event selection cuts one-by-one in **EventSelectionCuts.ipynb**
+
+
 
 
 Mar-3, 2023 (commit_cfbc431)   

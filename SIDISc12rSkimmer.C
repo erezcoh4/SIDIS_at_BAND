@@ -148,6 +148,7 @@ double e_PCAL_sector, e_DC_sector, e_DC_Chi2N, e_DC_x[3], e_DC_y[3], e_DC_z[3];
 
 // positive pions
 bool pipsPastSelectionCuts[NMAXPIONS], eepipsPastKinematicalCuts[NMAXPIONS];
+int            pips_region[NMAXPIONS];
 double        pips_chi2PID[NMAXPIONS];
 double         pips_PCAL_W[NMAXPIONS];
 double         pips_PCAL_V[NMAXPIONS];
@@ -181,6 +182,7 @@ double      piplus_qFrame_Phi[NMAXPIONS];
 // negative pions
 bool     pimsPastSelectionCuts[NMAXPIONS];
 bool eepimsPastKinematicalCuts[NMAXPIONS];
+int            pims_region[NMAXPIONS];
 double        pims_chi2PID[NMAXPIONS];
 double         pims_PCAL_W[NMAXPIONS];
 double         pims_PCAL_V[NMAXPIONS];
@@ -676,157 +678,9 @@ int GetBeamHelicity( event_ptr p_event, int runnum, int fdebug ){
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void SetOutputTTrees(){
     // pi+
-//    outTree_e_piplus_no_cuts->Branch("eventnumber"          ,&evnum                 );
-//    outTree_e_piplus_no_cuts->Branch("runnum"               ,&runnum                );
-//    outTree_e_piplus_no_cuts->Branch("inclusive"            ,&inclusive             );
-//    outTree_e_piplus_no_cuts->Branch("e_E_PCAL"             ,&e_E_PCAL              );
-//    outTree_e_piplus_no_cuts->Branch("e_E_ECIN"             ,&e_E_ECIN              );
-//    outTree_e_piplus_no_cuts->Branch("e_E_ECOUT"            ,&e_E_ECOUT             );
-//    outTree_e_piplus_no_cuts->Branch("e_PCAL_W"             ,&e_PCAL_W              );
-//    outTree_e_piplus_no_cuts->Branch("e_PCAL_V"             ,&e_PCAL_V              );
-//    outTree_e_piplus_no_cuts->Branch("e_PCAL_x"             ,&e_PCAL_x              );
-//    outTree_e_piplus_no_cuts->Branch("e_PCAL_y"             ,&e_PCAL_y              );
-//    outTree_e_piplus_no_cuts->Branch("e_PCAL_z"             ,&e_PCAL_z              );
-//    outTree_e_piplus_no_cuts->Branch("e_PCAL_sector"        ,&e_PCAL_sector         );
-//    outTree_e_piplus_no_cuts->Branch("e_DC_sector"          ,&e_DC_sector           );
-//    outTree_e_piplus_no_cuts->Branch("e_DC_Chi2N"           ,&e_DC_Chi2N            );
-//    outTree_e_piplus_no_cuts->Branch("e_DC_x"               ,&e_DC_x                , "e_DC_x[3]/D"         );
-//    outTree_e_piplus_no_cuts->Branch("e_DC_y"               ,&e_DC_y                , "e_DC_y[3]/D"         );
-//    outTree_e_piplus_no_cuts->Branch("e_DC_z"               ,&e_DC_z                , "e_DC_z[3]/D"         );
-//    outTree_e_piplus_no_cuts->Branch("Npi"                  ,&Npips                 );
-//    outTree_e_piplus_no_cuts->Branch("pi_chi2PID"           ,&pips_chi2PID          , "pi_chi2PID[Npi]/D"    );
-//    outTree_e_piplus_no_cuts->Branch("pi_PCAL_x"            ,&pips_PCAL_x           , "pi_PCAL_x[Npi]/D"     );
-//    outTree_e_piplus_no_cuts->Branch("pi_PCAL_y"            ,&pips_PCAL_y           , "pi_PCAL_y[Npi]/D"     );
-//    outTree_e_piplus_no_cuts->Branch("pi_PCAL_z"            ,&pips_PCAL_z           , "pi_PCAL_z[Npi]/D"     );
-//    outTree_e_piplus_no_cuts->Branch("pi_PCAL_sector"       ,&pips_PCAL_sector      , "pi_PCAL_sector[Npi]/D");
-//    outTree_e_piplus_no_cuts->Branch("pi_DC_sector"         ,&pips_DC_sector        , "pi_DC_sector[Npi]/D"  );
-//    outTree_e_piplus_no_cuts->Branch("pi_Chi2N"             ,&pips_Chi2N            , "pi_Chi2N[Npi]/D"      );
-//    outTree_e_piplus_no_cuts->Branch("pi_DC_x"              ,&pips_DC_x             , "pi_DC_x[Npi][3]/D"    );
-//    outTree_e_piplus_no_cuts->Branch("pi_DC_y"              ,&pips_DC_y             , "pi_DC_y[Npi][3]/D"    );
-//    outTree_e_piplus_no_cuts->Branch("pi_DC_z"              ,&pips_DC_z             , "pi_DC_z[Npi][3]/D"    );
-//    outTree_e_piplus_no_cuts->Branch("pi_E_PCAL"            ,&pips_E_PCAL           , "pi_E_PCAL[Npi]/D"     );
-//    outTree_e_piplus_no_cuts->Branch("pi_E_ECIN"            ,&pips_E_ECIN           , "pi_E_ECIN[Npi]/D"     );
-//    outTree_e_piplus_no_cuts->Branch("pi_E_ECIN"            ,&pips_E_ECIN           , "pi_E_ECIN[Npi]/D"     );
-//    outTree_e_piplus_no_cuts->Branch("pi_E_ECOUT"           ,&pips_E_ECOUT          , "pi_E_ECOUT[Npi]/D"    );
-//    outTree_e_piplus_no_cuts->Branch("DC_layers"            ,&DC_layers             , "DC_layers[3]/I"      );
-//    outTree_e_piplus_no_cuts->Branch("e"                    ,&e                     );
-//    outTree_e_piplus_no_cuts->Branch("Ve"                   ,&Ve                    );
-//    outTree_e_piplus_no_cuts->Branch("pi"                   ,&piplus                );
-//    outTree_e_piplus_no_cuts->Branch("Vpi"                  ,&Vpiplus               );
-//    outTree_e_piplus_no_cuts->Branch("Beam"                 ,&Beam                  );
-//    outTree_e_piplus_no_cuts->Branch("beam_helicity"        ,&beam_helicity         );
-//    outTree_e_piplus_no_cuts->Branch("q"                    ,&q                     );
-//    outTree_e_piplus_no_cuts->Branch("Ebeam"                ,&Ebeam                 );
-//    outTree_e_piplus_no_cuts->Branch("xB"                   ,&xB                    );
-//    outTree_e_piplus_no_cuts->Branch("Q2"                   ,&Q2                    );
-//    outTree_e_piplus_no_cuts->Branch("omega"                ,&omega                 );
-//    outTree_e_piplus_no_cuts->Branch("W_d"         ,&W_d          );
-//    outTree_e_piplus_no_cuts->Branch("W"         ,&W          );
-//    outTree_e_piplus_no_cuts->Branch("Z"                    ,Zpips                  );
-//    outTree_e_piplus_no_cuts->Branch("y"                    ,&y                     );
-//
-//    outTree_e_piplus_no_cuts->Branch("EventPassedCuts"      ,&EventPassedCuts       );
-//    outTree_e_piplus_no_cuts->Branch("ePastCutsInEvent"     ,&ePastCutsInEvent      );
-//    outTree_e_piplus_no_cuts->Branch("eepipsPastKinematicalCuts",&eepipsPastKinematicalCuts ,"eepipsPastKinematicalCuts[Npi]/O"  );
-//    outTree_e_piplus_no_cuts->Branch("piPastCutsInEvent"    ,&pipsPastCutsInEvent   ,"piPastCutsInEvent/O"  );
-//    outTree_e_piplus_no_cuts->Branch("eepipsPastCutsInEvent",&eepipsPastCutsInEvent ,"eepipsPastCutsInEvent/O"  );
-//    outTree_e_piplus_no_cuts->Branch("Npips"                ,&Npips                 );
-//    outTree_e_piplus_no_cuts->Branch("Npims"                ,&Npims                 );
-//    outTree_e_piplus_no_cuts->Branch("Nelectrons"           ,&Ne                    );
-//    outTree_e_piplus_no_cuts->Branch("Ngammas"              ,&Ngammas               );
-//    outTree_e_piplus_no_cuts->Branch("Nprotons"             ,&Np                    );
-//    outTree_e_piplus_no_cuts->Branch("Nneutrons"            ,&Nn                    );
-//
-//    outTree_e_piplus_no_cuts->Branch("piplus_Px"                ,&piplus_Px              , "piplus_Px[Npi]/D"       );
-//    outTree_e_piplus_no_cuts->Branch("piplus_Py"                ,&piplus_Py              , "piplus_Py[Npi]/D"       );
-//    outTree_e_piplus_no_cuts->Branch("piplus_Pz"                ,&piplus_Pz              , "piplus_Pz[Npi]/D"       );
-//    outTree_e_piplus_no_cuts->Branch("piplus_E"                 ,&piplus_E               , "piplus_E[Npi]/D"        );
-//    outTree_e_piplus_no_cuts->Branch("Vpiplus_X"                ,&Vpiplus_X              , "Vpiplus_X[Npi]/D"       );
-//    outTree_e_piplus_no_cuts->Branch("Vpiplus_Y"                ,&Vpiplus_Y              , "Vpiplus_Y[Npi]/D"       );
-//    outTree_e_piplus_no_cuts->Branch("Vpiplus_Z"                ,&Vpiplus_Z              , "Vpiplus_Z[Npi]/D"       );
-//    outTree_e_piplus_no_cuts->Branch("piplus_qFrame_pT"         ,&piplus_qFrame_pT       , "piplus_qFrame_pT[Npi]/D");
-//    outTree_e_piplus_no_cuts->Branch("piplus_qFrame_pL"         ,&piplus_qFrame_pL       , "piplus_qFrame_pL[Npi]/D");
-//    outTree_e_piplus_no_cuts->Branch("piplus_qFrame_Theta"      ,&piplus_qFrame_Theta    , "piplus_qFrame_Theta[Npi]/D");
-//    outTree_e_piplus_no_cuts->Branch("piplus_qFrame_Phi"        ,&piplus_qFrame_Phi      , "piplus_qFrame_Phi[Npi]/D");
 
     if (fdebug>1) std::cout << "SetOutputTTrees()" << std::endl;
-    
-
-    
-//    // pi-
-//    outTree_e_piminus_no_cuts->Branch("eventnumber"          ,&evnum                 );
-//    outTree_e_piminus_no_cuts->Branch("runnum"               ,&runnum                );
-//    outTree_e_piminus_no_cuts->Branch("inclusive"            ,&inclusive             );
-//    outTree_e_piminus_no_cuts->Branch("e_E_PCAL"             ,&e_E_PCAL              );
-//    outTree_e_piminus_no_cuts->Branch("e_E_ECIN"             ,&e_E_ECIN              );
-//    outTree_e_piminus_no_cuts->Branch("e_E_ECOUT"            ,&e_E_ECOUT             );
-//    outTree_e_piminus_no_cuts->Branch("e_PCAL_W"             ,&e_PCAL_W              );
-//    outTree_e_piminus_no_cuts->Branch("e_PCAL_V"             ,&e_PCAL_V              );
-//    outTree_e_piminus_no_cuts->Branch("e_PCAL_x"             ,&e_PCAL_x              );
-//    outTree_e_piminus_no_cuts->Branch("e_PCAL_y"             ,&e_PCAL_y              );
-//    outTree_e_piminus_no_cuts->Branch("e_PCAL_z"             ,&e_PCAL_z              );
-//    outTree_e_piminus_no_cuts->Branch("e_PCAL_sector"        ,&e_PCAL_sector         );
-//    outTree_e_piminus_no_cuts->Branch("e_DC_sector"          ,&e_DC_sector           );
-//    outTree_e_piminus_no_cuts->Branch("e_DC_Chi2N"           ,&e_DC_Chi2N            );
-//    outTree_e_piminus_no_cuts->Branch("e_DC_x"               ,&e_DC_x                , "e_DC_x[3]/D"            );
-//    outTree_e_piminus_no_cuts->Branch("e_DC_y"               ,&e_DC_y                , "e_DC_y[3]/D"            );
-//    outTree_e_piminus_no_cuts->Branch("e_DC_z"               ,&e_DC_z                , "e_DC_z[3]/D"            );
-//    outTree_e_piminus_no_cuts->Branch("Npi"                  ,&Npims                 );
-//    outTree_e_piminus_no_cuts->Branch("pi_chi2PID"           ,&pims_chi2PID          , "pi_chi2PID[Npi]/D"       );
-//    outTree_e_piminus_no_cuts->Branch("pi_PCAL_x"            ,&pims_PCAL_x           , "pi_PCAL_x[Npi]/D"        );
-//    outTree_e_piminus_no_cuts->Branch("pi_PCAL_y"            ,&pims_PCAL_y           , "pi_PCAL_y[Npi]/D"        );
-//    outTree_e_piminus_no_cuts->Branch("pi_PCAL_z"            ,&pims_PCAL_z           , "pi_PCAL_z[Npi]/D"        );
-//    outTree_e_piminus_no_cuts->Branch("pi_PCAL_sector"       ,&pims_PCAL_sector      , "pi_PCAL_sector[Npi]/D"   );
-//    outTree_e_piminus_no_cuts->Branch("pi_DC_sector"         ,&pims_DC_sector        , "pi_DC_sector[Npi]/D"     );
-//    outTree_e_piminus_no_cuts->Branch("pi_Chi2N"             ,&pims_Chi2N            , "pi_Chi2N[Npi]/D"         );
-//    outTree_e_piminus_no_cuts->Branch("pi_DC_x"              ,&pims_DC_x             , "pi_DC_x[Npi][3]/D"       );
-//    outTree_e_piminus_no_cuts->Branch("pi_DC_y"              ,&pims_DC_y             , "pi_DC_y[Npi][3]/D"       );
-//    outTree_e_piminus_no_cuts->Branch("pi_DC_z"              ,&pims_DC_z             , "pi_DC_z[Npi][3]/D"       );
-//    outTree_e_piminus_no_cuts->Branch("pi_E_PCAL"            ,&pims_E_PCAL           , "pi_E_PCAL[Npi]/D"        );
-//    outTree_e_piminus_no_cuts->Branch("pi_E_ECIN"            ,&pims_E_ECIN           , "pi_E_ECIN[Npi]/D"        );
-//    outTree_e_piminus_no_cuts->Branch("pi_E_ECIN"            ,&pims_E_ECIN           , "pi_E_ECIN[Npi]/D"        );
-//    outTree_e_piminus_no_cuts->Branch("pi_E_ECOUT"           ,&pims_E_ECOUT          , "pi_E_ECOUT[Npi]/D"       );
-//    outTree_e_piminus_no_cuts->Branch("DC_layers"            ,&DC_layers             , "DC_layers[3]"           );
-//    outTree_e_piminus_no_cuts->Branch("e"                   ,&e                     );
-//    outTree_e_piminus_no_cuts->Branch("pi"                  ,&piminus               );
-//    outTree_e_piminus_no_cuts->Branch("Ve"                  ,&Ve                    );
-//    outTree_e_piminus_no_cuts->Branch("Vpi"                 ,&Vpiminus              );
-//    outTree_e_piminus_no_cuts->Branch("Beam"                ,&Beam                  );
-//    outTree_e_piminus_no_cuts->Branch("beam_helicity"       ,&beam_helicity         );
-//    outTree_e_piminus_no_cuts->Branch("q"                   ,&q                     );
-//    outTree_e_piminus_no_cuts->Branch("Ebeam"               ,&Ebeam                 );
-//    outTree_e_piminus_no_cuts->Branch("xB"                  ,&xB                    );
-//    outTree_e_piminus_no_cuts->Branch("Q2"                  ,&Q2                    );
-//    outTree_e_piminus_no_cuts->Branch("omega"               ,&omega                 );
-//    outTree_e_piminus_no_cuts->Branch("W_d"        ,&W_d          );
-//    outTree_e_piminus_no_cuts->Branch("W"        ,&W          );
-//    outTree_e_piminus_no_cuts->Branch("Z"                    ,Zpims                  );
-//
-//    outTree_e_piminus_no_cuts->Branch("EventPassedCuts"      ,&EventPassedCuts       );
-//    outTree_e_piminus_no_cuts->Branch("ePastCutsInEvent"     ,&ePastCutsInEvent      );
-//    outTree_e_piminus_no_cuts->Branch("eepimsPastKinematicalCuts",&eepimsPastKinematicalCuts ,"eepimsPastKinematicalCuts[Npi]/O"  );
-//    outTree_e_piminus_no_cuts->Branch("piPastCutsInEvent"    ,&pimsPastCutsInEvent   ,"piPastCutsInEvent/O" );
-//    outTree_e_piminus_no_cuts->Branch("eepimsPastCutsInEvent",&eepimsPastCutsInEvent ,"eepimsPastCutsInEvent/O"  );
-//    outTree_e_piminus_no_cuts->Branch("Npips"                ,&Npips                 );
-//    outTree_e_piminus_no_cuts->Branch("Npims"                ,&Npims                 );
-//    outTree_e_piminus_no_cuts->Branch("Nelectrons"           ,&Ne                    );
-//    outTree_e_piminus_no_cuts->Branch("Ngammas"              ,&Ngammas               );
-//    outTree_e_piminus_no_cuts->Branch("Nprotons"             ,&Np                    );
-//    outTree_e_piminus_no_cuts->Branch("Nneutrons"            ,&Nn                    );
-//
-//    outTree_e_piminus_no_cuts->Branch("piminus_Px"           ,&piminus_Px              , "piminus_Px[Npi]/D"    );
-//    outTree_e_piminus_no_cuts->Branch("piminus_Py"           ,&piminus_Py              , "piminus_Py[Npi]/D"    );
-//    outTree_e_piminus_no_cuts->Branch("piminus_Pz"           ,&piminus_Pz              , "piminus_Pz[Npi]/D"    );
-//    outTree_e_piminus_no_cuts->Branch("piminus_E"            ,&piminus_E               , "piminus_E[Npi]/D"    );
-//    outTree_e_piminus_no_cuts->Branch("Vpiminus_X"           ,&Vpiminus_X              , "Vpiminus_X[Npi]/D"    );
-//    outTree_e_piminus_no_cuts->Branch("Vpiminus_Y"           ,&Vpiminus_Y              , "Vpiminus_Y[Npi]/D"    );
-//    outTree_e_piminus_no_cuts->Branch("Vpiminus_Z"           ,&Vpiminus_Z              , "Vpiminus_Z[Npi]/D"    );
-//    outTree_e_piminus_no_cuts->Branch("piminus_qFrame_pT"    ,&piminus_qFrame_pT       , "piminus_qFrame_pT[Npi]/D");
-//    outTree_e_piminus_no_cuts->Branch("piminus_qFrame_pL"    ,&piminus_qFrame_pL       , "piminus_qFrame_pL[Npi]/D");
-//    outTree_e_piminus_no_cuts->Branch("piminus_qFrame_Theta" ,&piminus_qFrame_Theta    , "piminus_qFrame_Theta[Npi]/D");
-//    outTree_e_piminus_no_cuts->Branch("piminus_qFrame_Phi"   ,&piminus_qFrame_Phi      , "piminus_qFrame_Phi[Npi]/D");
-    
-    
+   
     
     // pi+
     if ((!IsMC)
@@ -851,6 +705,8 @@ void SetOutputTTrees(){
         outTree_e_piplus->Branch("e_DC_y"               ,&e_DC_y                , "e_DC_y[3]/D"         );
         outTree_e_piplus->Branch("e_DC_z"               ,&e_DC_z                , "e_DC_z[3]/D"         );
         outTree_e_piplus->Branch("Npi"                  ,&Npips                 );
+        
+        outTree_e_piplus->Branch("pi_region"            ,&pips_region           , "pi_region[Npi]/I"   );
         outTree_e_piplus->Branch("pi_chi2PID"           ,&pips_chi2PID          , "pi_chi2PID[Npi]/D"    );
         outTree_e_piplus->Branch("pi_PCAL_x"            ,&pips_PCAL_x           , "pi_PCAL_x[Npi]/D"     );
         outTree_e_piplus->Branch("pi_PCAL_y"            ,&pips_PCAL_y           , "pi_PCAL_y[Npi]/D"     );
@@ -929,6 +785,7 @@ void SetOutputTTrees(){
         outTree_e_piminus->Branch("e_DC_z"               ,&e_DC_z                , "e_DC_z[3]/D"            );
         
         outTree_e_piminus->Branch("Npi"                  ,&Npims                 );
+        outTree_e_piminus->Branch("pi_region"            ,&pims_region           , "pi_region[Npi]/I"   );
         outTree_e_piminus->Branch("pi_chi2PID"           ,&pims_chi2PID          , "pi_chi2PID[Npi]/D"       );
         outTree_e_piminus->Branch("pi_PCAL_x"            ,&pims_PCAL_x           , "pi_PCAL_x[Npi]/D"        );
         outTree_e_piminus->Branch("pi_PCAL_y"            ,&pims_PCAL_y           , "pi_PCAL_y[Npi]/D"        );
@@ -1052,6 +909,7 @@ void InitializeVariables(){
     protons     .clear();
     gammas      .clear();
     for (int piIdx=0; piIdx<NMAXPIONS; piIdx++) {
+        pips_region[piIdx]                          = -9999;
         pips_chi2PID[piIdx]                         = -9999;
         pips_DC_sector[piIdx]                       = -9999;
         pips_PCAL_sector[piIdx]                     = -9999;
@@ -1061,6 +919,7 @@ void InitializeVariables(){
         pips_E_PCAL[piIdx]                          = -9999;
         pips_E_ECIN[piIdx] = pips_E_ECOUT[piIdx]    = -9999;
         
+        pims_region[piIdx]                          = -9999;
         pims_chi2PID[piIdx]                         = -9999;
         pims_DC_sector[piIdx]                       = -9999;
         pims_PCAL_sector[piIdx]                     = -9999;
@@ -1311,7 +1170,7 @@ void ExtractPipsInformation( int pipsIdx, int fdebug ){
     
     
     // Extract positive pion information
-    
+    pips_region[pipsIdx] = pipluses[pipsIdx]->getRegion();
     // First - we restrict ourselves to pions only from the central detector
     if( pipluses[pipsIdx]->getRegion() != FD ){
         if (fdebug>2){
@@ -1414,7 +1273,7 @@ void ExtractPipsInformation( int pipsIdx, int fdebug ){
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void ExtractPimsInformation( int pimsIdx, int fdebug ){
     // Extract negative pion information
-    
+    pims_region[pimsIdx] = piminuses[pimsIdx]->getRegion();
     // First - we restrict ourselves to pions only from the central detector
     if( piminuses[pimsIdx]->getRegion() != FD ){
         if (fdebug>2){
