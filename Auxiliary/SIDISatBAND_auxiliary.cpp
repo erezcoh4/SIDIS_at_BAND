@@ -57,22 +57,6 @@ Double_t SIDISatBAND_auxiliary::Chi2PID_pion_upperBound( Double_t p, Double_t C)
     
 }
 
-//// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-//TVector3 SIDISatBAND_auxiliary::GetParticleVertex(clas12::region_part_ptr rp){
-//    TVector3 V(rp->par()->getVx(),
-//               rp->par()->getVy(),
-//               rp->par()->getVz());
-//    return V;
-//}
-
-//// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-//void SIDISatBAND_auxiliary::SetParticle4Momentum (TLorentzVector &p4,clas12::region_part_ptr rp){
-//    p4.SetXYZM(rp->par()->getPx(),
-//               rp->par()->getPy(),
-//               rp->par()->getPz(),
-//               p4.M());
-//}
-
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void SIDISatBAND_auxiliary::loadCutValues(std::string cutValuesFilename,
                                           int torusBending){

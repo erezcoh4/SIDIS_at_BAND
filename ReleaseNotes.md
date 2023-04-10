@@ -3,7 +3,7 @@
 # SRC-SIDIS revisions and release-notes 
 -----------------------------------------------------------------
 
-Mar-20, 2023 (commit_)   
+Mar-24, 2023 (commit_cfbc431)   
 -------------
 
 1. Moved to using only pions from the forward detector 

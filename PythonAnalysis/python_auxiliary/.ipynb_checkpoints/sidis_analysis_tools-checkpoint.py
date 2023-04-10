@@ -22,7 +22,11 @@ phi_centers = (phi_bins[1:]+phi_bins[:-1])/2
 Nphi_pts    = len(phi_centers)
 phi_xticks  = [-180,-60,60,180]
 phi_xlim    = [-180,180]
-
+sectors     = [1,2,3,4,5,6]
+phi_mid_arr = np.array([-1, 0, 60, 120, 180, -120, -60])
+phi_min_arr = phi_mid_arr - 50
+phi_max_arr = phi_mid_arr + 50
+    
 # d(e,e'π), d(e,e'πn) and  p(e,e'π) events before all selection cuts
 global e_e_pi          , e_e_pi_n,          e_e_pi_FreeP;
 
@@ -55,6 +59,195 @@ for run in beam_charge_all_runs_rga.runnum:
     
     
 from scipy.optimize import curve_fit
+
+def shift_phi_for_sector_4(phi):#{
+    '''
+    phi = shift_phi_for_sector_4(phi)
+    last update Apr-5, 2023
+
+    Shift phi in sector 4, such that all phi below 100 deg. are shifted to phi+360
+    
+    comments:
+    ------------
+    phi is measurfed in deg.
+    
+    '''
+    phi_shifted = [];    
+    for _phi_ in phi:    
+        if _phi_ < 100: phi_shifted.append(_phi_+360)        
+        else: phi_shifted.append(_phi_)
+    phi = phi_shifted;
+    return np.array(phi)
+#}
+
+def bowl_function( x, y0=0, Scale=1, x0=0, width=1, ymax=35, bowl_type='x2/(1-x2)' ):#{
+    '''
+    Produce a bowl-shaped function     
+    
+    comments:
+    ------------
+    A. ymax=35 by default since maximal allowed theta in our analysis is 35
+
+    B. bowl_type
+                'x2/(1-x2)'
+                 y = y0 + Scale * ( (x-x0)^2/(width-(x-x0)^2) ) 
+                
+                'parabola'
+                y = y0 + Scale * (x-x0)^2
+                
+    '''
+    # 
+    if bowl_type == 'x2/(1-x2)':
+        y = y0 + Scale*(np.square(x - x0)/(width-np.square(x - x0)))
+        y[width<=np.square(x - x0)] = ymax 
+        y[ymax < y] = ymax
+        
+    
+    elif bowl_type == 'parabola':
+        # smiling parabola
+        y = y0 + Scale*(np.square(x-x0))
+
+    return y
+#}
+
+def get_bowl_function_in_sector(pi_charge = 'piminus', sector=1, p_idx=0, phi=np.linspace(-180,180,51)):#{
+    '''
+    theta_min = get_bowl_function_in_sector(pi_charge = 'piminus', sector=1, p_idx=0, phi=np.linspace(-180,180,51))
+    
+    comments:
+    ------------
+    We use the same theta_min for piplus and piminus
+    Only change is phi median value which is different for outbending and inbending 
+    
+    '''
+    pi_idx = 0
+    if pi_charge == 'piminus': pi_idx = 1    
+    
+    # indices: [sector=1...6, p_bin, pi_charge='piplus'/'piminus']
+    phi_theta_bowl_theta_min = np.zeros((6,4,2))
+    phi_theta_bowl_phi0      = np.zeros((6,4,2))
+    phi_theta_bowl_Scale     = np.zeros((6,4))
+    phi_theta_bowl_width     = np.zeros((6,4))
+
+
+    phi_theta_bowl_theta_min = [[[8.02,15.42],  [7.33,13.70],  [7.14,12.08],  [7.04,10.39]],                            
+                                [[7.80, 15.39], [7.24, 13.69], [7.09,  12.10],[6.87,10.28]],
+                                [[7.66,15.49],  [7.14,13.73],  [6.93,12.08],  [6.96, 10.37]],
+                                [[7.58,15.45],  [7.09,13.65],  [6.89,12.05],  [6.86,10.23]],
+                                [[7.65,15.30],  [7.15,13.59],  [6.94,12.00],  [6.84,10.22]],
+                                [[7.77,15.38],  [7.04,13.68],  [6.90,12.05],  [6.88,10.34]]]
+
+    phi_theta_bowl_phi0      = [[[-18.02,18.11],   [-13.71,12.08],   [-10.36,10.19],   [-6.81,7.35]],
+                                [[41.9, 78.25],    [46.0, 73.75],    [49.56, 70.3],    [53.2, 67.2]],
+                                [[101.62,138.25],  [105.81,133.38],  [109.44,130.00],  [113.19,126.94]],
+                                [[161.88,197.62],  [165.88,193.12],  [169.50,189.62],  [173.38,186.62]],
+                                [[-137.75,-101.88],[-133.75,-106.44],[-130.25,-110.25],[-126.44,-112.81]],                             
+                                [[-77.31,-41.91],  [-72.88,-46.41],  [-69.31,-49.88],  [-65.31,-52.38]]]
+
+    phi_theta_bowl_Scale     = [[1,1,1,1],
+                                [1,1,1,1],                           
+                                [1,1,1,1],                           
+                                [1,1,1,1],                           
+                                [1,1,1,1],                           
+                                [1,1,1,1]]
+
+    phi_theta_bowl_width     = [[550,550,550,550],                            
+                                [550,550,550,550],
+                                [550,550,550,550],
+                                [550,550,550,550],
+                                [550,550,550,550],
+                                [550,550,550,550]]
+    
+    
+    # y0    = phi_theta_bowl_theta_min   [sector-1][p_idx][pi_idx]
+    y0    = phi_theta_bowl_theta_min   [sector-1][p_idx][1]
+    x0    = phi_theta_bowl_phi0        [sector-1][p_idx][pi_idx]
+    Scale = phi_theta_bowl_Scale       [sector-1][p_idx]
+    width = phi_theta_bowl_width       [sector-1][p_idx]    
+    return bowl_function(phi, y0=y0, x0=x0, Scale=Scale, width=width)
+#}
+
+def get_theta_min_in_phi_theta_bowl( pi_charge = 'any', sector=1, p_idx=0, phi=np.linspace(-180,180,51) ):#{
+    pi_idx = 0
+    if pi_charge == 'piminus': pi_idx = 1
+    theta_min = get_bowl_function_in_sector( pi_charge=pi_charge, sector=sector, p_idx=p_idx, phi=phi); #bowl_function( phi, y0=y0, x0=x0, Scale=Scale, width=width )
+    return theta_min
+#}
+
+def apply_acceptance_match_cut_p_theta_phi(df_dict_before_cut, fdebug=0):#{
+    '''
+    df_dict_after_cut = apply_acceptance_match_cut_p_theta_phi(df_dict_before_cut, fdebug=0)
+    last update Apr-5, 2023
+
+    
+    Apply acceptance matching cut in 3D
+    (1) Subdivide data-set into (pion DC) sectors 
+    (2) In each sector, subdivide data-set into four pion momentum bins
+        1.25 < p < 2.0, 2.0 < p < 2.5, 2.5 < p < 3.5, 3.5 < p < 5.0 GeV/c
+    (3) In sector and momentum bin, define a bowl-shaped boundary for piplus and piminus to describe the allowed limits in phi-theta plane
+    (4) Allow only events inside or above this bowl to pass the cut
+ 
+    
+    
+    comments:
+    ------------
+    A. phi and theta are measured in degrees
+    B. in sector 4, phi is shifted using shift_phi_for_sector_4()
+    C. We use the same theta_min for piplus and piminus, and only change is central phi value which is different for outbending and inbending 
+    
+    '''
+    
+    p_min_arr = [1.25, 2.00, 2.50, 3.50 ]
+    p_max_arr = [2.00, 2.50, 3.50, 5.00 ]
+    Np = len(p_min_arr)
+
+    Nbefore_dict, Nafter_dict = dict(),dict()
+    df_dict_after_cut = dict()
+    for pi_ch,pi_label,pi_color,pi_idx in zip(pi_charge_names,pi_labels,pi_colors,[1,2]):
+        df = df_dict_before_cut[pi_ch]
+        df_after_cut = pd.DataFrame();
+        Nbefore_dict[pi_ch], Nafter_dict[pi_ch] = [],[]
+        for sector in sectors:#{
+            df_in_sector = df[df.pi_DC_sector==sector]
+            Nbefore_dict[pi_ch].append(len(df_in_sector))
+            df_in_sector_pass_cut = pd.DataFrame();
+            for p_min,p_max,p_idx in zip(p_min_arr,p_max_arr,range(Np)):#{
+                
+                df_in_bin = df_in_sector[ (p_min < df_in_sector.pi_P) & (df_in_sector.pi_P < p_max) ]
+
+                phi       = df_in_bin.pi_Phi  *180./np.pi; 
+                if sector==4: phi = shift_phi_for_sector_4(phi)             
+                theta_min_in_sector = get_theta_min_in_phi_theta_bowl( pi_charge=pi_ch, sector=sector, p_idx=p_idx, phi=phi )
+
+                df_in_sector_in_bin_pass_cut = df_in_bin[ df_in_bin.pi_Theta*r2d > theta_min_in_sector ]                
+                df_in_sector_pass_cut = pd.concat([df_in_sector_pass_cut,df_in_sector_in_bin_pass_cut])
+            #}            
+            Nafter_dict[pi_ch].append(len(df_in_sector_pass_cut))
+            df_after_cut = pd.concat([df_after_cut, df_in_sector_pass_cut]);
+            #}
+        df_dict_after_cut[pi_ch] = df_after_cut
+        #}
+    #}
+
+    if fdebug:#{
+        print('Acceptance matching cut statistics');
+        print('Sector \t Before \t After \t Survival');
+        print('------------------------------------------------')
+        for pi_ch,pi_label,pi_color,pi_idx in zip(pi_charge_names,pi_labels,pi_colors,[1,2]):#{
+            print('\t\t',pi_ch)
+            print('------------------------------------------------')
+            Nbefore_dict[pi_ch+' total'] = np.sum(Nbefore_dict[pi_ch])
+            Nafter_dict[pi_ch+' total']  = np.sum(Nafter_dict[pi_ch])
+
+            for sector in sectors: 
+                print(sector,'\t %.2f M'%(Nbefore_dict[pi_ch][sector-1]*1e-6),'\t','%.2f M'%(Nafter_dict[pi_ch][sector-1]*1e-6),'\t %.1f'%(100.*Nafter_dict[pi_ch][sector-1]/Nbefore_dict[pi_ch][sector-1]),'%' )
+            print('------------------------------------------------')
+            print('\t %.2f M'%(Nbefore_dict[pi_ch+' total']*1e-6),'\t','%.2f M'%(Nafter_dict[pi_ch+' total']*1e-6),'\t %.1f'%(100.*Nafter_dict[pi_ch+' total']/Nbefore_dict[pi_ch+' total']),'%' )
+            print()
+        #}
+    #}
+    return df_dict_after_cut
+#}
 
 # ----------------------- #
 def load_SIDIS_data(rgb_runs_filenames = ["good_runs_10-2-final.txt"],
@@ -924,7 +1117,6 @@ def apply_p_theta_acceptance_cut_single_set( df_dict=None,
         else:              NeventsMax = len(df_dict[pi_ch])
         df = df_dict[pi_ch][0:NeventsMax]
         if fdebug: print('Applying p-theta on cut for '+pi_ch+' on %d events'%NeventsMax)
-        # good_indices = np.array([])
         df_after_cut = pd.DataFrame();
         for sector in range(1,7):#{
             df_in_sector   = df[df.pi_DC_sector == sector]
@@ -1073,29 +1265,34 @@ def apply_cuts_to_e_e_pi_n(fdebug=2,
 # ----------------------- #
 def apply_cuts_to_e_e_pi(fdebug=0,
                          NeventsMax=-1,
-                         NMaxPerSubset = 500000,
                          doAcceptanceMatchingCut = True,
-                         doApply_minPn_cut       = True,
+                         AcceptanceMatchingType  ='p-theta',
                          doApply_Mx_cut          = True,
                          W_min                   = None):#{
     '''
     e_e_pi_pass_cuts = apply_cuts_to_e_e_pi(fdebug,
                                          NeventsMax,
-                                         NMaxPerSubset,
                                          doAcceptanceMatchingCut,
-                                         doApply_minPn_cut,
+                                         AcceptanceMatchingType,
                                          doApply_Mx_cut)
                                          
-    Sep-15, 2022
+                                         
+                                         
+    last update Apr-5, 2023
+    
+    AcceptanceMatchingType  = 'p-theta'/'p-theta-phi'
     '''
     # d(e,e'\pi) SIDIS data
     global e_e_pi, e_e_pi_pass_cuts
 
     
     if doAcceptanceMatchingCut:#{
-        e_e_pi_after_p_theta_cut = apply_p_theta_acceptance_cut_single_set( e_e_pi,
-                                                                  NeventsMax=NeventsMax,
-                                                                  fdebug=fdebug )
+        if AcceptanceMatchingType=='p-theta':
+            e_e_pi_after_p_theta_cut = apply_p_theta_acceptance_cut_single_set( e_e_pi,
+                                                                      NeventsMax=NeventsMax,
+                                                                      fdebug=fdebug )
+        elif AcceptanceMatchingType=='p-theta-phi':
+            e_e_pi_after_p_theta_cut = apply_acceptance_match_cut_p_theta_phi( e_e_pi, fdebug=fdebug )
 
     #}
     else:#{
@@ -1146,14 +1343,12 @@ def apply_cuts_to_e_e_pi_FreeP(fdebug=2,
                              NeventsMax=-1,
                              NMaxPerSubset = 500000,
                              doAcceptanceMatchingCut = True,
-                             doApply_minPn_cut       = True,
                              doApply_Mx_cut          = True):#{
     '''
     e_e_pi_FreeP_pass_cuts = apply_cuts_to_e_e_pi_FreeP(fdebug,
                                          NeventsMax,
                                          NMaxPerSubset,
                                          doAcceptanceMatchingCut,
-                                         doApply_minPn_cut,
                                          doApply_Mx_cut)
                                          
     Jan-26, 2023
@@ -1223,12 +1418,13 @@ def apply_further_selection_cuts_to_data(fdebug=0,
                                          NeventsMax=-1,
                                          NMaxPerSubset = 500000,
                                          doAcceptanceMatchingCut = True,
+                                         AcceptanceMatchingType  ='p-theta',
                                          doApply_minPn_cut       = True,
                                          doApply_Mx_cut          = True,
                                          W_min                   = None):#{
     '''
     e_e_pi_pass_cuts, e_e_pi_n_pass_cuts, e_e_pi_FreeP_pass_cuts, e_e_pi_GEMC_pass_cuts = apply_further_selection_cuts_to_data(fdebug=2)
-    last edit Jan-7, 2023
+    last edit Apr-5, 2023
     
     Apply selection cuts not previously imposed
     
@@ -1240,8 +1436,9 @@ def apply_further_selection_cuts_to_data(fdebug=0,
     
     input:
     --------
-    doApply_*_cut      flag to apply the cut or not
-    W_min              default is read-off automatically from macros/cuts/BANDcutValues.csv
+    doApply_*_cut           flag to apply the cut or not
+    W_min                   default is read-off automatically from macros/cuts/BANDcutValues.csv
+    AcceptanceMatchingType  'p-theta'/'p-theta-phi'
         
     return:
     --------
@@ -1263,10 +1460,11 @@ def apply_further_selection_cuts_to_data(fdebug=0,
     # (1) d(e,e'π) Data
     if (e_e_pi=={}) is False:#{
         if fdebug: print("(1) Applying cuts to d(e,e'π) data")
-        e_e_pi_pass_cuts = apply_cuts_to_e_e_pi(fdebug, NeventsMax, NMaxPerSubset,
-                                                doAcceptanceMatchingCut,
-                                                doApply_minPn_cut,
-                                                doApply_Mx_cut,
+        e_e_pi_pass_cuts = apply_cuts_to_e_e_pi(fdebug=fdebug,
+                                                NeventsMax=NeventsMax, 
+                                                doAcceptanceMatchingCut=doAcceptanceMatchingCut,
+                                                doApply_Mx_cut=doApply_Mx_cut,
+                                                AcceptanceMatchingType=AcceptanceMatchingType,
                                                 W_min = W_min)
     # (2) d(e,e'πn) data
     if (e_e_pi_n=={}) is False:#{
@@ -1278,10 +1476,10 @@ def apply_further_selection_cuts_to_data(fdebug=0,
     # (3) p(e,e'π) Data
     if (e_e_pi_FreeP=={}) is False:#{
         if fdebug: print("(3) Applying cuts to p(e,e'π) data")
-        e_e_pi_FreeP_pass_cuts = apply_cuts_to_e_e_pi_FreeP(fdebug, NeventsMax,NMaxPerSubset,
-                                                    doAcceptanceMatchingCut,
-                                                    doApply_minPn_cut,
-                                                    doApply_Mx_cut)
+        e_e_pi_FreeP_pass_cuts = apply_cuts_to_e_e_pi_FreeP(fdebug=fdebug, NeventsMax=NeventsMax,
+                                                    doAcceptanceMatchingCut=doAcceptanceMatchingCut,
+                                                            AcceptanceMatchingType=AcceptanceMatchingType,
+                                                    doApply_Mx_cut=doApply_Mx_cut)
     # (4) MC
     if fdebug: print('e_e_pi_GEMC=={}:',(e_e_pi_GEMC=={}))
     if (e_e_pi_GEMC=={}) is False:#{
@@ -1338,28 +1536,6 @@ def apply_cuts_to_e_e_pi_GEMC(fdebug=2,
     for pi_ch,pi_print in zip(pi_charge_names,pi_prints):#{
         e_e_pi_GEMC_pass_cuts[pi_ch]['weight'] = 1
     #}
-
-
-
-    # print number of events retained on every cut in the uniform GEMC
-    # if fdebug<2: return
-#     for pi_ch,pi_print in zip(pi_charge_names,pi_prints):#{
-#         print('(e,e',pi_print,') in uniform GEMC simulation')
-
-#         Nevents[pi_ch + ' GEMC original'] = len(e_e_pi_GEMC[pi_ch])
-#         frac_Nevents[pi_ch + ' GEMC original'] = 1
-#         print(Nevents[pi_ch + ' GEMC original'],'events before cut')
-
-#         Nevents[pi_ch +' GEMC p-theta cut'] = len(e_e_pi_GEMC_after_p_theta_cut[pi_ch])
-#         frac_Nevents[pi_ch + ' GEMC p-theta cut'] = float(Nevents[pi_ch +' GEMC p-theta cut'])/ Nevents[pi_ch + ' GEMC original']
-#         print(Nevents[pi_ch +' GEMC p-theta cut'],'events after p-theta cut (%.1f'%(100.*frac_Nevents[pi_ch + ' GEMC p-theta cut']),'%)')
-
-
-#         Nevents[pi_ch +' GEMC Mx cut'] = len(e_e_pi_GEMC_after_Mx_cut[pi_ch])
-#         frac_Nevents[pi_ch + ' GEMC Mx cut'] = float(Nevents[pi_ch +' GEMC Mx cut'])/Nevents[pi_ch + ' GEMC original']
-#         print(Nevents[pi_ch +' GEMC Mx cut'],'events after M_X cut (%.1f'%(100.*frac_Nevents[pi_ch + ' GEMC Mx cut']),'%)')
-#     #}
-    # print(' ')
     return e_e_pi_GEMC_pass_cuts
 #}
 
