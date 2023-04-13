@@ -14,6 +14,8 @@ Mar-24, 2023 (commit_cfbc431)
     
 2. Added a branch in TTree called “pi_region”, in order that in the event-selection cuts notebook, we show only events with Npi>0 where pi is from the FD
       
+    where FD = 2000, see in Clas12Banks/clas12defs.h:  static const short FD = 2000;      
+      
 3. Updated Python analysis to step over event selection cuts one-by-one in **EventSelectionCuts.ipynb**
 
 
