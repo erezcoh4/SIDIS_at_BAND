@@ -3,6 +3,46 @@
 # SRC-SIDIS revisions and release-notes 
 -----------------------------------------------------------------
 
+
+
+May-4, 2023 (commit_)   
+-------------
+
+1. Corrected cross-section extraction 
+    previous version:  Yield = Sum_{run i=0,...N} (Y_i / Charge_i) 
+    corrected version: Yield = Sum_{run i=0,...N} (Y_i) / Sum_{run i} (Charge_i)
+    
+2. Renamed *extract_SIDIS_ratio()* to *extract_SIDIS_Xsec_ratio()*
+
+            
+    df_dict({'piplus','piminus'})
+    --> extract_SIDIS_Xsec_ratio() that calls: 
+    --> compute_ratio_pips_to_pims()  --> (Npips, Npims, R, Npips_weighted, Npims_weighted, R_corrected) per bin         
+    
+        
+    
+Apr-28, 2023    
+-------------
+
+1. Added weights to results dataFrames in sidis_analsis_tools::apply_cuts_to_e_e_pi()
+
+    the weight is calculated for each event, according to its π charge (π+/π- separately) and the kinematics of the event: x,Q2,z
+
+    beamCharge_weight    = 1/beam-charge
+    binMigration_weight  = 1/bin-migration, in bins of x,Q2,z
+    acceptance_weight    = 1/acceptance, where acceptance = N(accepted)/N(generated) in bins of x,Q2,z
+    weight               = beamCharge_weight * binMigration_weight * acceptance_weight
+
+    
+    
+    (Further details and plots of weights at PythonAnalysis/MC/Correction_from_SIDISMC.ipynb)
+
+
+
+ 
+
+
+
 Mar-24, 2023 (commit_cfbc431)   
 -------------
 
