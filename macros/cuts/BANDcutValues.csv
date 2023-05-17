@@ -24,3 +24,8 @@ Ppi_min,1.25
 Ppi_max,5.0
 Pe_min,3.0
 Pe_max,10.6
+(Ve-VK)_z_max,20.0
+K_theta_min,5.
+K_theta_max,35.
+PK_min,1.25
+PK_max,5.0

@@ -1,4 +1,4 @@
-// last edit Feb-17, 2023
+// last edit May-9, 2023
 
 #ifdef __CINT__
 #pragma link C++ class std::vector<TVector3>+;
@@ -122,9 +122,14 @@ TString Skimming = "", DataPath = "", prefix = "", SimPi = "";
 auto db = TDatabasePDG::Instance();
 double        Pe_phi, q_phi, q_theta; // "q-frame" parameters
 double                   Zpi, Zpi_LC;
+double                   ZK,  ZK_LC;
 
-bool ePastCutsInEvent = false, pipsPastCutsInEvent = false, eepipsPastCutsInEvent = false;
-bool pimsPastCutsInEvent = false, EventPassedCuts = false,     eepimsPastCutsInEvent = false;
+bool    ePastCutsInEvent = false,       EventPassedCuts = false;
+bool pipsPastCutsInEvent = false, eepipsPastCutsInEvent = false;
+bool pimsPastCutsInEvent = false, eepimsPastCutsInEvent = false;
+bool  KpsPastCutsInEvent = false,  eeKpsPastCutsInEvent = false;
+bool  KmsPastCutsInEvent = false,  eeKmsPastCutsInEvent = false;
+
 bool IsMC = false; // GEMC simulations
 // meta-data
 int fdebug = 0;
@@ -133,13 +138,16 @@ int DC_layers[3] = {6,18,36};// Region 1 is denoted at DC detector 6, Region 2 i
 int DC_layer, runnum=0, evnum=0, beam_helicity=0;
 // helicity of the electron +1 along the beam and -1 opposite to it
 int status, NeventsMaxToProcess, Nevents_processed, Nevents_passed_e_cuts;
-int Nevents_passed_pips_cuts, Nevents_passed_e_pips_cuts;
-int Nevents_passed_e_pips_kinematics_cuts, Nevents_passed_pims_cuts;
-int Nevents_passed_e_pims_cuts, Nevents_passed_e_pims_kinematics_cuts;
+int Nevents_passed_pips_cuts,               Nevents_passed_e_pips_cuts;
+int Nevents_passed_e_pips_kinematics_cuts,  Nevents_passed_pims_cuts;
+int Nevents_passed_e_pims_cuts,             Nevents_passed_e_pims_kinematics_cuts;
+int Nevents_passed_Kps_cuts,                Nevents_passed_e_Kps_cuts;
+int Nevents_passed_e_Kps_kinematics_cuts,   Nevents_passed_Kms_cuts;
+int Nevents_passed_e_Kms_cuts,              Nevents_passed_e_Kms_kinematics_cuts;
 int inclusive; // tag to look at inclusive run - all the events with no selection
 
 // number of particles per event
-int Ne, Nn, Np, Npips, Npims, Ngammas, Nd; // number of detected deuterons
+int Ne, Nn, Np, Npips, Npims, NKps, NKms, Ngammas, Nd;
 
 // leading electron
 // electron energy deposit in PCAL [GeV], in ECAL_in [GeV], in ECAL_out [GeV]...
@@ -211,6 +219,73 @@ double       piminus_qFrame_pT[NMAXPIONS]; // transverse momentum relative to q
 double       piminus_qFrame_pL[NMAXPIONS]; // longitudinal momentum relative to q
 double    piminus_qFrame_Theta[NMAXPIONS];
 double      piminus_qFrame_Phi[NMAXPIONS];
+
+// positive Kaons
+bool KpsPastSelectionCuts[NMAXKAONS], eeKpsPastKinematicalCuts[NMAXKAONS];
+int            Kps_region[NMAXKAONS];
+double        Kps_chi2PID[NMAXKAONS];
+double         Kps_PCAL_W[NMAXKAONS];
+double         Kps_PCAL_V[NMAXKAONS];
+double         Kps_PCAL_x[NMAXKAONS];
+double         Kps_PCAL_y[NMAXKAONS];
+double         Kps_PCAL_z[NMAXKAONS];
+double    Kps_PCAL_sector[NMAXKAONS];
+double      Kps_DC_sector[NMAXKAONS];
+double          Kps_Chi2N[NMAXKAONS];
+double        Kps_DC_x[NMAXKAONS][3];
+double        Kps_DC_y[NMAXKAONS][3];
+double        Kps_DC_z[NMAXKAONS][3];
+double         Kps_E_PCAL[NMAXKAONS];
+double         Kps_E_ECIN[NMAXKAONS];
+double        Kps_E_ECOUT[NMAXKAONS];
+double               ZKps[NMAXKAONS]; // hadron rest-frame energy
+double             ZKpsLC[NMAXKAONS]; // hadron z on the light-cone
+double           Kplus_Px[NMAXKAONS];
+double           Kplus_Py[NMAXKAONS];
+double           Kplus_Pz[NMAXKAONS];
+double            Kplus_E[NMAXKAONS];
+double           VKplus_X[NMAXKAONS];
+double           VKplus_Y[NMAXKAONS];
+double           VKplus_Z[NMAXKAONS];
+double       Kaplus_qFrame_pT[NMAXKAONS]; // transverse momentum relative to q
+double       Kaplus_qFrame_pL[NMAXKAONS]; // longitudinal momentum relative to q
+double    Kaplus_qFrame_Theta[NMAXKAONS];
+double      Kaplus_qFrame_Phi[NMAXKAONS];
+
+
+// negative Kaons
+bool     KmsPastSelectionCuts[NMAXKAONS];
+bool eeKmsPastKinematicalCuts[NMAXKAONS];
+int            Kms_region[NMAXKAONS];
+double        Kms_chi2PID[NMAXKAONS];
+double         Kms_PCAL_W[NMAXKAONS];
+double         Kms_PCAL_V[NMAXKAONS];
+double         Kms_PCAL_x[NMAXKAONS];
+double         Kms_PCAL_y[NMAXKAONS];
+double         Kms_PCAL_z[NMAXKAONS];
+double    Kms_PCAL_sector[NMAXKAONS];
+double      Kms_DC_sector[NMAXKAONS];
+double          Kms_Chi2N[NMAXKAONS];
+double        Kms_DC_x[NMAXKAONS][3];
+double        Kms_DC_y[NMAXKAONS][3];
+double        Kms_DC_z[NMAXKAONS][3];
+double         Kms_E_PCAL[NMAXKAONS];
+double         Kms_E_ECIN[NMAXKAONS];
+double        Kms_E_ECOUT[NMAXKAONS];
+double               ZKms[NMAXKAONS]; // hadron rest-frame energy
+double             ZKmsLC[NMAXKAONS]; // hadron z on the light-cone
+double              Kminus_Px[NMAXKAONS];
+double              Kminus_Py[NMAXKAONS];
+double              Kminus_Pz[NMAXKAONS];
+double               Kminus_E[NMAXKAONS];
+double              VKminus_X[NMAXKAONS];
+double              VKminus_Y[NMAXKAONS];
+double              VKminus_Z[NMAXKAONS];
+double       Kminus_qFrame_pT[NMAXKAONS]; // transverse momentum relative to q
+double       Kminus_qFrame_pL[NMAXKAONS]; // longitudinal momentum relative to q
+double    Kminus_qFrame_Theta[NMAXKAONS];
+double      Kminus_qFrame_Phi[NMAXKAONS];
+
 
 
 // Output root file and tree

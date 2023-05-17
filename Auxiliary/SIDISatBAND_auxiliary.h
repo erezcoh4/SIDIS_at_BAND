@@ -20,9 +20,10 @@ public:
 
     Double_t Chi2PID_pion_upperBound (Double_t p, Double_t C);
     Double_t Chi2PID_pion_lowerBound (Double_t p, Double_t C);
-        
-//    TVector3        GetParticleVertex (clas12::region_part_ptr rp);
-//    void         SetParticle4Momentum (TLorentzVector &p4,clas12::region_part_ptr rp);
+    
+    Double_t Chi2PID_Kaon_upperBound (Double_t p, Double_t C);
+    Double_t Chi2PID_Kaon_lowerBound (Double_t p, Double_t C);
+    
     bool eepiPassedKinematicalCriteria(Double_t Ebeam,
                                        Double_t omega,
                                        Double_t Q2,
@@ -30,6 +31,14 @@ public:
                                        Double_t W,
                                        TLorentzVector pi,
                                        TLorentzVector e );
+    bool eeKPassedKinematicalCriteria(Double_t Ebeam,
+                                       Double_t omega,
+                                       Double_t Q2,
+                                       Double_t y,
+                                       Double_t W,
+                                       TLorentzVector K,
+                                       TLorentzVector e );
+    
     void                loadCutValues (std::string cutValuesFilename="cutValues.csv",
                                        int torusBending=1); //  -1 for In-bending, +1 for Out-bending
     void               printCutValues ();
@@ -84,16 +93,27 @@ public:
     double              cutValue_Zpi_min;
     double              cutValue_Zpi_max;
     
+    // Kaons
+    double        cutValue_Ve_VK_dz_max;
+    double         cutValue_K_theta_min;
+    double         cutValue_K_theta_max;
+    double              cutValue_PK_min; // Kaon momentum
+    double              cutValue_PK_max; // Kaon momentum
+    double              cutValue_ZK_min; // Kaon energy fraction
+    double              cutValue_ZK_max; // Kaon energy fraction
     
     
-    double       Me  = 0.00051099895; // GeV/c2
-    double            Mpi = 0.139570; // GeV/c2
-    double       Mpims  = 0.13957039; // GeV/c2
-    double       Mpips  = 0.13957039; // GeV/c2
-    double            Mp  = 0.938272; // GeV/c2
-    double             Mn = 0.939565; // GeV/c2
-    double                Md = 1.875; // GeV/c2
-    double             Mp2 = Mp * Mp;
+    
+    double       Me = 0.00051099895;// GeV/c2
+    double      Mpi = 0.139570;     // GeV/c2
+    double      Mpims = 0.13957039; // GeV/c2
+    double      Mpips = 0.13957039; // GeV/c2
+    double       MKms = 0.493677;   // K- GeV/c2
+    double       MKps = 0.493677;   // K+ GeV/c2
+    double         Mp = 0.938272;   // GeV/c2
+    double         Mn = 0.939565;   // GeV/c2
+    double         Md = 1.875;      // GeV/c2
+    double        Mp2 = Mp * Mp;
 
 
 protected:
