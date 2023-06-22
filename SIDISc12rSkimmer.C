@@ -1,4 +1,4 @@
-// last edit May-9, 2023
+// last edit May-29, 2023
 
 #ifdef __CINT__
 #pragma link C++ class std::vector<TVector3>+;
@@ -142,8 +142,9 @@ int Nevents_passed_pips_cuts,               Nevents_passed_e_pips_cuts;
 int Nevents_passed_e_pips_kinematics_cuts,  Nevents_passed_pims_cuts;
 int Nevents_passed_e_pims_cuts,             Nevents_passed_e_pims_kinematics_cuts;
 int Nevents_passed_Kps_cuts,                Nevents_passed_e_Kps_cuts;
-int Nevents_passed_e_Kps_kinematics_cuts,   Nevents_passed_Kms_cuts;
-int Nevents_passed_e_Kms_cuts,              Nevents_passed_e_Kms_kinematics_cuts;
+int Nevents_passed_e_Kps_kinematics_cuts;
+int Nevents_passed_Kms_cuts,                Nevents_passed_e_Kms_cuts;
+int Nevents_passed_e_Kms_kinematics_cuts;
 int inclusive; // tag to look at inclusive run - all the events with no selection
 
 // number of particles per event
@@ -220,7 +221,7 @@ double       piminus_qFrame_pL[NMAXPIONS]; // longitudinal momentum relative to 
 double    piminus_qFrame_Theta[NMAXPIONS];
 double      piminus_qFrame_Phi[NMAXPIONS];
 
-// positive Kaons
+// K+
 bool KpsPastSelectionCuts[NMAXKAONS], eeKpsPastKinematicalCuts[NMAXKAONS];
 int            Kps_region[NMAXKAONS];
 double        Kps_chi2PID[NMAXKAONS];
@@ -253,14 +254,14 @@ double    Kaplus_qFrame_Theta[NMAXKAONS];
 double      Kaplus_qFrame_Phi[NMAXKAONS];
 
 
-// negative Kaons
+// K-
 bool     KmsPastSelectionCuts[NMAXKAONS];
 bool eeKmsPastKinematicalCuts[NMAXKAONS];
-int            Kms_region[NMAXKAONS];
-double        Kms_chi2PID[NMAXKAONS];
-double         Kms_PCAL_W[NMAXKAONS];
-double         Kms_PCAL_V[NMAXKAONS];
-double         Kms_PCAL_x[NMAXKAONS];
+int                Kms_region[NMAXKAONS];
+double            Kms_chi2PID[NMAXKAONS];
+double             Kms_PCAL_W[NMAXKAONS];
+double             Kms_PCAL_V[NMAXKAONS];
+double             Kms_PCAL_x[NMAXKAONS];
 double         Kms_PCAL_y[NMAXKAONS];
 double         Kms_PCAL_z[NMAXKAONS];
 double    Kms_PCAL_sector[NMAXKAONS];
@@ -297,6 +298,8 @@ TTree * outTree_e_piplus_no_cuts, * outTree_e_piminus_no_cuts;
 // Output CSV file
 std::ofstream   CSVfile_e_piplus,  SelectedEventsCSVfile_e_piplus,  SelectedEventsCSVfile_e_piplus_kinematics;
 std::ofstream   CSVfile_e_piminus, SelectedEventsCSVfile_e_piminus, SelectedEventsCSVfile_e_piminus_kinematics;
+std::ofstream   CSVfile_e_Kplus,   SelectedEventsCSVfile_e_Kplus,   SelectedEventsCSVfile_e_Kplus_kinematics;
+std::ofstream   CSVfile_e_Kminus,  SelectedEventsCSVfile_e_Kminus,  SelectedEventsCSVfile_e_Kminus_kinematics;
 // vectors in lab-frame
 TLorentzVector      Beam, target, e, q, pi;
 TLorentzVector              d_rest, p_rest;
@@ -327,7 +330,9 @@ std::vector<TLorentzVector>      piminus_qFrame;
 
 // auxiliary
 DCfid_SIDIS dcfid;
-std::vector<region_part_ptr>  electrons, neutrons, protons, pipluses, piminuses, gammas, deuterons;
+std::vector<region_part_ptr>  electrons, neutrons, protons, gammas, deuterons;
+std::vector<region_part_ptr>  pipluses, piminuses;
+std::vector<region_part_ptr>  Kpluses,  Kminuses;
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void SetVerbosity( int _fdebug_ ){
@@ -345,7 +350,14 @@ void SetIsMC(){
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void SetSimPi (TString fSimPi) {
-    SimPi   = fSimPi; // default
+    SimPi   = fSimPi; // Simulated pion species
+    SimK    = "";
+}
+
+// Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+void SetSimK (TString fSimK) {
+    SimPi  = "";
+    SimK   = fSimK; // Simulated Kaon species
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
@@ -1133,16 +1145,40 @@ void ExtractPionsInformation(int fdebug){
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+void ExtractKaonsInformation(int fdebug){
+    
+    // positive pions)
+    for (int Kidx=0; Kidx < NKps; Kidx++) {
+        ExtractKpsInformation( Kidx, fdebug );
+    }
+    // negative pions
+    for (int Kidx=0; Kidx < NKms; Kidx++) {
+        ExtractKmsInformation( Kidx, fdebug );
+    }
+    
+    // move to q-frame and define the pion momentum with respect to q
+    MoveTo_qFrame( fdebug );
+    
+    // done
+    if (fdebug > 2) std::cout << "done extracting Kaon information" << std::endl;
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void WriteEventToOutput(int fdebug){
     // (Maybe) write this event to "selected events csv-file"
     bool            IsSelected_eepi = false;
+    bool             IsSelected_eeK = false;
 
     //ePastCutsInEvent = true;
     if (inclusive == 1) {
-        pipsPastCutsInEvent = true;
-        pimsPastCutsInEvent = true;
-        eepipsPastCutsInEvent = true;
-        eepimsPastCutsInEvent = true;
+        pipsPastCutsInEvent     = true;
+        pimsPastCutsInEvent     = true;
+        eepipsPastCutsInEvent   = true;
+        eepimsPastCutsInEvent   = true;
+        KpsPastCutsInEvent      = true;
+        KmsPastCutsInEvent      = true;
+        eeKpsPastCutsInEvent    = true;
+        eeKmsPastCutsInEvent    = true;
     }
     
     // Fill "no-cuts" TTrees even if nothing passed criteria
@@ -1177,6 +1213,22 @@ void WriteEventToOutput(int fdebug){
             for (int pimsIdx=0; pimsIdx<Npims; pimsIdx++) {
                 Stream_e_pi_line_to_CSV( "pi-", pimsIdx,
                                         pimsPastSelectionCuts[pimsIdx], eepimsPastKinematicalCuts[pimsIdx],
+                                        fdebug );
+            }
+        }
+    }
+    
+    if (ePastCutsInEvent && KmsPastCutsInEvent) {
+        if ((!IsMC) || (IsMC && SimPi=="Kminus")){
+            IsSelected_eeK = true;
+            outTree_e_Kminus -> Fill();
+            if (fdebug>3) std::cout << "Filling (e,e'K-) TTree with this event!" << std::endl;
+            Nevents_passed_e_Kms_cuts ++ ;
+            if (eeKmsPastCutsInEvent) Nevents_passed_e_Kms_kinematics_cuts ++;
+            
+            for (int Kidx=0; Kidx<NKms; Kidx++) {
+                Stream_e_K_line_to_CSV( "K-", Kidx,
+                                       KmsPastSelectionCuts[pimsIdx], eeKmsPastKinematicalCuts[pimsIdx],
                                         fdebug );
             }
         }
@@ -1431,6 +1483,99 @@ void ExtractPimsInformation( int pimsIdx, int fdebug ){
     Vpiminus_Z[pimsIdx]          = Vpiminus[pimsIdx].Z();
 }
 
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+void ExtractKpsInformation( int KpsIdx, int fdebug ){
+    if (fdebug>2)
+        std::cout << "ExtractKpsInformation( KpsIdx=" << KpsIdx << ", fdebug=" << fdebug << " )" << std::endl;
+    // CONTINUE HERE! COMPLETE THIS FUNCITON AND THEN ALSO FOR K-....
+    
+    // Extract positive pion information
+    pips_region[KpsIdx] = pipluses[pipsIdx]->getRegion();
+    // First - we restrict ourselves to pions only from the central detector
+    if( pipluses[KpsIdx]->getRegion() != FD ){
+        if (fdebug>2){
+            SetLorentzVector(K  ,Kpluses[KpsIdx]);
+            std::cout
+            << "piplus [" << KpsIdx << "] not from FD (from " << Kpluses[KpsIdx]->getRegion()
+            << ") "
+            << "p = "       << pi.P() << " GeV/c, "
+            << "theta = "   << pi.Theta()*180./3.1415 << "˚"
+            << ", not extracting information..."
+            << std::endl;
+        }
+        return;
+    }else{
+        if (fdebug>2) std::cout << "piplus ["<<KpsIdx<<"] is from FD ("<<pipluses[KpsIdx]->getRegion()<< "), extracting information..." << std::endl;
+    }
+
+    // Now we extract the information on this Kaon
+    SetLorentzVector(piplus[pipsIKpsIdxdx]  ,pipluses[KpsIdx]);
+    Zpips[pipsIdx]              = piplus[KpsIdx].E() / omega;
+    Vpiplus[pipsIdx]            = GetParticleVertex( pipluses[KpsIdx] );
+    pips_chi2PID[pipsIdx]       = pipluses[KpsIdx]->par()->getChi2Pid();
+    
+    // EC in and out
+    pips_E_ECIN[pipsIdx]        = pipluses[KpsIdx]->cal(ECIN)->getEnergy();
+    pips_E_ECOUT[pipsIdx]       = pipluses[KpsIdx]->cal(ECOUT)->getEnergy();
+    // PCAL
+    auto pips_PCAL_info         = pipluses[KpsIdx]->cal(PCAL);
+    pips_E_PCAL[KpsIdx]        = pips_PCAL_info->getEnergy();
+    pips_PCAL_sector[KpsIdx]   = pips_PCAL_info->getSector();
+    pips_PCAL_V[KpsIdx]        = pips_PCAL_info->getLv();
+    pips_PCAL_W[KpsIdx]        = pips_PCAL_info->getLw();
+    pips_PCAL_x[KpsIdx]        = pips_PCAL_info->getX();
+    pips_PCAL_y[KpsIdx]        = pips_PCAL_info->getY();
+    pips_PCAL_z[KpsIdx]        = pips_PCAL_info->getZ();
+    // DC
+    auto pips_DC_info           = pipluses[pipsIdx]->trk(DC);
+    pips_DC_sector[KpsIdx]     = pips_DC_info->getSector(); // tracking sector
+    pips_Chi2N[KpsIdx]         = pips_DC_info->getChi2N();  // tracking chi^2/NDF
+    for (int regionIdx=0; regionIdx<3; regionIdx++) {
+        DC_layer = DC_layers[regionIdx];
+        pips_DC_x[KpsIdx][regionIdx] = pipluses[KpsIdx]->traj(DC,DC_layer)->getX();
+        pips_DC_y[KpsIdx][regionIdx] = pipluses[KpsIdx]->traj(DC,DC_layer)->getY();
+        pips_DC_z[KpsIdx][regionIdx] = pipluses[KpsIdx]->traj(DC,DC_layer)->getZ();
+        
+    }
+//    // ------------------------------------------------------------------------------------------------
+//    // now, check if pion passed event selection requirements
+//    // ------------------------------------------------------------------------------------------------
+//    pipsPastSelectionCuts[pipsIdx] = CheckIfPionPassedSelectionCuts("pi+",
+//                                                                    pips_DC_sector[pipsIdx],
+//                                                                    pips_DC_x[pipsIdx],
+//                                                                    pips_DC_y[pipsIdx],
+//                                                                    pips_DC_z[pipsIdx],
+//                                                                    pips_chi2PID[pipsIdx],
+//                                                                    piplus[pipsIdx].P(),
+//                                                                    Ve,
+//                                                                    Vpiplus[pipsIdx],
+//                                                                    fdebug);
+//    eepipsPastKinematicalCuts[pipsIdx] = aux.eepiPassedKinematicalCriteria(Ebeam,
+//                                                                           omega,
+//                                                                           Q2,
+//                                                                           y,
+//                                                                           W,
+//                                                                           piplus[pipsIdx],
+//                                                                           e);
+//
+//    if (pipsPastSelectionCuts[pipsIdx]) {
+//        pipsPastCutsInEvent = true;
+//        Nevents_passed_pips_cuts ++;
+//        if (eepipsPastKinematicalCuts[pipsIdx]) {
+//            eepipsPastCutsInEvent = true;
+//        }
+//    }
+//
+//    piplus_Px[pipsIdx] = piplus[pipsIdx].Px();
+//    piplus_Py[pipsIdx] = piplus[pipsIdx].Py();
+//    piplus_Pz[pipsIdx] = piplus[pipsIdx].Pz();
+//    piplus_E[pipsIdx]  = piplus[pipsIdx].E();
+//    Vpiplus_X[pipsIdx] = Vpiplus[pipsIdx].X();
+//    Vpiplus_Y[pipsIdx] = Vpiplus[pipsIdx].Y();
+//    Vpiplus_Z[pipsIdx] = Vpiplus[pipsIdx].Z();
+}
+
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void GetParticlesByType (int evnum, int fdebug){
     // get particles by type
@@ -1624,6 +1769,37 @@ void MoveTo_qFrame(int fdebug){
         
         if (fdebug>1) aux.Print4Vector( Ppi_q, "pi-(" + std::to_string(piIdx) + ")" );
     }
+    // (5) rotate Kaons to this q-frame
+    // K+ int the q-Frame
+    for (int KIdx=0; piIdx<NKps; KIdx++) {
+        TVector3 PKplus = RotateVectorTo_qFrame( Kplus.at(KIdx).Vect() );
+        Kplus_qFrame.at(KIdx).SetVectM( PKplus, aux.MK  );
+        TLorentzVector PK_q = Kplus_qFrame.at(KIdx);
+        // fill variables that later go to TTree
+        Kplus_qFrame_pT[KIdx]   = PK_q.Pt();
+        Kplus_qFrame_pL[KIdx]   = PK_q.Pz();
+        Kplus_qFrame_Theta[KIdx]= PK_q.Theta();
+        Kplus_qFrame_Phi[KIdx]  = PK_q.Phi();
+        // z on the light-cone
+        ZKpsLC[KIdx]            = (PK_q.E() - PK_q.Pz()) / (q.E() - q.P());
+        if (fdebug>1) aux.Print4Vector( PK_q, "K+(" + std::to_string(KIdx) + ")" );
+    }
+    // K- int the q-Frame
+    for (int KIdx=0; piIdx<NKms; KIdx++) {
+        TVector3 PKminus = RotateVectorTo_qFrame( Kminus.at(KIdx).Vect() );
+        Kplus_qFrame.at(KIdx).SetVectM( PKplus, aux.MK  );
+        TLorentzVector PK_q = Kminus_qFrame.at(KIdx);
+        // fill variables that later go to TTree
+        Kminus_qFrame_pT[KIdx]   = PK_q.Pt();
+        Kminus_qFrame_pL[KIdx]   = PK_q.Pz();
+        Kminus_qFrame_Theta[KIdx]= PK_q.Theta();
+        Kminus_qFrame_Phi[KIdx]  = PK_q.Phi();
+        // z on the light-cone
+        ZKmsLC[KIdx]            = (PK_q.E() - PK_q.Pz()) / (q.E() - q.P());
+        if (fdebug>1) aux.Print4Vector( PK_q, "K-(" + std::to_string(KIdx) + ")" );
+    }
+
+    
     if (fdebug>2){
         std::cout
         << "size(piplus_qFrame): "  << piplus_qFrame.size() << ","
@@ -1651,8 +1827,6 @@ void SetInclusive( int fInclusive ){
 
 
 
-
-
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 // Main functionality
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
@@ -1669,8 +1843,9 @@ void SIDISc12rSkimmer(int RunNumber    = 6420   ,
                       // "sidisdvcs", "inc", "nSidis", "AcceptanceCorrection"
                       TString fDataPath= "sidisdvcs",
                       double fEbeam    = 10.2, // [GeV]
-                      // simulation - piplus or piminus
-                      TString fSimPi   = "piplus",
+                      // simulation - π+ / π- / K+ / K-
+                      TString fSimPi   = "piplus", //""/"piplus" / "piminus"
+                      TString fSimK    = "", // ""/"Kplus" / "Kminus"
                       // inclusive means do not apply cuts
                       int   fInclusive = 0
                       ){
@@ -1682,6 +1857,7 @@ void SIDISc12rSkimmer(int RunNumber    = 6420   ,
     SetSkimming ( fSkimming  );
     SetEbeam    ( fEbeam     );
     SetSimPi    ( fSimPi     );
+    SetSimK     ( fSimK      );
     SetInclusive( fInclusive );
     SetIsMC     (            );
     
@@ -1703,11 +1879,20 @@ void SIDISc12rSkimmer(int RunNumber    = 6420   ,
     // for an (e,e'π+) or an (e,e'π-) data set
     // and this is labeled in the filename
     if (IsMC){
-        infilename = (DataPath
-                     + "/" + SimPi
-                     + "/ee" + SimPi + "_" + prefix
-                     + "_" + RunNumberStr + "_reco.hipo");
-        outfilename = "skimmed_SIDIS_" + SimPi + "_" + prefix + "_" + RunNumberStr;
+        if (SimPi ~= ""){
+            infilename = (DataPath
+                          + "/"   + SimPi
+                          + "/ee" + SimPi + "_" + prefix
+                          + "_" + RunNumberStr + "_reco.hipo");
+            outfilename = "skimmed_SIDIS_" + SimPi + "_" + prefix + "_" + RunNumberStr;
+        }
+        else if (SimK ~= ""){
+            infilename = (DataPath
+                          + "/"   + SimK
+                          + "/ee" + SimK + "_" + prefix
+                          + "_" + RunNumberStr + "_reco.hipo");
+            outfilename = "skimmed_SIDIS_" + SimK + "_" + prefix + "_" + RunNumberStr;
+        }
     }
     
     if (fdebug>1){
@@ -1766,35 +1951,45 @@ void SIDISc12rSkimmer(int RunNumber    = 6420   ,
                 piminuses   = c12.getByID(-211  );
                 gammas      = c12.getByID( 22   );
                 deuterons   = c12.getByID( 1000010020 );
+                Kpluses     = c12.getByID( 321  );
+                Kminuses    = c12.getByID(-321  );
                 GetParticlesByType ( evnum, fdebug );
                 
                 if (fdebug>2) {
                     std::cout
-                    << "Ne: "           << Ne << ","
+                    << "Ne: "           << Ne        << ","
                     << "inclusive: "    << inclusive << ","
-                    << "Npips: "        << Npips << ","
-                    << "Npims: "        << Npims << ","
-                    << "NMAXPIONS: "    << NMAXPIONS << ","
+                    << "Npips: "        << Npips     << ","
+                    << "Npims: "        << Npims     << ","
+                    << "NKps: "         << NKps      << ","
+                    << "NKms: "         << NKms      << ","
                     << std::endl;
                 }
                 // filter events, extract information, and compute event kinematics:
-                // we keep only d(e,e’pi+)X and d(e,e’pi-)X events
+                // we keep only events of;
+                // d(e,e’π+)X, d(e,e’π-)X, d(e,e’K+)X, d(e,e’K-)X
                 if(  0 < Ne // after studying some MC and data, we need to kill events with more than 1 electron
                    &&
-                   ((inclusive == 1) || (0 < Npips) || (0 < Npims)) // "inclusive" means (e,e') events
+                   ((inclusive == 1) || (0 < Npips) || (0 < Npims)|| (0 < NKps) || (0 < NKms)) // "inclusive" means (e,e') events
                    &&
                    (Npips < NMAXPIONS) && (Npims < NMAXPIONS) // we don't want to crash the memeory
+                   &&
+                   (NKps < NMAXKAONS)  && (NKms < NMAXKAONS) // we don't want to crash the memeory
                    ){
                     
                     ExtractElectronInformation  (fdebug);
                     ComputeElectronKinematics   ();
                     ExtractPionsInformation     (fdebug);
+                    ExtractKaonsInformation     (fdebug);
                     WriteEventToOutput          (fdebug);
                     
                 } else {
                     if (fdebug>1) {
                         std::cout << "Skipped computations in this event as there are not enough particles: "
-                        << "Ne = " << Ne << ",Npips = " << Npips << ",Npims = " << Npims << std::endl ;
+                        << "Ne = " << Ne
+                        << ",N(π+) = " << Npips << ", N(π-) = " << Npims
+                        << ",N(K+) = " << NKps  << ", N(K-) = " << NKms
+                        << std::endl ;
                     }
                 }
                 if (fdebug>1) {
@@ -1839,13 +2034,25 @@ void SIDISc12rSkimmer(int RunNumber    = 6420   ,
                             pi_g = P_mc_particle;
                             Vpi_g = V_mc_particle;
                         }
+                        else if ( (pid==321) && (SimPi=="Kplus") ) {
+                            pi_g = P_mc_particle;
+                            Vpi_g = V_mc_particle;
+                        }
+                        else if ( (pid==-321) && (SimPi=="Kminus") ) {
+                            pi_g = P_mc_particle;
+                            Vpi_g = V_mc_particle;
+                        }
                         else  {
                             if (fdebug>2){
                                 std::cout << "MC particle PDG code " << pid << " do not match generated particles: e (" << 11 << ") + ";
                                 if ( SimPi=="piplus")
-                                    std::cout << " pi+ (" << 211;
+                                    std::cout << " π+ (" << 211;
                                 else if ( SimPi=="piminus")
-                                    std::cout << " pi- (" << -211;
+                                    std::cout << " π- (" << -211;
+                                else if ( SimK=="Kplus")
+                                    std::cout << " K+ (" << 321;
+                                else if ( SimK=="Kminus")
+                                    std::cout << " K- (" << -321;
                                 std::cout << ")" << std::endl;
                             }
                         }

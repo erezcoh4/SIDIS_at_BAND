@@ -29,20 +29,6 @@ phi_mid_arr = np.array([-1, 0, 60, 120, 180, -120, -60])
 phi_min_arr = phi_mid_arr - 50
 phi_max_arr = phi_mid_arr + 50
 
-# bin-migration and acceptance corrections in bins of xB,Q2,z
-MCCorrections_binWidth_xB = 0.05;
-MCCorrections_binCenters_xB = np.arange(0.125,0.625,0.05); MCCorrections_Nbins_xB = len(MCCorrections_binCenters_xB); 
-
-MCCorrections_binWidth_Q2 = 0.5;
-MCCorrections_binCenters_Q2 = np.arange(2.25,8.25,0.5);    MCCorrections_Nbins_Q2 = len(MCCorrections_binCenters_Q2); 
-
-MCCorrections_binWidth_z  = 0.05;
-MCCorrections_binCenters_z  = np.arange(0.325,1.25,0.05);  MCCorrections_Nbins_z  = len(MCCorrections_binCenters_z);  
-
-BinMigrationWeights_pips = np.zeros([MCCorrections_Nbins_xB, MCCorrections_Nbins_Q2, MCCorrections_Nbins_z])
-BinMigrationWeights_pims = np.zeros([MCCorrections_Nbins_xB, MCCorrections_Nbins_Q2, MCCorrections_Nbins_z])
-AcceptanceWeights_pips   = np.zeros([MCCorrections_Nbins_xB, MCCorrections_Nbins_Q2, MCCorrections_Nbins_z])
-AcceptanceWeights_pims   = np.zeros([MCCorrections_Nbins_xB, MCCorrections_Nbins_Q2, MCCorrections_Nbins_z])
 
 
     
@@ -77,24 +63,6 @@ for run in beam_charge_all_runs_rga.runnum:
 
     
     
-    
-    
-# Get bin-migration and acceptance weights in bins of xB,Q2,z from MC calculations by Jason
-corrections_data_path = '/Users/erezcohen/Desktop/Software/CLAS12/BAND/SIDIS_at_BAND/MC/Acceptance_Corrections/JasonAcceptanceCorrections/'
-filename_binmigration_corr_pips = corrections_data_path + 'bin_migration_piplus_hists.root'
-filename_binmigration_corr_pims = corrections_data_path + 'bin_migration_piminus_hists.root'
-filename_acceptance_corr_pips   = corrections_data_path + 'acceptance_map_piplus_hists.root'
-filename_acceptance_corr_pims   = corrections_data_path + 'acceptance_map_piminus_hists.root'
-
-
-    
-# Get bin-migration and acceptance weights in bins of xB,Q2,z from MC calculations by Jason
-corrections_data_path = '/Users/erezcohen/Desktop/Software/CLAS12/BAND/SIDIS_at_BAND/MC/Acceptance_Corrections/JasonAcceptanceCorrections/'
-filename_binmigration_corr_pips = corrections_data_path + 'bin_migration_piplus_hists.root'
-filename_binmigration_corr_pims = corrections_data_path + 'bin_migration_piminus_hists.root'
-filename_acceptance_corr_pips   = corrections_data_path + 'acceptance_map_piplus_hists.root'
-filename_acceptance_corr_pims   = corrections_data_path + 'acceptance_map_piminus_hists.root'
-
 
 # bin-migration and acceptance corrections in bins of xB,Q2,z
 MCCorrections_binWidth_xB = 0.05;
@@ -106,25 +74,59 @@ MCCorrections_binCenters_Q2 = np.arange(2.25,8.25,0.5);     MCCorrections_Nbins_
 MCCorrections_binWidth_z  = 0.05;
 MCCorrections_binCenters_z  = np.arange(0.325,1.025,0.05);  MCCorrections_Nbins_z  = len(MCCorrections_binCenters_z);  
 
-BinMigrationWeights = dict();
-AcceptanceWeights   = dict();
-BinMigrationWeights['piplus']  = np.zeros([MCCorrections_Nbins_xB, MCCorrections_Nbins_Q2, MCCorrections_Nbins_z])
-BinMigrationWeights['piminus'] = np.zeros([MCCorrections_Nbins_xB, MCCorrections_Nbins_Q2, MCCorrections_Nbins_z])
-AcceptanceWeights['piplus']    = np.zeros([MCCorrections_Nbins_xB, MCCorrections_Nbins_Q2, MCCorrections_Nbins_z])
-AcceptanceWeights['piminus']   = np.zeros([MCCorrections_Nbins_xB, MCCorrections_Nbins_Q2, MCCorrections_Nbins_z])
+BinMigrationWeights     = dict();
+AcceptanceWeights       = dict();
+MesonSubtractionWeights = dict();
+BinMigrationWeights['piplus']        = np.zeros([MCCorrections_Nbins_xB, MCCorrections_Nbins_Q2, MCCorrections_Nbins_z])
+BinMigrationWeights['piminus']       = np.zeros([MCCorrections_Nbins_xB, MCCorrections_Nbins_Q2, MCCorrections_Nbins_z])
+AcceptanceWeights['piplus']          = np.zeros([MCCorrections_Nbins_xB, MCCorrections_Nbins_Q2, MCCorrections_Nbins_z])
+AcceptanceWeights['piminus']         = np.zeros([MCCorrections_Nbins_xB, MCCorrections_Nbins_Q2, MCCorrections_Nbins_z])
+MesonSubtractionWeights['piplus']    = np.zeros([MCCorrections_Nbins_xB, MCCorrections_Nbins_Q2, MCCorrections_Nbins_z])
+MesonSubtractionWeights['piminus']   = np.zeros([MCCorrections_Nbins_xB, MCCorrections_Nbins_Q2, MCCorrections_Nbins_z])
 
 
 
-# Get bin-migration and acceptance weights in bins of xB,Q2,z from MC calculations by Jason
-f1 = ROOT.TFile.Open( filename_binmigration_corr_pips,"READ" )
-hBinMigrationWeights_pips = f1.Get("hWeights")
-f2 = ROOT.TFile.Open( filename_binmigration_corr_pims,"READ" )
-hBinMigrationWeights_pims = f2.Get("hWeights")
+    
+# Get bin-migration and acceptance weights in 2D (p-theta) in bins of xB,Q2,z from MC calculations by Jason
+corrections_data_path = '/Users/erezcohen/Desktop/Software/CLAS12/BAND/SIDIS_at_BAND/MC/Acceptance_Corrections/JasonAcceptanceCorrections/acceptance_match_2d/'
+filename_acceptance_corr_pips   = corrections_data_path + 'acceptance_map_piplus_hists.root'
+filename_acceptance_corr_pims   = corrections_data_path + 'acceptance_map_piminus_hists.root'
+filename_binmigration_corr      = corrections_data_path + 'bin_migration_hists.root'
+filename_mesonsubtraction       = corrections_data_path + 'rho_correction_hists.root'
+
+
+
+
+# bin-migration and acceptance corrections in bins of xB,Q2,z
+BinMigrationWeights     = dict();
+AcceptanceWeights       = dict();
+MesonSubtractionWeights = dict();
+BinMigrationWeights['piplus']        = np.zeros([MCCorrections_Nbins_xB, MCCorrections_Nbins_Q2, MCCorrections_Nbins_z])
+BinMigrationWeights['piminus']       = np.zeros([MCCorrections_Nbins_xB, MCCorrections_Nbins_Q2, MCCorrections_Nbins_z])
+AcceptanceWeights['piplus']          = np.zeros([MCCorrections_Nbins_xB, MCCorrections_Nbins_Q2, MCCorrections_Nbins_z])
+AcceptanceWeights['piminus']         = np.zeros([MCCorrections_Nbins_xB, MCCorrections_Nbins_Q2, MCCorrections_Nbins_z])
+MesonSubtractionWeights['piplus']    = np.zeros([MCCorrections_Nbins_xB, MCCorrections_Nbins_Q2, MCCorrections_Nbins_z])
+MesonSubtractionWeights['piminus']   = np.zeros([MCCorrections_Nbins_xB, MCCorrections_Nbins_Q2, MCCorrections_Nbins_z])
+
+
+
+
+
+# Get bin-migration, acceptance, and meson-subtraction weights in bins of xB,Q2,z from MC calculations by Jason
+f_binmigration = ROOT.TFile.Open( filename_binmigration_corr,"READ" )
+hBinMigrationWeights_pips = f_binmigration.Get("hWeights_p")
+hBinMigrationWeights_pims = f_binmigration.Get("hWeights_m")
+
 
 f3 = ROOT.TFile.Open( filename_acceptance_corr_pips,"READ" )
 hAcceptanceWeights_pips = f3.Get("hWeights")
 f4 = ROOT.TFile.Open( filename_acceptance_corr_pims,"READ" )
 hAcceptanceWeights_pims = f4.Get("hWeights")
+
+f_mesonsubtraction = ROOT.TFile.Open( filename_mesonsubtraction,"READ" )
+hMesonSubtractionWeights_pips = f_mesonsubtraction.Get("hWeights_p")
+hMesonSubtractionWeights_pims = f_mesonsubtraction.Get("hWeights_m")
+
     
     
 for bin_x in range(MCCorrections_Nbins_xB): #{
@@ -135,10 +137,34 @@ for bin_x in range(MCCorrections_Nbins_xB): #{
             BinMigrationWeights['piminus'][bin_x][bin_Q2][bin_z] = hBinMigrationWeights_pims.GetBinContent(bin_x+1, bin_Q2+1, bin_z+1)
             AcceptanceWeights['piplus']   [bin_x][bin_Q2][bin_z] = hAcceptanceWeights_pips.GetBinContent  (bin_x+1, bin_Q2+1, bin_z+1)
             AcceptanceWeights['piminus']  [bin_x][bin_Q2][bin_z] = hAcceptanceWeights_pims.GetBinContent  (bin_x+1, bin_Q2+1, bin_z+1)            
+
+            MesonSubtractionWeights['piplus']   [bin_x][bin_Q2][bin_z] = hMesonSubtractionWeights_pips.GetBinContent  (bin_x+1, bin_Q2+1, bin_z+1)
+            MesonSubtractionWeights['piminus']  [bin_x][bin_Q2][bin_z] = hMesonSubtractionWeights_pims.GetBinContent  (bin_x+1, bin_Q2+1, bin_z+1)            
+
         #}
     #}
 #}            
 print('Loaded bin migration and acceptance weights from MC calculations.')
+
+
+
+# limit corrections to a reasonable range between 0.3 - 3
+# and all corrections that are outside this range will be set to zero
+w_min_correction = 0.1
+w_max_correction = 10.0
+for pi_ch in pi_charge_names: #{
+    
+    BinMigrationWeights[pi_ch][BinMigrationWeights[pi_ch] < w_min_correction] = 0
+    BinMigrationWeights[pi_ch][w_max_correction < BinMigrationWeights[pi_ch]] = 0
+    
+    AcceptanceWeights[pi_ch][AcceptanceWeights[pi_ch] < w_min_correction] = 0
+    AcceptanceWeights[pi_ch][w_max_correction < AcceptanceWeights[pi_ch]] = 0
+
+    MesonSubtractionWeights[pi_ch][MesonSubtractionWeights[pi_ch] < w_min_correction] = 0
+    MesonSubtractionWeights[pi_ch][w_max_correction < MesonSubtractionWeights[pi_ch]] = 0
+
+#}
+
 
 
 
@@ -164,10 +190,10 @@ def compute_ratio_pips_to_pims(df_dict,
                                pT_min = 0, pT_max= np.inf,
                                phi_min = 0,phi_max= np.inf,                               
                                Mx_d_min=0, fdebug=0,
-                               weight_option = 'bin migration + acceptance',
+                               weight_option = 'bin migration + acceptance + meson subtraction',
                                cutoff = 1.e-8 ):#{
     '''
-    last edit May-4, 2023
+    last edit June-10, 2023
     
     [R_pips_to_pims, R_pips_to_pims_errup, R_pips_to_pims_errdw,
      N_pips, N_pims,
@@ -192,7 +218,7 @@ def compute_ratio_pips_to_pims(df_dict,
     M_x_min               float         minimal M_x
     M_x_max               float         maximal M_x
     weight                str           MC corrections applied 
-                                        'bin migration' / 'acceptance' / 'bin migration + acceptance'
+                                        'bin migration' / 'acceptance' / 'bin migration + acceptance' + / 'bin migration + acceptance + meson subtraction'
     
     return:
     -------
@@ -264,11 +290,21 @@ def compute_ratio_pips_to_pims(df_dict,
     elif   weight_option == 'acceptance': #{
         w_pips = np.array( df_pips.acceptance_weight )
         w_pims = np.array( df_pims.acceptance_weight )        
-    #}        
+    #}     
+    elif   weight_option == 'meson subtraction': #{
+        w_pips = np.array( df_pips.mesonsubtraction_weight )
+        w_pims = np.array( df_pims.mesonsubtraction_weight )        
+    #}         
     elif weight_option == 'bin migration + acceptance':#{
         w_pips = np.array( df_pips.binMigration_weight * df_pips.acceptance_weight )
         w_pims = np.array( df_pims.binMigration_weight * df_pims.acceptance_weight )        
     #}
+
+    elif weight_option == 'bin migration + acceptance + meson subtraction':#{
+        w_pips = np.array( df_pips.binMigration_weight * df_pips.acceptance_weight * df_pips.mesonsubtraction_weight )
+        w_pims = np.array( df_pims.binMigration_weight * df_pims.acceptance_weight * df_pims.mesonsubtraction_weight  )        
+    #}
+
 
 
     Zavg_pips = np.mean( np.array(df_pips[zvar])  )
@@ -371,10 +407,6 @@ def compute_ratio_pips_to_pims(df_dict,
 
 
 
-
-
-
-      
 # ----------------------- #
 def extract_r_from_SIDIS_ratio(data_path     = '/Users/erezcohen/Desktop/data/BAND/Results/',
                                prefix        = 'Tagged_SIDIS_ratio_', 
@@ -389,19 +421,19 @@ def extract_r_from_SIDIS_ratio(data_path     = '/Users/erezcohen/Desktop/data/BA
                               ):
     '''
     extract r(z) from pi+/pi- cross section ratio
-    last edit May-4, 2023 (EOC)
+    last edit May-18, 2023 (EOC)
     '''
     z_arr,z_errdw_arr,z_errup_arr = dict(),dict(),dict()
     r_arr,r_errup_arr,r_errdw_arr = dict(),dict(),dict()
     r_corrected_arr,r_corrected_errup_arr,r_corrected_errdw_arr = dict(),dict(),dict()
     for suffix in suffixes:
-        if fdebug>1: print(suffix)
+        if fdebug>1: print('loading sidis ratio from suffix:',suffix)
         results = load_SIDIS_ratio(prefix        = prefix, 
                                    fdebug        = 0,
                                    suffix        = suffix,                                                                         
                                    doPlotResults = False,  
                                    data_path     = data_path)
-        if fdebug: 
+        if fdebug>3: 
             print('results with %s/%s:'%(prefix,suffix))
             print(results)
         result_name = suffix
@@ -429,7 +461,7 @@ def extract_r_from_SIDIS_ratio(data_path     = '/Users/erezcohen/Desktop/data/BA
             # print(z_min,z,z_max,z_errdw,z_errup)
 
             res = results[key][np.abs(results[key]['$x_B$']-xB_selected) < Delta_xB/2]
-            if fdebug>1: 
+            if fdebug>3: 
                 print('res: \n',res)
             if len(res)==0:    # empty data-frame
                 R,dR_up,dR_dw=0,0,0
@@ -481,6 +513,31 @@ def extract_r_from_SIDIS_ratio(data_path     = '/Users/erezcohen/Desktop/data/BA
         z_errup_arr[result_name] = np.array(z_errup_arr[result_name])
         z_errdw_arr[result_name] = np.array(z_errdw_arr[result_name])
 
+        z_sort_indices = np.argsort(z_arr[result_name])
+        z_arr[result_name] = np.take_along_axis(z_arr[result_name], z_sort_indices, axis=0)
+        z_errup_arr[result_name] = np.take_along_axis(z_errup_arr[result_name], z_sort_indices, axis=0)
+        z_errdw_arr[result_name] = np.take_along_axis(z_errdw_arr[result_name], z_sort_indices, axis=0)
+
+        r_arr[result_name] = np.take_along_axis(r_arr[result_name], z_sort_indices, axis=0)
+        r_errup_arr[result_name] = np.take_along_axis(r_errup_arr[result_name], z_sort_indices, axis=0)
+        r_errdw_arr[result_name] = np.take_along_axis(r_errdw_arr[result_name], z_sort_indices, axis=0)
+
+        r_corrected_arr[result_name] = np.take_along_axis(r_corrected_arr[result_name], z_sort_indices, axis=0)
+        r_corrected_errup_arr[result_name] = np.take_along_axis(r_corrected_errup_arr[result_name], z_sort_indices, axis=0)
+        r_corrected_errdw_arr[result_name] = np.take_along_axis(r_corrected_errdw_arr[result_name], z_sort_indices, axis=0)
+
+        # HERE WE NEED TO SORT THE RESULTS AS A FUNCTION OF Z!
+        if fdebug>2:
+            print('z[',result_name,']:',z_arr[result_name])
+            print('sort_indices:',z_sort_indices)
+            
+            print('sorted z[',result_name,']:',z_arr[result_name])
+            print('sorted r[',result_name,']:',r_corrected_arr[result_name])
+
+
+
+            # print('sorted z[',result_name,']:',z_sorted_arr[result_name])
+            # print(r_arr[result_name])
 
     print('Done loading %s SIDIS results and extracting r for x=%.2f.'%(prefix,xB_selected))
     print('From',data_path)
@@ -488,6 +545,113 @@ def extract_r_from_SIDIS_ratio(data_path     = '/Users/erezcohen/Desktop/data/BA
     return z_arr,z_errdw_arr,z_errup_arr, r_arr, r_errup_arr, r_errdw_arr, r_corrected_arr, r_corrected_errup_arr, r_corrected_errdw_arr
 # ----------------------- #  
     
+
+
+
+    
+# ----------------------- #
+def load_SIDIS_ratio(xlabel   = "Bjorken $x$",
+                     fdebug   = 0,
+                     prefix   = 'Untagged_SIDIS_ratio_',
+                     suffix   = '',
+                     doPlotResults=False,
+                     axPlot   = [],
+                     Nzbins2Plot = 5,
+                     titlePlot="$\pi^+/\pi^-$ ratio as a function of $x_B$ without a tagged neutron",
+                     zvar     = "Zpi",
+                     data_path= '/Users/erezcohen/Desktop/data/BAND/Results/Results_31Jan2023/'):
+    '''
+    Load SIDIS ratio results
+    last update May-18, 2023
+    
+    input
+    -------
+    zvar      "Zpi","zeta_pi"
+    
+    '''
+    
+    SIDIS_results = dict()
+    
+    z_min_arr, z_max_arr, Zavg_pips_arr, Zavg_pims_arr = [],[],[],[]
+    data_path = data_path + '/';
+    if fdebug: print('Reading files from ' + data_path)
+    filelist = os.listdir( data_path )
+    for filename in filelist:
+        if prefix in filename and suffix in filename:
+            filenameparts = filename.split('_')
+            if fdebug>2: print(filename)
+            if fdebug>3: print(filenameparts)
+            if zvar=="Zpi":
+                if "Zpi" not in filenameparts: continue
+                z_min     = float(filenameparts[4][4:8])
+                # Zavg_pips = float(filenameparts[7][5:9])
+                Zavg_pips_str = filenameparts[7][5:9]
+                if 'an' in Zavg_pips_str: 
+                    Zavg_pips = 0.000;
+                else:                     Zavg_pips = float(Zavg_pips_str)
+                # Zavg_pims = float(filenameparts[8][5:9])
+                Zavg_pims_str = filenameparts[8][5:9]
+                if 'an' in Zavg_pims_str: 
+                    Zavg_pims = 0.000;
+                else:                     Zavg_pims = float(Zavg_pims_str) 
+                z_max     = float(filenameparts[10][4:8])
+
+            elif zvar=="zeta_pi":
+                if "zeta" not in filenameparts: continue
+                z_min     = float(filenameparts[5][4:8])
+                Zavg_pips = float(filenameparts[9][5:9])
+                Zavg_pims = float(filenameparts[10][5:9])
+                z_max     = float(filenameparts[13][4:8])
+
+            filelabel = '%s_min%.3f_%s_mean_pips%.3f_pims%.3f_%s_max%.3f'%(zvar,z_min,zvar,Zavg_pips,Zavg_pims,zvar,z_max)
+
+            df = pd.read_csv( data_path + '/' + filename )
+            SIDIS_results[filelabel] = df
+            z_min_arr.append(z_min)
+            z_max_arr.append(z_max)
+            Zavg_pips_arr.append(Zavg_pips)
+            Zavg_pims_arr.append(Zavg_pims)
+
+        
+    z_min_arr = np.sort(z_min_arr)
+    z_max_arr = np.sort(z_max_arr)
+    Zavg_pips_arr = np.sort(Zavg_pips_arr)
+    Zavg_pims_arr = np.sort(Zavg_pims_arr)
+    
+    if doPlotResults:#{
+        x     = np.array(df["$x_B$"])
+        x_err = np.array(df["$\Delta x_B$"])
+
+        if axPlot==[]:
+            fig = plt.figure(figsize=(9,6))
+            axPlot  = fig.add_subplot(1,1,1)
+            
+        for filelabel,z_min,z_max in zip(SIDIS_results.keys(),z_min_arr,z_max_arr):
+        # z_min,z_max,Zavg_pips,Zavg_pims in zip( z_min_arr, z_max_arr, Zavg_pips_arr, Zavg_pims_arr[0:Nzbins2Plot] ):
+            # Zavg = (Zavg_pips+Zavg_pims)/2.
+            # filelabel = '%s_min%.3f_%s_mean_pips%.3f_pims%.3f_%s_max%.3f'%(zvar,z_min,zvar,Zavg_pips,Zavg_pims,zvar,z_max)
+            
+            df = SIDIS_results[filelabel]
+            y    = df['$R$']
+            y_err= (df['$\Delta R_{+}$'],df['$\Delta R_{-}$'])
+            # plot
+            l=axPlot.errorbar(x=x, xerr=x_err,  y=y, yerr=y_err,
+                        marker='o',markeredgecolor='k',
+                        label='$%.3f<z<%.3f$'%(z_min,z_max))
+
+        set_axes(axPlot,xlabel,"$N(e,e'\pi^+)/N(e,e'\pi^-)$",
+                 title=titlePlot,
+                 do_add_grid=True, do_add_legend=True,fontsize=18);
+        # plt.legend(bbox_to_anchor=(1,1.05),loc='best',fontsize=18)
+        
+    if fdebug: print('Done.')
+    return SIDIS_results
+# ----------------------- #
+
+
+
+
+     
     
 
 # ----------------------- #
@@ -586,108 +750,7 @@ def extract_SIDIS_Xsec_ratio(df_dict  = None,
                 print('$%s=%.3f\pm%.3f$'%(zvar,z_bin,z_width))
                 if fdebug>2: display(df_to_save)
 # ----------------------- #
-    
-# ----------------------- #
-def load_SIDIS_ratio(xlabel   = "Bjorken $x$",
-                     fdebug   = 0,
-                     prefix   = 'Untagged_SIDIS_ratio_',
-                     suffix   = '',
-                     doPlotResults=False,
-                     axPlot   = [],
-                     Nzbins2Plot = 5,
-                     titlePlot="$\pi^+/\pi^-$ ratio as a function of $x_B$ without a tagged neutron",
-                     zvar     = "Zpi",
-                     data_path= '/Users/erezcohen/Desktop/data/BAND/Results/Results_31Jan2023/'):
-    '''
-    Load SIDIS ratio results
-    last update Feb-22, 2023
-    
-    input
-    -------
-    zvar      "Zpi","zeta_pi"
-    
-    '''
-    
-    SIDIS_results = dict()
-    
-    z_min_arr, z_max_arr, Zavg_pips_arr, Zavg_pims_arr = [],[],[],[]
-    data_path = data_path + '/';
-    if fdebug: print('Reading files from ' + data_path)
-    filelist = os.listdir( data_path )
-    for filename in filelist:
-        if prefix in filename and suffix in filename:
-            filenameparts = filename.split('_')
-            if fdebug>2: print(filename)
-            if fdebug>3: print(filenameparts)
-            if zvar=="Zpi":
-                if "Zpi" not in filenameparts: continue
-                z_min     = float(filenameparts[4][4:8])
-                # Zavg_pips = float(filenameparts[7][5:9])
-                Zavg_pips_str = filenameparts[7][5:9]
-                if 'an' in Zavg_pips_str: 
-                    Zavg_pips = 0.000;
-                else:                     Zavg_pips = float(Zavg_pips_str)
-                # Zavg_pims = float(filenameparts[8][5:9])
-                Zavg_pims_str = filenameparts[8][5:9]
-                if 'an' in Zavg_pims_str: 
-                    Zavg_pims = 0.000;
-                else:                     Zavg_pims = float(Zavg_pims_str) 
-                z_max     = float(filenameparts[10][4:8])
-
-            elif zvar=="zeta_pi":
-                if "zeta" not in filenameparts: continue
-                z_min     = float(filenameparts[5][4:8])
-                Zavg_pips = float(filenameparts[9][5:9])
-                Zavg_pims = float(filenameparts[10][5:9])
-                z_max     = float(filenameparts[13][4:8])
-
-            filelabel = '%s_min%.3f_%s_mean_pips%.3f_pims%.3f_%s_max%.3f'%(zvar,z_min,zvar,Zavg_pips,Zavg_pims,zvar,z_max)
-
-            df = pd.read_csv( data_path + '/' + filename )
-            SIDIS_results[filelabel] = df
-            z_min_arr.append(z_min)
-            z_max_arr.append(z_max)
-            Zavg_pips_arr.append(Zavg_pips)
-            Zavg_pims_arr.append(Zavg_pims)
-
-        
-    z_min_arr = np.sort(z_min_arr)
-    z_max_arr = np.sort(z_max_arr)
-    Zavg_pips_arr = np.sort(Zavg_pips_arr)
-    Zavg_pims_arr = np.sort(Zavg_pims_arr)
-    
-    if doPlotResults:#{
-        x     = np.array(df["$x_B$"])
-        x_err = np.array(df["$\Delta x_B$"])
-
-        if axPlot==[]:
-            fig = plt.figure(figsize=(9,6))
-            axPlot  = fig.add_subplot(1,1,1)
-            
-        for filelabel,z_min,z_max in zip(SIDIS_results.keys(),z_min_arr,z_max_arr):
-        # z_min,z_max,Zavg_pips,Zavg_pims in zip( z_min_arr, z_max_arr, Zavg_pips_arr, Zavg_pims_arr[0:Nzbins2Plot] ):
-            # Zavg = (Zavg_pips+Zavg_pims)/2.
-            # filelabel = '%s_min%.3f_%s_mean_pips%.3f_pims%.3f_%s_max%.3f'%(zvar,z_min,zvar,Zavg_pips,Zavg_pims,zvar,z_max)
-            
-            df = SIDIS_results[filelabel]
-            y    = df['$R$']
-            y_err= (df['$\Delta R_{+}$'],df['$\Delta R_{-}$'])
-            # plot
-            l=axPlot.errorbar(x=x, xerr=x_err,  y=y, yerr=y_err,
-                        marker='o',markeredgecolor='k',
-                        label='$%.3f<z<%.3f$'%(z_min,z_max))
-
-        set_axes(axPlot,xlabel,"$N(e,e'\pi^+)/N(e,e'\pi^-)$",
-                 title=titlePlot,
-                 do_add_grid=True, do_add_legend=True,fontsize=18);
-        # plt.legend(bbox_to_anchor=(1,1.05),loc='best',fontsize=18)
-        
-    if fdebug: print('Done.')
-    return SIDIS_results
-# ----------------------- #
-
-
-
+ 
 
 
 
@@ -772,9 +835,11 @@ def apply_cuts_to_e_e_pi(fdebug=0,
         
         # add beam-charge weight
         runnumbers = np.array(e_e_pi_pass_cuts[pi_ch].runnum).astype(int);
-        e_e_pi_pass_cuts[pi_ch]['beamCharge_weight']   = runnum_weight       ( runnumbers, 'rgb')       
-        e_e_pi_pass_cuts[pi_ch]['binMigration_weight'] = get_binMigration_weights ( e_e_pi_pass_cuts, pi_ch, NeventsMax=NeventsMax ) 
-        e_e_pi_pass_cuts[pi_ch]['acceptance_weight']   = get_acceptance_weights   ( e_e_pi_pass_cuts, pi_ch, NeventsMax=NeventsMax  ) 
+        e_e_pi_pass_cuts[pi_ch]['beamCharge_weight']         = runnum_weight                  ( runnumbers, 'rgb')       
+        e_e_pi_pass_cuts[pi_ch]['binMigration_weight']       = get_binMigration_weights       ( e_e_pi_pass_cuts, pi_ch, NeventsMax=NeventsMax ) 
+        e_e_pi_pass_cuts[pi_ch]['acceptance_weight']         = get_acceptance_weights         ( e_e_pi_pass_cuts, pi_ch, NeventsMax=NeventsMax  ) 
+        e_e_pi_pass_cuts[pi_ch]['mesonsubtraction_weight']   = get_mesonsubtraction_weights   ( e_e_pi_pass_cuts, pi_ch, NeventsMax=NeventsMax  ) 
+
     #}
     print(' ')
     return e_e_pi_pass_cuts
@@ -846,6 +911,41 @@ def get_acceptance_weights ( df_dict=None, pi_ch='piplus', NeventsMax=-1 , fdebu
 
     return np.array(acceptance_weights)
 # ----------------------- #
+
+
+
+# ----------------------- #
+def get_mesonsubtraction_weights ( df_dict=None, pi_ch='piplus', NeventsMax=-1 , fdebug=0):
+    
+    df = df_dict[pi_ch]
+    if NeventsMax>0: 
+        df = df[0:int(NeventsMax)]
+    
+    mesonsubtraction_weights = np.zeros(len(df))
+    
+    Q2 = np.array(df.Q2)
+    Q2_bins = np.digitize( Q2, MCCorrections_binCenters_Q2 )
+    
+    xB = np.array(df.xB)
+    xB_bins = np.digitize( xB, MCCorrections_binCenters_xB )
+
+    z  = np.array(df.Zpi)
+    z_bins = np.digitize( z, MCCorrections_binCenters_z )
+
+    if fdebug:#{
+        for val_Q2,val_xB,val_z,bin_Q2,bin_xB,bin_z in zip(Q2,xB,z,Q2_bins,xB_bins,z_bins):#{
+            print(val_Q2,val_xB,val_z,bin_Q2,bin_xB,bin_z)
+            print(MesonSubtractionWeights[pi_ch][bin_xB][bin_Q2][bin_z])
+        #}
+    #}
+
+    for bin_Q2,bin_xB,bin_z,bin_idx in zip(Q2_bins,xB_bins,z_bins,range(len(df))):
+        if (bin_xB<MCCorrections_Nbins_xB) and (bin_Q2<MCCorrections_Nbins_Q2) and (bin_z<MCCorrections_Nbins_z):
+            mesonsubtraction_weights[bin_idx] = MesonSubtractionWeights[pi_ch][bin_xB][bin_Q2][bin_z]
+
+    return np.array(mesonsubtraction_weights)
+# ----------------------- #
+
 
 
     
@@ -1361,214 +1461,215 @@ def get_r_from_CrossSectionRatio(R, R_errup, R_errdw, u_over_d=1):
 
 
     
-# ----------------------- #
-def compute_weights_ratio_pips_to_pims(df_dict,
-                               specific_run_number=None,
-                               var='xB',
-                               bins=np.linspace(0,1,10),
-                               weight_option = 'beam-charge',
-                               zvar="Zpi",
-                               z_min=0,    z_max=1,
-                               M_x_min=0,  M_x_max=np.inf,
-                               W_min=0,    W_max=np.inf,
-                               Q2_min = 0, Q2_max= np.inf,
-                               pT_min = 0, pT_max= np.inf,
-                               phi_min = 0,phi_max= np.inf,                               
-                               Mx_d_min=0, fdebug=0,
-                               cutoff = 1.e-8 ):#{
-    '''
-    last edit Apr-28, 2023
+# # ----------------------- #
+# This following function is obselet
+# def compute_weights_ratio_pips_to_pims(df_dict,
+#                                specific_run_number=None,
+#                                var='xB',
+#                                bins=np.linspace(0,1,10),
+#                                weight_option = 'beam-charge',
+#                                zvar="Zpi",
+#                                z_min=0,    z_max=1,
+#                                M_x_min=0,  M_x_max=np.inf,
+#                                W_min=0,    W_max=np.inf,
+#                                Q2_min = 0, Q2_max= np.inf,
+#                                pT_min = 0, pT_max= np.inf,
+#                                phi_min = 0,phi_max= np.inf,                               
+#                                Mx_d_min=0, fdebug=0,
+#                                cutoff = 1.e-8 ):#{
+#     '''
+#     last edit Apr-28, 2023
     
-    [R_pips_to_pims, R_pips_to_pims_errup, R_pips_to_pims_errdw,
-     N_pips, N_pims,
-     Zavg_pips, Zavg_pims,
-     N_pips_err, N_pims_err] = compute_ratio_pips_to_pims(df_dict,
-                               specific_run_number=None,
-                               var='xB',
-                               bins=np.linspace(0,1,10),
-                               weight_option = 'beam-charge',
-                               z_min=0,   z_max=1,
-                               M_x_min=0, M_x_max=np.inf,
-                               W_min=0,   W_max=np.inf,
-                               Q2_min = 0, Q2_max= np.inf,
-                               Mx_d_min=0, fdebug=0 )
-    
-    
-    input:
-    -------
-    M_x_min               float         minimal M_x
-    M_x_max               float         maximal M_x
-    weight_option         str           None, 'beam-charge and MC corrections', 'beam-charge', 'Acc. correction as f(phi)'
-                                        default: 'beam-charge and MC corrections'
+#     [R_pips_to_pims, R_pips_to_pims_errup, R_pips_to_pims_errdw,
+#      N_pips, N_pims,
+#      Zavg_pips, Zavg_pims,
+#      N_pips_err, N_pims_err] = compute_ratio_pips_to_pims(df_dict,
+#                                specific_run_number=None,
+#                                var='xB',
+#                                bins=np.linspace(0,1,10),
+#                                weight_option = 'beam-charge',
+#                                z_min=0,   z_max=1,
+#                                M_x_min=0, M_x_max=np.inf,
+#                                W_min=0,   W_max=np.inf,
+#                                Q2_min = 0, Q2_max= np.inf,
+#                                Mx_d_min=0, fdebug=0 )
     
     
+#     input:
+#     -------
+#     M_x_min               float         minimal M_x
+#     M_x_max               float         maximal M_x
+#     weight_option         str           None, 'beam-charge and MC corrections', 'beam-charge', 'Acc. correction as f(phi)'
+#                                         default: 'beam-charge and MC corrections'
     
-    return:
-    -------
-    R_pips_to_pims                np.array()   number of π+ events in each x-bin / number of π-
-    R_pips_to_pims_errup          np.array()   err-up in number of π+ events in each x-bin / number of π-
-    R_pips_to_pims_errdw          np.array()   err-dw in number of π+ events in each x-bin / number of π-
+    
+    
+#     return:
+#     -------
+#     R_pips_to_pims                np.array()   number of π+ events in each x-bin / number of π-
+#     R_pips_to_pims_errup          np.array()   err-up in number of π+ events in each x-bin / number of π-
+#     R_pips_to_pims_errdw          np.array()   err-dw in number of π+ events in each x-bin / number of π-
 
-    R_normed_pips_to_pims         np.array()   R_pips_to_pims normalized by beam-charge
-    R_normed_pips_to_pims_errup   np.array()   R_pips_to_pims_errup normalized by beam-charge
-    R_normed_pips_to_pims_errdw   np.array()   R_pips_to_pims_errdw normalized by beam-charge
+#     R_normed_pips_to_pims         np.array()   R_pips_to_pims normalized by beam-charge
+#     R_normed_pips_to_pims_errup   np.array()   R_pips_to_pims_errup normalized by beam-charge
+#     R_normed_pips_to_pims_errdw   np.array()   R_pips_to_pims_errdw normalized by beam-charge
 
-    N_pips                        np.array()   number of π+ events in each x-bin
-    N_pims                        np.array()   number of π- events in each x-bin
-    Zavg_pips                     float        mean z-value in the range z_min < z < z_max for π+
-    Zavg_pims                     float        mean z-value in the range z_min < z < z_max for π-
-    N_pips_err                    np.array()   uncertainty number of π+ events in each x-bin
-    N_pims_err                    np.array()   uncertainty in the number of π- events in each x-bin
+#     N_pips                        np.array()   number of π+ events in each x-bin
+#     N_pims                        np.array()   number of π- events in each x-bin
+#     Zavg_pips                     float        mean z-value in the range z_min < z < z_max for π+
+#     Zavg_pims                     float        mean z-value in the range z_min < z < z_max for π-
+#     N_pips_err                    np.array()   uncertainty number of π+ events in each x-bin
+#     N_pims_err                    np.array()   uncertainty in the number of π- events in each x-bin
 
         
-    comments:
-    -------
-    if weight is 'beam-charge', the results are given in number of events per nC
-    if weight is 'beam-charge and MC corrections',  MC corrections are also applied
-                                                    Apr-28, 2023: bin-migration and acceptance corrections
-                                                    calculated by Jason M. P., using SIDIS MC + GEMC
+#     comments:
+#     -------
+#     if weight is 'beam-charge', the results are given in number of events per nC
+#     if weight is 'beam-charge and MC corrections',  MC corrections are also applied
+#                                                     Apr-28, 2023: bin-migration and acceptance corrections
+#                                                     calculated by Jason M. P., using SIDIS MC + GEMC
     
-    '''
-    # z_min,z_max are z limits on the pion outgoing momentum
-    df_pips = df_dict['piplus']
-    df_pims = df_dict['piminus']
+#     '''
+#     # z_min,z_max are z limits on the pion outgoing momentum
+#     df_pips = df_dict['piplus']
+#     df_pims = df_dict['piminus']
     
-    # bin in z or other kinematical variables
-    df_pips = df_pips[  (z_min   < df_pips[zvar]) & (df_pips[zvar] < z_max  )
-                      & (W_min   < df_pips.W  )   & (df_pips.W   < W_max  )   ]
-    df_pims = df_pims[  (z_min   < df_pims[zvar]) & (df_pims[zvar] < z_max  )
-                      & (W_min   < df_pims.W  )   & (df_pims.W   < W_max  )   ]
+#     # bin in z or other kinematical variables
+#     df_pips = df_pips[  (z_min   < df_pips[zvar]) & (df_pips[zvar] < z_max  )
+#                       & (W_min   < df_pips.W  )   & (df_pips.W   < W_max  )   ]
+#     df_pims = df_pims[  (z_min   < df_pims[zvar]) & (df_pims[zvar] < z_max  )
+#                       & (W_min   < df_pims.W  )   & (df_pims.W   < W_max  )   ]
 
     
-    if 0 < M_x_min or M_x_max < np.inf:
-        df_pips = df_pips[ (M_x_min < df_pips.M_x) & (df_pips.M_x < M_x_max) ]
-        df_pims = df_pims[ (M_x_min < df_pims.M_x) & (df_pims.M_x < M_x_max) ]
+#     if 0 < M_x_min or M_x_max < np.inf:
+#         df_pips = df_pips[ (M_x_min < df_pips.M_x) & (df_pips.M_x < M_x_max) ]
+#         df_pims = df_pims[ (M_x_min < df_pims.M_x) & (df_pims.M_x < M_x_max) ]
         
-    if 0 < Mx_d_min:
-        df_pips = df_pips[ Mx_d_min < df_pips.M_x_d ]
-        df_pims = df_pims[Mx_d_min < df_pims.M_x_d]
+#     if 0 < Mx_d_min:
+#         df_pips = df_pips[ Mx_d_min < df_pips.M_x_d ]
+#         df_pims = df_pims[Mx_d_min < df_pims.M_x_d]
        
-    if 0 < Q2_min or Q2_max < np.inf:
-        df_pips = df_pips[ (Q2_min < df_pips.Q2) & (df_pips.Q2 < Q2_max) ]
-        df_pims = df_pims[ (Q2_min < df_pims.Q2) & (df_pims.Q2 < Q2_max) ]
+#     if 0 < Q2_min or Q2_max < np.inf:
+#         df_pips = df_pips[ (Q2_min < df_pips.Q2) & (df_pips.Q2 < Q2_max) ]
+#         df_pims = df_pims[ (Q2_min < df_pims.Q2) & (df_pims.Q2 < Q2_max) ]
 
-    if 0 < pT_min or pT_max < np.inf:
-        df_pips = df_pips[ (pT_min < df_pips.pi_qFrame_pT) & (df_pips.pi_qFrame_pT < pT_max) ]
-        df_pims = df_pims[ (pT_min < df_pims.pi_qFrame_pT) & (df_pims.pi_qFrame_pT < pT_max) ]
+#     if 0 < pT_min or pT_max < np.inf:
+#         df_pips = df_pips[ (pT_min < df_pips.pi_qFrame_pT) & (df_pips.pi_qFrame_pT < pT_max) ]
+#         df_pims = df_pims[ (pT_min < df_pims.pi_qFrame_pT) & (df_pims.pi_qFrame_pT < pT_max) ]
 
-    if 0 < phi_min or phi_max < np.inf:
-        df_pips = df_pips[ (phi_min < df_pips.pi_qFrame_Phi) & (df_pips.pi_qFrame_Phi < phi_max) ]
-        df_pims = df_pims[ (phi_min < df_pims.pi_qFrame_Phi) & (df_pims.pi_qFrame_Phi < phi_max) ]
+#     if 0 < phi_min or phi_max < np.inf:
+#         df_pips = df_pips[ (phi_min < df_pips.pi_qFrame_Phi) & (df_pips.pi_qFrame_Phi < phi_max) ]
+#         df_pims = df_pims[ (phi_min < df_pims.pi_qFrame_Phi) & (df_pims.pi_qFrame_Phi < phi_max) ]
 
 
 
 
         
-    if specific_run_number is not None:
-        # if fdebug>1:  print('df_pips: before run %d filter: %d events'%(specific_run_number,len(df_pips)))
-        df_pips = df_pips[df_pips.runnum == specific_run_number]
-        df_pims = df_pims[df_pims.runnum == specific_run_number]
-        # if fdebug>1:  print('after run %d filter: %d events'%(specific_run_number,len(df_pips)))
+#     if specific_run_number is not None:
+#         # if fdebug>1:  print('df_pips: before run %d filter: %d events'%(specific_run_number,len(df_pips)))
+#         df_pips = df_pips[df_pips.runnum == specific_run_number]
+#         df_pims = df_pims[df_pims.runnum == specific_run_number]
+#         # if fdebug>1:  print('after run %d filter: %d events'%(specific_run_number,len(df_pips)))
                            
-    Zavg_pips = np.mean( np.array(df_pips[zvar])  )
-    Zavg_pims = np.mean( np.array(df_pims[zvar])  )
+#     Zavg_pips = np.mean( np.array(df_pips[zvar])  )
+#     Zavg_pims = np.mean( np.array(df_pims[zvar])  )
 
 
-    pips = df_pips[var]
-    pims = df_pims[var]
-    if weight_option == 'Acc. correction as f(phi)':#{
-        phi_pips = np.array( df_pips.pi_Phi )*r2d
-        phi_pims = np.array( df_pims.pi_Phi )*r2d
-    #}    
-    elif weight_option == 'beam-charge':#{
-        w_pips = np.array( df_pips.beamCharge_weight )
-        w_pims = np.array( df_pims.beamCharge_weight )
-    #}
-    elif weight_option == 'beam-charge and MC corrections':#{
-        w_pips = np.array( df_pips.weight )
-        w_pims = np.array( df_pims.weight )        
-    #}
+#     pips = df_pips[var]
+#     pims = df_pims[var]
+#     if weight_option == 'Acc. correction as f(phi)':#{
+#         phi_pips = np.array( df_pips.pi_Phi )*r2d
+#         phi_pims = np.array( df_pims.pi_Phi )*r2d
+#     #}    
+#     elif weight_option == 'beam-charge':#{
+#         w_pips = np.array( df_pips.beamCharge_weight )
+#         w_pims = np.array( df_pims.beamCharge_weight )
+#     #}
+#     elif weight_option == 'beam-charge and MC corrections':#{
+#         w_pips = np.array( df_pips.weight )
+#         w_pims = np.array( df_pims.weight )        
+#     #}
 
         
-    R_pips_to_pims, R_pips_to_pims_err = [],[]
-    N_pips, N_pims                     = [],[]
-    N_pips_err, N_pims_err             = [],[]
-    if fdebug>1: print('%.2f<%s<%.2f: '%(z_min,zvar,z_max), len(pips),'π+ and',len(pims),'π-')
+#     R_pips_to_pims, R_pips_to_pims_err = [],[]
+#     N_pips, N_pims                     = [],[]
+#     N_pips_err, N_pims_err             = [],[]
+#     if fdebug>1: print('%.2f<%s<%.2f: '%(z_min,zvar,z_max), len(pips),'π+ and',len(pims),'π-')
         
 
-    for x_min,x_max in zip(bins[:-1],bins[1:]):#{
+#     for x_min,x_max in zip(bins[:-1],bins[1:]):#{
         
-        if fdebug>1: print('\t%.2f<%s<%.2f:'%(x_min,var,x_max),
-                           len(pips[ (x_min < pips) & (pips < x_max) ]),'π+ and',
-                           len(pims[ (x_min < pims) & (pims < x_max) ]),'π-')
+#         if fdebug>1: print('\t%.2f<%s<%.2f:'%(x_min,var,x_max),
+#                            len(pips[ (x_min < pips) & (pips < x_max) ]),'π+ and',
+#                            len(pims[ (x_min < pims) & (pims < x_max) ]),'π-')
         
-        if weight_option == 'Acc. correction as f(phi)':#{
-            # each event is weighted by the acceptance correction weight
-            phi_pips_in_bin = phi_pips[ (x_min < pips) & (pips < x_max) ]
-            W_pips_in_bin   = [ Compute_acceptance_correction_weight( 'piplus' , phi ) for phi in phi_pips_in_bin ]
-            Npips_in_bin    = np.sum( W_pips_in_bin )
+#         if weight_option == 'Acc. correction as f(phi)':#{
+#             # each event is weighted by the acceptance correction weight
+#             phi_pips_in_bin = phi_pips[ (x_min < pips) & (pips < x_max) ]
+#             W_pips_in_bin   = [ Compute_acceptance_correction_weight( 'piplus' , phi ) for phi in phi_pips_in_bin ]
+#             Npips_in_bin    = np.sum( W_pips_in_bin )
             
-            phi_pims_in_bin = phi_pims[ (x_min < pims) & (pims < x_max) ]
-            W_pims_in_bin   = [ Compute_acceptance_correction_weight( 'piminus', phi ) for phi in phi_pims_in_bin ]
-            Npims_in_bin    = np.sum( W_pims_in_bin )
+#             phi_pims_in_bin = phi_pims[ (x_min < pims) & (pims < x_max) ]
+#             W_pims_in_bin   = [ Compute_acceptance_correction_weight( 'piminus', phi ) for phi in phi_pims_in_bin ]
+#             Npims_in_bin    = np.sum( W_pims_in_bin )
             
-        elif (weight_option == 'beam-charge') or (weight_option == 'beam-charge and MC corrections'):#{
+#         elif (weight_option == 'beam-charge') or (weight_option == 'beam-charge and MC corrections'):#{
             
-            # weighted by 1/beam-charge
-            W_pips_in_bin   = w_pips[ (x_min < pips) & (pips < x_max) ]
-            Npips_in_bin    = np.sum( W_pips_in_bin )
-            Npips_in_bin_err= np.sqrt(np.sum( np.square(W_pips_in_bin )))
+#             # weighted by 1/beam-charge
+#             W_pips_in_bin   = w_pips[ (x_min < pips) & (pips < x_max) ]
+#             Npips_in_bin    = np.sum( W_pips_in_bin )
+#             Npips_in_bin_err= np.sqrt(np.sum( np.square(W_pips_in_bin )))
             
-            W_pims_in_bin   = w_pims[ (x_min < pims) & (pims < x_max) ]
-            Npims_in_bin    = np.sum( W_pims_in_bin )
-            Npims_in_bin_err= np.sqrt(np.sum( np.square(W_pims_in_bin )))
+#             W_pims_in_bin   = w_pims[ (x_min < pims) & (pims < x_max) ]
+#             Npims_in_bin    = np.sum( W_pims_in_bin )
+#             Npims_in_bin_err= np.sqrt(np.sum( np.square(W_pims_in_bin )))
             
-            # cutoff = np.min(weight_per_run)
-            # print(cutoff,np.max([Npims_in_bin,cutoff]))
-            if Npims_in_bin < cutoff: R = 0
-            else:                     R = Npips_in_bin / np.max([Npims_in_bin,cutoff])
-            R_err = R * np.sqrt( np.square(Npips_in_bin_err/np.max([Npips_in_bin,cutoff]))
-                                + np.square(Npims_in_bin_err/np.max([Npims_in_bin,cutoff]) ) )
+#             # cutoff = np.min(weight_per_run)
+#             # print(cutoff,np.max([Npims_in_bin,cutoff]))
+#             if Npims_in_bin < cutoff: R = 0
+#             else:                     R = Npips_in_bin / np.max([Npims_in_bin,cutoff])
+#             R_err = R * np.sqrt( np.square(Npips_in_bin_err/np.max([Npips_in_bin,cutoff]))
+#                                 + np.square(Npims_in_bin_err/np.max([Npims_in_bin,cutoff]) ) )
 
            
-        else:
-            # no weight, no acceptance correction
-            pips_in_bin      = pips[ (x_min < pips) & (pips < x_max) ]
-            Npips_in_bin     = len(pips_in_bin)
-            Npips_in_bin_err = sqrt(len(pips_in_bin))
+#         else:
+#             # no weight, no acceptance correction
+#             pips_in_bin      = pips[ (x_min < pips) & (pips < x_max) ]
+#             Npips_in_bin     = len(pips_in_bin)
+#             Npips_in_bin_err = sqrt(len(pips_in_bin))
             
-            pims_in_bin      = pims[ (x_min < pims) & (pims < x_max) ]
-            Npims_in_bin     = len(pims_in_bin)
-            Npims_in_bin_err = sqrt(len(pims_in_bin))
+#             pims_in_bin      = pims[ (x_min < pims) & (pims < x_max) ]
+#             Npims_in_bin     = len(pims_in_bin)
+#             Npims_in_bin_err = sqrt(len(pims_in_bin))
 
             
-            R     = Npips_in_bin / np.max([Npims_in_bin,1])
-            R_err = R * np.sqrt( 1./np.max([1,Npips_in_bin]) + 1./np.max([1,Npims_in_bin]) )
-        #}
+#             R     = Npips_in_bin / np.max([Npims_in_bin,1])
+#             R_err = R * np.sqrt( 1./np.max([1,Npips_in_bin]) + 1./np.max([1,Npims_in_bin]) )
+#         #}
 
 
-        N_pips            .append(Npips_in_bin)
-        N_pips_err        .append(Npips_in_bin_err)
+#         N_pips            .append(Npips_in_bin)
+#         N_pips_err        .append(Npips_in_bin_err)
 
-        N_pims            .append(Npims_in_bin)
-        N_pims_err        .append(Npims_in_bin_err)
+#         N_pims            .append(Npims_in_bin)
+#         N_pims_err        .append(Npims_in_bin_err)
 
-        R_pips_to_pims    .append(R)
-        R_pips_to_pims_err.append(R_err)
-    #}
-    R_pips_to_pims_errup,R_pips_to_pims_errdw = get_err_up_dw(R_pips_to_pims, R_pips_to_pims_err)
+#         R_pips_to_pims    .append(R)
+#         R_pips_to_pims_err.append(R_err)
+#     #}
+#     R_pips_to_pims_errup,R_pips_to_pims_errdw = get_err_up_dw(R_pips_to_pims, R_pips_to_pims_err)
     
-    return [np.array(R_pips_to_pims),
-            np.array(R_pips_to_pims_errup),
-            np.array(R_pips_to_pims_errdw),
-            np.array(N_pips),
-            np.array(N_pims),
-            Zavg_pips,
-            Zavg_pims,
-            np.array(N_pips_err),
-            np.array(N_pims_err)]
-#}
-# ----------------------- #
+#     return [np.array(R_pips_to_pims),
+#             np.array(R_pips_to_pims_errup),
+#             np.array(R_pips_to_pims_errdw),
+#             np.array(N_pips),
+#             np.array(N_pims),
+#             Zavg_pips,
+#             Zavg_pims,
+#             np.array(N_pips_err),
+#             np.array(N_pims_err)]
+# #}
+# # ----------------------- #
 
 
 

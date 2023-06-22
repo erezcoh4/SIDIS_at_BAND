@@ -1,0 +1,118 @@
+
+--------------------------------------------------
+Simulation using GEMC
+--------------------------------------------------
+
+Comments, May-4, 2022
+
+Specific GEMC settings for BAND 10.2 GeV data (RGB spring 2019)
+ /group/clas12/gemc/4.4.1/config/rgb_spring2019.gcard
+ /group/clas12/gemc/4.4.1/config/rgb_spring2019.yaml
+ 
+ 
+ 
+
+Simulation of tagged (e,e'\pi) events
+-----------------------------------------
+(1) set environement
+
+> source set_gemc_env.csh
+
+(2) simulate
+
+	/u/home/cohen/clas12Tags/4.4.1/source/gemc /group/clas12/gemc/4.4.1/config/clas12-default.gcard -USE_GUI=0 -N=100 -INPUT_GEN_FILE="LUND, /volatile/clas12/users/ecohen/GEMC/LUND/10.2/AcceptanceCorrection/pips/eepips_p_uniform_distribution.dat" -OUTPUT="evio, /volatile/clas12/users/ecohen/GEMC/evio/10.2/AcceptanceCorrection/pips/eepips_p_uniform_distribution.ev"
+
+
+	previous (not working for some reason with a GEMC using custom made gcard...): 
+	/u/home/cohen/clas12Tags/4.4.1/source/gemc /u/home/cohen/SIDIS_at_BAND/MC/Acceptance_Corrections/gcards/Erez_band-clas12.gcard -USE_GUI=0 -N=10000 -INPUT_GEN_
+FILE="LUND, /volatile/clas12/users/ecohen/GEMC/LUND/10.2/AcceptanceCorrection/pips/eepips_p_uniform_distribution.dat" -OUTPUT="evio, /volatile/clas12/users/ecohen/GEMC/evio/10.2/AcceptanceCorrection/pips/eepips_p_uniform_distribution.ev"
+
+	/u/home/cohen/clas12Tags/4.4.1/source/gemc /u/home/cohen/SIDIS_at_BAND/MC/Acceptance_Corrections/gcards/Erez_band-clas12.gcard -USE_GUI=0 -N=10000 -INPUT_GEN_
+FILE="LUND, /volatile/clas12/users/ecohen/GEMC/LUND/10.2/AcceptanceCorrection/pims/eepims_p_uniform_distribution.dat" -OUTPUT="evio, /volatile/clas12/users/ecohen/GEMC/evio/10.2/AcceptanceCorrection/pims/eepims_p_uniform_distribution.ev"
+
+
+(3) cook
+
+    > open different environement for cooking
+    > source set_cook_env.csh
+	
+If an updated cooking is desired:
+
+    > cd clas12-offline-software/
+    > ./build-coatjava.sh
+    
+    (3.1) convert EVIO to HIPO:
+
+
+	> /u/home/cohen/clas12-offline-software/coatjava/bin/evio2hipo -t -1 -s -1 -r 11 -i /volatile/clas12/users/ecohen/GEMC/evio/10.2/AcceptanceCorrection/pips/eepips_p_uniform_distribution.ev -o /volatile/clas12/users/ecohen/GEMC/hipo/10.2/AcceptanceCorrection/pips/eepips_p_uniform_distribution.hipo
+
+
+	previous (not working for some reason with a GEMC using custom made gcard...): 
+	> /u/home/cohen/clas12-offline-software/coatjava/bin/evio2hipo -t -1 -s -1 -r 11 -i /volatile/clas12/users/ecohen/GEMC/evio/10.2/AcceptanceCorrection/pips/eepips_p_uniform_distribution.ev -o /volatile/clas12/users/ecohen/GEMC/hipo/10.2/AcceptanceCorrection/pips/eepips_p_uniform_distribution.hipo
+
+
+
+    (3.2) Apply event reconstruction:
+
+
+	> /u/home/cohen/clas12-offline-software/coatjava/bin//recon-util -i /volatile/clas12/users/ecohen/GEMC/hipo/10.2/AcceptanceCorrection/pips/eepips_p_uniform_distribution.hipo -o /volatile/clas12/users/ecohen/GEMC/hipo/10.2/AcceptanceCorrection/pips/eepips_p_uniform_distribution_reconstructed.hipo -y /group/clas12/gemc/4.4.1/config/clas12-default.yaml
+
+
+	previous (not working for some reason with a GEMC using custom made gcard...): 
+	> /u/home/cohen/clas12-offline-software/coatjava/bin/recon-util -i /volatile/clas12/users/ecohen/GEMC/hipo/10.2/AcceptanceCorrection/pips/eepips_p_uniform_distribution.hipo -o /volatile/clas12/users/ecohen/GEMC/hipo/10.2/AcceptanceCorrection/pips/eepips_p_uniform_distribution_reconstructed.hipo -y /u/home/cohen/SIDIS_at_BAND/MC/Acceptance_Corrections/yaml_cards/Erez_rgb_fall2019.yaml
+
+
+	(
+	Following the discussion at
+	[https://clas12.discourse.group/t/simulated-events-empty/503/7] 
+	I am using a custom gcard, it seems it was derived from /group/clas12/gemc/4.4.1/config/rgb_fall2019.gcard or similar. 
+	If so, I should use /group/clas12/gemc/4.4.1/config/rgb_fall2019.yaml
+	There were a couple of things that may give problems. 
+
+	I've produced a copy of
+
+	/group/clas12/gemc/4.4.1/config/rgb_fall2019.yaml
+	at
+	/u/home/cohen/SIDIS_at_BAND/MC/Acceptance_Corrections/yaml_cards/Erez_rgb_fall2019.yaml
+
+	and a copy of the gcard
+
+	/u/home/cohen/clas12Tags/gcards/band-clas12.gcard
+	to
+	/u/home/cohen/SIDIS_at_BAND/MC/Acceptance_Corrections/gcards/Erez_band-clas12.gcard
+
+	)
+
+
+    
+(4) read output hipo file
+
+    > read_gemc_pion_acceptance
+    
+
+
+
+Using a shell script:
+------------------------
+./run_gemc_for_pi_acceptance_map.sh <pi charge> <Nevents>
+./run_gemc_for_pi_acceptance_map.sh pips 100
+
+
+Simulation of tagged (e,e') events - by Tyler K.
+-------------------------
+(0) set environement
+
+> source set_gemc_env.csh
+
+(1) simulate
+
+/u/home/cohen/clas12Tags/4.4.1/source/gemc /u/home/cohen/clas12Tags/gcards/band-clas12.gcard -USE_GUI=0 -N=10 -INPUT_GEN_
+FILE="LUND, /volatile/clas12/users/ecohen/GEMC/LUND/10.2/tagged/WP/lund_tagged_WP_00001.dat" -OUTPUT="evio, /volatile/cla
+s12/users/ecohen/GEMC/evio/10.2/tagged/WP/gemc_tagged_WP_00001.ev"
+
+
+(2) cook
+
+ > open different environement for cooking
+
+

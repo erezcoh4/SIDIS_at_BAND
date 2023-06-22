@@ -3,9 +3,13 @@
 # SRC-SIDIS revisions and release-notes 
 -----------------------------------------------------------------
 
+May-18, 2023   
+-------------
+
+1. Started to add Kaons to the extracted particles, with two files added in the output: (e,e'K+) and (e,e'K-)  
 
 
-May-4, 2023 (commit_)   
+May-4, 2023   
 -------------
 
 1. Corrected cross-section extraction 
