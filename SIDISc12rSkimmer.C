@@ -1,4 +1,4 @@
-// last edit May-29, 2023
+// last edit June-22, 2023
 
 #ifdef __CINT__
 #pragma link C++ class std::vector<TVector3>+;
@@ -52,13 +52,7 @@ TString csvheader_GEMCaddition = ( (TString)"e_P_g,e_Theta_g,e_Phi_g,e_Vz_g,"
                                   +(TString)"Q2_g,xB_g,omega_g,y_g,"
                                   );
 
-std::vector<int> csvprecisions = {
-    0,0,0,0,
-    9,9,9,9,
-    9,9,9,9,
-    9,9,9,9,
-    0,0,
-};
+std::vector<int> csvprecisions = {0,0,0,0,9,9,9,9,9,9,9,9,9,9,9,9,0,0,};
 
 
 
@@ -119,6 +113,7 @@ void                         SetVerbosity ( int _fdebug_ = 0 );
 
 // globals
 TString Skimming = "", DataPath = "", prefix = "", SimPi = "";
+TString SpecificFilePath = "", SpecificFilename = "";
 auto db = TDatabasePDG::Instance();
 double        Pe_phi, q_phi, q_theta; // "q-frame" parameters
 double                   Zpi, Zpi_LC;
@@ -1825,6 +1820,15 @@ void SetInclusive( int fInclusive ){
     if (inclusive == 1) std::cout << "Running as inclusive (all data registered event regardless of the application of event selection cuts)" << std::endl;
 }
 
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+void SetSpecificFilename (TString fSpecificFilename=""){
+    SpecificFilename = fSpecificFilename;
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+void SetSpecificFilePath (TString fSpecificFilePath=""){
+    SpecificFilePath = fSpecificFilePath;
+}
 
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
@@ -1847,31 +1851,43 @@ void SIDISc12rSkimmer(int RunNumber    = 6420   ,
                       TString fSimPi   = "piplus", //""/"piplus" / "piminus"
                       TString fSimK    = "", // ""/"Kplus" / "Kminus"
                       // inclusive means do not apply cuts
-                      int   fInclusive = 0
+                      int   fInclusive = 0,
+                      // specific file name
+                      TString fSpecificFilePath = "",
+                      TString fSpecificFilename = ""
                       ){
     
     
-    
-    SetVerbosity( fdebug     );
-    SetDataPath ( fDataPath, fEbeam );
-    SetSkimming ( fSkimming  );
-    SetEbeam    ( fEbeam     );
-    SetSimPi    ( fSimPi     );
-    SetSimK     ( fSimK      );
-    SetInclusive( fInclusive );
-    SetIsMC     (            );
-    
+    SetVerbosity        ( fdebug     );
+    SetDataPath         ( fDataPath, fEbeam );
+    SetSkimming         ( fSkimming  );
+    SetEbeam            ( fEbeam     );
+    SetSimPi            ( fSimPi     );
+    SetSimK             ( fSimK      );
+    SetInclusive        ( fInclusive );
+    SetIsMC             (            );
+    SetSpecificFilename ( fSpecificFilename );
+    SetSpecificFilePath ( fSpecificFilePath );
+
     TString RunNumberStr = aux.GetRunNumberSTR(RunNumber, Skimming);
     
     // read cut values
     aux.loadCutValues("macros/cuts/BANDcutValues.csv",torusBending);
     
     // define input filename
-    TString infilename = DataPath + prefix + RunNumberStr + ".hipo";
+    TString infilename, outfilepath, outfilename;
     
-    // open result files
-    TString outfilepath = "/volatile/clas12/users/ecohen/BAND/" + Skimming + "/";
-    TString outfilename = "skimmed_SIDIS_" + prefix + RunNumberStr;
+    if (SpecificFilePath=="" || SpecificFilename=="") {
+        infilename  = DataPath + prefix + RunNumberStr + ".hipo";
+        outfilepath = "/volatile/clas12/users/ecohen/BAND/" + Skimming + "/";
+        outfilename = "skimmed_SIDIS_" + prefix + RunNumberStr;
+    }
+    else {
+        infilename  = SpecificFilePath + SpecificFilename + ".hipo";
+        outfilepath = SpecificFilePath + "/";
+        outfilename = SpecificFilePath + "skimmed_SIDIS_" + SpecificFilename;
+    }
+    
     
     
     // Simulation - define input and output file names for GEMC simulations slightly different

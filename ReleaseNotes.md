@@ -3,6 +3,16 @@
 # SRC-SIDIS revisions and release-notes 
 -----------------------------------------------------------------
 
+
+June-22, 2023   
+-------------
+
+1. Started analyzing Harut CLASDIS simulation files /work/clas12/ecohen/mc/sidis/he3
+    This by adding a routine to *SIDISc12rSkimmer.C*:    
+        SetSpecificFilename (TString fSpecificFilename="")
+    If fSpecificFilename=="" then SIDISc12rSkimmer.C operates normally as before. Else SIDISc12rSkimmer.C analyzes the file specified by the specific file name.
+
+
 May-18, 2023   
 -------------
 
