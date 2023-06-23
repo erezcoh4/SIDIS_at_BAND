@@ -1,0 +1,127 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+# continously take data and print the rate every few seconds
+# last edit June-23, 2023 (EOC)
+#
+# execute:
+#
+# skim_sidis_specific_file
+# skim_sidis_specific_file --fdebug=3
+
+import sys, os, linecache
+import argparse
+
+parser = argparse.ArgumentParser(description='SIDIS skimming of multiple runs')
+parser.add_argument("--NeventsMax",   type=int, default=-1,
+                    required=False, help="maximal number of events to process")
+parser.add_argument("--fdebug",       type=int, default=1,
+                    required=False, help="verbosity")
+parser.add_argument("--PrintProgress",type=int, default=500000,
+                    required=False, help="print progress (every N events)")
+parser.add_argument("--no-email",   dest="no_email",
+                    default=False,  required=False,
+                    action='store_true', help="do not send email")
+parser.add_argument("--FirstEvent",     type=int, default=0,
+                    required=False, help="first event to start from")
+parser.add_argument("--Skimming",     type=str, default="SIDIS_skimming",
+                    required=False,
+                    help="SIDIS_skimming, RGA_Free_proton, p_uniform_distribution" )
+parser.add_argument("--FilePath",     type=str, default="/work/clas12/ecohen/mc/sidis/he3",
+                    required=False,
+                    help="file path")
+parser.add_argument("--Ebeam",     type=float, default=10.6,
+                    required=False, help="beam energy")
+parser.add_argument("--Filename",     type=str, default="",
+                    required=False,
+                    help="file path")
+
+parser.add_argument("--only-pi+",        dest="only_pips",
+                    default=False,
+                    action='store_true', help="do only pi+ (and not pi-)")
+parser.add_argument("--inclusive",          dest="inclusive",
+                    type=int,               default=0,
+                    help="do not apply cuts")
+
+
+args = parser.parse_args()
+
+Nruns         = args.Nruns
+NeventsMax    = args.NeventsMax
+fdebug        = args.fdebug
+PrintProgress = args.PrintProgress
+FirstRun      = args.FirstRun
+FirstEvent    = args.FirstEvent
+Skimming      = args.Skimming
+DataPath      = args.DataPath
+Ebeam         = args.Ebeam
+
+# "correct" datapath typos/mislabeling
+if DataPath=="nsidis": DataPath="nSidis"
+
+if Skimming == "SIDIS_skimming":
+    if Ebeam == 10.2:
+        runs_filename = "macros/runlists/good_runs_10-2-final.txt"
+    elif Ebeam == 10.4:
+        runs_filename = "macros/runlists/good_runs_10-4.txt"
+    elif Ebeam == 10.6:
+        runs_filename = "macros/runlists/good_runs_10-6.txt"
+    
+elif Skimming == "RGA_Free_proton":
+    runs_filename = "macros/runlists/rga_data/rga_nsidis_runs_10-6.txt"
+    Ebeam = 10.6
+    
+elif Skimming == "p_uniform_distribution":
+    Ebeam = 10.2 # "white" simulations were done for E = 10.2 GeV
+    runs_filename = "macros/runlists/gemc_p_uniform_distribution.txt"
+    DataPath = "AcceptanceCorrection"
+    
+    
+    
+# Using readlines()
+runs_file = open(runs_filename, 'r')
+run_fileLines = runs_file.readlines();
+if Nruns<0: Nruns = len(run_fileLines)
+if fdebug>1:#{
+    print('good runs to process:')
+    for line in run_fileLines[FirstRun:]:#{
+        print(int(line.strip()), end =" ")
+    #}
+    print('')
+    print('processing %d runs, starting from run %d, event %d'%(Nruns-FirstRun,FirstRun, FirstEvent))
+#}
+
+runIdx = 0
+for line in run_fileLines[FirstRun:]:#{
+    runIdx += 1
+    run = int(line.strip())
+    print('')
+    print("processing run %d/%d"%(runIdx,Nruns))
+    print('')
+    commandline = ("clas12root -q 'SIDISc12rSkimmer.C+(%d,%d,%d,%d,%d,\"%s\",\"%s\",%f,\"piplus\",%d)'"%
+                    (run,NeventsMax,fdebug,PrintProgress,FirstEvent,Skimming,DataPath,Ebeam,args.inclusive))
+    print(commandline)
+    os.system( commandline )
+    
+    # if this is MC, repeat the same analysis for π+ and for π-
+    if ((Skimming=="p_uniform_distribution") and (args.only_pips==False)):#{
+        commandline = ("clas12root -q 'SIDISc12rSkimmer.C+(%d,%d,%d,%d,%d,\"%s\",\"%s\",%f,\"piminus\",%d)'"%
+                    (run,NeventsMax,fdebug,PrintProgress,FirstEvent,Skimming,DataPath,Ebeam,args.inclusive))
+        print(commandline)
+        os.system( commandline )
+    
+    #}
+    
+    if (runIdx >= Nruns): break;
+    print('------------------------------------------------------------')
+#}
+
+print('')
+print('done.')
+print('')
+if args.no_email==False:#{
+    mailtitle = 'Done processing skim_sidis_multiple_runs on ifarm'
+    mailbody  = ('Processed %s - %d runs, see /volatile/clas12/users/ecohen/BAND/%s/'%( DataPath, Nruns, Skimming))
+    emailstr = ('echo %s | mail -s %s cohen.erez7@gmail.com'%(mailbody,mailtitle) )
+    os.system(emailstr)
+#}
