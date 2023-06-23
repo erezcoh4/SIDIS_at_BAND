@@ -60,7 +60,7 @@ print('')
 print("Analyzing specific file:",FilePath,"/",Filename)
 print('')
 commandline = ("clas12root -q 'SIDISc12rSkimmer.C+(0,%d,%d,%d,%d,\"%s\",\"\",%f,\"\",\"\",\"\",%d,\"%s\",\"%s\")'"%
-                    (NeventsMax,fdebug,PrintProgress,FirstEvent,Skimming,DataPath,Ebeam,args.inclusive,FilePath,Filename))
+                    (NeventsMax,fdebug,PrintProgress,FirstEvent,Skimming,Ebeam,args.inclusive,FilePath,Filename))
 print(commandline)
 os.system( commandline )
     
