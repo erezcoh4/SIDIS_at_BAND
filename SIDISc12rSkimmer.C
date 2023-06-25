@@ -1908,14 +1908,14 @@ void SIDISc12rSkimmer(int RunNumber    = 6420   ,
     // for an (e,e'π+) or an (e,e'π-) data set
     // and this is labeled in the filename
     if (IsMC){
-        if (SimPi ~= ""){
+        if (SimPi != ""){
             infilename = (DataPath
                           + "/"   + SimPi
                           + "/ee" + SimPi + "_" + prefix
                           + "_" + RunNumberStr + "_reco.hipo");
             outfilename = "skimmed_SIDIS_" + SimPi + "_" + prefix + "_" + RunNumberStr;
         }
-        else if (SimK ~= ""){
+        else if (SimK != ""){
             infilename = (DataPath
                           + "/"   + SimK
                           + "/ee" + SimK + "_" + prefix
