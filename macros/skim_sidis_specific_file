@@ -60,7 +60,22 @@ Ebeam         = args.Ebeam
 print('')
 print("Analyzing specific file:",FilePath,"/",Filename)
 print('')
-commandline = ("clas12root -q 'SIDISc12rSkimmer.C+(0,%d,%d,%d,%d,\"%s\",\"\",%f,\"\",\"\",\"\",%d,\"%s\",\"%s\")'"%
+#clas12root SIDISc12rSkimmer(int RunNumber    = 6420   ,
+#                      int NeventsMax   = -1     ,
+#                      int fdebug       = 1      ,
+#                      int PrintProgress= 50000  ,
+#                      int FirstEvent   = 0      ,
+#                      TString fSkimming= "SIDIS_skimming",
+#                      TString fDataPath= "sidisdvcs",
+#                      double fEbeam    = 10.2,
+#                      TString fSimPi   = "piplus",
+#                      TString fSimK    = "",
+#                      int   fInclusive = 0,
+#                      TString fSpecificFilePath = "",
+#                      TString fSpecificFilename = ""
+#                      )
+
+commandline = ("clas12root -q 'SIDISc12rSkimmer.C+(0,%d,%d,%d,%d,\"%s\",\"\",%f,\"\",\"\",%d,\"%s\",\"%s\")'"%
                     (NeventsMax,fdebug,PrintProgress,FirstEvent,Skimming,Ebeam,args.inclusive,FilePath,Filename))
 print(commandline)
 os.system( commandline )
@@ -72,7 +87,7 @@ print('done.')
 print('')
 if args.no_email==False:#{
     mailtitle = 'Done processing skim_sidis_multiple_runs on ifarm'
-    mailbody  = ('Analyzed %s/%s.hipo - %d runs, see /volatile/clas12/users/ecohen/BAND/%s/'%( FilePath,Filename, Nruns, Skimming))
+    mailbody  = ('Analyzed %s/%s.hipo, see /volatile/clas12/users/ecohen/BAND/%s/'%( FilePath,Filename, Skimming))
     emailstr = ('echo %s | mail -s %s cohen.erez7@gmail.com'%(mailbody,mailtitle) )
     os.system(emailstr)
 #}
