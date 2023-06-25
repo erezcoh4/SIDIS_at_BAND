@@ -91,6 +91,8 @@ void           ExtractElectronInformation (int fdebug);
 void              ExtractPionsInformation (int fdebug);
 void               ExtractPipsInformation (int pipsIdx, int fdebug );
 void               ExtractPimsInformation (int pimsIdx, int fdebug );
+void                ExtractKpsInformation (int kIdx, int fdebug );
+void                ExtractKmsInformation (int kIdx, int fdebug );
 void            ComputeElectronKinematics ();
 void                ComputePionKinematics (TLorentzVector pi, TLorentzVector pi_qFrame);
 void                   WriteEventToOutput (int fdebug);
@@ -112,7 +114,7 @@ void                         SetVerbosity ( int _fdebug_ = 0 );
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 
 // globals
-TString Skimming = "", DataPath = "", prefix = "", SimPi = "";
+TString Skimming = "", DataPath = "", prefix = "", SimPi = "", SimK = "";
 TString SpecificFilePath = "", SpecificFilename = "";
 auto db = TDatabasePDG::Instance();
 double        Pe_phi, q_phi, q_theta; // "q-frame" parameters
@@ -287,6 +289,8 @@ double      Kminus_qFrame_Phi[NMAXKAONS];
 // Output root file and tree
 TFile * outFile_e_piplus, * outFile_e_piminus;
 TTree * outTree_e_piplus, * outTree_e_piminus;
+TFile * outFile_e_Kplus,  * outFile_e_Kminus;
+TTree * outTree_e_Kplus,  * outTree_e_Kminus;
 TFile * outFile_e_piplus_no_cuts, * outFile_e_piminus_no_cuts;
 TTree * outTree_e_piplus_no_cuts, * outTree_e_piminus_no_cuts;
 
@@ -300,10 +304,14 @@ TLorentzVector      Beam, target, e, q, pi;
 TLorentzVector              d_rest, p_rest;
 std::vector<TLorentzVector>         piplus; // positive pions
 std::vector<TLorentzVector>        piminus; // negative pions
+std::vector<TLorentzVector>          Kplus; // positive Kaons
+std::vector<TLorentzVector>         Kminus; // negative Kaons
 // reconstructed vertex position
 TVector3                                Ve;
 std::vector<TVector3>              Vpiplus;
 std::vector<TVector3>             Vpiminus;
+std::vector<TVector3>               VKplus;
+std::vector<TVector3>              VKminus;
 
 // kinematics
 Double_t Ebeam, omega, y, xB, Q2, xF, eta_pi;
@@ -1223,7 +1231,7 @@ void WriteEventToOutput(int fdebug){
             
             for (int Kidx=0; Kidx<NKms; Kidx++) {
                 Stream_e_K_line_to_CSV( "K-", Kidx,
-                                       KmsPastSelectionCuts[pimsIdx], eeKmsPastKinematicalCuts[pimsIdx],
+                                       KmsPastSelectionCuts[Kidx], eeKmsPastKinematicalCuts[Kidx],
                                         fdebug );
             }
         }
@@ -1486,7 +1494,7 @@ void ExtractKpsInformation( int KpsIdx, int fdebug ){
     // CONTINUE HERE! COMPLETE THIS FUNCITON AND THEN ALSO FOR K-....
     
     // Extract positive pion information
-    pips_region[KpsIdx] = pipluses[pipsIdx]->getRegion();
+    Kps_region[KpsIdx] = Kpluses[KpsIdx]->getRegion();
     // First - we restrict ourselves to pions only from the central detector
     if( pipluses[KpsIdx]->getRegion() != FD ){
         if (fdebug>2){
@@ -1494,8 +1502,8 @@ void ExtractKpsInformation( int KpsIdx, int fdebug ){
             std::cout
             << "piplus [" << KpsIdx << "] not from FD (from " << Kpluses[KpsIdx]->getRegion()
             << ") "
-            << "p = "       << pi.P() << " GeV/c, "
-            << "theta = "   << pi.Theta()*180./3.1415 << "˚"
+            << "p = "       << K.P() << " GeV/c, "
+            << "theta = "   << K.Theta()*180./3.1415 << "˚"
             << ", not extracting information..."
             << std::endl;
         }
@@ -1505,33 +1513,32 @@ void ExtractKpsInformation( int KpsIdx, int fdebug ){
     }
 
     // Now we extract the information on this Kaon
-    SetLorentzVector(piplus[pipsIKpsIdxdx]  ,pipluses[KpsIdx]);
-    Zpips[pipsIdx]              = piplus[KpsIdx].E() / omega;
-    Vpiplus[pipsIdx]            = GetParticleVertex( pipluses[KpsIdx] );
-    pips_chi2PID[pipsIdx]       = pipluses[KpsIdx]->par()->getChi2Pid();
+    SetLorentzVector(Kplus[KpsIdx]  ,Kpluses[KpsIdx]);
+    ZKps[KpsIdx]              = Kplus[KpsIdx].E() / omega;
+    VKplus[pipsIdx]            = GetParticleVertex( Kpluses[KpsIdx] );
+    Kps_chi2PID[pipsIdx]       = Kpluses[KpsIdx]->par()->getChi2Pid();
     
     // EC in and out
-    pips_E_ECIN[pipsIdx]        = pipluses[KpsIdx]->cal(ECIN)->getEnergy();
-    pips_E_ECOUT[pipsIdx]       = pipluses[KpsIdx]->cal(ECOUT)->getEnergy();
+    Kps_E_ECIN[KpsIdx]        = Kpluses[KpsIdx]->cal(ECIN)->getEnergy();
+    Kps_E_ECOUT[KpsIdx]       = Kpluses[KpsIdx]->cal(ECOUT)->getEnergy();
     // PCAL
-    auto pips_PCAL_info         = pipluses[KpsIdx]->cal(PCAL);
-    pips_E_PCAL[KpsIdx]        = pips_PCAL_info->getEnergy();
-    pips_PCAL_sector[KpsIdx]   = pips_PCAL_info->getSector();
-    pips_PCAL_V[KpsIdx]        = pips_PCAL_info->getLv();
-    pips_PCAL_W[KpsIdx]        = pips_PCAL_info->getLw();
-    pips_PCAL_x[KpsIdx]        = pips_PCAL_info->getX();
-    pips_PCAL_y[KpsIdx]        = pips_PCAL_info->getY();
-    pips_PCAL_z[KpsIdx]        = pips_PCAL_info->getZ();
+    auto Kps_PCAL_info        = Kpluses[KpsIdx]->cal(PCAL);
+    Kps_E_PCAL[KpsIdx]        = Kps_PCAL_info->getEnergy();
+    Kps_PCAL_sector[KpsIdx]   = Kps_PCAL_info->getSector();
+    Kps_PCAL_V[KpsIdx]        = Kps_PCAL_info->getLv();
+    Kps_PCAL_W[KpsIdx]        = Kps_PCAL_info->getLw();
+    Kps_PCAL_x[KpsIdx]        = Kps_PCAL_info->getX();
+    Kps_PCAL_y[KpsIdx]        = Kps_PCAL_info->getY();
+    Kps_PCAL_z[KpsIdx]        = Kps_PCAL_info->getZ();
     // DC
-    auto pips_DC_info           = pipluses[pipsIdx]->trk(DC);
-    pips_DC_sector[KpsIdx]     = pips_DC_info->getSector(); // tracking sector
-    pips_Chi2N[KpsIdx]         = pips_DC_info->getChi2N();  // tracking chi^2/NDF
+    auto Kps_DC_info          = Kpluses[pipsIdx]->trk(DC);
+    Kps_DC_sector[KpsIdx]     = Kps_DC_info->getSector(); // tracking sector
+    Kps_Chi2N[KpsIdx]         = Kps_DC_info->getChi2N();  // tracking chi^2/NDF
     for (int regionIdx=0; regionIdx<3; regionIdx++) {
         DC_layer = DC_layers[regionIdx];
-        pips_DC_x[KpsIdx][regionIdx] = pipluses[KpsIdx]->traj(DC,DC_layer)->getX();
-        pips_DC_y[KpsIdx][regionIdx] = pipluses[KpsIdx]->traj(DC,DC_layer)->getY();
-        pips_DC_z[KpsIdx][regionIdx] = pipluses[KpsIdx]->traj(DC,DC_layer)->getZ();
-        
+        Kps_DC_x[KpsIdx][regionIdx] = Kpluses[KpsIdx]->traj(DC,DC_layer)->getX();
+        Kps_DC_y[KpsIdx][regionIdx] = Kpluses[KpsIdx]->traj(DC,DC_layer)->getY();
+        Kps_DC_z[KpsIdx][regionIdx] = Kpluses[KpsIdx]->traj(DC,DC_layer)->getZ();
     }
 //    // ------------------------------------------------------------------------------------------------
 //    // now, check if pion passed event selection requirements
@@ -1766,7 +1773,7 @@ void MoveTo_qFrame(int fdebug){
     }
     // (5) rotate Kaons to this q-frame
     // K+ int the q-Frame
-    for (int KIdx=0; piIdx<NKps; KIdx++) {
+    for (int KIdx=0; KIdx<NKps; KIdx++) {
         TVector3 PKplus = RotateVectorTo_qFrame( Kplus.at(KIdx).Vect() );
         Kplus_qFrame.at(KIdx).SetVectM( PKplus, aux.MK  );
         TLorentzVector PK_q = Kplus_qFrame.at(KIdx);
