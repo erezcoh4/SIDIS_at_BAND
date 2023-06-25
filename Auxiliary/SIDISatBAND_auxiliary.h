@@ -104,10 +104,11 @@ public:
     
     
     
-    double       Me = 0.00051099895;// GeV/c2
-    double      Mpi = 0.139570;     // GeV/c2
+    double         Me = 0.00051099895;// GeV/c2
+    double        Mpi = 0.139570;     // GeV/c2
     double      Mpims = 0.13957039; // GeV/c2
     double      Mpips = 0.13957039; // GeV/c2
+    double         MK = 0.493677;   // K GeV/c2
     double       MKms = 0.493677;   // K- GeV/c2
     double       MKps = 0.493677;   // K+ GeV/c2
     double         Mp = 0.938272;   // GeV/c2

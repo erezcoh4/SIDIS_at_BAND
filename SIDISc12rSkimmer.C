@@ -102,6 +102,10 @@ void              Stream_e_pi_line_to_CSV (TString pionCharge, int piIdx,
                                            bool passed_cuts_e_pi,
                                            bool passed_cuts_e_pi_kinematics,
                                            int fdebug );
+void               Stream_e_K_line_to_CSV (TString KCharge, int KIdx,
+                                           bool passed_cuts_e_K,
+                                           bool passed_cuts_e_K_kinematics,
+                                           int fdebug );
 TVector3            RotateVectorTo_qFrame (TVector3 V);
 void                        MoveTo_qFrame (int fdebug);
 void                          SetDataPath (TString fDataPath, Double_t fEbeam) ;
@@ -245,10 +249,10 @@ double            Kplus_E[NMAXKAONS];
 double           VKplus_X[NMAXKAONS];
 double           VKplus_Y[NMAXKAONS];
 double           VKplus_Z[NMAXKAONS];
-double       Kaplus_qFrame_pT[NMAXKAONS]; // transverse momentum relative to q
-double       Kaplus_qFrame_pL[NMAXKAONS]; // longitudinal momentum relative to q
-double    Kaplus_qFrame_Theta[NMAXKAONS];
-double      Kaplus_qFrame_Phi[NMAXKAONS];
+double       Kplus_qFrame_pT[NMAXKAONS]; // transverse momentum relative to q
+double       Kplus_qFrame_pL[NMAXKAONS]; // longitudinal momentum relative to q
+double    Kplus_qFrame_Theta[NMAXKAONS];
+double      Kplus_qFrame_Phi[NMAXKAONS];
 
 
 // K-
@@ -300,7 +304,7 @@ std::ofstream   CSVfile_e_piminus, SelectedEventsCSVfile_e_piminus, SelectedEven
 std::ofstream   CSVfile_e_Kplus,   SelectedEventsCSVfile_e_Kplus,   SelectedEventsCSVfile_e_Kplus_kinematics;
 std::ofstream   CSVfile_e_Kminus,  SelectedEventsCSVfile_e_Kminus,  SelectedEventsCSVfile_e_Kminus_kinematics;
 // vectors in lab-frame
-TLorentzVector      Beam, target, e, q, pi;
+TLorentzVector   Beam, target, e, q, pi, K;
 TLorentzVector              d_rest, p_rest;
 std::vector<TLorentzVector>         piplus; // positive pions
 std::vector<TLorentzVector>        piminus; // negative pions
@@ -330,6 +334,8 @@ Double_t pi_P_g, pi_Theta_g, pi_Phi_g, pi_Vz_g, Q2_g, xB_g, omega_g, y_g;
 TLorentzVector               e_qFrame, q_qFrame;
 std::vector<TLorentzVector>       piplus_qFrame;
 std::vector<TLorentzVector>      piminus_qFrame;
+std::vector<TLorentzVector>       Kplus_qFrame;
+std::vector<TLorentzVector>      Kminus_qFrame;
 
 // auxiliary
 DCfid_SIDIS dcfid;
@@ -1509,14 +1515,14 @@ void ExtractKpsInformation( int KpsIdx, int fdebug ){
         }
         return;
     }else{
-        if (fdebug>2) std::cout << "piplus ["<<KpsIdx<<"] is from FD ("<<pipluses[KpsIdx]->getRegion()<< "), extracting information..." << std::endl;
+        if (fdebug>2) std::cout << "piplus ["<<KpsIdx<<"] is from FD ("<<Kpluses[KpsIdx]->getRegion()<< "), extracting information..." << std::endl;
     }
 
     // Now we extract the information on this Kaon
     SetLorentzVector(Kplus[KpsIdx]  ,Kpluses[KpsIdx]);
     ZKps[KpsIdx]              = Kplus[KpsIdx].E() / omega;
-    VKplus[pipsIdx]            = GetParticleVertex( Kpluses[KpsIdx] );
-    Kps_chi2PID[pipsIdx]       = Kpluses[KpsIdx]->par()->getChi2Pid();
+    VKplus[KpsIdx]            = GetParticleVertex( Kpluses[KpsIdx] );
+    Kps_chi2PID[KpsIdx]       = Kpluses[KpsIdx]->par()->getChi2Pid();
     
     // EC in and out
     Kps_E_ECIN[KpsIdx]        = Kpluses[KpsIdx]->cal(ECIN)->getEnergy();
@@ -1531,7 +1537,7 @@ void ExtractKpsInformation( int KpsIdx, int fdebug ){
     Kps_PCAL_y[KpsIdx]        = Kps_PCAL_info->getY();
     Kps_PCAL_z[KpsIdx]        = Kps_PCAL_info->getZ();
     // DC
-    auto Kps_DC_info          = Kpluses[pipsIdx]->trk(DC);
+    auto Kps_DC_info          = Kpluses[KpsIdx]->trk(DC);
     Kps_DC_sector[KpsIdx]     = Kps_DC_info->getSector(); // tracking sector
     Kps_Chi2N[KpsIdx]         = Kps_DC_info->getChi2N();  // tracking chi^2/NDF
     for (int regionIdx=0; regionIdx<3; regionIdx++) {
@@ -1787,7 +1793,7 @@ void MoveTo_qFrame(int fdebug){
         if (fdebug>1) aux.Print4Vector( PK_q, "K+(" + std::to_string(KIdx) + ")" );
     }
     // K- int the q-Frame
-    for (int KIdx=0; piIdx<NKms; KIdx++) {
+    for (int KIdx=0; KIdx<NKms; KIdx++) {
         TVector3 PKminus = RotateVectorTo_qFrame( Kminus.at(KIdx).Vect() );
         Kplus_qFrame.at(KIdx).SetVectM( PKplus, aux.MK  );
         TLorentzVector PK_q = Kminus_qFrame.at(KIdx);
