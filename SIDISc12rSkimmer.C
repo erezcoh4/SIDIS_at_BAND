@@ -77,11 +77,11 @@ bool   CheckIfElectronPassedSelectionCuts (Double_t e_PCAL_x, Double_t e_PCAL_y,
                                            Double_t e_DC_z[3],
                                            int torusBending);
 bool      CheckIfPionPassedSelectionCuts (TString pionCharge, // "pi+" or "pi-"
-                                           Double_t DC_sector,
-                                           Double_t DC_x[3], Double_t DC_y[3], Double_t DC_z[3],
-                                           Double_t chi2PID, Double_t p,
-                                           TVector3 Ve,      TVector3 Vpi,
-                                           int fdebug);
+                                          Double_t DC_sector,
+                                          Double_t DC_x[3], Double_t DC_y[3], Double_t DC_z[3],
+                                          Double_t chi2PID, Double_t p,
+                                          TVector3 Ve,      TVector3 Vpi,
+                                          int fdebug);
 int                       GetBeamHelicity (event_ptr p_event, int runnum, int fdebug);
 double                      GetBeamEnergy (int fdebug);
 void                InitializeFileReading (int NeventsMax,int c12Nentries, int fdebug);
@@ -372,7 +372,7 @@ void SetSimK (TString fSimK) {
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void SetDataPath (TString fDataPath, Double_t fEbeam) {
     prefix   = "sidisdvcs_"; // default
-
+    
     if (fDataPath=="" || fDataPath=="sidisdvcs" || fDataPath=="sidis dvcs"){
         // sidis-dvcs train files, used since July 2022
         // (the 'usual' train files)
@@ -433,16 +433,16 @@ void SetEbeam (double fEbeam) {
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 bool CheckIfElectronPassedSelectionCuts(Double_t e_PCAL_x, Double_t e_PCAL_y,
-                                     Double_t e_PCAL_W, Double_t e_PCAL_V,
-                                     Double_t e_E_PCAL,
-                                     Double_t e_E_ECIN, Double_t e_E_ECOUT,
-                                     TLorentzVector e,
-                                     TVector3 Ve,
-                                     Double_t e_DC_sector,
-                                     Double_t e_DC_x[3],
-                                     Double_t e_DC_y[3],
-                                     Double_t e_DC_z[3],
-                                     int torusBending){
+                                        Double_t e_PCAL_W, Double_t e_PCAL_V,
+                                        Double_t e_E_PCAL,
+                                        Double_t e_E_ECIN, Double_t e_E_ECOUT,
+                                        TLorentzVector e,
+                                        TVector3 Ve,
+                                        Double_t e_DC_sector,
+                                        Double_t e_DC_x[3],
+                                        Double_t e_DC_y[3],
+                                        Double_t e_DC_z[3],
+                                        int torusBending){
     
     // decide if electron in event passes event selection cuts
     
@@ -457,7 +457,7 @@ bool CheckIfElectronPassedSelectionCuts(Double_t e_PCAL_x, Double_t e_PCAL_y,
     // sometimes the readout-sector is 0. This is funny
     // Justin B. Estee (June-21): I also had this issue. I am throwing away sector 0. The way you check is plot the (x,y) coordinates of the sector and you will not see any thing. Double check me but I think it is 0.
     if (e_DC_sector == 0) return false;
-
+    
     for (int regionIdx=0; regionIdx<3; regionIdx++) {
         // DC_e_fid:
         // sector:  1-6
@@ -478,36 +478,36 @@ bool CheckIfElectronPassedSelectionCuts(Double_t e_PCAL_x, Double_t e_PCAL_y,
     
     
     if(!(true
-       // fiducial cuts on PCAL
-       //fabs(e_PCAL_x)>0
-       //&&  fabs(e_PCAL_y)>0
-       &&  e_PCAL_W > aux.cutValue_e_PCAL_W
-       &&  e_PCAL_V > aux.cutValue_e_PCAL_V
-       
-       // Electron Identification Refinement  - PCAL Minimum Energy Deposition Cut
-       &&  e_E_PCAL > aux.cutValue_e_E_PCAL
-       
-       // Sampling fraction cut
-       && ((e_E_PCAL + e_E_ECIN + e_E_ECOUT)/e.P()) > aux.cutValue_SamplingFraction_min
-       && (e_E_ECIN/e.P() > aux.cutValue_PCAL_ECIN_SF_min - e_E_PCAL/e.P()) // RGA AN puts "<" here mistakenly
-       
-       // Cut on z-vertex position: in-bending torus field -13.0 cm < Vz < +12.0 cm
-       // Spring 19 and Spring 2020 in-bending.
-       // Fall 2019 (without low-energy-run) was out-bending.
-       &&  ((aux.cutValue_Vz_min < Ve.Z()) && (Ve.Z() < aux.cutValue_Vz_max))
-       )) return false;
+         // fiducial cuts on PCAL
+         //fabs(e_PCAL_x)>0
+         //&&  fabs(e_PCAL_y)>0
+         &&  e_PCAL_W > aux.cutValue_e_PCAL_W
+         &&  e_PCAL_V > aux.cutValue_e_PCAL_V
+         
+         // Electron Identification Refinement  - PCAL Minimum Energy Deposition Cut
+         &&  e_E_PCAL > aux.cutValue_e_E_PCAL
+         
+         // Sampling fraction cut
+         && ((e_E_PCAL + e_E_ECIN + e_E_ECOUT)/e.P()) > aux.cutValue_SamplingFraction_min
+         && (e_E_ECIN/e.P() > aux.cutValue_PCAL_ECIN_SF_min - e_E_PCAL/e.P()) // RGA AN puts "<" here mistakenly
+         
+         // Cut on z-vertex position: in-bending torus field -13.0 cm < Vz < +12.0 cm
+         // Spring 19 and Spring 2020 in-bending.
+         // Fall 2019 (without low-energy-run) was out-bending.
+         &&  ((aux.cutValue_Vz_min < Ve.Z()) && (Ve.Z() < aux.cutValue_Vz_max))
+         )) return false;
     
     return true;
 }
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
-                                     Double_t DC_sector,
-                                     Double_t DC_x[3], Double_t DC_y[3], Double_t DC_z[3],
-                                     Double_t chi2PID, Double_t p,
-                                     TVector3 Ve,
-                                     TVector3 Vpi,
-                                     int fdebug){
+                                    Double_t DC_sector,
+                                    Double_t DC_x[3], Double_t DC_y[3], Double_t DC_z[3],
+                                    Double_t chi2PID, Double_t p,
+                                    TVector3 Ve,
+                                    TVector3 Vpi,
+                                    int fdebug){
     
     // decide if pion (pi+ or pi-) passed event selection cuts
     //
@@ -537,7 +537,7 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
         std::cout << "π charge ill-defined, returning false" << std::endl;
         return false;
     }
-
+    
     for (int regionIdx=0; regionIdx<3; regionIdx++) {
         // DC_e_fid:
         // sector:  1-6
@@ -585,10 +585,10 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
        (( aux.Chi2PID_pion_lowerBound( p, C ) < chi2PID
          &&
          chi2PID < aux.Chi2PID_pion_upperBound( p , C ) )
-       
-       // Cut on the z-Vertex Difference Between Electrons and Hadrons.
-       &&  ( fabs((Ve-Vpi).Z()) < aux.cutValue_Ve_Vpi_dz_max )
-       )) {
+        
+        // Cut on the z-Vertex Difference Between Electrons and Hadrons.
+        &&  ( fabs((Ve-Vpi).Z()) < aux.cutValue_Ve_Vpi_dz_max )
+        )) {
         return false;
     }
     if (fdebug>3) { std::cout << "succesfully passed CheckIfPionPassedSelectionCuts(), return true" << std::endl; }
@@ -615,13 +615,13 @@ void SetLorentzVector (TLorentzVector &p4,clas12::region_part_ptr rp){
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 void OpenOutputFiles (TString outfilename){
-
     
-//    // Create output tree
-//    outFile_e_piplus_no_cuts  = new TFile( outfilename + "_e_piplus_no_cuts.root"  ,"RECREATE");
-//    outTree_e_piplus_no_cuts  = new TTree( "tree" , "(e,e'pi+) event information - no cuts");
-//    outFile_e_piminus_no_cuts = new TFile( outfilename + "_e_piminus_no_cuts.root"  ,"RECREATE");
-//    outTree_e_piminus_no_cuts = new TTree( "tree" , "(e,e'pi+) event information - no cuts");
+    
+    //    // Create output tree
+    //    outFile_e_piplus_no_cuts  = new TFile( outfilename + "_e_piplus_no_cuts.root"  ,"RECREATE");
+    //    outTree_e_piplus_no_cuts  = new TTree( "tree" , "(e,e'pi+) event information - no cuts");
+    //    outFile_e_piminus_no_cuts = new TFile( outfilename + "_e_piminus_no_cuts.root"  ,"RECREATE");
+    //    outTree_e_piminus_no_cuts = new TTree( "tree" , "(e,e'pi+) event information - no cuts");
     TString header = csvheader;
     
     if (!IsMC){
@@ -663,23 +663,23 @@ void CloseOutputFiles (TString OutDataPath, TString outfilename){
     << (float)Nevents_passed_e_cuts/Nevents_processed       << " events passed e cuts,"
     << "output files ready in root/csv formats in "
     << std::endl;
-
     
-//    CSVfile_e_piplus                .close();
-//    SelectedEventsCSVfile_e_piplus  .close();
-//    CSVfile_e_piminus               .close();
-//    SelectedEventsCSVfile_e_piminus .close();
-
+    
+    //    CSVfile_e_piplus                .close();
+    //    SelectedEventsCSVfile_e_piplus  .close();
+    //    CSVfile_e_piminus               .close();
+    //    SelectedEventsCSVfile_e_piminus .close();
+    
     
     // close output ROOT
-//    outFile_e_piplus_no_cuts->cd();
-//    outTree_e_piplus_no_cuts->Write();
-//    outFile_e_piplus_no_cuts->Close();
-//
-//    outFile_e_piminus_no_cuts->cd();
-//    outTree_e_piminus_no_cuts->Write();
-//    outFile_e_piminus_no_cuts->Close();
-
+    //    outFile_e_piplus_no_cuts->cd();
+    //    outTree_e_piplus_no_cuts->Write();
+    //    outFile_e_piplus_no_cuts->Close();
+    //
+    //    outFile_e_piminus_no_cuts->cd();
+    //    outTree_e_piminus_no_cuts->Write();
+    //    outFile_e_piminus_no_cuts->Close();
+    
     if ((!IsMC)
         ||
         ((IsMC) && (SimPi=="piplus"))
@@ -774,9 +774,9 @@ int GetBeamHelicity( event_ptr p_event, int runnum, int fdebug ){
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void SetOutputTTrees(){
     // pi+
-
+    
     if (fdebug>1) std::cout << "SetOutputTTrees()" << std::endl;
-   
+    
     
     // pi+
     if ((!IsMC)
@@ -991,7 +991,7 @@ void InitializeVariables(){
     
     Ve                                  = TVector3();
     ePastCutsInEvent                    = false;
-
+    
     piplus          .clear();
     piminus         .clear();
     piplus_qFrame   .clear();
@@ -1050,7 +1050,7 @@ void InitializeVariables(){
         piminus_qFrame_pT[piIdx]   = piminus_qFrame_pL[piIdx]                           = -9999;
         piplus_qFrame_Theta[piIdx] = piplus_qFrame_Phi[piIdx]                           = -9999;
         piminus_qFrame_Theta[piIdx]= piminus_qFrame_Phi[piIdx]                          = -9999;
-         
+        
     }
     DC_layer                                        = -9999;
     status                                          = 1; // 0 is good...
@@ -1123,13 +1123,13 @@ void ExtractElectronInformation(int fdebug){
     // now, check if electron passed event selection requirements
     // ------------------------------------------------------------------------------------------------
     ePastCutsInEvent = CheckIfElectronPassedSelectionCuts(e_PCAL_x, e_PCAL_y,
-                                                              e_PCAL_W, e_PCAL_V,
-                                                              e_E_PCAL, e_E_ECIN,
-                                                              e_E_ECOUT,
-                                                              e, Ve,
-                                                              e_PCAL_sector, // e_PCAL_sector should be consistent with e_DC_sector
-                                                              e_DC_x, e_DC_y, e_DC_z,
-                                                              torusBending );
+                                                          e_PCAL_W, e_PCAL_V,
+                                                          e_E_PCAL, e_E_ECIN,
+                                                          e_E_ECOUT,
+                                                          e, Ve,
+                                                          e_PCAL_sector, // e_PCAL_sector should be consistent with e_DC_sector
+                                                          e_DC_x, e_DC_y, e_DC_z,
+                                                          torusBending );
     if (inclusive)         ePastCutsInEvent = true;
     if (ePastCutsInEvent)  Nevents_passed_e_cuts++ ;
 }
@@ -1177,7 +1177,7 @@ void WriteEventToOutput(int fdebug){
     // (Maybe) write this event to "selected events csv-file"
     bool            IsSelected_eepi = false;
     bool             IsSelected_eeK = false;
-
+    
     //ePastCutsInEvent = true;
     if (inclusive == 1) {
         pipsPastCutsInEvent     = true;
@@ -1238,7 +1238,7 @@ void WriteEventToOutput(int fdebug){
             for (int Kidx=0; Kidx<NKms; Kidx++) {
                 Stream_e_K_line_to_CSV( "K-", Kidx,
                                        KmsPastSelectionCuts[Kidx], eeKmsPastKinematicalCuts[Kidx],
-                                        fdebug );
+                                       fdebug );
             }
         }
     }
@@ -1323,7 +1323,7 @@ void ExtractPipsInformation( int pipsIdx, int fdebug ){
     }else{
         if (fdebug>2) std::cout << "piplus ["<<pipsIdx<<"] is from FD ("<<pipluses[pipsIdx]->getRegion()<< "), extracting information..." << std::endl;
     }
-
+    
     // Now we extract the information on this pion
     SetLorentzVector(piplus[pipsIdx]  ,pipluses[pipsIdx]);
     Zpips[pipsIdx]              = piplus[pipsIdx].E() / omega;
@@ -1427,7 +1427,7 @@ void ExtractPimsInformation( int pimsIdx, int fdebug ){
     else{
         if (fdebug>2) std::cout << "piminus ["<<pimsIdx<<"] is from FD ("<<piminuses[pimsIdx]->getRegion()<< "), extracting information..." << std::endl;
     }
-
+    
     // Now we extract pion information
     SetLorentzVector(piminus[pimsIdx]  ,piminuses[pimsIdx]);
     Zpims[pimsIdx]              = piminus[pimsIdx].E() / omega;
@@ -1460,8 +1460,8 @@ void ExtractPimsInformation( int pimsIdx, int fdebug ){
     // now, check if pion passed event selection requirements
     // ------------------------------------------------------------------------------------------------
     pimsPastSelectionCuts[pimsIdx] = CheckIfPionPassedSelectionCuts("pi-",
-                                                                     pims_DC_sector[pimsIdx],
-                                                                     pims_DC_x[pimsIdx],
+                                                                    pims_DC_sector[pimsIdx],
+                                                                    pims_DC_x[pimsIdx],
                                                                     pims_DC_y[pimsIdx],
                                                                     pims_DC_z[pimsIdx],
                                                                     pims_chi2PID[pimsIdx],  piminus[pimsIdx].P(),
@@ -1517,7 +1517,7 @@ void ExtractKpsInformation( int KpsIdx, int fdebug ){
     }else{
         if (fdebug>2) std::cout << "piplus ["<<KpsIdx<<"] is from FD ("<<Kpluses[KpsIdx]->getRegion()<< "), extracting information..." << std::endl;
     }
-
+    
     // Now we extract the information on this Kaon
     SetLorentzVector(Kplus[KpsIdx]  ,Kpluses[KpsIdx]);
     ZKps[KpsIdx]              = Kplus[KpsIdx].E() / omega;
@@ -1546,42 +1546,42 @@ void ExtractKpsInformation( int KpsIdx, int fdebug ){
         Kps_DC_y[KpsIdx][regionIdx] = Kpluses[KpsIdx]->traj(DC,DC_layer)->getY();
         Kps_DC_z[KpsIdx][regionIdx] = Kpluses[KpsIdx]->traj(DC,DC_layer)->getZ();
     }
-//    // ------------------------------------------------------------------------------------------------
-//    // now, check if pion passed event selection requirements
-//    // ------------------------------------------------------------------------------------------------
-//    pipsPastSelectionCuts[pipsIdx] = CheckIfPionPassedSelectionCuts("pi+",
-//                                                                    pips_DC_sector[pipsIdx],
-//                                                                    pips_DC_x[pipsIdx],
-//                                                                    pips_DC_y[pipsIdx],
-//                                                                    pips_DC_z[pipsIdx],
-//                                                                    pips_chi2PID[pipsIdx],
-//                                                                    piplus[pipsIdx].P(),
-//                                                                    Ve,
-//                                                                    Vpiplus[pipsIdx],
-//                                                                    fdebug);
-//    eepipsPastKinematicalCuts[pipsIdx] = aux.eepiPassedKinematicalCriteria(Ebeam,
-//                                                                           omega,
-//                                                                           Q2,
-//                                                                           y,
-//                                                                           W,
-//                                                                           piplus[pipsIdx],
-//                                                                           e);
-//
-//    if (pipsPastSelectionCuts[pipsIdx]) {
-//        pipsPastCutsInEvent = true;
-//        Nevents_passed_pips_cuts ++;
-//        if (eepipsPastKinematicalCuts[pipsIdx]) {
-//            eepipsPastCutsInEvent = true;
-//        }
-//    }
-//
-//    piplus_Px[pipsIdx] = piplus[pipsIdx].Px();
-//    piplus_Py[pipsIdx] = piplus[pipsIdx].Py();
-//    piplus_Pz[pipsIdx] = piplus[pipsIdx].Pz();
-//    piplus_E[pipsIdx]  = piplus[pipsIdx].E();
-//    Vpiplus_X[pipsIdx] = Vpiplus[pipsIdx].X();
-//    Vpiplus_Y[pipsIdx] = Vpiplus[pipsIdx].Y();
-//    Vpiplus_Z[pipsIdx] = Vpiplus[pipsIdx].Z();
+    //    // ------------------------------------------------------------------------------------------------
+    //    // now, check if pion passed event selection requirements
+    //    // ------------------------------------------------------------------------------------------------
+    //    pipsPastSelectionCuts[pipsIdx] = CheckIfPionPassedSelectionCuts("pi+",
+    //                                                                    pips_DC_sector[pipsIdx],
+    //                                                                    pips_DC_x[pipsIdx],
+    //                                                                    pips_DC_y[pipsIdx],
+    //                                                                    pips_DC_z[pipsIdx],
+    //                                                                    pips_chi2PID[pipsIdx],
+    //                                                                    piplus[pipsIdx].P(),
+    //                                                                    Ve,
+    //                                                                    Vpiplus[pipsIdx],
+    //                                                                    fdebug);
+    //    eepipsPastKinematicalCuts[pipsIdx] = aux.eepiPassedKinematicalCriteria(Ebeam,
+    //                                                                           omega,
+    //                                                                           Q2,
+    //                                                                           y,
+    //                                                                           W,
+    //                                                                           piplus[pipsIdx],
+    //                                                                           e);
+    //
+    //    if (pipsPastSelectionCuts[pipsIdx]) {
+    //        pipsPastCutsInEvent = true;
+    //        Nevents_passed_pips_cuts ++;
+    //        if (eepipsPastKinematicalCuts[pipsIdx]) {
+    //            eepipsPastCutsInEvent = true;
+    //        }
+    //    }
+    //
+    //    piplus_Px[pipsIdx] = piplus[pipsIdx].Px();
+    //    piplus_Py[pipsIdx] = piplus[pipsIdx].Py();
+    //    piplus_Pz[pipsIdx] = piplus[pipsIdx].Pz();
+    //    piplus_E[pipsIdx]  = piplus[pipsIdx].E();
+    //    Vpiplus_X[pipsIdx] = Vpiplus[pipsIdx].X();
+    //    Vpiplus_Y[pipsIdx] = Vpiplus[pipsIdx].Y();
+    //    Vpiplus_Z[pipsIdx] = Vpiplus[pipsIdx].Z();
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -1713,11 +1713,11 @@ void MoveTo_qFrame(int fdebug){
     //    q-frame is defined as follows:
     //    z axis is defined by the q - parallel to q
     //    x axis is defined by the e' - such that p(e') resides in the x-z plane
-
+    
     // (1) define q-angles
     q_phi   = q.Phi();
     q_theta = q.Theta();
-
+    
     // (2) rotate Pe and q according to q angles
     TVector3 Pe = e.Vect();
     TVector3 Pq = q.Vect();
@@ -1728,7 +1728,7 @@ void MoveTo_qFrame(int fdebug){
     Pe       .RotateZ(-Pe_phi);
     Pq       .RotateZ(-q_phi);
     Pq       .RotateY(-q_theta);
-
+    
     
     // (3) verify on q and Pe that the frame-change is done correctly
     //    RotateVectorTo_qFrame( &Pe );
@@ -1795,7 +1795,7 @@ void MoveTo_qFrame(int fdebug){
     // K- int the q-Frame
     for (int KIdx=0; KIdx<NKms; KIdx++) {
         TVector3 PKminus = RotateVectorTo_qFrame( Kminus.at(KIdx).Vect() );
-        Kplus_qFrame.at(KIdx).SetVectM( PKplus, aux.MK  );
+        Kminus_qFrame.at(KIdx).SetVectM( PKminus, aux.MK  );
         TLorentzVector PK_q = Kminus_qFrame.at(KIdx);
         // fill variables that later go to TTree
         Kminus_qFrame_pT[KIdx]   = PK_q.Pt();
@@ -1806,7 +1806,7 @@ void MoveTo_qFrame(int fdebug){
         ZKmsLC[KIdx]            = (PK_q.E() - PK_q.Pz()) / (q.E() - q.P());
         if (fdebug>1) aux.Print4Vector( PK_q, "K-(" + std::to_string(KIdx) + ")" );
     }
-
+    
     
     if (fdebug>2){
         std::cout
@@ -1881,7 +1881,7 @@ void SIDISc12rSkimmer(int RunNumber    = 6420   ,
     SetIsMC             (            );
     SetSpecificFilename ( fSpecificFilename );
     SetSpecificFilePath ( fSpecificFilePath );
-
+    
     TString RunNumberStr = aux.GetRunNumberSTR(RunNumber, Skimming);
     
     // read cut values
@@ -1941,7 +1941,7 @@ void SIDISc12rSkimmer(int RunNumber    = 6420   ,
     
     // open output files
     OpenResultFiles( outfilepath, outfilename );
-
+    
     // start analysis
     // step over events and extract information....
     for(Int_t i=0;i<files->GetEntries();i++){
@@ -1952,7 +1952,7 @@ void SIDISc12rSkimmer(int RunNumber    = 6420   ,
         InitializeFileReading( NeventsMax, c12.getReader().getEntries(), fdebug );
         
         int event = 0;
-
+        
         // process the events...
         while((c12.next()==true) && (event < NeventsMaxToProcess)){
             
