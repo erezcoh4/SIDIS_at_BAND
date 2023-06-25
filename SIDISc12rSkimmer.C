@@ -1896,9 +1896,9 @@ void SIDISc12rSkimmer(int RunNumber    = 6420   ,
         outfilename = "skimmed_SIDIS_" + prefix + RunNumberStr;
     }
     else {
-        infilename  = SpecificFilePath + SpecificFilename + ".hipo";
+        infilename  = SpecificFilePath + "/" + SpecificFilename + ".hipo";
         outfilepath = SpecificFilePath + "/";
-        outfilename = SpecificFilePath + "skimmed_SIDIS_" + SpecificFilename;
+        outfilename = outfilepath + "skimmed_SIDIS_" + SpecificFilename;
     }
     
     
