@@ -1596,7 +1596,7 @@ void GetParticlesByType (int evnum, int fdebug){
     Nd      = deuterons.size();
     if (fdebug>2){
         std::cout
-        << "GetParticlesByType (event "     << evnum        << ")"
+        << "Particles in event "     << evnum        << ")"
         << std::endl
         << "particles in event "            << evnum        << " : "
         << "N(electrons): "                 << Ne           <<  ","
@@ -1608,10 +1608,12 @@ void GetParticlesByType (int evnum, int fdebug){
         << "N(deuterons): "                 << Nd           <<  ","
         << std::endl;
         
-        std::cout
-        << "size(piplus): "         << piplus.size()        << ","
-        << "size(piminus): "        << piminus.size()       << ","
-        << std::endl;
+        if (fdebug>6){
+            std::cout
+            << "size(piplus): "         << piplus.size()        << ","
+            << "size(piminus): "        << piminus.size()       << ","
+            << std::endl;
+        }
     }
 }
 
@@ -1984,7 +1986,7 @@ void SIDISc12rSkimmer(int RunNumber    = 6420   ,
                 Kminuses    = c12.getByID(-321  );
                 GetParticlesByType ( evnum, fdebug );
                 
-                if (fdebug>2) {
+                if (fdebug>8) {
                     std::cout
                     << "Ne: "           << Ne        << ","
                     << "inclusive: "    << inclusive << ","
