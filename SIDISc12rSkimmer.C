@@ -754,11 +754,11 @@ int GetBeamHelicity( event_ptr p_event, int runnum, int fdebug ){
     //};
     //else if(RG=="RGK") helFlip = false
     //else if(RG=="RGF") helFlip = true
-    if (fdebug>3) std::cout << "beam_helicity = c12.event()->getHelicity()" << std::endl;
+    if (fdebug>5) std::cout << "beam_helicity = c12.event()->getHelicity()" << std::endl;
     
     beam_helicity = p_event->getHelicity();
     
-    if (fdebug>3) std::cout << "check spin flip" << std::endl;
+    if (fdebug>5) std::cout << "check spin flip" << std::endl;
     // we are working here on RGB data
     bool helFlip = true;
     if      (runnum>=11093 && runnum<=11283)    helFlip = false; // falls, 10.4 GeV period only
@@ -767,7 +767,7 @@ int GetBeamHelicity( event_ptr p_event, int runnum, int fdebug ){
     if (helFlip) {
         beam_helicity = -1 * beam_helicity;
     }
-    if (fdebug>3) std::cout << "done GetBeamHelicity() " << std::endl;
+    if (fdebug>5) std::cout << "done GetBeamHelicity() " << std::endl;
     return beam_helicity;
 }
 
@@ -992,6 +992,11 @@ void InitializeVariables(){
     Ve                                  = TVector3();
     ePastCutsInEvent                    = false;
     
+    electrons   .clear();
+    neutrons    .clear();
+    protons     .clear();
+    gammas      .clear();
+    
     piplus          .clear();
     piminus         .clear();
     piplus_qFrame   .clear();
@@ -1000,10 +1005,16 @@ void InitializeVariables(){
     Vpiminus    .clear();
     pipluses    .clear();
     piminuses   .clear();
-    electrons   .clear();
-    neutrons    .clear();
-    protons     .clear();
-    gammas      .clear();
+
+    Kplus          .clear();
+    Kminus         .clear();
+    Kplus_qFrame   .clear();
+    Kminus_qFrame  .clear();
+    VKplus     .clear();
+    VKminus    .clear();
+    Kpluses    .clear();
+    Kminuses   .clear();
+    
     for (int piIdx=0; piIdx<NMAXPIONS; piIdx++) {
         pips_region[piIdx]                          = -9999;
         pips_chi2PID[piIdx]                         = -9999;
@@ -1052,6 +1063,55 @@ void InitializeVariables(){
         piminus_qFrame_Theta[piIdx]= piminus_qFrame_Phi[piIdx]                          = -9999;
         
     }
+    
+    for (int KIdx=0; KIdx<NMAXKAONS; KIdx++) {
+        Kps_region[KIdx]                          = -9999;
+        Kps_chi2PID[KIdx]                         = -9999;
+        Kps_DC_sector[KIdx]                       = -9999;
+        Kps_PCAL_sector[KIdx]                     = -9999;
+        Kps_PCAL_W[KIdx] = Kps_PCAL_V[KIdx]     = -9999;
+        Kps_PCAL_x[KIdx] = Kps_PCAL_y[KIdx]     = -9999;
+        Kps_PCAL_z[KIdx]                          = -9999;
+        Kps_E_PCAL[KIdx]                          = -9999;
+        Kps_E_ECIN[KIdx] = Kps_E_ECOUT[KIdx]    = -9999;
+        
+        Kms_region[KIdx]                          = -9999;
+        Kms_chi2PID[KIdx]                         = -9999;
+        Kms_DC_sector[KIdx]                       = -9999;
+        Kms_PCAL_sector[KIdx]                     = -9999;
+        Kms_PCAL_W[KIdx] = Kms_PCAL_V[KIdx]     = -9999;
+        Kms_PCAL_x[KIdx] = Kms_PCAL_y[KIdx]     = -9999;
+        Kms_PCAL_z[KIdx]                          = -9999;
+        Kms_E_PCAL[KIdx]                          = -9999;
+        Kms_E_ECIN[KIdx] = Kms_E_ECOUT[KIdx]    = -9999;
+        for (int regionIdx=0; regionIdx<3; regionIdx++) {
+            Kps_DC_x[KIdx][regionIdx]= Kps_DC_y[KIdx][regionIdx]    = -9999;
+            Kps_DC_z[KIdx][regionIdx]                                 = -9999;
+            Kms_DC_x[KIdx][regionIdx]= Kms_DC_y[KIdx][regionIdx]    = -9999;
+            Kms_DC_z[KIdx][regionIdx]                                 = -9999;
+        }
+        Kplus       .push_back( TLorentzVector(0,0,0,db->GetParticle( 211 )->Mass()) );
+        Kplus_qFrame.push_back( TLorentzVector(0,0,0,db->GetParticle( 211 )->Mass()) );
+        VKplus .push_back( TVector3() );
+        KpsPastSelectionCuts[KIdx]                = false;
+        eeKpsPastKinematicalCuts[KIdx]            = false;
+        
+        Kminus       .push_back( TLorentzVector(0,0,0,db->GetParticle( -211 )->Mass()) );
+        Kminus_qFrame.push_back( TLorentzVector(0,0,0,db->GetParticle( -211 )->Mass()) );
+        VKminus.push_back( TVector3() );
+        KmsPastSelectionCuts[KIdx]                = false;
+        eeKmsPastKinematicalCuts[KIdx]            = false;
+        
+        Kplus_Px[KIdx]    = Kplus_Py[KIdx]  = Kplus_Pz[KIdx]  = Kplus_E[KIdx]   = -9999;
+        Kminus_Px[KIdx]   = Kminus_Py[KIdx] = Kminus_Pz[KIdx] = Kminus_E[KIdx]  = -9999;
+        VKplus_X[KIdx]    = VKplus_Y[KIdx]  = VKplus_Z[KIdx]                      = -9999;
+        VKminus_X[KIdx]   = VKminus_Y[KIdx] = VKminus_Z[KIdx]                     = -9999;
+        Kplus_qFrame_pT[KIdx]    = Kplus_qFrame_pL[KIdx]                            = -9999;
+        Kminus_qFrame_pT[KIdx]   = Kminus_qFrame_pL[KIdx]                           = -9999;
+        Kplus_qFrame_Theta[KIdx] = Kplus_qFrame_Phi[KIdx]                           = -9999;
+        Kminus_qFrame_Theta[KIdx]= Kminus_qFrame_Phi[KIdx]                          = -9999;
+        
+    }
     DC_layer                                        = -9999;
     status                                          = 1; // 0 is good...
     
@@ -1059,6 +1119,11 @@ void InitializeVariables(){
     eepipsPastCutsInEvent                           = false;
     pimsPastCutsInEvent                             = false;
     eepimsPastCutsInEvent                           = false;
+    
+    KpsPastCutsInEvent                             = false;
+    eeKpsPastCutsInEvent                           = false;
+    KmsPastCutsInEvent                             = false;
+    eeKmsPastCutsInEvent                           = false;
 }
 
 
@@ -1596,9 +1661,7 @@ void GetParticlesByType (int evnum, int fdebug){
     Nd      = deuterons.size();
     if (fdebug>2){
         std::cout
-        << "Particles in event "     << evnum        << ")"
-        << std::endl
-        << "particles in event "            << evnum        << " : "
+        << "Particles in event "     << evnum        << ": "
         << "N(electrons): "                 << Ne           <<  ","
         << "N(protons): "                   << Np           <<  ","
         << "N(neutrons): "                  << Nn           <<  ","
