@@ -693,14 +693,14 @@ void CloseOutputFiles (TString OutDataPath, TString outfilename){
         
         
         std::cout
-        << (float)Nevents_passed_pips_cuts/Nevents_processed    << " events passed pi+ cuts,"
+        << (float)Nevents_passed_pips_cuts/Nevents_processed    << " events passed π+ cuts,"
         << std::endl
-        << "\t" << (float)Nevents_passed_e_pips_cuts/Nevents_processed  << " passed (e,e'pi+) cuts,"
+        << "\t" << (float)Nevents_passed_e_pips_cuts/Nevents_processed  << " passed (e,e'π+) cuts,"
         << std::endl
         << "\t\t" << (float)Nevents_passed_e_pips_kinematics_cuts/Nevents_processed  << " also passed kinematical cuts,"
         << std::endl;
         
-        std::cout << "wrote "  << Nentires_e_piplus  << " to (e,e'pi+) root file, "
+        std::cout << "wrote "  << Nentires_e_piplus  << " to (e,e'π+) root file, "
         << std::endl << outFile_e_piplus -> GetName()
         << std::endl << OutDataPath + outfilename + "_e_piplus_selected_eepi_kinematics.csv"
         << std::endl;
@@ -1963,7 +1963,7 @@ void SIDISc12rSkimmer(int RunNumber    = 6420   ,
     else {
         infilename  = SpecificFilePath + "/" + SpecificFilename + ".hipo";
         outfilepath = SpecificFilePath + "/";
-        outfilename = outfilepath + "skimmed_SIDIS_" + SpecificFilename;
+        outfilename = "skimmed_SIDIS_" + SpecificFilename;
     }
     
     
