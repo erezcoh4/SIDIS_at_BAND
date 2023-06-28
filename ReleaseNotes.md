@@ -13,6 +13,9 @@ June-22, 2023
     If fSpecificFilename=="" then SIDISc12rSkimmer.C operates normally as before. Else SIDISc12rSkimmer.C analyzes the file specified by the specific file name.
 
 
+2. Added a flag **IsMC** (default = false) to *SIDISc12rSkimmer.C*
+
+
 May-18, 2023   
 -------------
 

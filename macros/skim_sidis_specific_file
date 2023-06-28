@@ -36,7 +36,9 @@ parser.add_argument("--Ebeam",     type=float, default=10.6,
 parser.add_argument("--Filename",     type=str, default="MC_clasdis.neutron",
                     required=False,
                     help="file name")
-
+parser.add_argument("--IsMC",           dest="IsMC",
+                    default=False,
+                    action='store_true', help="is MC simulation (GEMC)")
 parser.add_argument("--only-pi+",        dest="only_pips",
                     default=False,
                     action='store_true', help="do only pi+ (and not pi-)")
@@ -55,7 +57,8 @@ Skimming      = args.Skimming
 FilePath      = args.FilePath
 Filename      = args.Filename
 Ebeam         = args.Ebeam
-
+IsMC          = args.IsMC
+                      
 
 print('')
 print("Analyzing specific file:",FilePath,"/",Filename)
@@ -73,12 +76,13 @@ print('')
                       TString fSimK    = "",
                       int   fInclusive = 0,
                       TString fSpecificFilePath = "",
-                      TString fSpecificFilename = ""
+                      TString fSpecificFilename = "",
+                      bool       fIsMC = false
                       )
 '''
 
-commandline = ("clas12root -q 'SIDISc12rSkimmer.C+(0,%d,%d,%d,%d,\"%s\",\"\",%f,\"\",\"\",%d,\"%s\",\"%s\")'"%
-                    (NeventsMax,fdebug,PrintProgress,FirstEvent,Skimming,Ebeam,args.inclusive,FilePath,Filename))
+commandline = ("clas12root -q 'SIDISc12rSkimmer.C+(0,%d,%d,%d,%d,\"%s\",\"\",%f,\"\",\"\",%d,\"%s\",\"%s\",%d)'"%
+                    (NeventsMax,fdebug,PrintProgress,FirstEvent,Skimming,Ebeam,args.inclusive,FilePath,Filename,IsMC))
 print(commandline)
 os.system( commandline )
     

@@ -113,7 +113,7 @@ void                             SetSimPi (TString fSimPi);
 void                          SetSkimming (TString fSkimming) ;
 void                         SetInclusive ( int fInclusive );
 void                             SetEbeam ( double fEbeam );
-void                              SetIsMC ();
+void                              SetIsMC ( bool fIsMC = false );
 void                         SetVerbosity ( int _fdebug_ = 0 );
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
 
@@ -351,7 +351,8 @@ void SetVerbosity( int _fdebug_ ){
 
 
 // Oo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
-void SetIsMC(){
+void SetIsMC( bool fIsMC ){
+    IsMC = fIsMC;
     if (Skimming=="p_uniform_distribution"){
         IsMC = true;
     }
@@ -702,6 +703,7 @@ void CloseOutputFiles (TString OutDataPath, TString outfilename){
         
         std::cout << "wrote "  << Nentires_e_piplus  << " to (e,e'π+) root file, "
         << std::endl << outFile_e_piplus -> GetName()
+        << "and "  << Nevents_passed_e_pips_kinematics_cuts << " to (e,e'π-) csv file (after kinematical cuts) "
         << std::endl << OutDataPath + outfilename + "_e_piplus_selected_eepi_kinematics.csv"
         << std::endl;
     }
@@ -729,6 +731,7 @@ void CloseOutputFiles (TString OutDataPath, TString outfilename){
         << std::endl
         << "wrote "  << Nentires_e_piminus << " to (e,e'π-) root file. "
         << std::endl << outFile_e_piminus -> GetName()
+        << "and "  << Nevents_passed_e_pims_kinematics_cuts << " to (e,e'π-) csv file (after kinematical cuts) "
         << std::endl << OutDataPath + outfilename + "_e_piminus_selected_eepi_kinematics.csv"
         << std::endl;
     }
@@ -1932,7 +1935,8 @@ void SIDISc12rSkimmer(int RunNumber    = 6420   ,
                       int   fInclusive = 0,
                       // specific file name
                       TString fSpecificFilePath = "",
-                      TString fSpecificFilename = ""
+                      TString fSpecificFilename = "",
+                      bool       fIsMC = false
                       ){
     
     
@@ -1943,7 +1947,7 @@ void SIDISc12rSkimmer(int RunNumber    = 6420   ,
     SetSimPi            ( fSimPi     );
     SetSimK             ( fSimK      );
     SetInclusive        ( fInclusive );
-    SetIsMC             (            );
+    SetIsMC             ( fIsMC      );
     SetSpecificFilename ( fSpecificFilename );
     SetSpecificFilePath ( fSpecificFilePath );
     
