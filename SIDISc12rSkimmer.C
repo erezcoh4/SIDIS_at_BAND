@@ -718,16 +718,16 @@ void CloseOutputFiles (TString OutDataPath, TString outfilename){
         outFile_e_piminus->Close();
         
         std::cout
-        << (float)Nevents_passed_pims_cuts/Nevents_processed    << " events passed pi- cuts,"
+        << (float)Nevents_passed_pims_cuts/Nevents_processed    << " events passed π- cuts,"
         << std::endl
-        << "\t" << (float)Nevents_passed_e_pims_cuts/Nevents_processed  << " passed (e,e'pi-) cuts,"
+        << "\t" << (float)Nevents_passed_e_pims_cuts/Nevents_processed  << " passed (e,e'π-) cuts,"
         << std::endl
         <<  "\t\t" << (float)Nevents_passed_e_pims_kinematics_cuts/Nevents_processed  << " also passed kinematical cuts,"
         << std::endl;
         
         std::cout << "output files ready in root/csv formats in " << std::endl
         << std::endl
-        << "wrote "  << Nentires_e_piminus << " to (e,e'pi-) root file. "
+        << "wrote "  << Nentires_e_piminus << " to (e,e'π-) root file. "
         << std::endl << outFile_e_piminus -> GetName()
         << std::endl << OutDataPath + outfilename + "_e_piminus_selected_eepi_kinematics.csv"
         << std::endl;
