@@ -4,6 +4,19 @@
 -----------------------------------------------------------------
 
 
+Aug-19, 2023   
+-------------
+
+1. Added the analysis of generator-level simualtions in 
+    /PythonAnalysis/MC/CLASDIS_generator/
+    
+2. Updated *compute_ratio_pips_to_pims()* to also allow π+/π- cross-section ratio extraction with no correction weights (e.g. for generator-level simulations, see bullet 1 above)
+
+3. Cropped final CSV saving float format in **extract_SIDIS_Xsec_ratio()** to 3 digits "float_format='%2.3f'"  
+    
+
+
+
 June-22, 2023   
 -------------
 

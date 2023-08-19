@@ -193,7 +193,7 @@ def compute_ratio_pips_to_pims(df_dict,
                                weight_option = 'bin migration + acceptance + meson subtraction',
                                cutoff = 1.e-8 ):#{
     '''
-    last edit June-10, 2023
+    last edit Aug-17, 2023
     
     [R_pips_to_pims, R_pips_to_pims_errup, R_pips_to_pims_errdw,
      N_pips, N_pims,
@@ -218,7 +218,7 @@ def compute_ratio_pips_to_pims(df_dict,
     M_x_min               float         minimal M_x
     M_x_max               float         maximal M_x
     weight                str           MC corrections applied 
-                                        'bin migration' / 'acceptance' / 'bin migration + acceptance' + / 'bin migration + acceptance + meson subtraction'
+                                        '' / 'bin migration' / 'acceptance' / 'bin migration + acceptance' + / 'bin migration + acceptance + meson subtraction'
     
     return:
     -------
@@ -282,8 +282,13 @@ def compute_ratio_pips_to_pims(df_dict,
         df_pims = df_pims[df_pims.runnum == specific_run_number]
         # if fdebug>1:  print('after run %d filter: %d events'%(specific_run_number,len(df_pips)))
     
-    
-    if   weight_option == 'bin migration': #{
+
+    if fdebug>1: print('compute R(pips/pims) weight option:',weight_option)
+    if  ((weight_option == '') | (weight_option == None)): #{
+        w_pips = np.ones( len(df_pips) )
+        w_pims = np.ones( len(df_pims) )        
+    #}        
+    elif   weight_option == 'bin migration': #{
         w_pips = np.array( df_pips.binMigration_weight )
         w_pims = np.array( df_pims.binMigration_weight )        
     #}        
@@ -407,246 +412,8 @@ def compute_ratio_pips_to_pims(df_dict,
 
 
 
-# ----------------------- #
-def extract_r_from_SIDIS_ratio(data_path     = '/Users/erezcohen/Desktop/data/BAND/Results/',
-                               prefix        = 'Tagged_SIDIS_ratio_', 
-                               suffixes      = [''], 
-                               xB_selected   = 0.34,
-                               Delta_xB      = 0.02,
-                               Zpi_min       = 0.3, 
-                               Zpi_max       = 0.9, 
-                               fdebug        = 0,
-                               u_over_d      = 1,
-                               Xsec_option   = 'bin migration + acceptance'
-                              ):
-    '''
-    extract r(z) from pi+/pi- cross section ratio
-    last edit May-18, 2023 (EOC)
-    '''
-    z_arr,z_errdw_arr,z_errup_arr = dict(),dict(),dict()
-    r_arr,r_errup_arr,r_errdw_arr = dict(),dict(),dict()
-    r_corrected_arr,r_corrected_errup_arr,r_corrected_errdw_arr = dict(),dict(),dict()
-    for suffix in suffixes:
-        if fdebug>1: print('loading sidis ratio from suffix:',suffix)
-        results = load_SIDIS_ratio(prefix        = prefix, 
-                                   fdebug        = 0,
-                                   suffix        = suffix,                                                                         
-                                   doPlotResults = False,  
-                                   data_path     = data_path)
-        if fdebug>3: 
-            print('results with %s/%s:'%(prefix,suffix))
-            print(results)
-        result_name = suffix
-        z_arr[result_name],z_errdw_arr[result_name], z_errup_arr[result_name] = [],[],[]
-        r_arr[result_name],r_errup_arr[result_name], r_errdw_arr[result_name] = [],[],[]
-        r_corrected_arr[result_name], r_corrected_errup_arr[result_name], r_corrected_errdw_arr[result_name] = [],[],[]
-
-        for key in results.keys():#{
-            #print (key)
-            z_min = np.max([Zpi_min,float(key[7:12])]);
-            z_max = np.min([Zpi_max,float(key[-4:])]);
-            z_mean_pips = float(key[26:31])
-            z_mean_pims = float(key[36:40])
-            z = (z_mean_pips + z_mean_pims)/2
-            if z_mean_pips > 0 and z_mean_pims > 0:
-                z_errdw = z - z_min 
-                z_errup = z_max - z
-            else:
-                z_errdw = 0
-                z_errup = 0
-
-            z_arr[result_name].append( z )
-            z_errdw_arr[result_name].append( z_errdw )
-            z_errup_arr[result_name].append( z_errup )
-            # print(z_min,z,z_max,z_errdw,z_errup)
-
-            res = results[key][np.abs(results[key]['$x_B$']-xB_selected) < Delta_xB/2]
-            if fdebug>3: 
-                print('res: \n',res)
-            if len(res)==0:    # empty data-frame
-                R,dR_up,dR_dw=0,0,0
-            elif len(res)==1:  # Get result in one selected x bin
-                R,dR_up,dR_dw = float(res['$R$']),float(res['$\Delta R_{+}$']),float(res['$\Delta R_{+}$'])
-                R_corrected,dR_corrected_up,dR_corrected_dw = float(res['$R^{corrected}$']),float(res['$\Delta R^{corrected}_{+}$']),float(res['$\Delta R^{corrected}_{+}$'])                    
-            else: # Get result integrated over x bins
-                Npips_tot = np.sum(res['$N(\pi_{+})$'])
-                dNpips_tot = np.sum(res['$\Delta N(\pi_{+})$'])
-                Npims_tot = np.sum(res['$N(\pi_{-})$'])
-                dNpims_tot = np.sum(res['$\Delta N(\pi_{-})$'])
-                if Npips_tot==0 or Npims_tot==0: R,dR_up,dR_dw=0,0,0
-                else: 
-                    R = Npips_tot/Npims_tot
-                    dR_up = R * np.sqrt( np.square(dNpips_tot/Npips_tot) + np.square(dNpims_tot/Npims_tot ))
-                    dR_dw = dR_up
-            
-                Npips_w_tot = np.sum(res['$N_{w}(\pi_{+})$'])
-                dNpips_w_tot = np.sum(res['$\Delta N_{w}(\pi_{+})$'])
-                Npims_w_tot = np.sum(res['$N_{w}(\pi_{-})$'])
-                dNpims_w_tot = np.sum(res['$\Delta N_{w}(\pi_{-})$'])
-                if Npips_w_tot==0 or Npims_w_tot==0: R_corrected,dR_corrected_up,dR_corrected_dw=0,0,0
-                else: 
-                    R_corrected = Npips_w_tot/Npims_w_tot
-                    dR_corrected_up = R_corrected * np.sqrt( np.square(dNpips_w_tot/Npips_w_tot) + np.square(dNpims_w_tot/Npims_w_tot ))
-                    dR_corrected_dw = dR_corrected_up
-            
-            
-            r, r_errup, r_errdw  = get_r_from_CrossSectionRatio(R, dR_up, dR_dw, u_over_d=u_over_d)
-            r_arr[result_name].append( r )
-            r_errup_arr[result_name].append( r_errup )
-            r_errdw_arr[result_name].append( r_errdw )
-
-            r_corrected, r_corrected_errup, r_corrected_errdw  = get_r_from_CrossSectionRatio(R_corrected, dR_corrected_up, dR_corrected_dw, u_over_d=u_over_d)
-            r_corrected_arr[result_name].append( r_corrected )
-            r_corrected_errup_arr[result_name].append( r_corrected_errup )
-            r_corrected_errdw_arr[result_name].append( r_corrected_errdw )
-
-        #}
-        r_arr[result_name]       = np.array(r_arr[result_name])
-        r_errup_arr[result_name] = np.array(r_errup_arr[result_name])
-        r_errdw_arr[result_name] = np.array(r_errdw_arr[result_name])
-
-        r_corrected_arr[result_name]       = np.array(r_corrected_arr[result_name])
-        r_corrected_errup_arr[result_name] = np.array(r_corrected_errup_arr[result_name])
-        r_corrected_errdw_arr[result_name] = np.array(r_corrected_errdw_arr[result_name])
-
-        z_arr[result_name]       = np.array(z_arr[result_name])
-        z_errup_arr[result_name] = np.array(z_errup_arr[result_name])
-        z_errdw_arr[result_name] = np.array(z_errdw_arr[result_name])
-
-        z_sort_indices = np.argsort(z_arr[result_name])
-        z_arr[result_name] = np.take_along_axis(z_arr[result_name], z_sort_indices, axis=0)
-        z_errup_arr[result_name] = np.take_along_axis(z_errup_arr[result_name], z_sort_indices, axis=0)
-        z_errdw_arr[result_name] = np.take_along_axis(z_errdw_arr[result_name], z_sort_indices, axis=0)
-
-        r_arr[result_name] = np.take_along_axis(r_arr[result_name], z_sort_indices, axis=0)
-        r_errup_arr[result_name] = np.take_along_axis(r_errup_arr[result_name], z_sort_indices, axis=0)
-        r_errdw_arr[result_name] = np.take_along_axis(r_errdw_arr[result_name], z_sort_indices, axis=0)
-
-        r_corrected_arr[result_name] = np.take_along_axis(r_corrected_arr[result_name], z_sort_indices, axis=0)
-        r_corrected_errup_arr[result_name] = np.take_along_axis(r_corrected_errup_arr[result_name], z_sort_indices, axis=0)
-        r_corrected_errdw_arr[result_name] = np.take_along_axis(r_corrected_errdw_arr[result_name], z_sort_indices, axis=0)
-
-        # HERE WE NEED TO SORT THE RESULTS AS A FUNCTION OF Z!
-        if fdebug>2:
-            print('z[',result_name,']:',z_arr[result_name])
-            print('sort_indices:',z_sort_indices)
-            
-            print('sorted z[',result_name,']:',z_arr[result_name])
-            print('sorted r[',result_name,']:',r_corrected_arr[result_name])
 
 
-
-            # print('sorted z[',result_name,']:',z_sorted_arr[result_name])
-            # print(r_arr[result_name])
-
-    print('Done loading %s SIDIS results and extracting r for x=%.2f.'%(prefix,xB_selected))
-    print('From',data_path)
-    print('For',suffixes)
-    return z_arr,z_errdw_arr,z_errup_arr, r_arr, r_errup_arr, r_errdw_arr, r_corrected_arr, r_corrected_errup_arr, r_corrected_errdw_arr
-# ----------------------- #  
-    
-
-
-
-    
-# ----------------------- #
-def load_SIDIS_ratio(xlabel   = "Bjorken $x$",
-                     fdebug   = 0,
-                     prefix   = 'Untagged_SIDIS_ratio_',
-                     suffix   = '',
-                     doPlotResults=False,
-                     axPlot   = [],
-                     Nzbins2Plot = 5,
-                     titlePlot="$\pi^+/\pi^-$ ratio as a function of $x_B$ without a tagged neutron",
-                     zvar     = "Zpi",
-                     data_path= '/Users/erezcohen/Desktop/data/BAND/Results/Results_31Jan2023/'):
-    '''
-    Load SIDIS ratio results
-    last update May-18, 2023
-    
-    input
-    -------
-    zvar      "Zpi","zeta_pi"
-    
-    '''
-    
-    SIDIS_results = dict()
-    
-    z_min_arr, z_max_arr, Zavg_pips_arr, Zavg_pims_arr = [],[],[],[]
-    data_path = data_path + '/';
-    if fdebug: print('Reading files from ' + data_path)
-    filelist = os.listdir( data_path )
-    for filename in filelist:
-        if prefix in filename and suffix in filename:
-            filenameparts = filename.split('_')
-            if fdebug>2: print(filename)
-            if fdebug>3: print(filenameparts)
-            if zvar=="Zpi":
-                if "Zpi" not in filenameparts: continue
-                z_min     = float(filenameparts[4][4:8])
-                # Zavg_pips = float(filenameparts[7][5:9])
-                Zavg_pips_str = filenameparts[7][5:9]
-                if 'an' in Zavg_pips_str: 
-                    Zavg_pips = 0.000;
-                else:                     Zavg_pips = float(Zavg_pips_str)
-                # Zavg_pims = float(filenameparts[8][5:9])
-                Zavg_pims_str = filenameparts[8][5:9]
-                if 'an' in Zavg_pims_str: 
-                    Zavg_pims = 0.000;
-                else:                     Zavg_pims = float(Zavg_pims_str) 
-                z_max     = float(filenameparts[10][4:8])
-
-            elif zvar=="zeta_pi":
-                if "zeta" not in filenameparts: continue
-                z_min     = float(filenameparts[5][4:8])
-                Zavg_pips = float(filenameparts[9][5:9])
-                Zavg_pims = float(filenameparts[10][5:9])
-                z_max     = float(filenameparts[13][4:8])
-
-            filelabel = '%s_min%.3f_%s_mean_pips%.3f_pims%.3f_%s_max%.3f'%(zvar,z_min,zvar,Zavg_pips,Zavg_pims,zvar,z_max)
-
-            df = pd.read_csv( data_path + '/' + filename )
-            SIDIS_results[filelabel] = df
-            z_min_arr.append(z_min)
-            z_max_arr.append(z_max)
-            Zavg_pips_arr.append(Zavg_pips)
-            Zavg_pims_arr.append(Zavg_pims)
-
-        
-    z_min_arr = np.sort(z_min_arr)
-    z_max_arr = np.sort(z_max_arr)
-    Zavg_pips_arr = np.sort(Zavg_pips_arr)
-    Zavg_pims_arr = np.sort(Zavg_pims_arr)
-    
-    if doPlotResults:#{
-        x     = np.array(df["$x_B$"])
-        x_err = np.array(df["$\Delta x_B$"])
-
-        if axPlot==[]:
-            fig = plt.figure(figsize=(9,6))
-            axPlot  = fig.add_subplot(1,1,1)
-            
-        for filelabel,z_min,z_max in zip(SIDIS_results.keys(),z_min_arr,z_max_arr):
-        # z_min,z_max,Zavg_pips,Zavg_pims in zip( z_min_arr, z_max_arr, Zavg_pips_arr, Zavg_pims_arr[0:Nzbins2Plot] ):
-            # Zavg = (Zavg_pips+Zavg_pims)/2.
-            # filelabel = '%s_min%.3f_%s_mean_pips%.3f_pims%.3f_%s_max%.3f'%(zvar,z_min,zvar,Zavg_pips,Zavg_pims,zvar,z_max)
-            
-            df = SIDIS_results[filelabel]
-            y    = df['$R$']
-            y_err= (df['$\Delta R_{+}$'],df['$\Delta R_{-}$'])
-            # plot
-            l=axPlot.errorbar(x=x, xerr=x_err,  y=y, yerr=y_err,
-                        marker='o',markeredgecolor='k',
-                        label='$%.3f<z<%.3f$'%(z_min,z_max))
-
-        set_axes(axPlot,xlabel,"$N(e,e'\pi^+)/N(e,e'\pi^-)$",
-                 title=titlePlot,
-                 do_add_grid=True, do_add_legend=True,fontsize=18);
-        # plt.legend(bbox_to_anchor=(1,1.05),loc='best',fontsize=18)
-        
-    if fdebug: print('Done.')
-    return SIDIS_results
-# ----------------------- #
 
 
 
@@ -654,103 +421,6 @@ def load_SIDIS_ratio(xlabel   = "Bjorken $x$",
      
     
 
-# ----------------------- #
-def extract_SIDIS_Xsec_ratio(df_dict  = None,
-                        specific_run_number=None,
-                        x_var    = 'xB' ,
-                        x_bins   = np.linspace(0.2,0.6,11),
-                        zvar     = "Zpi",
-                        z_bins   = np.arange(0.3,0.8,0.1),
-                        z_widths = 0.01*np.ones(5),
-                        data_path= '/Users/erezcohen/Desktop/data/BAND/Results/',
-                        fdebug   = 0,
-                        prefix   = 'Untagged_SIDIS_ratio_',
-                        suffix   = '',
-                        M_x_min  = 0, M_x_max  = np.inf,
-                        W_min    = 0, W_max    = np.inf,
-                        Q2_min   = 0, Q2_max   = np.inf,
-                        pT_min   = 0, pT_max   = np.inf,
-                        phi_min  = 0, phi_max  = np.inf,
-                        Mx_d_min = 0,
-                        weight_option = 'bin migration + acceptance'):
-    '''
-    Extract SIDIS results,
-    the number of d(e,e'π+) and d(e,e'π-) events,
-    and save them to a CSV file
-    
-    last update May-4, 2023
-    
-    
-    input
-    ---------
-    zvar            "Zpi" / "zeta_pi"
-    MCcorrection    "bin migration" / "acceptance" / "bin migration + acceptance"
-    
-    '''
-    
-    x        = (x_bins[1:] + x_bins[:-1])/2
-    x_err    = (x_bins[1:] - x_bins[:-1])/2
-    for z_bin,z_width in zip(z_bins,z_widths):
-        z_min,z_max = z_bin-z_width, z_bin+z_width
-        
-        (R,
-         R_err_up,
-         R_err_dw,
-         N_pips,
-         N_pims,
-         Zavg_pips,
-         Zavg_pims,
-         N_pips_err,
-         N_pims_err,
-         N_pips_weighted,N_pips_weighted_err, 
-         N_pims_weighted,N_pims_weighted_err,
-         R_corrected,      
-         R_corrected_errup, R_corrected_errdw) = compute_ratio_pips_to_pims(df_dict = df_dict ,
-                                                  specific_run_number=specific_run_number,                                                 
-                                                  var     = x_var,                                                
-                                                  bins    = x_bins,
-                                                  zvar    = zvar,
-                                                  z_min   = z_min,   z_max   = z_max,
-                                                  M_x_min = M_x_min, M_x_max = M_x_max,
-                                                  W_min   = W_min,   W_max   = W_max,
-                                                  Mx_d_min= Mx_d_min,
-                                                  Q2_min  = Q2_min,  Q2_max  = Q2_max,
-                                                  pT_min  = pT_min,  pT_max  = pT_max,
-                                                  phi_min = phi_min, phi_max = phi_max,
-                                                  fdebug  = fdebug,
-                                                  weight_option=weight_option)
-        
-        # if MCcorrection == "bin migration + acceptance":
-        #     R_corrected, R_corrected_err_up, R_corrected_err_dw = apply_MCcorrection_to_SIDIS_Xsec_ratio( N_pips, N_pims, N_pips_err, N_pims_err, MCcorrection );
-
-        df_to_save = pd.DataFrame({"$x_B$":       x,
-                                   "$\Delta x_B$":x_err,
-                                   '$N(\pi_{+})$':       N_pips,
-                                   '$N(\pi_{-})$':       N_pims,
-                                   '$\Delta N(\pi_{+})$':N_pips_err,
-                                   '$\Delta N(\pi_{-})$':N_pims_err,
-                                   '$R$':           R,
-                                   '$\Delta R_{+}$':R_err_up,
-                                   '$\Delta R_{-}$':R_err_dw,                                                            
-                                   '$N_{w}(\pi_{+})$':       N_pips_weighted,
-                                   '$N_{w}(\pi_{-})$':       N_pims_weighted,
-                                   '$\Delta N_{w}(\pi_{+})$':N_pips_weighted_err,
-                                   '$\Delta N_{w}(\pi_{-})$':N_pims_weighted_err,
-
-                                   '$R^{corrected}$':           R_corrected,
-                                   '$\Delta R^{corrected}_{+}$':R_corrected_errup,
-                                   '$\Delta R^{corrected}_{-}$':R_corrected_errdw})
-        
-        filelabel = '%s_min%.3f_%s_mean_pips%.3f_pims%.3f_%s_max%.3f'%(zvar,z_min,zvar,Zavg_pips,Zavg_pims,zvar,z_max)
-        filename  =  data_path + prefix + filelabel + suffix  + '.csv'
-        df_to_save.to_csv(filename)
-        if fdebug:
-            print('saved',filename)
-            if fdebug>1:
-                print('$%s=%.3f\pm%.3f$'%(zvar,z_bin,z_width))
-                if fdebug>2: display(df_to_save)
-# ----------------------- #
- 
 
 
 
@@ -1416,7 +1086,8 @@ def beam_energy_from_run(run,rungroup = 'rgb'):
 
     
 # ----------------------- #
-def plot_FF_expectation(color='blue',formula='(1-z)/(1+z)', ax=None,x0=0.32,z0=0.5,
+def plot_FF_expectation(color='blue',formula='(1-z)/(1+z)', 
+                        ax=None,x0=0.32,z0=0.5,label=None,
                         delta_z=0,
                         Q2=np.linspace(5,9,100)):
     '''
@@ -1425,12 +1096,17 @@ def plot_FF_expectation(color='blue',formula='(1-z)/(1+z)', ax=None,x0=0.32,z0=0
     [J. Hua and B.Q. Ma Eur.Phys.J.C30:207-212,2003]
     '''
     zFF = np.linspace(0,1,100)
+    if label is not None: 
+        label = formula
+        
     if formula == '(1-z)/(1+z)':
         rFF = (1-zFF)/(1+zFF)
-        ax.plot(zFF, rFF, '--',color=color,label='$(1-z)/(1+ z)$')
+        ax.plot(zFF, rFF, '--',color=color,label=label)
+        
     elif formula == '(1-z)/(1-z+z/0.46)':
         rFF = (1-zFF)/(1-zFF+zFF/0.46)
-        ax.plot(zFF, rFF, '--',color=color,label='$(1-z)/(1 - z + z/0.46)$')
+        ax.plot(zFF, rFF, '--',color=color,label=label)
+        
     elif formula == 'r(Q^2,x=x0,z=z0)':
         rFF = (1-z0)/(1-z0+z0/0.46)*np.ones(len(Q2))
         rFF_dw = (1-(z0-delta_z))/(1-(z0-delta_z)+(z0-delta_z)/0.46)*np.ones(len(Q2))

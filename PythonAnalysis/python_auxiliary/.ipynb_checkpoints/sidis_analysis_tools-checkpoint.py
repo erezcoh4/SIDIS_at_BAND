@@ -193,7 +193,7 @@ def compute_ratio_pips_to_pims(df_dict,
                                weight_option = 'bin migration + acceptance + meson subtraction',
                                cutoff = 1.e-8 ):#{
     '''
-    last edit June-10, 2023
+    last edit Aug-17, 2023
     
     [R_pips_to_pims, R_pips_to_pims_errup, R_pips_to_pims_errdw,
      N_pips, N_pims,
@@ -218,7 +218,7 @@ def compute_ratio_pips_to_pims(df_dict,
     M_x_min               float         minimal M_x
     M_x_max               float         maximal M_x
     weight                str           MC corrections applied 
-                                        'bin migration' / 'acceptance' / 'bin migration + acceptance' + / 'bin migration + acceptance + meson subtraction'
+                                        '' / 'bin migration' / 'acceptance' / 'bin migration + acceptance' + / 'bin migration + acceptance + meson subtraction'
     
     return:
     -------
@@ -282,8 +282,13 @@ def compute_ratio_pips_to_pims(df_dict,
         df_pims = df_pims[df_pims.runnum == specific_run_number]
         # if fdebug>1:  print('after run %d filter: %d events'%(specific_run_number,len(df_pips)))
     
-    
-    if   weight_option == 'bin migration': #{
+
+    if fdebug>1: print('compute R(pips/pims) weight option:',weight_option)
+    if  ((weight_option == '') | (weight_option == None)): #{
+        w_pips = np.ones( len(df_pips) )
+        w_pims = np.ones( len(df_pims) )        
+    #}        
+    elif   weight_option == 'bin migration': #{
         w_pips = np.array( df_pips.binMigration_weight )
         w_pims = np.array( df_pims.binMigration_weight )        
     #}        
@@ -405,6 +410,105 @@ def compute_ratio_pips_to_pims(df_dict,
 # ----------------------- #
 
 
+
+
+# ----------------------- #
+def extract_SIDIS_Xsec_ratio(df_dict  = None,
+                        specific_run_number=None,
+                        x_var    = 'xB' ,
+                        x_bins   = np.linspace(0.2,0.6,11),
+                        zvar     = "Zpi",
+                        z_bins   = np.arange(0.3,0.8,0.1),
+                        z_widths = 0.01*np.ones(5),
+                        data_path= '/Users/erezcohen/Desktop/data/BAND/Results/',
+                        fdebug   = 0,
+                        prefix   = 'Untagged_SIDIS_ratio_',
+                        suffix   = '',
+                        M_x_min  = 0, M_x_max  = np.inf,
+                        W_min    = 0, W_max    = np.inf,
+                        Q2_min   = 0, Q2_max   = np.inf,
+                        pT_min   = 0, pT_max   = np.inf,
+                        phi_min  = 0, phi_max  = np.inf,
+                        Mx_d_min = 0,
+                        weight_option = 'bin migration + acceptance'):
+    '''
+    Extract SIDIS results,
+    the number of d(e,e'π+) and d(e,e'π-) events,
+    and save them to a CSV file
+    
+    last update May-4, 2023
+    
+    
+    input
+    ---------
+    zvar            "Zpi" / "zeta_pi"
+    weight_option    "bin migration" / "acceptance" / "bin migration + acceptance"
+    
+    '''
+    
+    x        = (x_bins[1:] + x_bins[:-1])/2
+    x_err    = (x_bins[1:] - x_bins[:-1])/2
+    for z_bin,z_width in zip(z_bins,z_widths):
+        z_min,z_max = z_bin-z_width, z_bin+z_width
+        
+        (R,
+         R_err_up,
+         R_err_dw,
+         N_pips,
+         N_pims,
+         Zavg_pips,
+         Zavg_pims,
+         N_pips_err,
+         N_pims_err,
+         N_pips_weighted,N_pips_weighted_err, 
+         N_pims_weighted,N_pims_weighted_err,
+         R_corrected,      
+         R_corrected_errup, R_corrected_errdw) = compute_ratio_pips_to_pims(df_dict = df_dict ,
+                                                  specific_run_number=specific_run_number,                                                 
+                                                  var     = x_var,                                                
+                                                  bins    = x_bins,
+                                                  zvar    = zvar,
+                                                  z_min   = z_min,   z_max   = z_max,
+                                                  M_x_min = M_x_min, M_x_max = M_x_max,
+                                                  W_min   = W_min,   W_max   = W_max,
+                                                  Mx_d_min= Mx_d_min,
+                                                  Q2_min  = Q2_min,  Q2_max  = Q2_max,
+                                                  pT_min  = pT_min,  pT_max  = pT_max,
+                                                  phi_min = phi_min, phi_max = phi_max,
+                                                  fdebug  = fdebug,
+                                                  weight_option=weight_option)
+        
+        # if MCcorrection == "bin migration + acceptance":
+        #     R_corrected, R_corrected_err_up, R_corrected_err_dw = apply_MCcorrection_to_SIDIS_Xsec_ratio( N_pips, N_pims, N_pips_err, N_pims_err, MCcorrection );
+
+        df_to_save = pd.DataFrame({"$x_B$":       x,
+                                   "$\Delta x_B$":x_err,
+                                   '$N(\pi_{+})$':       N_pips,
+                                   '$N(\pi_{-})$':       N_pims,
+                                   '$\Delta N(\pi_{+})$':N_pips_err,
+                                   '$\Delta N(\pi_{-})$':N_pims_err,
+                                   '$R$':           R,
+                                   '$\Delta R_{+}$':R_err_up,
+                                   '$\Delta R_{-}$':R_err_dw,                                                            
+                                   '$N_{w}(\pi_{+})$':       N_pips_weighted,
+                                   '$N_{w}(\pi_{-})$':       N_pims_weighted,
+                                   '$\Delta N_{w}(\pi_{+})$':N_pips_weighted_err,
+                                   '$\Delta N_{w}(\pi_{-})$':N_pims_weighted_err,
+
+                                   '$R^{corrected}$':           R_corrected,
+                                   '$\Delta R^{corrected}_{+}$':R_corrected_errup,
+                                   '$\Delta R^{corrected}_{-}$':R_corrected_errdw})
+        
+        filelabel = '%s_min%.3f_%s_mean_pips%.3f_pims%.3f_%s_max%.3f'%(zvar,z_min,zvar,Zavg_pips,Zavg_pims,zvar,z_max)
+        filename  =  data_path + prefix + filelabel + suffix  + '.csv'
+        df_to_save.to_csv(filename)
+        if fdebug:
+            print('saved',filename)
+            if fdebug>1:
+                print('$%s=%.3f\pm%.3f$'%(zvar,z_bin,z_width))
+                if fdebug>2: display(df_to_save)
+# ----------------------- #
+ 
 
 
 # ----------------------- #
@@ -654,103 +758,6 @@ def load_SIDIS_ratio(xlabel   = "Bjorken $x$",
      
     
 
-# ----------------------- #
-def extract_SIDIS_Xsec_ratio(df_dict  = None,
-                        specific_run_number=None,
-                        x_var    = 'xB' ,
-                        x_bins   = np.linspace(0.2,0.6,11),
-                        zvar     = "Zpi",
-                        z_bins   = np.arange(0.3,0.8,0.1),
-                        z_widths = 0.01*np.ones(5),
-                        data_path= '/Users/erezcohen/Desktop/data/BAND/Results/',
-                        fdebug   = 0,
-                        prefix   = 'Untagged_SIDIS_ratio_',
-                        suffix   = '',
-                        M_x_min  = 0, M_x_max  = np.inf,
-                        W_min    = 0, W_max    = np.inf,
-                        Q2_min   = 0, Q2_max   = np.inf,
-                        pT_min   = 0, pT_max   = np.inf,
-                        phi_min  = 0, phi_max  = np.inf,
-                        Mx_d_min = 0,
-                        weight_option = 'bin migration + acceptance'):
-    '''
-    Extract SIDIS results,
-    the number of d(e,e'π+) and d(e,e'π-) events,
-    and save them to a CSV file
-    
-    last update May-4, 2023
-    
-    
-    input
-    ---------
-    zvar            "Zpi" / "zeta_pi"
-    MCcorrection    "bin migration" / "acceptance" / "bin migration + acceptance"
-    
-    '''
-    
-    x        = (x_bins[1:] + x_bins[:-1])/2
-    x_err    = (x_bins[1:] - x_bins[:-1])/2
-    for z_bin,z_width in zip(z_bins,z_widths):
-        z_min,z_max = z_bin-z_width, z_bin+z_width
-        
-        (R,
-         R_err_up,
-         R_err_dw,
-         N_pips,
-         N_pims,
-         Zavg_pips,
-         Zavg_pims,
-         N_pips_err,
-         N_pims_err,
-         N_pips_weighted,N_pips_weighted_err, 
-         N_pims_weighted,N_pims_weighted_err,
-         R_corrected,      
-         R_corrected_errup, R_corrected_errdw) = compute_ratio_pips_to_pims(df_dict = df_dict ,
-                                                  specific_run_number=specific_run_number,                                                 
-                                                  var     = x_var,                                                
-                                                  bins    = x_bins,
-                                                  zvar    = zvar,
-                                                  z_min   = z_min,   z_max   = z_max,
-                                                  M_x_min = M_x_min, M_x_max = M_x_max,
-                                                  W_min   = W_min,   W_max   = W_max,
-                                                  Mx_d_min= Mx_d_min,
-                                                  Q2_min  = Q2_min,  Q2_max  = Q2_max,
-                                                  pT_min  = pT_min,  pT_max  = pT_max,
-                                                  phi_min = phi_min, phi_max = phi_max,
-                                                  fdebug  = fdebug,
-                                                  weight_option=weight_option)
-        
-        # if MCcorrection == "bin migration + acceptance":
-        #     R_corrected, R_corrected_err_up, R_corrected_err_dw = apply_MCcorrection_to_SIDIS_Xsec_ratio( N_pips, N_pims, N_pips_err, N_pims_err, MCcorrection );
-
-        df_to_save = pd.DataFrame({"$x_B$":       x,
-                                   "$\Delta x_B$":x_err,
-                                   '$N(\pi_{+})$':       N_pips,
-                                   '$N(\pi_{-})$':       N_pims,
-                                   '$\Delta N(\pi_{+})$':N_pips_err,
-                                   '$\Delta N(\pi_{-})$':N_pims_err,
-                                   '$R$':           R,
-                                   '$\Delta R_{+}$':R_err_up,
-                                   '$\Delta R_{-}$':R_err_dw,                                                            
-                                   '$N_{w}(\pi_{+})$':       N_pips_weighted,
-                                   '$N_{w}(\pi_{-})$':       N_pims_weighted,
-                                   '$\Delta N_{w}(\pi_{+})$':N_pips_weighted_err,
-                                   '$\Delta N_{w}(\pi_{-})$':N_pims_weighted_err,
-
-                                   '$R^{corrected}$':           R_corrected,
-                                   '$\Delta R^{corrected}_{+}$':R_corrected_errup,
-                                   '$\Delta R^{corrected}_{-}$':R_corrected_errdw})
-        
-        filelabel = '%s_min%.3f_%s_mean_pips%.3f_pims%.3f_%s_max%.3f'%(zvar,z_min,zvar,Zavg_pips,Zavg_pims,zvar,z_max)
-        filename  =  data_path + prefix + filelabel + suffix  + '.csv'
-        df_to_save.to_csv(filename)
-        if fdebug:
-            print('saved',filename)
-            if fdebug>1:
-                print('$%s=%.3f\pm%.3f$'%(zvar,z_bin,z_width))
-                if fdebug>2: display(df_to_save)
-# ----------------------- #
- 
 
 
 
@@ -1416,7 +1423,8 @@ def beam_energy_from_run(run,rungroup = 'rgb'):
 
     
 # ----------------------- #
-def plot_FF_expectation(color='blue',formula='(1-z)/(1+z)', ax=None,x0=0.32,z0=0.5,
+def plot_FF_expectation(color='blue',formula='(1-z)/(1+z)', 
+                        ax=None,x0=0.32,z0=0.5,label=None,
                         delta_z=0,
                         Q2=np.linspace(5,9,100)):
     '''
@@ -1425,12 +1433,17 @@ def plot_FF_expectation(color='blue',formula='(1-z)/(1+z)', ax=None,x0=0.32,z0=0
     [J. Hua and B.Q. Ma Eur.Phys.J.C30:207-212,2003]
     '''
     zFF = np.linspace(0,1,100)
+    if label is not None: 
+        label = formula
+        
     if formula == '(1-z)/(1+z)':
         rFF = (1-zFF)/(1+zFF)
-        ax.plot(zFF, rFF, '--',color=color,label='$(1-z)/(1+ z)$')
+        ax.plot(zFF, rFF, '--',color=color,label=label)
+        
     elif formula == '(1-z)/(1-z+z/0.46)':
         rFF = (1-zFF)/(1-zFF+zFF/0.46)
-        ax.plot(zFF, rFF, '--',color=color,label='$(1-z)/(1 - z + z/0.46)$')
+        ax.plot(zFF, rFF, '--',color=color,label=label)
+        
     elif formula == 'r(Q^2,x=x0,z=z0)':
         rFF = (1-z0)/(1-z0+z0/0.46)*np.ones(len(Q2))
         rFF_dw = (1-(z0-delta_z))/(1-(z0-delta_z)+(z0-delta_z)/0.46)*np.ones(len(Q2))
