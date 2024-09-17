@@ -4,12 +4,39 @@
 -----------------------------------------------------------------
 
 
+Oct-1, 2023   
+-------------
+
+1. Updated the tabluar 4D results:
+
+    Each table has the following binning:
+     $Q^2_{min}$','$Q^2_{max}$',
+    '$x_B^{min}$','$x_B^{max}$',
+    '$z_{min}$','$z_{max}$'
+    '$p_T^{min}$','$p_T^{max}$',
+ 
+
+    A) Number of events: 
+    one table with the "raw" numbers before corrections
+    '$N^{+}/10^5$','$N^{-}/10^5$'
+    
+    B) Cross-section ratios 
+    one table with the "corrected" numbers and cross-section ratios
+    '$N^{+}_w/10^5$','$N^{-}_w/10^5$'
+    '$\\Delta N^{+}_w/10^5$','$\\Delta N^{-}_w/10^5$'
+    '$R$','$\\Delta R$'
+    
+    C) Fragmentation ratios 
+    '$r$','$\\Delta r$'
+    
+    
 Aug-25, 2023   
 -------------
 
 1. Added inputs to **compute_ratio_pips_to_pims()**: 
     *xB_min_arr* and *xB_max_arr*  
 
+2. Splitted and updated **compute_ratio_pips_to_pims()** with multiple auxiliary functions
 
 Aug-19, 2023   
 -------------

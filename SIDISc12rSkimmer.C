@@ -1360,7 +1360,8 @@ void ComputePionKinematics(TLorentzVector pi, TLorentzVector pi_qFrame){
     M_x     = ( q + p_rest - pi ).Mag();
     M_x_d   = ( q + d_rest - pi ).Mag();
     
-    xF      = 2. * (pi.Vect().Dot(q.Vect())) / (q.P() * W);
+//    xF      = 2. * (pi.Vect().Dot(q.Vect())) / (q.P() * W);
+    xF      = 2. * (pi_qFrame.Vect().Dot(q_qFrame.Vect())) / (q_qFrame.P() * W);
     eta_pi  = 0.5 * log((pi_qFrame.E()+pi_qFrame.Pz()) /
                         (pi_qFrame.E()-pi_qFrame.Pz()));
     
@@ -1928,11 +1929,12 @@ void SIDISc12rSkimmer(int RunNumber    = 6420   ,
                       // "sidisdvcs", "inc", "nSidis", "AcceptanceCorrection"
                       TString fDataPath= "sidisdvcs",
                       double fEbeam    = 10.2, // [GeV]
-                      // simulation - π+ / π- / K+ / K-
+                      // simulation - π+ / π- 
                       TString fSimPi   = "piplus", //""/"piplus" / "piminus"
-                      TString fSimK    = "", // ""/"Kplus" / "Kminus"
                       // inclusive means do not apply cuts
                       int   fInclusive = 0,
+                      //simulation - K+ / K-
+                      TString fSimK    = "", // ""/"Kplus" / "Kminus"
                       // specific file name
                       TString fSpecificFilePath = "",
                       TString fSpecificFilename = "",
