@@ -580,7 +580,7 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
         << aux.Chi2PID_pion_upperBound( p, C ) << ","
         << "fabs((Ve-Vpi).Z()): "   << fabs((Ve-Vpi).Z())       << ","
         << std::endl
-//        << "xF: "                   << xF                       << ","
+        << "xF: "                   << xF                       << ","
         << std::endl;
     }
     if(!
@@ -979,7 +979,7 @@ void InitializeVariables(){
     xB          = Q2        = omega     = -9999;
     xF          = y                     = -9999;
     xB_g        = Q2_g      = omega_g   = -9999;
-    xF          = y_g                   = -9999;
+    y_g                                 = -9999;
     W_d         = W                     = -9999;
     M_x         = M_x_d                 = -9999;
     e_E_ECIN    = e_E_ECOUT = e_E_PCAL  = -9999;
