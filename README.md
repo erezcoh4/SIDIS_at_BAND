@@ -35,6 +35,15 @@ This repository is responsible for
         $$p(e,e’π-)X  $$
 
 
+# Prequisits
+---------------------------------------
+### Load modules on ifarm:
+
+module use /scigroup/cvmfs/hallb/clas12/sw/modulefiles
+module purge
+module load sqlite/dev
+module load clas12
+
 
 
 # Data runs used for analysis

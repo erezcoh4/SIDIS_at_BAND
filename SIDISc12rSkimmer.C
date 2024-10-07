@@ -2095,7 +2095,7 @@ void SIDISc12rSkimmer(int RunNumber    = 6420   ,
                 if (fdebug>1) {
                     std::cout << "done processing event " << evnum
                     << " (" << event << "/" << NeventsMaxToProcess<< ") "
-                    << std::endl << "------------------------------------------------------------" << std::endl ;
+                    << std::endl << "------------------------------------------------------------" << std::endl << std::endl ;
                 }
                 
                 if (IsMC){
