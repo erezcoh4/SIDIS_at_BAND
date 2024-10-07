@@ -579,6 +579,8 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
         << "Chi2PID_pion_upperBound( p="<<p<<", C="<<C<<" ): "
         << aux.Chi2PID_pion_upperBound( p, C ) << ","
         << "fabs((Ve-Vpi).Z()): "   << fabs((Ve-Vpi).Z())       << ","
+        << std::endl
+        << "xF: "                   << xF                       << ","
         << std::endl;
     }
     if(!
