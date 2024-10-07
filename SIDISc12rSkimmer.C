@@ -579,8 +579,6 @@ bool CheckIfPionPassedSelectionCuts(TString pionCharge, // "pi+" or "pi-"
         << "Chi2PID_pion_upperBound( p="<<p<<", C="<<C<<" ): "
         << aux.Chi2PID_pion_upperBound( p, C ) << ","
         << "fabs((Ve-Vpi).Z()): "   << fabs((Ve-Vpi).Z())       << ","
-        << std::endl
-        << "xF: "                   << xF                       << ","
         << std::endl;
     }
     if(!
@@ -1368,6 +1366,19 @@ void ComputePionKinematics(TLorentzVector pi, TLorentzVector pi_qFrame){
                         (pi_qFrame.E()-pi_qFrame.Pz()));
     
     qStar   = calcQStar( e_qFrame.Vect(), pi_qFrame.Vect(), Ebeam );
+    
+    if (fdebug>3){
+        std::cout
+        << "ComputePionKinematics()"
+        << "Zpi: "                  << Zpi      << ","
+        << "M_x: "                  << M_x      << " GeV/c2,"
+        << std::endl
+        << "xF: "                   << xF       << ","
+        << std::endl
+        << "eta_pi: "               << eta_pi   << ","
+        << "qStar: "                << qStar    << ","
+        << std::endl;
+    }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
