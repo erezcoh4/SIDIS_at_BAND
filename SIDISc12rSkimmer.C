@@ -1375,7 +1375,7 @@ void ComputePionKinematics(TLorentzVector pi, TLorentzVector pi_qFrame){
         << "M_x: "                  << M_x      << " GeV/c2,"
         << "W: "                    << W        << " GeV/c2, "
         << std::endl
-        << "pi_qFrame.Vect().mag()" << pi_qFrame.Vect().mag() << ","
+        << "pi_qFrame.Vect().Mag()" << pi_qFrame.Vect().Mag() << ","
         << "xF: "                   << xF       << ","
         << std::endl
         << "eta_pi: "               << eta_pi   << ","
