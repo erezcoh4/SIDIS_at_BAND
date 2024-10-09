@@ -1376,17 +1376,17 @@ void ComputePionKinematics(TLorentzVector pi, TLorentzVector pi_qFrame){
     TLorentzVector         vecQ = vecBeam - vecElectron;
     TLorentzVector         vecW = vecBeam + vecTarget - vecElectron;
     TLorentzVector  boostvecCom = vecQ + vecTarget;
-    TVector3          ComBoost = -1 * boostvecCom.BoostVector();
+    TVector3           ComBoost = -1 * boostvecCom.BoostVector();
 
     // -- boost to CoM frame
     TLorentzVector    vecPh_com = pi_qFrame; // P+q COM frame Ph
     TLorentzVector  disVecQ_com = q_qFrame;  // P+q COM frame Q
     vecPh_com                  .Boost( ComBoost );
     disVecQ_com                .Boost( ComBoost );
-    TVector3           pPh_com = vecPh_com.Vect();
-    TVector3            pQ_com = disVecQ_com.Vect();
+    TVector3            pPh_com = vecPh_com.Vect();
+    TVector3             pQ_com = disVecQ_com.Vect();
     // compute xF
-    xF                         = 2 * pPh_com.Dot(pQ_com) / (vecW.M() * pQ_com.Mag());
+    xF                          = 2 * pPh_com.Dot(pQ_com) / (vecW.M() * pQ_com.Mag());
     
     if (fdebug>3){
         std::cout
@@ -1395,8 +1395,8 @@ void ComputePionKinematics(TLorentzVector pi, TLorentzVector pi_qFrame){
         << "Zpi: "                  << Zpi      << ","
         << "M_x: "                  << M_x      << " GeV/c2,"
         << "W: "                    << W        << " GeV/c2, "
+        << "|vecW|: "               << vecW        << " GeV/c2, "        
         << std::endl
-        << "pi_qFrame.Vect().Mag()" << pi_qFrame.Vect().Mag() << ", "
         << "xF: "                   << xF       << ", "
         << "2. * (pi.Vect().Dot(q.Vect())) / (q.P() * W): "                   << 2. * (pi.Vect().Dot(q.Vect())) / (q.P() * W)       << ", "
         << std::endl
