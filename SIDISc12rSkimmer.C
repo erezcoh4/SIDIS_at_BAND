@@ -1395,10 +1395,9 @@ void ComputePionKinematics(TLorentzVector pi, TLorentzVector pi_qFrame){
         << "Zpi: "                  << Zpi      << ","
         << "M_x: "                  << M_x      << " GeV/c2,"
         << "W: "                    << W        << " GeV/c2, "
-        << "|vecW|: "               << vecW.Mag()        << " GeV/c2, "        
         << std::endl
         << "xF: "                   << xF       << ", "
-        << "2. * (pi.Vect().Dot(q.Vect())) / (q.P() * W): "                   << 2. * (pi.Vect().Dot(q.Vect())) / (q.P() * W)       << ", "
+//        << "2. * (pi.Vect().Dot(q.Vect())) / (q.P() * W): "                   << 2. * (pi.Vect().Dot(q.Vect())) / (q.P() * W)       << ", "
         << std::endl
         << "eta_pi: "               << eta_pi   << ","
         << "qStar: "                << qStar    << ","
