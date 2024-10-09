@@ -1370,17 +1370,17 @@ void ComputePionKinematics(TLorentzVector pi, TLorentzVector pi_qFrame){
     // [https://github.com/c-dilks/dispin/blob/a48674568ac4c92af4c10d633397332ba727d20c/src/Dihadron.cxx#L100-L121]
     
     // lab frame 4-vectors
-    TLorenzVector  vecElectron = e;
-    TLorenzVector      vecBeam = TLorentzVector(0.0,0.0,TMath::Sqrt(TMath::Power(Ebeam,2)-TMath::Power(aux.Me,2)),Ebeam );
-    TLorenzVector    vecTarget = TLorentzVector(0.0,0.0,0.0, aux.Mp );
-    TLorenzVector         vecQ = vecBeam - vecElectron;
-    TLorenzVector         vecW = vecBeam + vecTarget - vecElectron;
-    TLorenzVector  boostvecCom = vecQ + vecTarget;
+    TLorentzVector  vecElectron = e;
+    TLorentzVector      vecBeam = TLorentzVector(0.0,0.0,TMath::Sqrt(TMath::Power(Ebeam,2)-TMath::Power(aux.Me,2)),Ebeam );
+    TLorentzVector    vecTarget = TLorentzVector(0.0,0.0,0.0, aux.Mp );
+    TLorentzVector         vecQ = vecBeam - vecElectron;
+    TLorentzVector         vecW = vecBeam + vecTarget - vecElectron;
+    TLorentzVector  boostvecCom = vecQ + vecTarget;
     TVector3          ComBoost = -1 * boostvecCom.BoostVector();
 
     // -- boost to CoM frame
-    TLorenzVector    vecPh_com = pi_qFrame; // P+q COM frame Ph
-    TLorenzVector  disVecQ_com = q_qFrame;  // P+q COM frame Q
+    TLorentzVector    vecPh_com = pi_qFrame; // P+q COM frame Ph
+    TLorentzVector  disVecQ_com = q_qFrame;  // P+q COM frame Q
     vecPh_com                  .Boost( ComBoost );
     disVecQ_com                .Boost( ComBoost );
     TVector3           pPh_com = vecPh_com.Vect();
