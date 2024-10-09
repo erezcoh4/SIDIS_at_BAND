@@ -1359,13 +1359,34 @@ void ComputePionKinematics(TLorentzVector pi, TLorentzVector pi_qFrame){
     // assuming scattering off a proton at rest
     M_x     = ( q + p_rest - pi ).Mag();
     M_x_d   = ( q + d_rest - pi ).Mag();
-    
-//    xF      = 2. * (pi.Vect().Dot(q.Vect())) / (q.P() * W);
-    xF      = 2. * (pi_qFrame.Vect().Dot(q_qFrame.Vect())) / (q_qFrame.P() * W);
     eta_pi  = 0.5 * log((pi_qFrame.E()+pi_qFrame.Pz()) /
                         (pi_qFrame.E()-pi_qFrame.Pz()));
     
     qStar   = calcQStar( e_qFrame.Vect(), pi_qFrame.Vect(), Ebeam );
+
+    //    xF      = 2. * (pi.Vect().Dot(q.Vect())) / (q.P() * W);
+    
+    // Compute xF following Chris Dilks
+    // [https://github.com/c-dilks/dispin/blob/a48674568ac4c92af4c10d633397332ba727d20c/src/Dihadron.cxx#L100-L121]
+    
+    // lab frame 4-vectors
+    TLorenzVector  vecElectron = e;
+    TLorenzVector      vecBeam = TLorentzVector(0.0,0.0,TMath::Sqrt(TMath::Power(Ebeam,2)-TMath::Power(aux.Me,2)),Ebeam );
+    TLorenzVector    vecTarget = TLorentzVector(0.0,0.0,0.0, aux.Mp );
+    TLorenzVector         vecQ = vecBeam - vecElectron;
+    TLorenzVector         vecW = vecBeam + vecTarget - vecElectron;
+    TLorenzVector  boostvecCom = vecQ + vecTarget;
+    TVector3          ComBoost = -1 * boostvecCom.BoostVector();
+
+    // -- boost to CoM frame
+    TLorenzVector    vecPh_com = pi_qFrame; // P+q COM frame Ph
+    TLorenzVector  disVecQ_com = q_qFrame;  // P+q COM frame Q
+    vecPh_com                  .Boost( ComBoost );
+    disVecQ_com                .Boost( ComBoost );
+    TVector3           pPh_com = vecPh_com.Vect();
+    TVector3            pQ_com = disVecQ_com.Vect();
+    // compute xF
+    xF                         = 2 * pPh_com.Dot(pQ_com) / (vecW.M() * pQ_com.Mag());
     
     if (fdebug>3){
         std::cout
